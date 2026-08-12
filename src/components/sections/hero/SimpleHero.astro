@@ -1,0 +1,293 @@
+---
+/**
+ * SimpleHero — generic, reusable centered hero: heading + lede + a row of CTAs,
+ * over an optional full-bleed decorative graphic that bleeds below the section.
+ * Reused across the site with different content; distinct from HomeHero (which
+ * carries the WebGL diamond + stream). No page prefix = generic.
+ *
+ * Rebuilt from live #brxe-c8774d (foundation hero). Reference:
+ * Measured off the live page.
+ *
+ * Content via props/slots:
+ *   eyebrow      (prop)    — small label above the heading (e.g. "syft-flwr:")
+ *   eyebrowIcon  (prop)    — optional Icon name shown before the eyebrow text
+ *   heading      (prop)    — h1 text (always global h1 / 61px)
+ *   subhead  (prop | slot) — optional h4 subhead directly under the h1 (subtle
+ *                            color); e.g. "Losing control of distribution is."
+ *                            Use the `subhead` slot for rich content (a link).
+ *   lede     (prop | slot) — intro paragraph; richer markup via the default slot
+ *   actions  (slot)        — buttons row (Donate / Get Involved, etc.)
+ *   swoop    (slot)        — optional <HeroSwoop>; the site-wide decorative band
+ *                            that bleeds below the hero (see graphics/HeroSwoop).
+ *                            It's a zero-height absolute bg layer, so the hero's
+ *                            own padding-bottom (--has-swoop below) owns the gap.
+ *
+ * Text parts (eyebrow / heading / subhead / lede) render through @ui/Text, the
+ * measure primitive — the *Measure props just forward `--measure` to it, so each
+ * part is measure-ready without bespoke wiring. Astro carries this component's
+ * scoped-style id onto those <Text> roots, so the .simple-hero__* rules below
+ * still apply to them.
+ *
+ * Live → token mapping:
+ *   content column width   ~840px (1440 − 2×300 margin)  → --col-8 (860, snap)
+ *   section padding-top    container margin-top 97px      → --spacing-full (88, snap)
+ *   h1                     Rubik 61px/1.2                 → global h1 (no override)
+ *   h1 margin-bottom       50px                           → --spacing-5XL (48)
+ *   text block → actions   50px                           → --spacing-5XL on .simple-hero__content
+ *   actions gap            10px / 22px                     → 10px / --spacing-XL (TODO below)
+ *   graphic (swoop)        absolute, 1440×405, z-index -1, → graphics/HeroSwoop
+ *                          top 212px, bleeds 275px below     (self-contained band)
+ *   mobile h1              36px/1.2 (live)                 → component override (≤991px)
+ */
+import Icon from '@elements/Icon.astro';
+import Text from '@ui/Text.astro';
+
+interface Props {
+  eyebrow?: string;
+  eyebrowIcon?: string;
+  heading: string;
+  subhead?: string;
+  /** Subhead heading level → its type style. 'h4' (default, punchy tagline) |
+   *  'h5' (mid) | 'h6' (smaller, for a longer descriptive subtitle). */
+  subheadAs?: 'h4' | 'h5' | 'h6';
+  /** Optional readability max-width for the subhead (any length, e.g. '40em').
+   *  Uses the .measure mechanism — centered, strips at ≤767px. */
+  subheadMeasure?: string;
+  lede?: string;
+  /** Optional readability max-width for the lede block (any length, e.g. '46em').
+   *  Uses the .measure mechanism — centered, strips at ≤767px. */
+  ledeMeasure?: string;
+  /** Optional desktop cap (px) for a long h1 → overrides --h1-max on the hero.
+   *  Mobile floor + fluid rate stay automatic (e.g. auditors' 48px title). */
+  headingMax?: number;
+  /** Optional readability max-width for the h1 (any length, e.g. '20em' — note
+   *  em resolves against the heading's own font-size). Uses the .measure
+   *  mechanism — centered, strips at ≤767px. Independent of headingMax (font). */
+  headingMeasure?: string;
+  /** Top padding: 'default' (--spacing-2XL, 24px — the tight top nearly every
+   *  product/subnet page uses) | 'spacious' (--spacing-full, 88px — the original
+   *  Foundation hero rhythm, reserved for pages that want the airier top) |
+   *  'minimal' (--spacing-L, 16px ≈ 1em — the barely-there top for campaign pages
+   *  behind a `Header variant="minimal"`, whose stripped bar wants the hero to
+   *  start right under it). */
+  padTop?: 'default' | 'spacious' | 'minimal';
+  /** Override the hero's bottom padding (any spacing token/length). Rarely
+   *  needed — the default (--spacing-full, or --spacing-3XL with a swoop) fits
+   *  most heroes. Escape hatch for a page with bespoke hero→next-section rhythm
+   *  (e.g. biomedical, whose hero carries a bottom rule). */
+  padBottom?: string;
+  /** Italicize the eyebrow — the treatment the "for …" subnet pages use. */
+  eyebrowItalic?: boolean;
+  /** Content column width: 'col-8' (860, default — the common product hero) |
+   *  'col-10' (1080 — a wider hero column, e.g. syfthub/syftbox) | 'col-12'
+   *  (full — fills the container's --container-full cap, e.g. syft-flwr). */
+  contentWidth?: 'col-8' | 'col-10' | 'col-12';
+  /** Gap between the text block and the CTA row: 'default' (--spacing-5XL, 48px —
+   *  the airy product-hero rhythm) | 'tight' (--spacing-2XL, 24px — the punchier
+   *  "for …" landing rhythm, e.g. ai-auditors / biomedical). No effect when the
+   *  hero has no actions. */
+  contentGap?: 'default' | 'tight';
+}
+const { eyebrow, eyebrowIcon, heading, subhead, subheadAs = 'h4', subheadMeasure, lede, ledeMeasure, headingMax, headingMeasure, padTop = 'default', padBottom, eyebrowItalic = false, contentWidth = 'col-8', contentGap = 'default' } = Astro.props;
+const hasSwoop = Astro.slots.has('swoop');
+const hasLede = lede !== undefined || Astro.slots.has('default');
+const hasEyebrowSlot = Astro.slots.has('eyebrow');
+const hasEyebrow = hasEyebrowSlot || eyebrow !== undefined || eyebrowIcon !== undefined;
+// subhead accepts a prop (plain text) or a slot (rich content, e.g. a link).
+const hasSubheadSlot = Astro.slots.has('subhead');
+const hasSubhead = hasSubheadSlot || subhead !== undefined;
+const hasActions = Astro.slots.has('actions');
+const heroStyle = [
+  headingMax && `--h1-max: ${headingMax}px`,
+  padBottom && `padding-bottom: ${padBottom}`,
+].filter(Boolean).join('; ') || undefined;
+// conditional classes precomputed so they pass through <Text>'s string `class`
+const eyebrowClass = ['simple-hero__eyebrow', eyebrowItalic && 'simple-hero__eyebrow--italic'].filter(Boolean).join(' ');
+const headingClass = ['simple-hero__heading', hasSubhead && 'simple-hero__heading--has-subhead'].filter(Boolean).join(' ');
+---
+
+<section
+  class:list={['simple-hero', { 'simple-hero--has-swoop': hasSwoop, 'simple-hero--spacious': padTop === 'spacious', 'simple-hero--tighttop': padTop === 'minimal', 'simple-hero--col-10': contentWidth === 'col-10', 'simple-hero--col-12': contentWidth === 'col-12' }]}
+  style={heroStyle}
+>
+  <div class="container">
+    <div class="simple-hero__inner trim-flow">
+      {/* Text block: owns its internal vertical rhythm (per-element margins,
+          .trim-flow zeroes the last one) and a single margin-bottom that is the
+          gap before the CTA row — so that gap is one value no matter whether the
+          last element is a lede or a subhead. When there are no actions this
+          wrapper is the inner's last child, so the outer .trim-flow zeroes it. */}
+      <div class:list={['simple-hero__content', 'trim-flow', { 'simple-hero__content--tight': contentGap === 'tight' }]}>
+        {hasEyebrow && (
+          <Text as="p" class={eyebrowClass}>
+            {hasEyebrowSlot ? (
+              <slot name="eyebrow" />
+            ) : (
+              <Fragment>
+                {eyebrowIcon && <Icon name={eyebrowIcon} size={20} />}
+                {eyebrow}
+              </Fragment>
+            )}
+          </Text>
+        )}
+        <Text as="h1" class={headingClass} measure={headingMeasure}>{heading}</Text>
+        {hasSubhead && (
+          <Text as={subheadAs} class="simple-hero__subhead" measure={subheadMeasure}>
+            {hasSubheadSlot ? <slot name="subhead" /> : subhead}
+          </Text>
+        )}
+        {hasLede && (
+          <Text as="div" class="simple-hero__lede" measure={ledeMeasure}>
+            {lede && <p>{lede}</p>}
+            <slot />
+          </Text>
+        )}
+      </div>
+      {hasActions && (
+        <div class="simple-hero__actions"><slot name="actions" /></div>
+      )}
+    </div>
+  </div>
+
+  {/* Decorative swoop band — section-level sibling. It sits at --z-below, so
+      all hero content (and every following section) paints above it. Self-contained. */}
+  <slot name="swoop" />
+</section>
+
+<style>
+  .simple-hero {
+    position: relative;
+    /* contain the swoop's horizontal full-bleed without clipping its downward
+       bleed (clip, not hidden) */
+    overflow-x: clip;
+    /* Each preset is the FALLBACK; a page can dial an exact top by setting
+       --hero-pad-top on a parent (same seam as the --hN-max heading overrides),
+       without adding another padTop variant. */
+    padding-top: var(--hero-pad-top, var(--spacing-2XL)); /* tight top — the common product-page hero */
+    padding-bottom: var(--spacing-full);
+  }
+  /* spacious top: the airier original Foundation hero rhythm (live 97px → 88) */
+  .simple-hero--spacious {
+    padding-top: var(--hero-pad-top, var(--spacing-full));
+  }
+  /* minimal top (~1em): campaign heroes under a minimal header start right below it */
+  .simple-hero--tighttop {
+    padding-top: var(--hero-pad-top, var(--spacing-L));
+  }
+  /* With a swoop, the graphic is a zero-height absolute bg layer, so the hero's
+     own padding-bottom owns the content→next-section gap (token-driven, like every
+     other section). The swoop floats in that gap, tucks behind content, and bleeds
+     below into the next section. (live foundation section margin ~158px → snap.) */
+  .simple-hero--has-swoop {
+    padding-bottom: var(--spacing-max);
+  }
+
+  /* lift content above the decorative swoop (which sits at --z-below) */
+  .simple-hero__inner {
+    position: relative;
+    z-index: var(--z-content);
+    max-width: var(--col-8); /* live content column ~840px → 860 */
+    margin-inline: auto;
+    text-align: center;
+  }
+  /* wider hero column (syfthub / syftbox) */
+  .simple-hero--col-10 .simple-hero__inner {
+    max-width: var(--col-10);
+  }
+  /* full 12-col: fill the container (its --container-full cap owns the width) */
+  .simple-hero--col-12 .simple-hero__inner {
+    max-width: 100%;
+  }
+
+  /* text block → CTA row gap. Owned here (not by the last text element) so it's
+     one value whether the block ends in a lede, subhead, or heading. When there
+     are no actions this is the inner's last child and the outer .trim-flow zeroes
+     it (live lede→actions rhythm: 50px → 48). */
+  .simple-hero__content {
+    margin-bottom: var(--spacing-5XL);
+  }
+  /* tighter text→CTA rhythm for the punchier "for …" landing heroes */
+  .simple-hero__content--tight {
+    margin-bottom: var(--spacing-2XL);
+  }
+
+  /* small label above the heading; centers with the rest of the inner column */
+  .simple-hero__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-S);
+    margin-bottom: var(--spacing-2XL); /* live: 24px ✓ */
+    color: var(--text-body);
+  }
+  .simple-hero__eyebrow--italic {
+    font-style: italic;
+  }
+  /* eyebrow logo (e.g. SyftBox wordmark) — render at its natural ratio */
+  .simple-hero__eyebrow :global(img),
+  .simple-hero__eyebrow :global(svg) {
+    display: block;
+    height: 32px; /* live logo ~36px */
+    width: auto;
+  }
+
+  /* .simple-hero__heading on <h1> — type from global h1 */
+  .simple-hero__heading {
+    margin-bottom: var(--spacing-5XL); /* live: 50px → 48 */
+  }
+  /* when measured (headingMeasure), center the width-constrained h1 in the column */
+  .simple-hero__heading.measure {
+    margin-inline: auto;
+  }
+  /* with a subhead, the h1→subhead gap tightens (live: 8px) and the subhead
+     carries the rhythm to whatever follows */
+  .simple-hero__heading--has-subhead {
+    margin-bottom: var(--spacing-S); /* live: 8px ✓ */
+  }
+
+  /* .simple-hero__subhead — type from its element (h4 default / h6 via
+     subheadAs); subtle color. Gap to the lede below (creators); when the subhead
+     is the block's last element (syfthub / publishers) .trim-flow zeroes this and
+     the content wrapper owns the gap to whatever follows. */
+  .simple-hero__subhead {
+    margin-bottom: var(--spacing-2XL);
+    color: var(--text-subtle);          /* live: #868394 ✓ */
+  }
+  /* when measured (subheadMeasure), center the constrained subhead in the column */
+  .simple-hero__subhead.measure {
+    margin-inline: auto;
+  }
+
+  /* lede is a block wrapper: a single `lede` prop paragraph, and/or richer
+     multi-paragraph markup via the default slot. margin-inline auto centers it
+     within the hero column when constrained by ledeMeasure (no-op at full width).
+     The gap to the CTA row is owned by .simple-hero__content, not here. */
+  .simple-hero__lede {
+    margin-inline: auto;
+  }
+  .simple-hero__lede :global(p) {
+    margin: 0;
+  }
+  .simple-hero__lede :global(p + p) {
+    margin-top: var(--spacing-L);
+  }
+
+  .simple-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    /* TODO(decision: live gap 22px — between --spacing-XL 20px and --spacing-2XL 24px) */
+    gap: 10px var(--spacing-XL);
+  }
+
+  @media (max-width: 991px) {
+    .simple-hero__inner {
+      max-width: 100%;
+    }
+    /* heading font-size scales globally (bare-heading responsive scale in
+       global.css) — only the section's spacing deviates here */
+    .simple-hero__heading {
+      margin-bottom: var(--spacing-2XL); /* live mobile: 24px */
+    }
+  }
+</style>

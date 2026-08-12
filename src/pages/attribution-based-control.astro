@@ -1,0 +1,146 @@
+---
+/**
+ * /attribution-based-control/ — long-form prose article (NOT a section-band
+ * product page; live inspection shows a col-6 reading column with col-8 breakout
+ * figures — the prose pattern). Built on the `.prose` breakout grid (global.css)
+ * with an ArticleHero above and the email-updates CtaSection below.
+ *
+ * Content is verbatim from the live page. Figures are the
+ * live ABC-Graphic SVGs (public/images/abc/), broken out to the wide zone with
+ * captions.
+ */
+import Page from '@layouts/Page.astro';
+import ArticleHero from '@components/sections/hero/ArticleHero.astro';
+import CtaSection from '@components/sections/cta/CtaSection.astro';
+import FormEmbed from '@elements/FormEmbed.astro';
+---
+
+<Page
+  title="Attribution-Based Control for AI"
+  description="A New Paradigm for Safe, Trustworthy, Responsible AI."
+>
+  <ArticleHero
+    icon="/images/abc/ABC-Icon.svg"
+    heading="Introduction to Attribution-Based Control (ABC)"
+    subtitle="A New Paradigm for Safe, Trustworthy, Responsible AI"
+  />
+
+  <!-- `.container` supplies the page gutter: this article is its own shell (no
+       section band around it), and `.prose-article` deliberately owns no
+       horizontal padding — see `global.css → .prose-article`. -->
+  <article class="prose prose-article container">
+    <p>Many of AI&rsquo;s risks in areas like AI evaluations, privacy, value alignment, copyright, concentration of power, loss of control, and hallucinations can be reduced to the lack of attribution-based control in AI systems, which itself can be reduced to the overuse of addition and copying within AI algorithms.</p>
+
+    <p>OpenMined&rsquo;s primary technical goal is to synthesize a handful of recently proposed techniques in deep learning, cryptography, and distributed systems into a viable path to reduce addition and copying, provide attribution-based control, and address many of AI&rsquo;s primary risks while maximizing its benefits &mdash; unlocking 6+ orders of magnitude more data, compute, and associated AI evaluations and capability in the process.</p>
+
+    <p>This article details the fundamental problem of attribution-based control, and the ways it underpins other problems like privacy, value alignment, copyright, concentration of power, loss of control, hallucinations, and AI evaluations.</p>
+
+    <figure class="breakout">
+      <img src="/images/abc/ABC-Graphic-1.svg" width="3840" height="2160" loading="lazy" data-fade
+        alt="Diagram contrasting traditional centralized AI with ABC-enabled AI, for people with data and people seeking insight." />
+      <figcaption>Traditional open/closed-source AI systems (left) centralize data collection and decision-making, while ABC-enabled AI systems (right) enable direct communication between those with data and those seeking insights.</figcaption>
+    </figure>
+
+    <h3>The Problem of Attribution-Based Control (ABC)</h3>
+
+    <p>Attribution-based control (ABC) describes a relationship between sources of AI-related data, compute, and talent and the AI users receiving predictions. These two groups of people have ABC when two things are true:</p>
+
+    <ul>
+      <li><strong>Resource owners:</strong> dynamically control how much intelligence to give each AI prediction they support</li>
+      <li><strong>AI users:</strong> dynamically control which resource providers they want to rely upon for each AI prediction.</li>
+    </ul>
+
+    <p>While AI systems learn from data, current AI architectures fail to offer resource owners and users attribution-based control&mdash;meaning they cannot verify or manage which data sources influence which AI predictions. This has cascading consequences across society at multiple levels: individual, institutional, societal, and geopolitical.</p>
+
+    <figure class="breakout">
+      <img src="/images/abc/ABC-Graphic-2.svg" width="3840" height="2160" loading="lazy" data-fade
+        alt="Diagram showing the absence of ABC creating problems at the individual, institutional, societal, geopolitical, and centralization levels." />
+      <figcaption>ABC presents problems at several levels of society.</figcaption>
+    </figure>
+
+    <h4>Individual Consequences: Authenticity and Trust</h4>
+
+    <p>At an individual level, missing ABC leads to authenticity issues&mdash;hallucinations, deepfakes, and disinformation. Unlike traditional research methods, AI-generated content typically offers no bibliography or verification mechanism. For instance, a medical student researching rare diseases cannot verify if the AI-sourced information originates from peer-reviewed journals or less reliable sources.</p>
+
+    <p>AI &ldquo;hallucinates&rdquo; by combining unrelated data points to produce plausible yet incorrect outputs, a problem inherent to the lack of attribution. Similarly, disinformation occurs when AI merges unrelated concepts, like combining celebrity images with controversial acts to produce misleading deepfakes. Without ABC, users cannot identify or correct such misinformation.</p>
+
+    <figure class="breakout">
+      <img src="/images/abc/ABC-Graphic-3-2.svg" width="3840" height="2160" loading="lazy" data-fade
+        alt="Diagram of a medical student showing how ABC-enabled AI preserves the link between source and prediction." />
+      <figcaption>Traditional open/closed-source AI systems (left) mathematically delete information linking source and prediction. Once this information is gone, neither adding more data (RLHF), looking for source information (influence functions), or providing oversight over AI systems addresses the core issue. Instead, ABC-enabled AI systems (right) enable direct communication between those with data and those seeking insights. In ABC-enabled AI, attribution and control flow with the information, enabling verification of sources and protection of contributor interests.</figcaption>
+    </figure>
+
+    <h4>Institutional Consequences: Data Sharing &amp; Control</h4>
+
+    <p>For institutions holding valuable data, the absence of ABC creates an incentive problem. Institutions must choose between contributing to AI development&mdash;risking loss of control and privacy&mdash;or withholding data, limiting AI&rsquo;s capabilities. Major medical institutions, for instance, often decline AI partnerships due to privacy and control concerns, significantly hindering advancements in fields like cancer detection.</p>
+
+    <p>Privacy-enhancing technologies (PETs), such as federated learning and secure multi-party computation, address privacy but still fail to deliver precise control over data usage. Without attribution, institutions cannot selectively support or withdraw from specific AI predictions, perpetuating data siloing.</p>
+
+    <figure class="breakout">
+      <img src="/images/abc/ABC-Graphic-4.svg" width="3840" height="2160" loading="lazy" data-fade
+        alt="Diagram of hospitals sharing data under traditional AI versus ABC-enabled AI." />
+      <figcaption>Traditional open/closed-source AI systems (left) copy data to AI providers, giving them unilateral control over the resulting model and its predictions. Instead, ABC-enabled AI systems (right) enable direct communication between those with data and those seeking insights. In ABC-enabled AI, attribution and control flow with the information, enabling data sources to retain control over which predictions they seek to support.</figcaption>
+    </figure>
+
+    <h4>Societal Consequences: Governance &amp; Representation</h4>
+
+    <p>At a societal level, the absence of ABC creates governance crises&mdash;AI safety concerns, value misalignment, and bias. AI systems concentrate control in the hands of their creators or maintainers, leading to decisions misaligned with societal values. Without ABC, AI decisions about content filtering and model behavior are made by a small group, not reflecting the broader public&rsquo;s interests.</p>
+
+    <p>ABC addresses this issue by reconnecting data contributors and AI users, ensuring continuous public consent and representation in AI-driven decisions.</p>
+
+    <figure class="breakout">
+      <img src="/images/abc/ABC-Graphic-5-1.svg" width="3840" height="2160" loading="lazy" data-fade
+        alt="Map illustration of an AI model trained on US Pacific-coast data and used across the eastern United States." />
+      <figcaption>A fictional illustration of an AI model trained on data from people across the US Pacific coast, and used by people in the eastern half of the United States. However, irrespective of where the training data comes from or the predictions go to &mdash; a handful of people at the AI organization retains centralized control over the AI model&rsquo;s capability and use. This calls into question how/whether the AI or its creators will forego selfish incentives and use the AI&rsquo;s intelligence to serve society broadly.</figcaption>
+    </figure>
+
+    <h4>Geopolitical Consequences: Democracy vs. Centralization</h4>
+
+    <p>On the geopolitical stage, the lack of ABC creates a stark choice: centralize data and decision-making, compromising democratic values, or lose AI capabilities to authoritarian regimes that do centralize aggressively. This dilemma underpins current geopolitical AI competitions, notably between democratic nations and authoritarian states like China.</p>
+
+    <p>Proposals like an &ldquo;AI Manhattan Project&rdquo; to centralize resources in democratic nations risk undermining core democratic principles without guaranteeing competitive advantage. ABC provides a decentralized alternative, allowing democratic nations to leverage vast global data and compute resources without centralization.</p>
+
+    <figure class="breakout">
+      <img src="/images/abc/ABC-graphic-6.1.svg" width="3840" height="2160" loading="lazy" data-fade
+        alt="Map illustration comparing an AI model trained across US organizations versus across organizations in China." />
+      <figcaption>A fictional illustration of a traditional AI model trained within organizations across the US (left) and trained across all organizations in China (right). It is meant to illustrate the difference between resources acquired at the corporation level and at the nation level.</figcaption>
+    </figure>
+
+    <h4>Centralization Consequences: AI as Central Intelligence or Communication Tool</h4>
+
+    <p>Ultimately, the lack of ABC positions AI as a tool of central control rather than a decentralized communication medium. Current AI systems centralize knowledge, guiding its use according to centralized interests, which disadvantages societies that resist centralization.</p>
+
+    <p>By shifting from operations that break ABC (addition and copying) to those that preserve it, AI can evolve into a true communication technology, directly connecting knowledge holders with seekers. This change is not merely technical; it aligns AI development with democratic principles and broad societal interests.</p>
+
+    <figure class="breakout">
+      <img src="/images/abc/ABC-Graphic-7.svg" width="3840" height="2160" loading="lazy" data-fade
+        alt="Diagram of AI as an intermediary between knowledge holders and seekers versus AI as a communication device." />
+      <figcaption>(left) An illustration of AI as an intermediary between those who have information and those who seek insights. (right) An illustration of AI as a communication device.</figcaption>
+    </figure>
+
+    <h3>The Road Ahead: From Deep Learning to Broad Listening</h3>
+
+    <p>Recent breakthroughs in deep learning, cryptography, and distributed systems have begun addressing these fundamental issues, paving the way toward practical ABC solutions. At OpenMined, we&rsquo;re seeking to transform those solutions into free, open-source software across a live network: the public network for non-public information.</p>
+
+    <p>For further reading, check out the <a href="/blog/what-is-broad-listening/">What is Broad Listening?</a> blog post.</p>
+
+    <p>Sign up for updates or join our community using the form below.</p>
+  </article>
+
+  <CtaSection
+    variant="gradient"
+    iconSrc="/images/abc/ABC-Icon.svg"
+    heading="Attribution-Based Control Updates"
+    body="Sign up to receive emails that explain this concept in bite-sized ideas, use cases and stories. Launching 2026."
+  >
+    <FormEmbed slot="form" formId="96d9d3a2-f49f-4d96-a835-655b661106b7" />
+    <Fragment slot="fineprint">
+      <p><a href="/get-involved/">Explore ways to get involved &nearr;</a></p>
+    </Fragment>
+  </CtaSection>
+</Page>
+
+<style>
+  /* Space the article body off the CTA band below (section-level gap). */
+  .prose { padding-bottom: var(--spacing-full); }
+</style>

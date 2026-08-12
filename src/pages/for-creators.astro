@@ -1,0 +1,168 @@
+---
+/**
+ * /for-creators/ — one of the four "Supported Subnets" pages (home
+ * Federated-Network section). Product page for the creator tool: an AI that
+ * answers audience questions from a creator's own published content.
+ *
+ * Content verbatim from the live page.
+ */
+import Page from '@layouts/Page.astro';
+import SimpleHero from '@components/sections/hero/SimpleHero.astro';
+import ContentSection from '@components/sections/ContentSection.astro';
+import CardGrid from '@elements/CardGrid.astro';
+import IconCard from '@elements/IconCard.astro';
+import StepRows from '@elements/StepRows.astro';
+import CtaSection from '@components/sections/cta/CtaSection.astro';
+import FormEmbed from '@elements/FormEmbed.astro';
+import Button from '@ui/Button.astro';
+
+// Icons are the real live inline-SVG (Lucide) marks fetched from production
+// (this page uses inline SVGs throughout — no font-icon glyphs).
+const losing = [
+  { icon: 'history', title: 'Time', body: 'Most questions in your inbox are questions you’ve already answered somewhere. Finding the right post takes longer than writing a new reply. That math gets worse as your audience grows.' },
+  { icon: 'search', title: 'Traffic', body: 'Your content has the answer, but it gets no credit. Your audience gets a manual reply from you, and the post that took you hours to make sits unvisited.' },
+  { icon: 'trending-up', title: 'Revenue', body: 'Brand DMs land in the same inbox as follower questions. Affiliate clicks go unearned when questions don’t get replies. Some brand messages route to a hidden requests folder and sit there for weeks.' },
+];
+
+const capabilities = [
+  { icon: 'search-check', title: 'Answer Audience Questions', body: 'Your followers get real answers, pulled from what you’ve actually published. Each response links back to the original post. The tool reads your content and constructs a response from it. No keyword matching, no generic AI output.' },
+  { icon: 'database', title: 'One Searchable Library', body: 'Everything you’ve created across Instagram, YouTube, TikTok, Facebook, your website, your podcast. One place your audience can search. So can you.' },
+  { icon: 'mic', title: 'Every Answer Traces Back to You', body: 'The tool doesn’t generate a response from scratch. It searches what you’ve already published, finds the relevant answer, and links back to the original source. Every response is traceable to something you actually wrote, recorded, or posted.' },
+  { icon: 'trending-up', title: 'See What Your Audience Wants', body: 'Your dashboard shows the real questions your followers are asking, which topics come up most, and where the gaps are. Content ideas from actual demand, not guesswork.' },
+];
+
+const forYou = [
+  { icon: 'search', title: 'Years of Content, Hard to Search', body: 'You have years of content across multiple platforms that your audience can’t easily search or navigate.' },
+  { icon: 'history', title: 'Repeating Yourself Every Week', body: 'You spend hours answering the same questions your content already covers, or sending the same affiliate links by hand.' },
+  { icon: 'eye', title: 'Missing Brand Deals in the DMs', body: 'Partnership inquiries arrive in the same inbox as follower messages, and the partnership DMs wait while you’re answering questions.' },
+  { icon: 'file-check', title: 'Care About Traceability', body: 'You care that every response your audience receives is traceable to content you actually published, not generic AI output.' },
+];
+---
+
+<Page
+  title="Private AI for Creators | Your Content, Your Control"
+  description="Your audience is asking questions your content already answers. This tool searches everything you’ve published and responds with the right answer, linked back to your original content."
+>
+  <SimpleHero
+    eyebrow="for Content Creators"
+    eyebrowItalic
+    heading="Your audience is asking questions."
+    subhead="Your current tools can't help."
+    ledeMeasure="46em"
+  >
+    <p>Your followers aren’t asking for a trigger word and a link. They’re asking which episode covered that topic, which post had those links, what you’d actually recommend for their situation.</p>
+    <p>Meanwhile, brand DMs are sitting in your hidden requests folder. Affiliate revenue disappears when questions go unanswered. The answer to most of these exists somewhere across your posts, videos, and episodes, buried in years of content your audience can’t search.</p>
+    <p>We built a tool that searches everything you’ve published and responds with the right answer, linked back to your original content. Your work gets the credit. Brand inquiries get routed. Your dashboard shows what your audience is actually asking.</p>
+    <Button slot="actions" href="#cta">Get Early Access</Button>
+  </SimpleHero>
+
+  <!-- What you're losing -->
+  <ContentSection as="h4" width="col-10" align="left" heading="What you're losing">
+    <CardGrid cols={3} gap="var(--spacing-XL)">
+      {losing.map((c) => (
+        <IconCard icon={c.icon} surface="dim" layout="stacked" title={c.title}>
+          <p>{c.body}</p>
+        </IconCard>
+      ))}
+    </CardGrid>
+  </ContentSection>
+
+  <!-- How It Works -->
+  <ContentSection
+    surface="dim"
+    as="h4"
+    width="col-10"
+    heading="How It Works"
+    intro="Here’s what happens when a follower has a question."
+  >
+    <StepRows steps={[
+      {
+        title: 'We bring your content together',
+        items: [{ icon: 'database', text: 'Your posts, videos, articles, and episodes from across your platforms, collected into one searchable library.' }],
+      },
+      {
+        title: 'A follower sends you a question',
+        items: [{ icon: 'message-circle', text: 'Something your content already answers. They just can’t find it on their own.' }],
+      },
+      {
+        title: 'The tool searches what you\'ve published',
+        items: [{ icon: 'search', text: 'It reads your actual content and constructs an answer from it. No pre-written responses, no keyword matching.' }],
+      },
+      {
+        title: 'Your follower gets an answer with a link to the original post',
+        items: [{ icon: 'trending-up', text: 'Your content gets the credit. Each response links back to the original post.' }],
+      },
+      {
+        title: 'You see what your audience wants to know',
+        items: [{ icon: 'lightbulb', text: 'Your dashboard surfaces real questions, trending topics, and content gaps.' }],
+      },
+    ]} />
+  </ContentSection>
+
+  <!-- An AI that knows your content. Only your content. -->
+  <ContentSection as="h4" width="col-10" align="left" heading="An AI that knows your content. Only your content.">
+    <CardGrid cols={2} gap="var(--spacing-XL)">
+      {capabilities.map((c) => (
+        <IconCard icon={c.icon} surface="dim" layout="stacked" title={c.title}>
+          <p>{c.body}</p>
+        </IconCard>
+      ))}
+    </CardGrid>
+  </ContentSection>
+
+  <!-- Is this for you? -->
+  <ContentSection surface="dim" as="h4" width="col-10" heading="Is this for you?">
+    <CardGrid cols={2} gap="var(--spacing-XL)">
+      {forYou.map((c) => (
+        <IconCard icon={c.icon} surface="default" layout="stacked" title={c.title}>
+          <p>{c.body}</p>
+        </IconCard>
+      ))}
+    </CardGrid>
+  </ContentSection>
+
+  <!-- You're in control (dark statement band) -->
+  <ContentSection surface="dark" width="col-8">
+    <div class="cr-statement">
+      <h4>You're in control.</h4>
+      <p class="cr-statement__lead">You choose what’s included. And what stays out.</p>
+      <ul class="cr-statement__list measure">
+        <li>Test everything before your audience sees anything. The tool doesn’t go live until you’ve run it privately and you’re satisfied.</li>
+        <li>You set the topics it never touches. Financial advice, legal terms, insurance, content for particular audiences. You define the limits.</li>
+        <li>Every answer links back to your original content. Your work, your credit.</li>
+        <li>Built by OpenMined, a nonprofit building public AI infrastructure that keeps you in control of your content and data.</li>
+      </ul>
+    </div>
+  </ContentSection>
+
+  <!-- CTA -->
+  <div id="cta">
+    <CtaSection
+      variant="gradient"
+      emoji="🧠"
+      eyebrow="Content Creators:"
+      heading="Your audience is asking. Your content has the answers."
+      body="Complete this form to get early beta access."
+    >
+      <FormEmbed slot="form" formId="46398180-2269-4089-9948-4d1de761a128" />
+      <Fragment slot="fineprint">
+        <p>Submitting confirms you agree with our <a href="/privacy-policy/">privacy policy</a>.</p>
+      </Fragment>
+    </CtaSection>
+  </div>
+</Page>
+
+<style>
+  /* You're in control — dark statement band: title + lead centered, body left */
+  .cr-statement { text-align: center; }
+  .cr-statement__lead { margin: var(--spacing-S) 0 var(--spacing-3XL); }
+  .cr-statement__list {
+    --measure: 50em; /* readability cap (strips ≤767px via .measure) */
+    margin-inline: auto; /* center the capped block under the centered title */
+    padding-left: 1.25em;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-L);
+    text-align: left;
+  }
+</style>

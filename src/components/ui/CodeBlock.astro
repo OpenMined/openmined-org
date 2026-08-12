@@ -1,0 +1,93 @@
+---
+import Icon from '@elements/Icon.astro';
+
+interface Props {
+  variant?: 'inline' | 'block';
+  lang?: string;
+  class?: string;
+}
+
+const {
+  variant = 'block',
+  lang,
+  class: className = '',
+} = Astro.props;
+---
+
+{variant === 'inline' ? (
+  <code class={className}><slot /></code>
+) : (
+  <div class="code-block-wrap">
+    <pre class={['code-block', className].filter(Boolean).join(' ')}>
+      <code class={lang ? `language-${lang}` : undefined}><slot /></code>
+    </pre>
+    <button class="code-block-copy" type="button" aria-label="Copy code" title="Copy code">
+      <span class="copy-icon"><Icon name="copy" size={16} /></span>
+      <span class="check-icon"><Icon name="checkmark" size={16} /></span>
+    </button>
+  </div>
+)}
+
+<style>
+  /* Inline code inherits from global.css */
+
+  .code-block-wrap { position: relative; }
+
+  .code-block {
+    background-color: var(--color-grayscale-950);
+    border-radius: var(--border-radius-S);
+    padding: 1em 1.25em;
+    overflow-x: auto;
+    margin-block: var(--spacing-L);
+  }
+
+  .code-block code {
+    background: none;
+    border-radius: 0;
+    padding: 0;
+    color: var(--color-grayscale-50);
+    font-size: 14px;
+  }
+
+  .code-block-copy {
+    position: absolute;
+    top: calc(var(--spacing-L) + var(--spacing-XS));
+    right: var(--spacing-S);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--border-radius-XS);
+    color: var(--color-grayscale-500);
+    cursor: pointer;
+    padding: 4px 6px;
+    font-size: 15px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition-base), color var(--transition-base);
+  }
+
+  .code-block-copy:hover {
+    background: rgba(255, 255, 255, 0.16);
+    color: var(--color-grayscale-00);
+  }
+
+  .copy-icon  { display: inline-flex; }
+  .check-icon { display: none; }
+  .code-block-copy.copied .copy-icon  { display: none; }
+  .code-block-copy.copied .check-icon { display: inline-flex; }
+  .code-block-copy.copied             { color: var(--color-green-400); }
+</style>
+
+<script>
+  document.addEventListener('click', (e: MouseEvent) => {
+    const btn = (e.target as HTMLElement).closest('.code-block-copy') as HTMLElement | null;
+    if (!btn) return;
+    const code = btn.closest('.code-block-wrap')?.querySelector('code');
+    if (!code) return;
+    navigator.clipboard.writeText(code.textContent?.trim() ?? '').then(() => {
+      btn.classList.add('copied');
+      setTimeout(() => btn.classList.remove('copied'), 2000);
+    });
+  });
+</script>

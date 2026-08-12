@@ -1,0 +1,491 @@
+---
+/**
+ * BlogPost — full blog-post shell for /blog/[...slug].
+ *
+ * Composes the standard site chrome (via Page) with the post hero + prose body.
+ * Hero matches live (`.article-single__head`): centered, with the order
+ *   h1 title → optional subtitle (muted h4 deck) → meta row → cover BELOW.
+ * The meta row is `.text-caption` and reads: relative date · category(ies) ·
+ *   location? · read time — categories only (tags/topics are NOT shown here;
+ *   they live in the end-of-post foot). Author is likewise NOT in the hero — it
+ *   lives in the meta foot ("Author: …"). The title-group→meta and meta→cover
+ *   gaps are the live 68px (`--hero-gap`).
+ *
+ * `.post-layout` ALWAYS centers the prose at col-8, whether or not a TOC is
+ * present — matching live, where the TOC never pushes the reading column
+ * off-center. `PostToc` positions itself with `position: absolute` in the
+ * natural left gutter that centering already leaves (`.post-layout` supplies
+ * `position: relative` as its containing block); it does not occupy a grid
+ * track. See `PostToc.astro` for the sticky/collapsed states.
+ * TOC posts hide-on-scroll-down like every other page, but override the
+ * header slot with `revealOnScrollUp={false}` — it still hides itself out of
+ * the way so the sticky TOC bar can take the full top strip (`top: 0`, not
+ * offset for header height), but doesn't pop back up mid-article and cover
+ * the TOC bar the way it normally would on scroll-up; see `Header.astro`'s
+ * `revealOnScrollUp` prop and `PostToc.astro`.
+ *
+ * Props are the resolved post data; the route (getEntry) resolves the
+ * category/author references and computes read time, then passes them in.
+ */
+import Page from './Page.astro';
+import { Image, getImage } from 'astro:assets';
+import PostCard from '@elements/PostCard.astro';
+import PostToc from '@elements/PostToc.astro';
+import BlogPostCta from '@components/sections/cta/BlogPostCta.astro';
+import Link from '@ui/Link.astro';
+import Header from '@components/layout/Header.astro';
+
+interface Author {
+  id: string;
+  name: string;
+  role?: string;
+  bio?: string;
+  avatar?: string;
+}
+
+interface RelatedPost {
+  href: string;
+  title: string;
+  date: Date;
+  category?: { slug: string; label: string };
+  cover?: ImageMetadata;
+  coverAlt?: string;
+  cardText?: 'light' | 'dark';
+}
+
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  title: string;
+  /** Optional SEO <title> override (live ACF `seo.title`) — falls back to title. */
+  seoTitle?: string;
+  /** Optional deck / standfirst under the title (muted h4). */
+  subtitle?: string;
+  /** Optional per-post title cap (px) → overrides --h1-max on the post <h1>. */
+  titleMax?: number;
+  date: Date;
+  updated?: Date;
+  categories: { slug: string; label: string }[];
+  topics?: { slug: string; label: string }[];
+  /** Post locations → each links to its /blog/locations/<slug>/ archive. */
+  locations?: { slug: string; label: string }[];
+  /** ACF `hide_default_form` — suppresses the end-of-post newsletter CTA. */
+  hideDefaultForm?: boolean;
+  /** ACF `header_downsize` (0|1|2) — shifts in-content headings down N levels. */
+  headerDownsize?: number;
+  /** Space above in-content h2s: 'spacious' = the full break, for long reads. */
+  sectionSpacing?: 'default' | 'spacious';
+  authors: Author[];
+  cover?: ImageMetadata;
+  coverAlt?: string;
+  /** ACF `app_hide_featured_image_on_single` — hide the cover in the post hero. */
+  hideCover?: boolean;
+  readingMinutes: number;
+  seoDescription?: string;
+  related?: RelatedPost[];
+  toc?: boolean;
+  headings?: Heading[];
+  tocMinDepth?: number;
+  tocMaxDepth?: number;
+}
+
+const {
+  title,
+  seoTitle,
+  subtitle,
+  titleMax,
+  date,
+  updated,
+  categories,
+  topics = [],
+  locations = [],
+  hideDefaultForm = false,
+  headerDownsize = 0,
+  sectionSpacing = 'default',
+  authors,
+  cover,
+  coverAlt = '',
+  hideCover = false,
+  readingMinutes,
+  seoDescription,
+  related = [],
+  toc = false,
+  headings = [],
+  tocMinDepth = 2,
+  tocMaxDepth = 3,
+} = Astro.props;
+
+// Absolute date — kept for the <time title> tooltip / machine-readable value.
+const dateLabel = date.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+// Relative date for the meta row ("3 months ago"), matching live. Computed at
+// build time; buckets to days → months → years like the live post head.
+function relativeDate(d: Date): string {
+  const days = Math.floor((Date.now() - d.getTime()) / 86_400_000);
+  const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'always' });
+  if (days < 1) return 'today';
+  if (days < 30) return rtf.format(-days, 'day');
+  const months = Math.round(days / 30);
+  if (months < 12) return rtf.format(-months, 'month');
+  return rtf.format(-Math.round(days / 365), 'year');
+}
+const relDate = relativeDate(date);
+const items = headings.filter((h) => h.depth >= tocMinDepth && h.depth <= tocMaxDepth);
+const showToc = toc && items.length > 0;
+// Author names for the SEO/JSON-LD side; the foot renders them as links to the
+// author archives (live links its byline the same way — verified 2026-07-27).
+const authorNames = authors.map((a) => a.name).join(', ');
+const topicLabels = topics.map((t) => t.label).join(', ');
+
+// Thumbnail for a /search/ result row. Built here rather than reusing the hero
+// cover's own URL for two reasons: the hero is a 1720px-wide landscape variant,
+// far too heavy for a thumbnail, and `hideCover` posts don't render a hero <img>
+// at all — so an attribute-capture on that element would silently miss them.
+//
+// ⚠ Constrain the HEIGHT ONLY — never ask for a square here.
+// The result row's tile is a 300px square and crops with `background-size: cover`,
+// so it's tempting to generate a 600×600 source to match. Don't: passing both
+// width and height makes the image service LETTERBOX the 16:9 cover into the
+// square and bake in pure #000000 bars (sharp's default `contain` background) —
+// the `fit: 'cover'` that ought to prevent it is not honoured. The bars then
+// survive into the tile, where CSS `cover` faithfully renders the padded square,
+// and on a dark cover they read as a deliberate treatment rather than a bug.
+// Height 600 gives a ~1067×600 landscape, which is full 2x resolution for a 300px
+// square once the CSS crops the sides, and leaves the cropping to CSS — which does
+// it correctly and needs nothing from the image service.
+const searchThumb = cover ? await getImage({ src: cover, height: 600, quality: 80 }) : undefined;
+// `thumb`, NOT `image`: Pagefind auto-populates `meta.image` from the first <img>
+// it finds on a page, so that key can't be trusted to hold something we chose —
+// it comes back as whatever logo or badge happened to render first (a Colab badge,
+// on one post). A key of our own is only ever set here.
+//
+// Kept as a single `key:value` pair, which is safe only because a getImage() URL
+// in a static build is a root-relative path with no `:` or `,` in it — the two
+// characters Pagefind parses on. Date and category can't use this form at all
+// (see the capture attributes in the meta row below).
+const searchThumbMeta = searchThumb ? `thumb:${searchThumb.src}` : undefined;
+---
+
+<Page
+  title={seoTitle ?? title}
+  description={seoDescription ?? subtitle}
+  type="article"
+  image={cover?.src}
+  imageAlt={coverAlt}
+  publishedTime={date.toISOString()}
+  modifiedTime={updated?.toISOString()}
+  authors={authors.map((a) => a.name)}
+  section={categories[0]?.label}
+  tags={topics.map((t) => t.label)}
+  searchKind="post"
+>
+  <Header slot="header" revealOnScrollUp={!showToc} />
+  {/* The `type:post` kind filter now comes from Page.astro via `searchKind` — one
+      owner for both kinds, so a post can't end up carrying `type:page` too. The
+      meta here is the row payload /search/ renders from. */}
+  <article class="post container content-top-rule" data-pagefind-meta={searchThumbMeta}>
+    <header class="post__hero">
+      <h1 class="post__title" style={titleMax ? `--h1-max: ${titleMax}px` : undefined}>{title}</h1>
+
+      {subtitle && <p class="post__subtitle">{subtitle}</p>}
+
+      {/* Meta row (live `.article-single__head .list-bullets`): relative date ·
+          category(ies) · location? · read time — a list whose items are joined by
+          a diamond separator (see .post__meta CSS). Categories only — tags/topics
+          are NOT shown here (they live in the end-of-post foot). */}
+      <ul class="post__meta text-caption">
+        {/* The two `data-pagefind-meta` attributes below feed a /search/ result
+            row, and use Pagefind's CAPTURE syntax (`key[attr]` for an attribute,
+            bare `key` for text content) rather than a `key:value` literal. That's
+            deliberate: a literal pair list is split on `:` and `,`, so an ISO
+            timestamp's own colons swallow every pair after it — `date` came back
+            holding the category and thumbnail too. A capture is taken verbatim. */}
+        <li><time datetime={date.toISOString()} title={dateLabel} data-pagefind-meta="date[datetime]">{relDate}</time></li>
+        {categories.map((c, i) => (
+          <li>
+            <a
+              class="post__meta-link"
+              href={`/blog/category/${c.slug}/`}
+              data-pagefind-meta={i === 0 ? 'category' : undefined}
+            >{c.label}</a>
+          </li>
+        ))}
+        {locations.map((l) => (
+          <li><a class="post__meta-link" href={`/blog/locations/${l.slug}/`}>{l.label}</a></li>
+        ))}
+        <li>{readingMinutes} min</li>
+      </ul>
+
+      {cover && !hideCover && (
+        <Image class="post__cover" src={cover} alt={coverAlt} widths={[640, 860, 1720]} sizes="(max-width: 991px) 100vw, 860px" quality={90} data-fade />
+      )}
+    </header>
+
+    <div class="post-layout">
+      {showToc && <PostToc headings={headings} minDepth={tocMinDepth} maxDepth={tocMaxDepth} />}
+      <div class:list={['prose', 'prose-article', headerDownsize === 1 && 'downsize-1', headerDownsize === 2 && 'downsize-2', sectionSpacing === 'spacious' && 'spacious-sections']}>
+        <slot />
+      </div>
+    </div>
+  </article>
+
+  <!-- End-of-post newsletter CTA — sits between body and foot. Suppressed when
+       the post sets `hideDefaultForm` (live ACF `hide_default_form`). -->
+  {!hideDefaultForm && <BlogPostCta />}
+
+  <!-- Meta foot — Author / Categories / Location / Topics. The top rule is the
+       end-of-post HR (same hairline as the post's opening .content-top-rule). -->
+  <footer class="post-foot container">
+    <dl class="post-foot__meta">
+      <div class="post-foot__row">
+        <dt>{authors.length > 1 ? 'Authors:' : 'Author:'}</dt>
+        <dd>
+          {authors.map((a, i) => (
+            <>
+              {i > 0 && ', '}
+              <Link href={`/blog/author/${a.id}/`} variant="inline">{a.name}</Link>
+            </>
+          ))}
+        </dd>
+      </div>
+      <div class="post-foot__row">
+        <dt>{categories.length > 1 ? 'Categories:' : 'Category:'}</dt>
+        <dd>
+          {categories.map((c, i) => (
+            <>
+              {i > 0 && ', '}
+              <Link href={`/blog/category/${c.slug}/`} variant="inline">{c.label}</Link>
+            </>
+          ))}
+        </dd>
+      </div>
+      {locations.length > 0 && (
+        <div class="post-foot__row">
+          <dt>{locations.length > 1 ? 'Locations:' : 'Location:'}</dt>
+          <dd>
+            {locations.map((l, i) => (
+              <>
+                {i > 0 && ', '}
+                <Link href={`/blog/locations/${l.slug}/`} variant="inline">{l.label}</Link>
+              </>
+            ))}
+          </dd>
+        </div>
+      )}
+      {topicLabels && (
+        <div class="post-foot__row">
+          <dt>Topics:</dt>
+          <dd>{topicLabels}</dd>
+        </div>
+      )}
+    </dl>
+  </footer>
+
+  {related.length > 0 && (
+    <section class="post-related container" data-pagefind-ignore>
+      <div class="post-related__head">
+        <h5 class="post-related__title">Continued Reading&hellip;</h5>
+        <Link href="/blog/" variant="inline" class="post-related__all">View all posts -></Link>
+      </div>
+      <div class="post-related__grid">
+        {related.map((r) => (
+          <PostCard href={r.href} title={r.title} date={r.date} category={r.category} cover={r.cover} coverAlt={r.coverAlt} cardText={r.cardText} />
+        ))}
+      </div>
+    </section>
+  )}
+</Page>
+
+<!-- HubSpot form loader lives in Base.astro (runs on every page, incl. posts). -->
+
+<style>
+  .post {
+    /* stroke from .content-top-rule, width from .container. spacing-max between
+       the rule and the title (more open than the listings' 3XL).
+
+       NO padding-bottom — live zeroes it on `.article-single__content` too, and
+       whatever follows the article already owns the gap with its own top margin
+       (`.blog-cta` and, when the CTA is suppressed, `.post-foot` — both
+       --spacing-full). Adding padding here stacked with that margin and doubled
+       the space below every post to 176px against live's 80.
+
+       Safe to drop only because prose rhythm is margin-top-based: with no
+       bottom margins in the body, there is nothing for the removed padding to
+       stop escaping the article box. */
+    padding-top: var(--spacing-max);
+    /* Backstop for `full` breakout figures, which are sized to the page
+       container and overflow their grid track on purpose (global.css →
+       "Full breakout"). Clipped here rather than on `.post-layout`, which is
+       the TOC's positioning context — clipping there would cut off the
+       sidebar. `clip` (not `hidden`) so no scroll container is created. */
+    overflow-x: clip;
+  }
+
+  /* Hero shares the prose reading shell width (col-8) and is centre-aligned
+     (live `.article-single__head`). `--hero-gap` is the live 68px that sits
+     both above the meta row (title-group → meta) and above the cover. */
+  /* The page gutter comes from `.post`'s own `.container` — see the note on
+     `.post-layout` for why none of these blocks may add a second one. */
+  .post__hero {
+    --hero-gap: calc(var(--spacing-5XL) + var(--spacing-XL)); /* 48 + 20 = 68px (live) */
+    max-width: var(--col-8);
+    margin-inline: auto;
+    margin-bottom: var(--spacing-5XL);
+    text-align: center;
+  }
+
+  /* .post__title on <h1> — type from global h1. An optional per-post `titleMax`
+     frontmatter value sets --h1-max inline (see BlogPost <h1>), capping the
+     desktop size while the 36px floor + fluid rate stay automatic. */
+  .post__title {
+    margin-bottom: 0;
+  }
+
+  /* Deck / standfirst — mirrors the global h4 fluid scale (Rubik 27→22px),
+     muted; sits 20px below the title (live). */
+  .post__subtitle {
+    font-family: var(--font-secondary);
+    font-size: clamp(var(--h4-min), 2.08vw, var(--h4-max));
+    line-height: 1.2;
+    color: var(--text-subtle);
+    margin-top: var(--spacing-XL);
+  }
+
+  /* Meta row — type (11px / 500 / --text-body) comes from `.text-caption`.
+     Items are joined by a diamond separator (a rotated square), matching live's
+     `.list-bullets` — a currentColor diamond sits in the gap before each item
+     except the first. */
+  .post__meta {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-S) var(--spacing-L);
+    margin-top: var(--hero-gap);
+  }
+  .post__meta li { position: relative; display: flex; align-items: center; }
+  .post__meta li:not(:first-child)::before {
+    content: "";
+    position: absolute;
+    right: calc(100% + var(--spacing-S));
+    top: 50%;
+    width: 4px;
+    height: 4px;
+    background-color: currentColor;
+    transform: translateY(-50%) rotate(45deg);
+  }
+  .post__meta-link { color: inherit; text-decoration: none; }
+  .post__meta-link:hover { text-decoration: underline; }
+
+  .post__cover {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: var(--border-radius-S);
+    height: auto;
+    /* placeholder shown while the cover fades in (see global.css → img[data-fade]) */
+    background-color: var(--cover-placeholder, var(--surface-background-dim));
+    margin-top: var(--hero-gap);
+  }
+
+  /* Prose always centers at col-8 (prose-article constrains to the same 860 from
+     there), TOC or not — `position: relative` anchors PostToc's absolute sidebar.
+
+     NO `padding-inline`, here or on the hero / foot / related blocks. Every one of
+     them sits inside a `.container` (`.post` itself, and the foot/related carry
+     the class directly), which is the site's one owner of the page gutter. Each
+     was adding a second one and `.prose-article` a third, so a post's body ran
+     56px in from each edge at 390px — 278px of text against live's 350 — while
+     the hero above it sat at 318 and the `wide` breakout zone lost 80px at
+     desktop. One gutter, owned by the container; these blocks only cap and centre.
+
+     PostToc is unaffected by the change: it is absolutely positioned against this
+     box's PADDING box (which padding-inline never moved) and its `left` assumes
+     only that the col-6 reading column is centred within col-8 — still true, since
+     removing padding from a centred stack doesn't move its centre. */
+  .post-layout {
+    position: relative;
+    max-width: var(--col-8);
+    margin-inline: auto;
+  }
+
+  /* Meta foot — aligns with the col-8 reading column. The top border is the
+     end-of-post HR (--border-strong = same hairline as .content-top-rule). */
+  .post-foot {
+    max-width: var(--col-8);
+    margin-inline: auto;
+    margin-top: var(--spacing-full);
+  }
+  /* When a post has no related band, the foot is the last block — give it the
+     bottom whitespace the related band would otherwise provide. */
+  .post-foot:last-child {
+    padding-bottom: var(--spacing-full);
+  }
+  .post-foot__meta {
+    margin: 0;
+    padding-top: var(--spacing-5XL); /* live: 50px → snap to 48px */
+    border-top: var(--border-strong);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-L);
+  }
+  /* Label / value row — label + value flow inline as one wrapping line (live);
+     both in body color. */
+  .post-foot__row dt {
+    display: inline;
+    color: var(--text-body);
+    margin-right: var(--spacing-S);
+  }
+  .post-foot__row dd {
+    display: inline;
+    margin: 0;
+    color: var(--text-body);
+  }
+
+  /* Continued-reading band — col-8, aligned with the reading column + foot. */
+  .post-related {
+    max-width: var(--col-8);
+    margin-inline: auto;
+    margin-top: var(--spacing-full);
+    padding-bottom: var(--spacing-full);
+  }
+  /* Heading row: title left, "View all posts" right (live layout). */
+  .post-related__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--spacing-L);
+    margin-bottom: var(--spacing-2XL);
+  }
+  /* .post-related__title on <h5> — 21px type from global h5 default */
+  .post-related__title { margin: 0; }
+  .post-related :global(.post-related__all) {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .post-related__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-2XL);
+  }
+
+  @media (max-width: 991px) {
+    /* Below the col-8 cap the hero fills the container. (The four
+       `padding-inline: --spacing-L` rules that used to live here went with the
+       second gutter — see `.post-layout`.) */
+    .post__hero { max-width: 100%; }
+  }
+  @media (max-width: 575px) {
+    .post-related__grid { grid-template-columns: 1fr; }
+  }
+</style>

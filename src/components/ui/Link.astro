@@ -1,0 +1,24 @@
+---
+interface Props {
+  variant?: 'inline' | 'nav' | 'absolute-cover' | 'subtle' | 'hover-line';
+  href: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { variant = 'inline', href, class: className = '', ...rest } = Astro.props;
+
+const classes: Record<string, string> = {
+  inline: 'link-inline',
+  nav: 'link-nav animated-line',
+  'absolute-cover': 'absolute-link',
+  subtle: 'link-subtle',
+  'hover-line': 'link-hover-line',
+};
+
+const cls = [classes[variant] ?? 'link-inline', className].filter(Boolean).join(' ');
+---
+
+<a href={href} class={cls} {...rest}>
+  <slot />
+</a>

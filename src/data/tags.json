@@ -1,0 +1,142 @@
+[
+  {
+    "id": "ai-auditing",
+    "label": "AI Auditing"
+  },
+  {
+    "id": "ai-ethics",
+    "label": "AI Ethics"
+  },
+  {
+    "id": "ai-safety",
+    "label": "AI Safety"
+  },
+  {
+    "id": "announcements",
+    "label": "Announcements"
+  },
+  {
+    "id": "attribution-based-control",
+    "label": "Attribution-Based Control"
+  },
+  {
+    "id": "ckks",
+    "label": "Cheon-Kim-Kim-Song (CKKS)"
+  },
+  {
+    "id": "featured-contributor",
+    "label": "Contributor Spotlight"
+  },
+  {
+    "id": "cost-of-intelligence",
+    "label": "Cost of Intelligence"
+  },
+  {
+    "id": "creators",
+    "label": "Creators"
+  },
+  {
+    "id": "cryptography",
+    "label": "Cryptography"
+  },
+  {
+    "id": "data-economy",
+    "label": "Data Economy"
+  },
+  {
+    "id": "deep-learning",
+    "label": "Deep Learning"
+  },
+  {
+    "id": "differential-privacy",
+    "label": "Differential Privacy (DP)"
+  },
+  {
+    "id": "federated-learning",
+    "label": "Federated Learning (FL)"
+  },
+  {
+    "id": "functional-encryption",
+    "label": "Functional Encryption (FE)"
+  },
+  {
+    "id": "homomorphic-encryption",
+    "label": "Homomorphic Encryption (HE)"
+  },
+  {
+    "id": "large-language-models-llms",
+    "label": "Large Language Models (LLMs)"
+  },
+  {
+    "id": "network-source-ai",
+    "label": "Network-Source AI"
+  },
+  {
+    "id": "network-sourced-ai",
+    "label": "network-sourced AI"
+  },
+  {
+    "id": "partnerships",
+    "label": "Partnerships"
+  },
+  {
+    "id": "privacy-enhancing-technologies-pets",
+    "label": "Privacy-Enhancing Technologies (PETs)"
+  },
+  {
+    "id": "privacy-preserving-machine-learning",
+    "label": "Privacy-Preserving Machine Learning (PPML)"
+  },
+  {
+    "id": "private-set-intersection",
+    "label": "Private Set Intersection"
+  },
+  {
+    "id": "publishers",
+    "label": "Publishers"
+  },
+  {
+    "id": "pysyft",
+    "label": "PySyft"
+  },
+  {
+    "id": "release-update",
+    "label": "Release Updates"
+  },
+  {
+    "id": "remote-data-science",
+    "label": "Remote Data Science"
+  },
+  {
+    "id": "secure-enclaves",
+    "label": "Secure Enclaves"
+  },
+  {
+    "id": "multi-party-computation",
+    "label": "Secure Multi-Party Computation (SMPC)"
+  },
+  {
+    "id": "structured-transparency",
+    "label": "Structured Transparency"
+  },
+  {
+    "id": "syftbox",
+    "label": "SyftBox"
+  },
+  {
+    "id": "synthetic-data",
+    "label": "Synthetic Data"
+  },
+  {
+    "id": "tutorials",
+    "label": "Tutorials"
+  },
+  {
+    "id": "use-cases",
+    "label": "Use Cases"
+  },
+  {
+    "id": "zero-knowledge-proofs",
+    "label": "Zero-Knowledge Proofs (ZKPs)"
+  }
+]

@@ -1,0 +1,97 @@
+---
+/**
+ * /blog/locations/<location>/page/N — pages 2..N of a location archive. Page 1
+ * lives at /blog/locations/<location> ([location].astro); these continuation
+ * pages carry the label+count toolbar and the next newest-first slice. Real,
+ * indexable pages (no-JS pagination) that BlogPagination also fetches to append
+ * cards on scroll. Mirrors the tag archive's continuation route.
+ */
+import BlogListing from '@layouts/BlogListing.astro';
+import PostCard from '@elements/PostCard.astro';
+import BlogToolbar from '@components/sections/blog/BlogToolbar.astro';
+import BlogPagination from '@elements/BlogPagination.astro';
+import { getCollection, getEntry } from 'astro:content';
+import { postSlug, postLocations, collectLocations, pageCount, pageSlice } from '@utils/posts';
+
+export async function getStaticPaths() {
+  const includeDrafts = import.meta.env.DEV;
+  const all = await getCollection('blog', ({ data }) => includeDrafts || !data.draft);
+
+  const paths = [];
+  for (const loc of collectLocations(all)) {
+    const posts = all
+      .filter((p) => postLocations(p).some((l) => l.slug === loc.slug))
+      .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+    const totalPages = pageCount(posts.length);
+    for (let page = 2; page <= totalPages; page++) {
+      paths.push({
+        params: { location: loc.slug, page: String(page) },
+        props: { label: loc.label, page, totalPages, count: posts.length, entries: pageSlice(posts, page) },
+      });
+    }
+  }
+  return paths;
+}
+
+const { location } = Astro.params;
+const { label, page, totalPages, count, entries } = Astro.props;
+
+const cards = await Promise.all(
+  entries.map(async (p) => {
+    const cat = await getEntry(p.data.categories[0]);
+    return {
+      href: `/blog/${postSlug(p)}/`,
+      title: p.data.title,
+      date: p.data.date,
+      category: { slug: cat.id, label: cat.data.label },
+      cover: p.data.cover,
+      coverAlt: p.data.coverAlt,
+      cardText: p.data.cardText,
+      draft: p.data.draft,
+    };
+  })
+);
+---
+
+<BlogListing title={`${label} — Blog — page ${page} — OpenMined`} description={`OpenMined blog posts from ${label}.`}>
+  <section class="location-archive container content-top-rule">
+    <BlogToolbar heading={label} count={count} scope={{ location }} />
+
+    <div class="blog-grid">
+      {cards.map((c) => (
+        <PostCard
+          href={c.href}
+          title={c.title}
+          date={c.date}
+          category={c.category}
+          cover={c.cover}
+          coverAlt={c.coverAlt}
+          cardText={c.cardText}
+          draft={c.draft}
+        />
+      ))}
+    </div>
+
+    <BlogPagination base={`/blog/locations/${location}`} currentPage={page} totalPages={totalPages} />
+  </section>
+</BlogListing>
+
+<style>
+  .location-archive {
+    padding-top: var(--spacing-3XL);
+    padding-bottom: var(--spacing-full);
+  }
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: var(--spacing-XL);
+    row-gap: var(--spacing-2XL);
+    margin-top: var(--spacing-3XL);
+  }
+  @media (max-width: 1099px) {
+    .blog-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 767px) {
+    .blog-grid { grid-template-columns: 1fr; }
+  }
+</style>

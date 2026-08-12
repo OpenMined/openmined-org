@@ -1,0 +1,50 @@
+---
+/**
+ * /events/india-ai-impact-summit-2026/meetup-registration/ — New Delhi community
+ * meetup registration for the India AI Impact Summit 2026 (Tue 17 Feb 2026).
+ * PAST EVENT: kept as an archival + reusable registration template. Explicitly
+ * noindex and excluded from the sitemap (astro.config.mjs sitemap filter); not
+ * linked from nav. Copy verbatim from the live page.
+ */
+import Page from '@layouts/Page.astro';
+import EventRegLanding from '@components/sections/forms/EventRegLanding.astro';
+
+const details = [
+  { icon: 'calendar', html: 'Tuesday 17 February 2026, 1:30–5:00 PM IST' },
+  { icon: 'map-pin', bold: true, html: '<a href="https://maps.app.goo.gl/6e56Wj2nrsRKuSTr5">India International Centre</a>, Conference Room II, New Delhi' },
+  { icon: 'triangle-alert', html: 'Venue capacity is 65 people' },
+];
+---
+
+<Page
+  title="Meetup at India AI Impact Summit 2026 | New Delhi, Feb 17"
+  description="Join the OpenMined community meetup in New Delhi during the India AI Impact Summit 2026 — open conversations, live demos of BioVault, and privacy-preserving AI for global health."
+  noindex={true}
+  searchable={false}
+>
+  <EventRegLanding
+    eyebrow="Join us at the:"
+    title="OpenMined Community Meetup — New Delhi"
+    details={details}
+    formId="660504c6-0693-4dd8-8898-0618986d3616"
+  >
+    <img
+      slot="graphic"
+      src="/logos/OpenMined-Icon-large.svg"
+      alt="OpenMined"
+      width="110"
+      height="110"
+    />
+
+    <div>
+      <h4>Info:</h4>
+      <p>We’re in New Delhi for the India AI Impact Summit and we want to meet you.</p>
+      <p>As part of our presence at the India AI Impact Summit, OpenMined, in collaboration with the Indian International Centre, is convening conversations on data visitation, genomics, and privacy-preserving AI for global health. This meetup carries those conversations forward in a relaxed, in-person setting – an opportunity to go deeper, ask questions, and connect with the OpenMined community.</p>
+      <p>We’ll be hanging out and raising awareness about how health data is generated, shared, and governed—and why privacy, trust, and equity matter for public health. We’ll demo <a href="https://biovault.net/">BioVault</a> and other privacy-preserving tools built by OpenMined, and create space to brainstorm practical solutions for using health data responsibly, from research and clinical settings to public health systems. Bring your laptop—we’ll show you how to try things out hands-on</p>
+      <p>Whether you’re a developer curious about privacy-enhancing technologies, a researcher working on health data governance, a policymaker thinking about data sovereignty, or just someone who thinks AI should work for everyone – come hang out. Extra bonus points if you bring a real problem, a half-baked idea, or some data you’ve been itching to talk about.</p>
+      <p>Expect open conversations, live demos, and good company. No slides-heavy keynotes. Just real talk about building open-source infrastructure for a more privacy-preserving world.</p>
+      <p>This is a free event open to all. Space is limited, so please register to secure your spot.</p>
+      <p>Refreshments will be provided</p>
+    </div>
+  </EventRegLanding>
+</Page>

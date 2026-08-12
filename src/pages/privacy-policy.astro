@@ -1,0 +1,161 @@
+---
+import Page from '@layouts/Page.astro';
+import SimpleHero from '@components/sections/hero/SimpleHero.astro';
+import ContentSection from '@components/sections/ContentSection.astro';
+
+/**
+ * /privacy-policy/ — the site's privacy policy. Rebuilt verbatim from live
+ * #brxe-ogcyyp (https://openmined.org/privacy-policy/), captured to
+ * the live page (sections 9–15 pulled from its raw HTML,
+ * the live innerText grab having raced lazy render).
+ *
+ * Layout matches live: centered h1 + "Last Updated" subhead (no hero graphic)
+ * over a col-6 `.prose` reading column; the 15 numbered sections are separated
+ * by a strong headline-color hairline (the live legal-doc rule). Section
+ * headings are h2 for semantic order but rendered at the live h4 size via
+ * `.prose.downsize-2` (27px, regular weight — the understated live treatment).
+ */
+---
+
+<Page
+  title="Privacy Policy — OpenMined"
+  description="How OpenMined collects, uses, and safeguards your personal information across our website, communications, and community platforms."
+>
+  <!-- § Hero — title + last-updated. No swoop (live is a plain centered header).
+       The opening statement now leads the body (below), not the hero. -->
+  <SimpleHero
+    heading="Privacy Policy"
+    subhead="Last Updated: 04/28/2026"
+    subheadAs="h6"
+    padTop="spacious"
+  />
+
+  <!-- § Policy body — verbatim, col-6 reading column, rules between sections.
+       Opens with the policy's intro statement, then a rule into section 1.
+       flushTop: article-style page, so the hero's padding-bottom owns the gap. -->
+  <ContentSection width="col-6" flushTop>
+    <div class="prose downsize-2 legal-body">
+      <p>OpenMined (“we,” “our,” or “us”) respects your privacy and is committed to protecting your personal information. This Privacy Policy explains how we collect, use, and safeguard your information across our website, communications, and community platforms.</p>
+
+      <hr class="legal-rule" />
+      <h2>1. Who We Are</h2>
+      <p>OpenMined is a globally distributed nonprofit organization. We maintain a digital presence through our websites and community tools, including Slack and email communications. Our primary operations are based in the United States and the United Kingdom.</p>
+
+      <hr class="legal-rule" />
+      <h2>2. Information We Collect</h2>
+      <p>We may collect the following categories of personal data:</p>
+      <ul>
+        <li><strong>Contact Information:</strong> Name, email address, affiliation, or other information you provide via forms or email communications.</li>
+        <li><strong>Community Data:</strong> Slack username, participation details, and other interaction metadata when joining our community platforms.</li>
+        <li><strong>Technical Data:</strong> IP address, browser type, device identifiers, pages visited, and referral information, collected via analytics tools and tracking links.</li>
+        <li><strong>Communication Preferences:</strong> Your opt-in status, including records of email engagement and unsubscribe actions.</li>
+      </ul>
+
+      <hr class="legal-rule" />
+      <h2>3. How We Collect Information</h2>
+      <p>We collect information through:</p>
+      <ul>
+        <li>Form submissions on our WordPress website</li>
+        <li>Slack workspace registration</li>
+        <li>Newsletter sign-ups and event registration</li>
+        <li>Email communications (via HubSpot and Gmail)</li>
+        <li>Cookies and analytics tools, including Google Analytics, Plausible Analytics, UTM tracking, and Bitly links</li>
+        <li>Blanks on form license agreements with companies and individuals contributing to our computer-software and other published projects</li>
+      </ul>
+
+      <hr class="legal-rule" />
+      <h2>4. How We Use Your Information</h2>
+      <p>We use your data to:</p>
+      <ul>
+        <li>Send updates, newsletters, and community-related announcements</li>
+        <li>Manage your participation in our programs and events</li>
+        <li>Improve our website and outreach through analytics and tracking</li>
+        <li>Monitor community engagement and opt-in preferences</li>
+        <li>Comply with applicable laws and protect our community</li>
+      </ul>
+
+      <hr class="legal-rule" />
+      <h2>5. Email Communications</h2>
+      <p>We are initiating formal email communications for the first time. If you receive an email from us and believe you have not opted in, we sincerely apologize. Our team is reviewing historical records to ensure consent is respected.</p>
+      <p>Every marketing email will include a visible unsubscribe link, as required by law and supported by our email platform (HubSpot).</p>
+      <p>You may also request to be removed from our communications manually by contacting <a href="mailto:privacy@openmined.org">privacy@openmined.org</a>.</p>
+
+      <hr class="legal-rule" />
+      <h2>6. Slack and Community Platforms</h2>
+      <p>By accepting an invite to our Slack workspace or participating in related programs, you acknowledge and consent to receive communication related to your involvement. Slack participation is considered an opt-in to community updates unless you indicate otherwise.</p>
+
+      <hr class="legal-rule" />
+      <h2>7. Cookies and Analytics</h2>
+      <p>We use cookies and similar tracking technologies on our website. These include:</p>
+      <ul>
+        <li>Google Analytics</li>
+        <li>Plausible Analytics</li>
+        <li>Bitly links and UTM parameters</li>
+        <li>Custom tracking tools used for campaign measurement</li>
+      </ul>
+      <p>You can manage your cookie preferences in your browser settings. Some services we use may also provide individual opt-out tools.</p>
+
+      <hr class="legal-rule" />
+      <h2>8. Data Sharing</h2>
+      <p>We do not sell or rent your personal information.</p>
+      <p>We may share your data with:</p>
+      <ul>
+        <li>Service providers who help us operate our website, email, or analytics (e.g., WP Engine, HubSpot, Gmail)</li>
+        <li>Legal or regulatory authorities if required to comply with law</li>
+        <li>Team members and contractors under confidentiality obligations, strictly for operations</li>
+      </ul>
+      <p>We do not publish contributor license agreements, but may share them privately with third parties to demonstrate that we have secured intellectual property rights in contributions to our projects.</p>
+
+      <hr class="legal-rule" />
+      <h2>9. Data Security</h2>
+      <p>We use reasonable administrative, technical, and physical safeguards to protect your information. Our data is hosted securely via WP Engine and HubSpot, with access restricted to authorized personnel.</p>
+      <p>No method of transmission over the Internet or electronic storage is 100% secure, and we cannot guarantee absolute security.</p>
+
+      <hr class="legal-rule" />
+      <h2>10. International Data Transfers</h2>
+      <p>Because we operate globally, your information may be processed outside of your country of residence, including in the United States and the United Kingdom.</p>
+      <p>If you are located in the European Economic Area (EEA) or United Kingdom, we comply with GDPR and applicable data protection laws, including using appropriate safeguards when transferring data.</p>
+
+      <hr class="legal-rule" />
+      <h2>11. Your Rights</h2>
+      <p>Depending on your jurisdiction, you may have the following rights:</p>
+      <ul>
+        <li>Access or request a copy of your personal data</li>
+        <li>Request correction or deletion of your data</li>
+        <li>Withdraw consent or object to processing</li>
+        <li>Request that we restrict use of your information</li>
+      </ul>
+      <p>To exercise your rights, email <a href="mailto:privacy@openmined.org">privacy@openmined.org</a>. We will respond within 30 days, as required by law.</p>
+
+      <hr class="legal-rule" />
+      <h2>12. Retention of Data</h2>
+      <p>We retain your data only as long as necessary to fulfill the purposes described in this policy, unless a longer period is required by law.</p>
+
+      <hr class="legal-rule" />
+      <h2>13. Children’s Privacy</h2>
+      <p>Our website and community are not intended for children under the age of 13. We do not knowingly collect data from children. If you believe a child has submitted personal information to us, please contact us immediately.</p>
+
+      <hr class="legal-rule" />
+      <h2>14. Changes to This Policy</h2>
+      <p>We may update this Privacy Policy occasionally. When we do, we’ll update the “Last Updated” date at the top. Significant changes will be communicated via our website or email.</p>
+
+      <hr class="legal-rule" />
+      <h2>15. Contact Us</h2>
+      <p>If you have any questions or concerns about this Privacy Policy, or how we use your data, please contact:</p>
+      <p>OpenMined Privacy Team<br />📧 <a href="mailto:privacy@openmined.org">privacy@openmined.org</a></p>
+    </div>
+  </ContentSection>
+</Page>
+
+<style>
+  /* Strong section rule (the live legal-doc hairline). Scoped so it beats the
+     global `.prose hr` (subtle) treatment; spans the full col-6 column. */
+  .legal-body .legal-rule {
+    width: 100%;
+    max-width: none;
+    border: 0;
+    border-top: 1px solid var(--text-headline);
+    margin-block: var(--spacing-3XL);
+    opacity: 0.6; /* live rule reads as a quiet-but-present divider */
+  }
+</style>

@@ -1,0 +1,155 @@
+---
+/**
+ * PostCard — blog listing / "continue reading" card, reproducing the live
+ * `.article` card (openmined.org/blog, verified 2026-07-01):
+ *
+ *   A square (1:1) card whose cover fills the whole tile (`object-fit: cover`);
+ *   the meta row (date ◆ category) is pinned top-left and the h6 title
+ *   bottom-left, overlaid directly on the image — no scrim. `cardText` sets the
+ *   text 'dark' (light covers) or 'light' (dark covers) for contrast — a
+ *   per-post frontmatter option, since the cover is the card background.
+ *   Cover-less posts fall back to the shared default-thumbnail (OMD brand mesh).
+ *
+ * Measurements → tokens: 423px square, 6px radius (--border-radius-S), padding
+ * 17/25/27 snapped to L / 2XL / 2XL, meta 12px, title 16px/500 (--h6-max: 16).
+ * The whole card is one link, so category renders as text (anchors can't nest);
+ * the live per-category links are a listing-page concern, not the card's.
+ *
+ * Layout-agnostic: it fills its grid cell, so /blog and the post-page related
+ * band share it.
+ *
+ * `filterMeta` is the taxonomy payload the client-side listing controls read.
+ * Only the `/blog/cards/` source route passes it — the cards it renders are
+ * lifted wholesale into a listing grid when a Filter/Sort/Search is applied, so
+ * each card has to carry everything the controller sorts and matches on. Every
+ * other surface omits it and renders exactly as before.
+ */
+import { Image } from 'astro:assets';
+
+interface Props {
+  href: string;
+  title: string;
+  date: Date;
+  category?: { slug: string; label: string };
+  cover?: ImageMetadata;
+  coverAlt?: string;
+  cardText?: 'light' | 'dark';
+  draft?: boolean;
+  filterMeta?: {
+    slug: string;
+    /** All category slugs (not just the primary one the card labels). */
+    cats: string[];
+    tags: string[];
+    authors: string[];
+    locations: string[];
+    /** Lowercased haystack for the no-Pagefind search fallback. */
+    search: string;
+  };
+}
+const { href, title, date, category, cover, coverAlt = '', cardText = 'light', draft = false, filterMeta } = Astro.props;
+const dateLabel = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+---
+
+<a
+  class="post-card card-float"
+  href={href}
+  data-text={cardText}
+  data-category={category?.slug ?? ''}
+  data-slug={filterMeta?.slug}
+  data-date={filterMeta && date.toISOString()}
+  data-cats={filterMeta && filterMeta.cats.join(' ')}
+  data-tags={filterMeta && filterMeta.tags.join(' ')}
+  data-authors={filterMeta && filterMeta.authors.join(' ')}
+  data-locations={filterMeta && filterMeta.locations.join(' ')}
+  data-search={filterMeta?.search}
+>
+  <div class="post-card__cover">
+    {/* The card is a 1:1 square; covers are 16:9 landscape, height-cropped via
+        object-fit: cover. srcset selection reads the <img> BOX width (sizes) and
+        doesn't account for the crop, so a landscape image filling a square paints
+        ~16/9 (1.78x) wider than the box. sizes is the grid slot inflated by 16/9
+        (30/45/90vw → 53/80/160vw) so the source has enough height to cover at 2x.
+        Reverting sizes to the raw column vw softens the cards. See blog-media-strategy.md. */}
+    {cover
+      ? <Image src={cover} alt={coverAlt} widths={[600, 900, 1280, 1600, 2000]} sizes="(max-width: 767px) 160vw, (max-width: 1099px) 80vw, 53vw" quality={90} data-fade />
+      : <img src="/blog/default-thumbnail.png" alt="" loading="lazy" width="856" height="482" data-fade />}
+  </div>
+  <div class="post-card__content">
+    <ul class="post-card__meta">
+      <li><time datetime={date.toISOString()}>{dateLabel}</time></li>
+      {category && <li>{category.label}</li>}
+      {draft && <li class="post-card__draft">Draft</li>}
+    </ul>
+    <h6 class="post-card__title">{title}</h6>
+  </div>
+</a>
+
+<style>
+  /* A flat card: no resting shadow, so `.card-float`'s defaults (none →
+     --shadow-md) are exactly right and no override is needed. */
+  .post-card {
+    --h6-max: 16px; /* card title is a flat 16px (live), not the fluid h6 ceiling */
+    position: relative;
+    display: block;
+    aspect-ratio: 1 / 1;
+    border-radius: var(--border-radius-S);
+    overflow: hidden;
+    text-decoration: none;
+    /* Placeholder shown behind the cover while it fades in (and if it has
+       transparency). Override --cover-placeholder inline (e.g. a build-time
+       dominant color) to tint per-post; defaults to the dim surface token. */
+    background-color: var(--cover-placeholder, var(--surface-background-dim));
+    /* Overlay text sits on the cover image, so its color is theme-independent:
+       both cases pin to a fixed grayscale value that never flips with the page
+       theme. Default (dark) → near-black; light → near-white. */
+    color: var(--color-grayscale-850);
+  }
+  .post-card[data-text='light'] { color: var(--color-grayscale-50); }
+
+  .post-card__cover {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  .post-card__cover :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .post-card__content {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* meta pins top, title pins bottom */
+    padding: var(--spacing-L) var(--spacing-2XL) var(--spacing-2XL);
+  }
+
+  .post-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 12px;
+    color: inherit;
+  }
+  .post-card__meta li { display: inline-flex; align-items: center; }
+  .post-card__meta li + li::before {
+    content: '◆';
+    font-size: 7px;
+    padding-inline: var(--spacing-S);
+    opacity: 0.7;
+  }
+  .post-card__draft { font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+
+  .post-card__title {
+    margin: 0;
+    font-weight: 500;
+    color: inherit;
+  }
+</style>

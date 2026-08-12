@@ -1,0 +1,69 @@
+---
+/**
+ * Tabs — a content-agnostic tab group rendered as a segmented control: a row of
+ * tabs over a set of panels, where selecting a tab swaps the whole panel. Pass
+ * tab labels via `tabs`; pass each panel as a direct child of the default slot,
+ * in the same order as the labels. Works for any content type (step lists +
+ * graphics, tables, prose, …).
+ *
+ * This component only emits markup. Styling lives in `global.css → .tabs` and
+ * behavior in the global `[data-tabs]` initializer in `Base.astro` — both are
+ * shared with raw-HTML `[data-tabs]` blocks authored directly in `.md` bodies
+ * (WordPress easy-tabs), so there is one implementation, not two (per the
+ * "reusable CSS belongs in global.css" convention).
+ *
+ * Progressive enhancement: panels all render in the DOM and are visible with no
+ * JS (graceful — all content reachable); the initializer hides inactive panels
+ * on load and wires ARIA tab semantics + arrow-key navigation.
+ *
+ * Rebuilt from live pysyft #brxe-ccrkcl ("How it works", For Researchers / For
+ * Data Owners). Measured off the live page.
+ *
+ * Live → token mapping (segmented control) — implemented in global.css:
+ *   tab container  #ffffff, box-shadow-m, radius 6px → --surface-background-bright,
+ *                                                       --shadow-md, --border-radius-S
+ *   active tab     fill #272532, light text, 500      → --text-headline / inverse (auto-theme)
+ *   inactive tab   transparent, #272532 text, 500     → --text-headline
+ *
+ * Usage:
+ *   <Tabs tabs={["For Researchers", "For Data Owners"]} label="How it works">
+ *     <div>…panel 0…</div>
+ *     <div>…panel 1…</div>
+ *   </Tabs>
+ */
+interface Props {
+  tabs: string[];
+  /** Accessible name for the tablist (e.g. the section heading). */
+  label?: string;
+  /** Index of the initially-selected tab. */
+  initial?: number;
+  /** Center the segmented control (when the tabs block is a centered column). */
+  center?: boolean;
+  /** Stable id base; auto-generated if omitted. */
+  id?: string;
+}
+const { tabs, label, initial = 0, center = false, id } = Astro.props;
+const base = id ?? `tabs-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<div class:list={['tabs', { 'tabs--center': center }]} data-tabs data-base={base} data-initial={initial}>
+  <div class="tabs__list" role="tablist" aria-label={label}>
+    {tabs.map((tab, i) => (
+      <button
+        type="button"
+        class="tabs__tab"
+        role="tab"
+        id={`${base}-tab-${i}`}
+        aria-controls={`${base}-panel-${i}`}
+        aria-selected={i === initial ? 'true' : 'false'}
+        tabindex={i === initial ? 0 : -1}
+      >
+        {tab}
+      </button>
+    ))}
+  </div>
+  {/* Each direct child = one panel, in label order. The global `[data-tabs]`
+      initializer in Base.astro wires ARIA + ids and hides inactive panels (all
+      visible without JS). Styling is global (global.css → `.tabs`). */}
+  <div class="tabs__panels"><slot /></div>
+</div>

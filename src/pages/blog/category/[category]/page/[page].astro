@@ -1,0 +1,125 @@
+---
+/**
+ * /blog/category/<cat>/page/N — pages 2..N of a category archive. Page 1 lives
+ * at /blog/category/<cat> ([category].astro) with the featured/rail header;
+ * these continuation pages carry the category nav, the label+count toolbar, and
+ * the next slice of the SAME featured-excluded, newest-first pool. Real,
+ * indexable pages (no-JS pagination) that BlogPagination also fetches to append
+ * cards on scroll. Mirrors [category].astro's pool logic so slices stay contiguous.
+ */
+import BlogListing from '@layouts/BlogListing.astro';
+import PostCard from '@elements/PostCard.astro';
+import BlogCategoryNav from '@elements/BlogCategoryNav.astro';
+import BlogToolbar from '@components/sections/blog/BlogToolbar.astro';
+import BlogPagination from '@elements/BlogPagination.astro';
+import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
+import { postSlug, resolveFeatured, pageCount, pageSlice } from '@utils/posts';
+
+export async function getStaticPaths() {
+  const NAV_ORDER = ['product', 'policy', 'news', 'research', 'stories', 'community', 'foundation'];
+  const includeDrafts = import.meta.env.DEV;
+  const allCats = await getCollection('categories');
+
+  const paths = [];
+  for (const category of NAV_ORDER) {
+    const categoryEntry = allCats.find((c) => c.id === category);
+    const posts = (await getCollection('blog', ({ data }) => (includeDrafts || !data.draft) && data.categories.some((c) => c.id === category)))
+      .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+    // Same featured exclusion as page 1 (only in 'featured' header mode).
+    const headerLeft = categoryEntry?.data.headerLeft ?? 'featured';
+    const featuredEntry = headerLeft === 'featured'
+      ? resolveFeatured(posts, categoryEntry?.data.featured, `category "${category}"`)
+      : undefined;
+    const gridPosts = featuredEntry ? posts.filter((p) => p.id !== featuredEntry.id) : posts;
+
+    const totalPages = pageCount(gridPosts.length);
+    for (let page = 2; page <= totalPages; page++) {
+      paths.push({
+        params: { category, page: String(page) },
+        props: {
+          label: categoryEntry?.data.label ?? category,
+          page,
+          totalPages,
+          count: gridPosts.length,
+          exclude: featuredEntry && postSlug(featuredEntry),
+          entries: pageSlice(gridPosts, page),
+        },
+      });
+    }
+  }
+  return paths;
+}
+
+const { category } = Astro.params;
+const { label, page, totalPages, count, exclude, entries } = Astro.props;
+const metaDescription = `${label} — articles from OpenMined, the public network for non-public information.`;
+
+// Category nav — same 7 nav categories, this one active.
+const NAV_ORDER = ['news', 'product', 'research', 'policy', 'stories', 'community', 'foundation'];
+const allCats = await getCollection('categories');
+const navCats = NAV_ORDER
+  .map((id) => allCats.find((c) => c.id === id))
+  .filter((c) => c !== undefined)
+  .map((c) => ({ id: c.id, label: c.data.label }));
+
+const resolveCard = async (p: CollectionEntry<'blog'>) => {
+  const cat = (await getEntry(p.data.categories[0]))!;
+  return {
+    href: `/blog/${postSlug(p)}/`,
+    title: p.data.title,
+    date: p.data.date,
+    category: { slug: cat.id, label: cat.data.label },
+    cover: p.data.cover,
+    coverAlt: p.data.coverAlt,
+    cardText: p.data.cardText,
+    draft: p.data.draft,
+  };
+};
+const cards = await Promise.all(entries.map(resolveCard));
+---
+
+<BlogListing title={`${label} — Blog — page ${page} — OpenMined`} description={metaDescription}>
+  <section class="cat-archive container content-top-rule">
+    <BlogCategoryNav categories={navCats} active={category} />
+
+    <BlogToolbar heading={label} count={count} scope={{ cat: category, exclude }} />
+
+    <div class="blog-grid">
+      {cards.map((c) => (
+        <PostCard
+          href={c.href}
+          title={c.title}
+          date={c.date}
+          category={c.category}
+          cover={c.cover}
+          coverAlt={c.coverAlt}
+          cardText={c.cardText}
+          draft={c.draft}
+        />
+      ))}
+    </div>
+
+    <BlogPagination base={`/blog/category/${category}`} currentPage={page} totalPages={totalPages} />
+  </section>
+</BlogListing>
+
+<style>
+  .cat-archive {
+    padding-top: var(--spacing-3XL);
+    padding-bottom: var(--spacing-full);
+  }
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: var(--spacing-XL);
+    row-gap: var(--spacing-2XL);
+    margin-top: var(--spacing-3XL);
+  }
+  @media (max-width: 1099px) {
+    .blog-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 767px) {
+    .blog-grid { grid-template-columns: 1fr; }
+  }
+</style>

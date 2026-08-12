@@ -1,0 +1,48 @@
+---
+interface Props {
+  type?: astroHTML.JSX.InputHTMLAttributes['type'];
+  placeholder?: string;
+  disabled?: boolean;
+  id?: string;
+  name?: string;
+  label?: string;
+  required?: boolean;
+  class?: string;
+}
+
+const {
+  type = 'text',
+  placeholder = '',
+  disabled = false,
+  id,
+  name,
+  label,
+  required = false,
+  class: className = '',
+} = Astro.props;
+---
+
+<div class="field-wrap">
+  {label && <label for={id}>{label}{required && <span class="required"> *</span>}</label>}
+  <input
+    type={type}
+    placeholder={placeholder}
+    disabled={disabled}
+    id={id}
+    name={name}
+    required={required}
+    class={className || undefined}
+  />
+</div>
+
+<style>
+  .field-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .required {
+    color: var(--color-red-500);
+  }
+</style>

@@ -1,0 +1,448 @@
+/* ══════════════════════════════════════════════════════════════════
+   PROSE — long-form content
+   Owns `.prose` (the article-style typographic scope) and `.prose-article`
+   (the breakout grid layout). Authored content lists lead, since the diamond
+   marker rule is scoped to `.prose` and classless lists together.
+
+   Two layers, deliberately distinct: `.prose` is a REGION scope, never a leaf
+   element, and carries no layout opinion; `.prose-article` adds the grid and
+   composes onto genuine long-form bodies only.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Content lists ────────────────────────────────────────────────────
+   OpenMined's diamond marker — a small rotated square (matching live
+   `.article-single__content ul li:before`), not a disc. Site-wide on authored
+   content lists: any classless <ul>, plus every list inside a `.prose` region
+   (migrated WP content sometimes carries `wp-block-list`). Layout lists — nav
+   menus, card grids, footer link columns — always carry a class and are never
+   touched, the same convention the content-link rule uses. Ordered lists keep
+   their numeric markers. */
+:is(.prose ol, ol:not([class])) { padding-left: var(--spacing-2XL); }
+:is(.prose ul, ul:not([class])) { list-style: none; padding-left: var(--spacing-S); }
+:is(.prose ul, ul:not([class])) > li { position: relative; padding-left: 0.875em; }
+:is(.prose ul, ul:not([class])) > li::before {
+  content: "";
+  position: absolute;
+  top: 0.8em;
+  left: 0;
+  width: 0.25em;
+  height: 0.25em;
+  background-color: currentColor;
+  transform: translateY(-50%) rotate(45deg);
+}
+:is(.prose ul, .prose ol, ul:not([class]), ol:not([class])) > li + li {
+  margin-top: var(--spacing-S);
+}
+
+
+/* ── Prose / long-form content ────────────────────────────────────────
+   `.prose` is the article-style *typographic scope* — it styles the bare
+   elements of flowing content (paragraphs, headings, lists, links, tables,
+   media) and nothing else. Embedded components (which always carry a class)
+   keep their own styling and never inherit prose rules. Bare content links
+   get the animated underline in any `.prose` region — and, more broadly, in
+   any bare paragraph (`p a:not([class])`), so a content link on a page reads
+   the same whether or not it sits in an article body.
+
+   `.prose` is a REGION, never an element modifier: put it on the container
+   that *wraps* prose (a `<div>`/`<article>` holding block-level children),
+   never on a leaf `<p>`/`<h2>`/`<li>`. A lone styled paragraph in a section
+   is not prose — style it locally. (`.prose` carries no layout opinion; the
+   article breakout grid is a separate class, `.prose-article`, below.)
+   (Type-scale sizing for prose headings lives in typography.css.) */
+
+/* Content links — animated underline. Applies to a classless <a> inside a
+   `.prose` region, any bare paragraph, OR any heading. `:not([class])` targets
+   authored <a> only; component links (.button, .link-nav, …) are left untouched,
+   and nav/TOC links (which sit outside <p>) are never reached. `color: inherit`
+   makes the link take its parent's color — --text-body inside prose/<p> (as
+   before), the heading color inside a heading — and currentColor drives the
+   underline to match. */
+:is(.prose, p, h1, h2, h3, h4, h5, h6) a:not([class]) {
+  background-image: linear-gradient(transparent calc(100% - 1px), currentColor 1px);
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+  background-position: left bottom;
+  padding-bottom: 2px;
+  text-decoration: none;
+  color: inherit;
+  animation: underlineIn 0.4s ease forwards;
+}
+:is(.prose, p, h1, h2, h3, h4, h5, h6) a:not([class]):hover {
+  animation: underlineOut 0.4s ease forwards,
+             underlineInGreen 0.4s ease 0.4s forwards;
+}
+
+/* Exception: links wrapping <sup> footnote markers — skip the underline */
+:is(.prose, p) a:not([class]):has(sup) {
+  background-image: none;
+  opacity: 0.8;
+  transition: opacity var(--transition-base);
+}
+:is(.prose, p) a:not([class]):has(sup):hover { opacity: 1; }
+
+/* WordPress block alignment (migrated content) — center/right-aligned blocks,
+   e.g. the ⬩⬩⬩ section divider and centered images/captions. The converter
+   preserves the `has-text-align-*` class on the block. */
+.prose .has-text-align-center { text-align: center; }
+.prose .has-text-align-right { text-align: right; }
+
+/* WordPress columns block (migrated `wp-block-columns`) — a responsive flex row
+   of equal-width columns (live gap 32px → --spacing-3XL); stacks on mobile. The
+   converter preserves the `wp-block-columns` / `wp-block-column` structure. */
+.prose .wp-block-columns {
+  display: flex;
+  gap: var(--spacing-3XL);
+}
+.prose .wp-block-column { flex: 1; min-width: 0; }
+.prose .wp-block-column > :first-child { margin-top: 0; }
+@media (max-width: 767px) {
+  .prose .wp-block-columns { flex-direction: column; gap: var(--spacing-L); }
+}
+
+/* Button-styled links migrated from WP `wp-block-button` (prose bodies are .md,
+   so they can't use the @ui/Button component). Mirrors the primary Button —
+   keep in sync with components/ui/Button.astro. The `a:not([class])` content-
+   link rule above already leaves these untouched. */
+.prose a.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-S);
+  background-color: var(--button-dark-color);
+  color: var(--button-light-color);
+  padding: 11px 19px;
+  min-height: 48px;
+  font-weight: 500;
+  border-radius: var(--border-radius-S);
+  text-decoration: none;
+  transition: background-color var(--transition-base), color var(--transition-base);
+}
+.prose a.btn:hover { background-color: var(--color-interactive-hover); color: var(--color-grayscale-50); }
+
+/* Prose body leans on a looser leading than UI body (1.5) — the live article
+   body measures 28px/16px = 1.75. Applies to flowing text, not headings. */
+.prose p,
+.prose li {
+  line-height: 1.75;
+}
+
+.prose p,
+.prose ul,
+.prose ol {
+  color: var(--text-body);
+}
+
+/* ── Prose flow rhythm ────────────────────────────────────────────────
+   ONE rule owns each gap (adjacent-sibling `+`), so nothing here depends on
+   margin collapsing and the rhythm is identical in block flow, in flex, and in
+   the `.prose-article` grid. The previous margin-bottom + margin-top model did
+   depend on it, and silently rendered 48px between a paragraph and an h2 inside
+   the grid but 32px in block flow (grid items' margins never collapse) — the
+   same class giving two answers on blog posts vs. legal pages.
+
+   Every value below IS the rendered gap; there are no sums to reason about.
+
+   The default gap keys off POSITION, not an element list: a direct child of
+   `.prose` is a flow block by construction, so `> * + *` covers every one —
+   including embedded blocks like `.hs-form-card` that no hand-written list
+   would remember. A second, `:where()`-scoped selector reaches the few
+   containers that hold nested flowing text. Neither can touch a component's
+   internal parts, which are always deeper than one level.
+
+   Specificity is load-bearing: the default and trailing-air rules use `:where()`
+   (zero specificity) so the heading rules below always win. Order matters too —
+   equal-specificity rules are resolved by source order. */
+
+/* Default gap between adjacent flow blocks. */
+.prose > * + *,
+.prose :where(.wp-block-column, blockquote, li) > * + * {
+  margin-top: var(--spacing-L);
+}
+/* The bare `blockquote` element rule carries its own margin-block for use
+   outside prose; drop the trailing half here so it can't stack with the gap
+   the rule above already owns. Bottom only — zeroing both would out-specify
+   the owl's margin-top. */
+.prose blockquote { margin-bottom: 0; }
+
+/* Blocks carrying more trailing air than the default. h2 closes a major
+   section (live: 24 after); h3–h6 are tighter (live: 16). */
+.prose :where(figure, table, .wp-block-embed, .link-card, h2) + * {
+  margin-top: var(--spacing-2XL);
+}
+.prose :where(h3, h4, h5, h6) + * {
+  margin-top: var(--spacing-L);
+}
+
+/* Space BEFORE a heading — the section break.
+
+   Rhythm follows the TAG, not the rendered size: `downsize-1/2` changes heading
+   SIZE only (typography.css), never rhythm. An `<h2>` is the top-level section
+   heading whatever size it renders at, so it gets the same break either way.
+
+   DEFAULT — measured off live's NON-downsized article scale (verified against
+   openmined.org 2026-08-03: a true 47px h2 has margin-top 32 / margin-bottom 24;
+   a 36px h3 has 24 / 16). Take the values from a non-downsized post: on a
+   downsized one an h2 renders at h3 size and reports h3's 24, which reads as an
+   h2 value but isn't one. */
+.prose * + h2 { margin-top: var(--spacing-3XL); }               /* 32 */
+.prose * + h3 { margin-top: var(--spacing-2XL); }               /* 24 */
+.prose * + :is(h4, h5, h6) { margin-top: var(--spacing-L); }    /* 16 */
+
+/* Stacked headings tighten (live collapses these to 24). Must come after the
+   space-before rules — same specificity, so source order decides. */
+.prose :is(h2, h3, h4, h5, h6) + :is(h2, h3, h4, h5, h6) { margin-top: var(--spacing-2XL); }
+
+/* SPACIOUS — the opt-in scale, per post via `sectionSpacing: spacious` in
+   frontmatter (`content.config.ts` → blog collection → `sectionSpacing`;
+   applied by `BlogPost.astro`). For LONG reads, where the extra whitespace
+   separates sections visually. Editorial choice, not a property of the content.
+   `spacious` matches the site's spacing-preset vocabulary, where it already
+   means --spacing-full (`SimpleHero.padTop`) — the same value used here.
+
+   Only h2 changes: the preset is about breaking up MAJOR sections, and h3–h6
+   are sub-sections that would only add noise. Higher specificity (0,2,1) than
+   the default (0,1,1), so it also wins over the stacked-heading rule above —
+   an h2 following another heading still opens a full break.
+
+   88px is measured off live: authors of long posts hand-inserted 48px spacer
+   blocks above their h2s to reach exactly this gap, consistent across 118
+   spacer instances on 16 posts. The converter drops those spacers
+   (`export-blog.mjs` → spacer rule), so this is what reproduces their intent.
+   Generic to `.prose`, so any long-form surface can opt in, not just blog. */
+.prose.spacious-sections :not(.prose-divider) + h2 { margin-top: var(--spacing-full); }  /* 88 */
+
+/* ⬩⬩⬩ section divider — an authored break between passages, not a heading.
+   It owns EQUAL space on both sides so it reads as a standalone mark; without
+   this it inherits whatever follows, and a following h2 would open a much
+   larger gap below than above. That is why the `.spacious-sections` rule above
+   excludes it: at (0,3,1) it would otherwise outrank these.
+
+   3em at body size = 48px = --spacing-5XL. Declared as the TOKEN, not `3em`,
+   because `em` on the *following* element resolves against that element's own
+   font-size — `3em` before an h2 would be 3 × 47px ≈ 141px, not 48.
+
+   Live composes the same effect from a spacer block plus the paragraph margin,
+   but authors it per instance, so it measures anywhere from 32 to 96. 48 is the
+   deliberate single value. */
+.prose * + .prose-divider,
+.prose .prose-divider + * { margin-top: var(--spacing-5XL); }
+
+/* A rule is its own break — generous on both sides. */
+.prose * + hr { margin-top: var(--spacing-3XL); }
+.prose :where(hr) + * { margin-top: var(--spacing-3XL); }
+
+/* Never leak a gap past the region's own edges. */
+.prose > :first-child { margin-top: 0; }
+
+/* List markers and item rhythm are site-wide now — see "Content lists" above. */
+
+/* Item rhythm is owned by `.prose li + li` in the flow-rhythm block above. */
+
+/* Co-located body images are authored as markdown `![]()` (so the image service
+   optimizes them); inside a `<figure>` CommonMark wraps that lone image in a
+   `<p>`. Neutralize the wrapper so `<figure><p><img></p><figcaption>` renders
+   with the same tight image↔caption rhythm as live's `<figure><img><figcaption>`
+   — no paragraph margin, no inline-baseline gap under the image. (Top-level
+   `<p><img></p>` outside a figure keeps normal paragraph rhythm.) */
+.prose figure > p { margin: 0; line-height: 0; }
+
+/* No framing outline — the rounded corner is the whole treatment. (Live puts a
+   grayscale-400 hairline around body images; dropped deliberately.) */
+.prose img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--border-radius-M);  /* medium */
+}
+
+/* Service badges (e.g. the "Open in Colab" SVG) are fixed-size chips, not
+   full-width figures — override the `.prose img` stretch and squared off. */
+.prose img[src*="colab-badge"] {
+  width: 120px;
+  border-radius: 0;
+}
+
+.prose figcaption {
+  /* font-size: 14px via the .text-small group above. */
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--text-subtle); /* #868394 */
+  padding-block: 10px;
+}
+
+/* Horizontal rule (from wp-block-separator, 27 posts) — quiet hairline.
+   Its surrounding space is owned by the flow-rhythm block above. */
+.prose hr {
+  border: none;
+  border-top: var(--border-subtle);
+}
+
+/* Data tables (bare markdown tables, ~6 posts) — clean rows on subtle dividers.
+   Distinct from the ComparisonTable element (class-based); this styles authored
+   bare <table> only. On mobile the table scrolls rather than overflowing the page. */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.prose th,
+.prose td {
+  text-align: left;
+  padding: var(--spacing-M) var(--spacing-L);
+  border-bottom: var(--border-subtle);
+  vertical-align: top;
+}
+.prose th {
+  font-weight: 600;
+  color: var(--text-headline);
+}
+@media (max-width: 767px) {
+  .prose table { display: block; overflow-x: auto; }
+}
+
+/* Embedded media — WP oEmbed video, self-hosted <video>, passed-through iframes.
+   YouTube/Vimeo embeds arrive as figure.wp-block-embed.wp-embed-aspect-16-9 with
+   an inner .wp-block-embed__wrapper; the padding-top hack makes them fluidly 16:9.
+   Other iframes (newsletter/substack, etc.) keep their own height — capped to the
+   column width. The converter carries this markup through verbatim (~9 posts). */
+.prose .wp-embed-aspect-16-9 .wp-block-embed__wrapper {
+  position: relative;
+  padding-top: 56.25%; /* 16:9 */
+}
+.prose .wp-embed-aspect-16-9 .wp-block-embed__wrapper iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: var(--border-radius-S);
+}
+.prose iframe { max-width: 100%; }
+/* Video in prose is figure-like media — treated exactly like `.prose img`, which
+   means the rounded corner and no framing outline. GIF-replacement <video> are
+   bare tags, matching the bare-<img> they succeed. Keep the two in step: if one
+   gains a treatment, so should the other. */
+.prose video {
+  width: 100%;
+  height: auto;
+  border-radius: var(--border-radius-M);
+}
+
+/* Code blocks: long lines scroll rather than widen the reading column. */
+.prose pre { overflow-x: auto; }
+
+
+/* Link card in prose — migrated Ghost bookmark cards (see export-blog.mjs).
+   Mirrors the @ui/@elements LinkCard (scoped styles can't reach raw prose
+   markup), dim surface variant. Whole-card link: bold title + muted subtitle
+   with a low-opacity trailing arrow that slides on hover. */
+.prose .link-card {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: var(--spacing-L);
+  padding: var(--spacing-3XL);
+  border-radius: var(--border-radius-S);
+  color: var(--text-body);
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+.prose .link-card--dim { background-color: var(--surface-background-dim); }
+.prose .link-card__content { display: flex; flex-direction: column; }
+.prose .link-card__title { font-size: 16px; font-weight: 700; color: var(--text-headline); }
+.prose .link-card__subtitle { color: var(--text-body); }
+.prose .link-card__arrow {
+  flex-shrink: 0;
+  align-self: center;
+  opacity: 0.3;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.prose .link-card:hover .link-card__arrow { opacity: 1; transform: translateX(4px); }
+@media (prefers-reduced-motion: reduce) {
+  .prose .link-card,
+  .prose .link-card__arrow { transition: none; }
+  .prose .link-card:hover .link-card__arrow { transform: none; }
+}
+
+
+/* ── Article breakout grid (`.prose-article`) ─────────────────────────
+   The article-body *layout* layer. Compose it with `.prose` on a genuine
+   long-form body (blog post, whitepaper, letter) whose children are
+   block-level elements: `<article class="prose prose-article">`. `.prose`
+   alone is type-only; this adds the named-column grid with three zones.
+   Authored content defaults to the narrow `content` reading column; elements
+   opt into a wider zone with a breakout class (carried verbatim from WP, or
+   the new aliases).
+
+      |<--------------------- full ---------------------->|  (= --container-full, 1300px)
+          |<------------- wide ------------->|                (= col-8, 860px)
+          |    |<--- content (col-6, 640) -->|   |
+
+   Caps itself at col-8 and centres, so the reading column sits at col-6 and
+   breakout figures fill col-8 — matching the live `article-single__content`
+   (860px container, 640–680px reading column, figures broken out to the
+   container edge). (When a TOC sidebar owns the width — future BlogPost layout —
+   override `max-width: none` on `.prose-article` inside that grid.)
+
+   It owns NO horizontal padding: the page gutter belongs to the shell around it
+   (`.container`, a section, `.post-layout`), exactly like every other block on
+   the site. It used to add its own, which silently stacked with the shell's —
+   on a post that made THREE gutters (`.post` container + `.post-layout` +
+   this), so at 390px the body read 278px against live's 350, and the `wide`
+   zone lost 80px at desktop. A layout class that adds a page gutter cannot know
+   whether one is already there, so it must not have an opinion. Consumers that
+   are their own shell compose `.container` for the gutter (see
+   `attribution-based-control.astro`).
+
+   Because every child is a real block element placed into `content`, bare text
+   can never land in a gutter track — the reason the grid must not live on
+   `.prose` itself (which is applied to leaf-text regions too).
+
+   `wide` and `full` coincide here (both span the container) because nothing on
+   these pages exceeds col-8; the distinct class names are preserved for when a
+   future surface needs a genuinely page-bleed `full` zone. */
+.prose-article {
+  display: grid;
+  grid-template-columns:
+    [full-start wide-start] minmax(0, 1fr)
+    [content-start] min(var(--col-6), 100%)
+    [content-end] minmax(0, 1fr)
+    [wide-end full-end];
+  max-width: var(--col-8); /* 860 — the live article shell; figures fill it */
+  margin-inline: auto;
+}
+
+/* Default: every authored child sits in the reading column */
+.prose-article > * { grid-column: content; }
+
+/* Breakout → wide zone (col-8). WP editor style variant + new MDX alias. */
+.prose-article > .is-style-wide-style,
+.prose-article > .breakout { grid-column: wide; }
+
+/* Full breakout → out of the article shell entirely, to the page container
+   width (live measures these at exactly 1300px = --container-full, the same cap
+   every other band on the site uses; live implements it as `width: 1300px` plus
+   a negative margin).
+
+   The grid track alone cannot do this: `full` is bounded by `.prose-article`'s
+   own max-width, so it can never be wider than the article shell. Instead the
+   item is sized directly and centred, overflowing its track symmetrically —
+   `justify-self: center` keeps the overflow even on both sides.
+
+   `min(…, 100vw - gutters)` keeps it inside the viewport on narrower screens, so
+   it degrades to a normal full-bleed-with-gutter rather than causing sideways
+   scroll. `article.post` carries `overflow-x: clip` as the backstop (same
+   pattern as `.content-section--banded`). */
+.prose-article > .is-style-full-width-style,
+.prose-article > .breakout--full {
+  grid-column: full;
+  width: min(var(--container-full), 100vw - 2 * var(--spacing-XL));
+  max-width: none;
+  justify-self: center;
+}
+
+/* A breakout figure's media + caption fill the wider zone (no inner re-centre). */
+.prose-article > .is-style-wide-style,
+.prose-article > .breakout,
+.prose-article > .is-style-full-width-style,
+.prose-article > .breakout--full { margin-inline: 0; }

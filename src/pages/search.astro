@@ -1,0 +1,507 @@
+---
+/**
+ * /search/ — site-wide search results.
+ *
+ * Rebuild of live's WordPress search surface (`openmined.org/?s=term`, probed
+ * 2026-07-29). Live runs Relevanssi behind a Bricks query loop; we run the same
+ * Pagefind index that already powers blog search, queried unscoped.
+ *
+ * What live does, and what we reproduce:
+ *   - h1 `Search Results: <term>`, 21px, above an --col-8 (860px) column —
+ *     live measures exactly 860px, so the token is not an approximation.
+ *   - Pages first, then posts. Reproduced by querying the two `type:` filter
+ *     values separately and concatenating, so each half keeps its own relevance
+ *     ranking and no cross-set score comparison is needed. The filter is emitted
+ *     by `@layouts/Page.astro → searchKind`.
+ *   - One row per hit: a 300px square tile, then meta / title / excerpt with the
+ *     matched term emphasised / "Read More ->". Whole row clickable.
+ *   - 10 rows, then scroll-load.
+ *
+ * Where we deliberately differ:
+ *   - **Empty states.** Live renders nothing at all for a no-match query — just
+ *     the bare heading over an empty list. We say so.
+ *   - **noindex + out of the sitemap.** Live noindexes its results page too;
+ *     ours must say so explicitly because the site-wide `noindex` default flips
+ *     to false at launch (see Base.astro) and would otherwise make this route
+ *     indexable at cutover. Sitemap exclusion is in astro.config.mjs.
+ *   - **No `paged=N` pagination.** Live supports it but never links it; the
+ *     scroll-load below replaces it.
+ *   - **No ~150-result ceiling.** Live caps there and BlogToolbar caps at 250,
+ *     both to bound an EAGER fetch of every hit's fragment. We call `.data()`
+ *     only for the chunk being rendered, so the whole result set is reachable at
+ *     a cost of ten small requests per chunk.
+ *
+ * The row is a <template> cloned per result rather than markup assembled from
+ * strings in the script — same reason as `BlogToolbar.astro →
+ * [data-results-template]`: it keeps the markup (and its scoped styles) in Astro.
+ *
+ * ⚠ Under `astro dev` there is no Pagefind index — it is built by the `index`
+ * postbuild step (`package.json`), so results only work in a real build
+ * (`npm run build && npm run preview`). The controller says so on screen rather
+ * than failing silently.
+ */
+import Page from '@layouts/Page.astro';
+---
+
+<Page title="Search" description="Search openmined.org." noindex={true} searchable={false}>
+  <section class="search-page">
+    <div class="container search-page__col">
+      {/* Live composes the heading from a static prefix span + the term. Sized
+          through --h1-max, never `font-size` — a direct font-size would strip the
+          automatic mobile scaling (the custom-heading-sizes rule in AGENTS.md). */}
+      <h1 class="search-page__title">
+        <span class="search-page__prefix">Search Results: </span><span data-search-term></span>
+      </h1>
+
+      <div class="search-page__results" data-search-results></div>
+
+      {/* Zero-height scroll trigger — same shape and 600px prefetch margin as
+          `BlogPagination.astro → .blog-pagination__sentinel`, so filling this
+          list feels identical to filling the blog grid. The button is the manual
+          affordance and the whole path where IntersectionObserver is missing. */}
+      <div class="search-page__foot" data-search-foot hidden>
+        <div class="search-page__sentinel" data-search-sentinel aria-hidden="true"></div>
+        <button type="button" class="search-page__more" data-search-more hidden>Load more results</button>
+      </div>
+
+      <p class="search-page__note" data-search-note role="status" aria-live="polite"></p>
+    </div>
+  </section>
+
+  {/* One result row, cloned per hit. */}
+  <template data-search-row>
+    {/* `hover-group` + `link-hover-line` (global.css) are the shared pair that makes
+        the "Read More" underline answer to the WHOLE row's hover, not the link's
+        own — the row is one click target, so a self-hover trigger reads as dead.
+        The pair also covers keyboard focus via :focus-within. */}
+    <article class="search-result hover-group">
+      <a class="search-result__link" data-row-link aria-hidden="true" tabindex="-1"></a>
+      <div class="search-result__tile" data-row-tile></div>
+      <div class="search-result__body">
+        {/* The two cells are STATIC markup, not built in the script, because the
+            diamond separator is a scoped `li + li::before` rule — and Astro scopes
+            by stamping `data-astro-cid-…` on every element in the selector. A
+            `document.createElement('li')` carries no such attribute, so the rule
+            silently can't match it and the separator never appears. Anything the
+            scoped CSS has to style must exist in this template.
+            Cell A is the date (or "Page"); cell B is the category, hidden when the
+            row has none — a hidden cell is display:none, so it takes its own
+            separator with it. */}
+        <ul class="search-result__meta">
+          <li data-row-meta-a></li>
+          <li data-row-meta-b hidden></li>
+        </ul>
+        <h4 class="search-result__title">
+          {/* The class matters: `global.css → :is(.prose, p, h1…h6) a:not([class])`
+              paints the content-link underline on any CLASSLESS anchor inside a
+              heading. The `:not([class])` guard is the intended opt-out, so naming
+              the link is the fix — `text-decoration: none` can't help, because that
+              underline is a background-image gradient, not text-decoration. */}
+          <a class="search-result__title-link" data-row-title-link></a>
+        </h4>
+        <p class="search-result__excerpt" data-row-excerpt></p>
+        <span class="search-result__more link-hover-line">Read More -&gt;</span>
+      </div>
+    </article>
+  </template>
+</Page>
+
+<style>
+  /* Live's results column measures 860px — exactly --col-8. */
+  .search-page__col {
+    max-width: var(--col-8);
+    margin-inline: auto;
+    padding-block: var(--spacing-5XL) var(--spacing-max);
+  }
+
+  .search-page__title {
+    /* Live's results heading is a 21px Inter label, not a display heading — so
+       this h1 is sized down to the h5 step.
+       ⚠ BOTH ends have to move. The heading scale is
+       `clamp(--hN-min, <rate>vw, --hN-max)`, and --h1-min is 36px: setting only
+       --h1-max: 21px leaves min > max, which makes clamp() return the MIN and
+       renders a 36px heading. Overriding --hN-max alone is only safe while the
+       new max still clears the floor. Borrowing the h5 pair keeps a real mobile
+       step instead of pinning a flat size. */
+    --h1-min: var(--h5-min);
+    --h1-max: var(--h5-max);
+    /* h1 defaults to --font-secondary (Rubik); live sets this one in Inter, which
+       is right for a small label — and matches what h5/h6 already use. */
+    font-family: var(--font-primary);
+    margin: 0 0 var(--spacing-4XL);
+  }
+  /* Live wraps the static half in its own span; kept so the term could be
+     weighted differently later without touching the controller. */
+  .search-page__prefix { color: inherit; }
+
+  .search-page__results {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4XL); /* live 40px */
+  }
+
+  .search-page__foot { margin-top: var(--spacing-4XL); }
+  .search-page__sentinel {
+    width: 100%;
+    height: 1px;
+  }
+  .search-page__more {
+    /* Matches the outline Button primitive's shape without pulling the component
+       in — this control only ever exists once, created by the controller. */
+    min-height: 48px;
+    padding: var(--spacing-M) var(--spacing-2XL);
+    color: var(--text-headline);
+    background: none;
+    border: var(--border-medium);
+    border-radius: var(--border-radius-S);
+    font-weight: 500;
+    cursor: pointer;
+    transition: color var(--transition-base), border-color var(--transition-base);
+  }
+  .search-page__more:hover {
+    color: var(--color-interactive-hover);
+    border-color: var(--color-interactive-hover);
+  }
+
+  .search-page__note {
+    margin-top: var(--spacing-2XL);
+    color: var(--text-body);
+  }
+  .search-page__note:empty { display: none; }
+
+  /* ── One result row ───────────────────────────────────────────────────
+     Live: flex row, 24px gap, a 300px square tile then the text column. */
+  .search-result {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2XL);
+  }
+
+  /* Full-row click target. --z-card is the token for exactly this ("full-cover
+     card links"). It's aria-hidden with tabindex -1 because the title anchor
+     below is the real, focusable link — otherwise every row is two tab stops to
+     the same URL. */
+  .search-result__link {
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-card);
+  }
+
+  .search-result__tile {
+    flex: none;
+    width: 300px;
+    height: 300px;
+    border-radius: var(--border-radius-S);
+    background-color: var(--cover-placeholder, var(--surface-background-dim));
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+  /* Cover-less PAGES: live's tile is the gradient iconmark centered on a near-black
+     field — sampled #17161c, which is --color-grayscale-950 (#17161d), with the
+     mark at 48.5% of the square. Rebuilt from the logo SVG we already own rather
+     than localising live's raster, so it stays crisp at any size.
+     NOTE cover-less blog POSTS keep the gradient-mesh default-thumbnail instead
+     (set by the controller) — live has two distinct fallbacks, not one. */
+  .search-result__tile--mark {
+    background-color: var(--color-grayscale-950);
+    background-image: url('/logos/OpenMined-Icon.svg');
+    background-size: 50%;
+  }
+
+  .search-result__body {
+    /* min-width:0 lets the text column shrink instead of forcing the row wider
+       than its container once a long unbroken excerpt lands in it. */
+    min-width: 0;
+  }
+
+  /* Live: 12px/500, 16px gap, diamond separators — the same meta treatment the
+     blog cards use, so reuse its glyph and rhythm (PostCard.astro → __meta). */
+  .search-result__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 0 0 var(--spacing-S);
+    padding: 0;
+    list-style: none;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-body);
+  }
+  .search-result__meta li { display: inline-flex; align-items: center; }
+  .search-result__meta li + li::before {
+    content: '◆';
+    font-size: 7px;
+    padding-inline: var(--spacing-S);
+    opacity: 0.7;
+  }
+
+  .search-result__title {
+    /* 27px is the default --h4-max, so no override is needed — live's title size
+       and our h4 ceiling already agree. */
+    margin: 0 0 var(--spacing-S);
+  }
+  /* Deliberately NOT lifted above the row overlay. Both point at the same URL, so
+     letting the overlay take the pointer keeps one hit target, and the link stays
+     keyboard-focusable and activatable regardless of what paints over it.
+     The title carries no underline at any time — the "Read More" line below is the
+     row's single hover affordance. */
+  .search-result__title-link {
+    color: var(--text-headline);
+    text-decoration: none;
+  }
+
+  .search-result__excerpt {
+    margin: 0 0 var(--spacing-L);
+    color: var(--text-body);
+  }
+  /* Pagefind wraps matched terms in <mark>. Live emphasises with <strong> — no
+     highlight fill — so render the same way rather than a coloured marker. */
+  .search-result__excerpt :global(mark) {
+    background: none;
+    color: var(--text-headline);
+    font-weight: 500;
+  }
+
+  /* The row's only hover affordance is the underline under "Read More", and the
+     whole apparatus is the shared `.link-hover-line` + `.hover-group` utility pair
+     in global.css — see the markup. Only the two things that differ from the
+     utility's defaults are set here: it rests at --text-body, and this one is a
+     headline-weight cue at the foot of a result.
+     (Deliberately NOT `.animated-in-out`: that triggers on its own :hover and
+     finishes on `underlineInGreen` — the green is exactly what was removed here.) */
+  .search-result__more {
+    color: var(--text-headline);
+    font-weight: 500;
+  }
+
+  @media (max-width: 767px) {
+    /* The 300px tile plus a text column doesn't fit 390px — stack, and let the
+       tile run the column width at its square ratio. */
+    .search-result {
+      flex-direction: column;
+      align-items: stretch;
+      gap: var(--spacing-L);
+    }
+    .search-result__tile {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1 / 1;
+    }
+    .search-page__col { padding-block: var(--spacing-3XL) var(--spacing-5XL); }
+  }
+</style>
+
+<script>
+  /**
+   * Results controller.
+   *
+   * Pages first then posts, each half relevance-ranked, rendered ten at a time
+   * with scroll-load. `.data()` is called only for the chunk being painted — it
+   * is one fragment request per hit, so fetching all of a broad query's hits up
+   * front is what forces the caps live and BlogToolbar both carry.
+   */
+  const CHUNK = 10; // live's own page size
+
+  const termEl = document.querySelector<HTMLElement>('[data-search-term]');
+  const list = document.querySelector<HTMLElement>('[data-search-results]');
+  const foot = document.querySelector<HTMLElement>('[data-search-foot]');
+  const moreBtn = document.querySelector<HTMLButtonElement>('[data-search-more]');
+  const note = document.querySelector<HTMLElement>('[data-search-note]');
+  const template = document.querySelector<HTMLTemplateElement>('[data-search-row]');
+
+  if (termEl && list && foot && moreBtn && note && template) {
+    // `q` is ours; `s` is the WordPress parameter name every OpenMined search
+    // link has ever used, so accept either shape.
+    const params = new URLSearchParams(location.search);
+    const query = (params.get('q') ?? params.get('s') ?? '').trim();
+
+    termEl.textContent = query;
+    if (query) {
+      // A static page can't bake the term into <title>; match live's shape once
+      // the query is known ("You searched for federated learning — OpenMined").
+      document.title = `You searched for ${query} — OpenMined`;
+    }
+
+    /** Ranked hits, pages before posts. Not yet resolved to data(). */
+    let hits: any[] = [];
+    let shown = 0; // hits consumed from `hits`
+    let painted = 0; // rows actually rendered (see the highlight check in showMore)
+
+    const setNote = (text: string) => { note.textContent = text; };
+
+    const norm = (s: string) => s.replace(/\s+/g, ' ').trim();
+
+    /**
+     * Mark a fragment excerpt as cut, with a leading and/or trailing ellipsis.
+     *
+     * `excerpt` carries Pagefind's <mark> tags, so the comparison runs on a
+     * tag-stripped copy while the returned HTML keeps them. When `content` is
+     * missing or doesn't contain the excerpt verbatim we ellipsise BOTH ends — the
+     * excerpt is a fragment far more often than not, so that's the safer default.
+     */
+    function withEllipses(excerpt?: string, content?: string): string {
+      const raw = (excerpt ?? '').trim();
+      if (!raw) return '';
+      const plain = norm(raw.replace(/<[^>]*>/g, ''));
+      const full = norm(content ?? '');
+      const atStart = !!plain && full.startsWith(plain);
+      const atEnd = !!plain && full.endsWith(plain);
+      // Don't double up where Pagefind already ended the excerpt with an ellipsis.
+      const hasTrailing = /(…|\.\.\.)$/.test(plain);
+      return (atStart ? '' : '…') + raw + (atEnd || hasTrailing ? '' : '…');
+    }
+
+    async function getPagefind() {
+      // Built by the postbuild indexer, so this only resolves in a real build —
+      // `astro dev` always lands in the catch.
+      const pf = await import(/* @vite-ignore */ `${location.origin}/pagefind/pagefind.js`);
+      await pf.init();
+      return pf;
+    }
+
+    /** Render the next CHUNK of hits, resolving only those hits' fragments. */
+    async function showMore() {
+      const batch = hits.slice(shown, shown + CHUNK);
+      if (!batch.length) return;
+      shown += batch.length;
+
+      const resolved = await Promise.all(batch.map((h) => h.data().catch(() => null)));
+      const frag = document.createDocumentFragment();
+
+      for (const d of resolved) {
+        if (!d) continue;
+        // Drop hits Pagefind matched only FUZZILY. It falls back to approximate
+        // matching when a term isn't in the index, so a nonsense query still
+        // returns a page or two — "zzzzqqqxx" came back with a real article. The
+        // giveaway is that Pagefind highlights nothing in the excerpt, because
+        // there was no literal hit to highlight. Cheaper and steadier than a score
+        // threshold (scores aren't normalised across queries), and it's what makes
+        // the no-results state reachable at all — live returns 0 here.
+        if (!(d.excerpt ?? '').includes('<mark')) continue;
+        const row = template!.content.firstElementChild!.cloneNode(true) as HTMLElement;
+        const meta = d.meta ?? {};
+        const title = meta.title || d.url;
+
+        row.querySelector<HTMLAnchorElement>('[data-row-link]')!.href = d.url;
+        const titleLink = row.querySelector<HTMLAnchorElement>('[data-row-title-link]')!;
+        titleLink.href = d.url;
+        titleLink.textContent = title;
+
+        // Pagefind's excerpt already carries <mark> around the matched terms, and
+        // is index-generated (not user input), so set:html's equivalent is safe.
+        //
+        // It is also a mid-document FRAGMENT, so it gets a leading/trailing ellipsis
+        // to show it's been cut — live does the same. Which end needs one is decided
+        // by comparing the excerpt against the page's full indexed text (`content`,
+        // already in this same payload — no extra request): an excerpt that starts
+        // the content needs no leading ellipsis, one that ends it needs no trailing.
+        row.querySelector<HTMLElement>('[data-row-excerpt]')!.innerHTML = withEllipses(d.excerpt, d.content);
+
+        // Meta is the type discriminator, exactly as live uses it: a page reads
+        // "Page"; a post reads its date ◆ category. The two cells already exist in
+        // the template (see the note there) — fill them, don't create them.
+        const isPost = (d.filters?.type ?? []).includes('post');
+        const cells: string[] = [];
+        if (isPost) {
+          if (meta.date) {
+            const dt = new Date(meta.date);
+            if (!isNaN(dt.getTime())) {
+              cells.push(dt.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
+            }
+          }
+          if (meta.category) cells.push(meta.category);
+        } else {
+          cells.push('Page');
+        }
+        const cellA = row.querySelector<HTMLElement>('[data-row-meta-a]')!;
+        const cellB = row.querySelector<HTMLElement>('[data-row-meta-b]')!;
+        cellA.textContent = cells[0] ?? '';
+        cellA.hidden = !cells[0];
+        cellB.textContent = cells[1] ?? '';
+        cellB.hidden = !cells[1];
+
+        // Tile. Live has TWO distinct fallbacks and they must not be collapsed: a
+        // cover-less POST gets the gradient mesh, a cover-less PAGE gets the
+        // iconmark on near-black. No page in this build declares a cover, so every
+        // page row lands on the iconmark today; the `thumb` check keeps the seam
+        // open for the day one does.
+        //
+        // Only `meta.thumb` is consulted, never `meta.image` — Pagefind fills the
+        // latter in automatically from the first <img> on the page, which on our
+        // pages is a partner logo or a diagram, not a cover.
+        const tile = row.querySelector<HTMLElement>('[data-row-tile]')!;
+        if (meta.thumb) {
+          tile.style.backgroundImage = `url('${meta.thumb}')`;
+        } else if (isPost) {
+          tile.style.backgroundImage = "url('/blog/default-thumbnail.png')";
+        } else {
+          tile.classList.add('search-result__tile--mark');
+        }
+
+        frag.appendChild(row);
+        painted++;
+      }
+
+      list!.appendChild(frag);
+      const drained = shown >= hits.length;
+      moreBtn!.hidden = drained;
+      foot!.hidden = drained;
+      // Every hit was a fuzzy near-miss, so there is genuinely nothing to show.
+      // Checked here rather than once in run() because the fuzzy hits can be
+      // spread across chunks, so the verdict isn't final until the list drains.
+      if (drained && painted === 0) setNote(`No results for “${query}”.`);
+    }
+
+    async function run() {
+      if (!query) {
+        setNote('Enter a search term to get started.');
+        return;
+      }
+
+      setNote('Searching…');
+
+      let pf;
+      try {
+        pf = await getPagefind();
+      } catch {
+        setNote('Search is unavailable on this build. (The index is generated by `npm run build`.)');
+        return;
+      }
+
+      try {
+        // Two filtered queries, concatenated — pages first, then posts. This IS
+        // live's ordering, and it avoids comparing relevance scores across two
+        // very differently-shaped content sets.
+        const [pages, posts] = await Promise.all([
+          pf.search(query, { filters: { type: 'page' } }),
+          pf.search(query, { filters: { type: 'post' } }),
+        ]);
+        hits = [...pages.results, ...posts.results];
+      } catch {
+        setNote('Something went wrong running that search. Please try again.');
+        return;
+      }
+
+      if (!hits.length) {
+        setNote(`No results for “${query}”.`);
+        return;
+      }
+
+      setNote('');
+      await showMore();
+
+      if ('IntersectionObserver' in window) {
+        const sentinel = document.querySelector<HTMLElement>('[data-search-sentinel]')!;
+        new IntersectionObserver(
+          (entries) => { if (entries.some((e) => e.isIntersecting)) showMore(); },
+          { rootMargin: '600px 0px' },
+        ).observe(sentinel);
+      }
+    }
+
+    moreBtn.addEventListener('click', showMore);
+    run();
+  }
+</script>

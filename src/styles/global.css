@@ -1,0 +1,29 @@
+/* ══════════════════════════════════════════════════════════════════
+   GLOBAL.CSS — the barrel.
+
+   Global CSS is split into concept files under `global/`; this file only
+   imports them. Vite inlines the imports at build time, so the site still
+   ships one stylesheet — the split costs nothing at runtime.
+
+   IMPORT ORDER IS THE CASCADE. Equal-specificity rules are resolved by
+   source order, and source order here is the order below. Two points are
+   load-bearing:
+
+     • hubspot-form BEFORE prose — `.hs-form-embed { margin-block }` and
+       `.prose > * + * { margin-top }` are both specificity (0,1,0), so
+       source order alone sets the top margin of a form embedded in a post
+       body (16px as ordered here; 24px if prose came first).
+     • typography LAST — it was imported after global.css in Base.astro,
+       so it wins ties against everything above it. Keep it there.
+
+   Add a new file deliberately, and don't sort this list.
+   ══════════════════════════════════════════════════════════════════ */
+
+@import './global/base.css';           /* reset, bare-element defaults, page plumbing */
+@import './global/theming.css';        /* data-section color modes, logo swap */
+@import './global/layout.css';         /* containers, grid, dividers, text widths */
+@import './global/components.css';     /* shared class skins: cards, links, tabs */
+@import './global/hubspot-form.css';   /* vendor form skin (before prose — see above) */
+@import './global/prose.css';          /* .prose scope + .prose-article grid */
+@import './global/blog.css';           /* blog listing chrome */
+@import './global/typography.css';     /* base type scale + prose type sizes (last) */

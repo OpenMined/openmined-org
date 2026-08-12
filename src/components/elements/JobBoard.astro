@@ -1,0 +1,239 @@
+---
+/**
+ * JobBoard — the careers "Open Positions" listing.
+ *
+ * Rendered CLIENT-SIDE from Workable's public widget API so new/closed roles
+ * appear with no site rebuild — mirroring the live WordPress widget's dynamic
+ * behavior (decision confirmed with the team).
+ *
+ *   endpoint  apply.workable.com/api/v1/widget/accounts/openmined?details=true
+ *             (CORS: access-control-allow-origin: *, so browser-fetchable; the
+ *             cleaner v3 /jobs endpoint is CORS-locked to workable.com.)
+ *   shape     one row per job × location → dedupe by `shortcode`.
+ *   fields    title, shortcode, url, telecommuting (→ "Remote").
+ *
+ * Two live-specific display rules the API does NOT carry, replicated here:
+ *   - Every role shows a static "ET ± 1hr" timezone label (not in the payload).
+ *   - The general-application role (API title "Future Opportunities") is
+ *     renamed "General Interest" and shown last with the subtitle
+ *     "Don't see the right position?" and no timezone label.
+ *
+ * States: loading → list | empty | error (error falls back to a link to the
+ * Workable board). Give the surrounding section this element's `id` anchor
+ * target (#open-positions) so the hero "View open positions" button scrolls here.
+ */
+const ACCOUNT = 'openmined';
+const API = `https://apply.workable.com/api/v1/widget/accounts/${ACCOUNT}?details=true`;
+const BOARD_URL = `https://apply.workable.com/${ACCOUNT}/`;
+---
+
+<div
+  class="job-board"
+  id="open-positions"
+  data-job-board
+  data-api={API}
+  data-account={ACCOUNT}
+  data-board-url={BOARD_URL}
+>
+  <p class="job-board__status" data-jb-status aria-live="polite">Loading open positions…</p>
+  <ul class="job-board__list" data-jb-list hidden></ul>
+</div>
+
+<!-- is:global — the rows are created in JS (createElement), so they never carry
+     Astro's scoped-style attribute; scoped rules wouldn't reach them. The
+     .job-board__* prefix keeps this namespaced. -->
+<style is:global>
+  .job-board__status {
+    margin: 0;
+    padding-block: var(--spacing-XL);
+    color: var(--text-subtle);
+  }
+  .job-board__status a { color: var(--text-body); }
+
+  .job-board__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .job-board__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-XL);
+    padding-block: var(--spacing-2XL);
+    border-top: var(--border-subtle);
+  }
+  .job-board__row:last-child { border-bottom: var(--border-subtle); }
+
+  .job-board__main {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: var(--spacing-2XS) var(--spacing-M);
+    min-width: 0;
+  }
+  .job-board__title {
+    font-weight: 700;
+    color: var(--text-headline);
+    text-decoration: none;
+  }
+  .job-board__title:hover { text-decoration: underline; }
+  .job-board__meta { color: var(--text-subtle); }
+
+  .job-board__aside {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2XL);
+    flex-shrink: 0;
+  }
+  .job-board__tz { color: var(--text-subtle); white-space: nowrap; }
+
+  .job-board__apply {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2XS);
+    font-weight: 700;
+    color: var(--text-headline);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .job-board__apply span {
+    display: inline-block;
+    transition: transform var(--transition-base);
+  }
+  .job-board__apply:hover span { transform: translateX(4px); }
+
+  @media (max-width: 767px) {
+    .job-board__row { flex-direction: column; align-items: flex-start; gap: var(--spacing-M); }
+    .job-board__aside { width: 100%; justify-content: space-between; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .job-board__apply span { transition: none; }
+    .job-board__apply:hover span { transform: none; }
+  }
+</style>
+
+<script>
+  (async () => {
+    const root = document.querySelector<HTMLElement>('[data-job-board]');
+    if (!root) return;
+    const statusEl = root.querySelector<HTMLElement>('[data-jb-status]')!;
+    const listEl = root.querySelector<HTMLUListElement>('[data-jb-list]')!;
+    const api = root.dataset.api!;
+    const account = root.dataset.account!;
+    const boardUrl = root.dataset.boardUrl!;
+
+    const GENERAL_TITLE = 'Future Opportunities';
+    const TZ_LABEL = 'ET ± 1hr'; // static on live; not in the API payload
+
+    const jobUrl = (shortcode: string) =>
+      `https://apply.workable.com/${account}/j/${shortcode}/`;
+
+    const fail = () => {
+      statusEl.innerHTML =
+        `We couldn’t load our open positions right now. ` +
+        `<a href="${boardUrl}" target="_blank" rel="noopener noreferrer">View them on Workable -></a>`;
+      statusEl.hidden = false;
+      listEl.hidden = true;
+    };
+
+    type Job = { title: string; shortcode: string; telecommuting?: boolean };
+
+    let jobs: Job[];
+    try {
+      const res = await fetch(api);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      jobs = Array.isArray(data?.jobs) ? data.jobs : [];
+    } catch {
+      fail();
+      return;
+    }
+
+    // Dedupe by shortcode (the widget returns one row per job × location).
+    const seen = new Set<string>();
+    const unique = jobs.filter((j) => {
+      if (!j?.shortcode || seen.has(j.shortcode)) return false;
+      seen.add(j.shortcode);
+      return true;
+    });
+
+    // Real roles first (in API order), general-interest application last.
+    const roles = unique.filter((j) => j.title !== GENERAL_TITLE);
+    const general = unique.find((j) => j.title === GENERAL_TITLE);
+
+    if (!roles.length && !general) {
+      statusEl.textContent = 'There are no open positions right now — check back soon.';
+      return;
+    }
+
+    const makeRow = (opts: {
+      title: string;
+      href: string;
+      meta: string;
+      tz: boolean;
+    }) => {
+      const li = document.createElement('li');
+      li.className = 'job-board__row';
+
+      const main = document.createElement('div');
+      main.className = 'job-board__main';
+      const title = document.createElement('a');
+      title.className = 'job-board__title';
+      title.href = opts.href;
+      title.target = '_blank';
+      title.rel = 'noopener noreferrer';
+      title.textContent = opts.title;
+      const meta = document.createElement('span');
+      meta.className = 'job-board__meta';
+      meta.textContent = opts.meta;
+      main.append(title, meta);
+
+      const aside = document.createElement('div');
+      aside.className = 'job-board__aside';
+      if (opts.tz) {
+        const tz = document.createElement('span');
+        tz.className = 'job-board__tz';
+        tz.textContent = TZ_LABEL;
+        aside.append(tz);
+      }
+      const apply = document.createElement('a');
+      apply.className = 'job-board__apply';
+      apply.href = opts.href;
+      apply.target = '_blank';
+      apply.rel = 'noopener noreferrer';
+      apply.innerHTML = 'Apply <span aria-hidden="true">-></span>';
+      aside.append(apply);
+
+      li.append(main, aside);
+      return li;
+    };
+
+    const frag = document.createDocumentFragment();
+    for (const j of roles) {
+      frag.append(
+        makeRow({
+          title: j.title,
+          href: jobUrl(j.shortcode),
+          meta: j.telecommuting ? 'Remote' : '',
+          tz: true,
+        }),
+      );
+    }
+    if (general) {
+      frag.append(
+        makeRow({
+          title: 'General Interest',
+          href: jobUrl(general.shortcode),
+          meta: 'Don’t see the right position?',
+          tz: false,
+        }),
+      );
+    }
+
+    listEl.append(frag);
+    listEl.hidden = false;
+    statusEl.hidden = true;
+  })();
+</script>

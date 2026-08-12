@@ -1,0 +1,98 @@
+---
+/**
+ * BlogPostCta — the end-of-post "Interested? 👀" newsletter band. Appears on
+ * every blog post (static content), so it takes no props.
+ *
+ * Rebuilt from live (#brxe-zabcqx on any /blog/* post): a container-width
+ * gradient band, text on the left, a light form card on the right. Reuses the
+ * home CTA's full-spectrum raster (`/images/cta-gradient-bg.png`).
+ *
+ * Live → token mapping:
+ *   band width        1300px (container)          → .container
+ *   band bg           full-spectrum raster        → cta-gradient-bg.png (as CtaSection)
+ *   columns           text | form-card            → grid 1fr / minmax(0,510px)
+ *   column gap        48px                        → --spacing-5XL
+ *   card bg           #F1F0F4                      → --surface-foreground-low (always-light)
+ *   card radius       16px                         → --border-radius-L
+ *   card padding      40px                         → --spacing-4XL
+ *   heading           h4, white                    → h4 default over always-dark
+ *
+ * Form is the live HubSpot embed (portalId 6487402, form
+ * 4e2f60da-df86-41dc-b08f-9e93e12d23fc) rendered via @elements/FormEmbed; the
+ * v2.js loader in Base.astro fills it and the `.hs-form` skin styles it. The
+ * always-light card keeps it legible in dark mode.
+ */
+import FormEmbed from '@elements/FormEmbed.astro';
+import Text from '@ui/Text.astro';
+---
+
+<section class="blog-cta" data-pagefind-ignore>
+  <div class="blog-cta__band">
+    <div class="blog-cta__text" data-section="always-dark">
+      <Text as="h4" class="blog-cta__heading">Interested? 👀</Text>
+      <Text as="p">Sign up to receive an email when new content like this is posted.</Text>
+      <Text as="p">Want to write for OpenMined or help update a post?</Text>
+      <Text as="p"><strong>Let us know!</strong></Text>
+    </div>
+
+    {/* No data-section: the card themes off --surface-foreground-low, matching live. */}
+    <div class="blog-cta__card">
+      <FormEmbed formId="4e2f60da-df86-41dc-b08f-9e93e12d23fc" />
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Aligned to the col-8 reading column (matches the meta foot + related band). */
+  .blog-cta {
+    max-width: var(--col-8);
+    margin-inline: auto;
+    padding-inline: var(--spacing-XL);
+    margin-block: var(--spacing-full);
+  }
+
+  .blog-cta__band {
+    display: grid;
+    grid-template-columns: 1fr minmax(0, 400px);
+    align-items: start;
+    gap: var(--spacing-4XL);
+    padding: var(--spacing-5XL) var(--spacing-4XL);
+    border-radius: var(--border-radius-L);
+    overflow: hidden; /* clip the gradient raster to the rounded corners */
+    background-image: url('/images/cta-gradient-bg.png');
+    background-position: center;
+    background-size: 100% 100%; /* stretch the raster to fill, as on live */
+    background-repeat: no-repeat;
+  }
+
+  /* Left text column — always-dark makes the copy read light over the gradient. */
+  .blog-cta__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-L);
+    color: var(--text-body);
+  }
+  /* .blog-cta__heading on <h4> — type from global h4 */
+  .blog-cta__heading { margin-bottom: var(--spacing-M); }
+  .blog-cta__text p { margin: 0; }
+
+  /* Right form card — always-light so the form stays legible even in dark mode.
+     The HubSpot embed inside is styled by the global `.hs-form` skin. */
+  .blog-cta__card {
+    background-color: var(--surface-foreground-low);
+    border-radius: var(--border-radius-S); /* smaller than the band; matches the form controls */
+    padding: var(--spacing-4XL); /* live: 40px */
+  }
+  /* Kill the embed's default vertical rhythm — the card padding owns spacing. */
+  .blog-cta__card :global(.hs-form-embed) { margin-block: 0; }
+
+  /* Stack the columns on tablet/mobile: text above the form card. */
+  @media (max-width: 991px) {
+    .blog-cta { padding-inline: var(--spacing-L); }
+    .blog-cta__band {
+      grid-template-columns: 1fr;
+      padding: var(--spacing-4XL) var(--spacing-XL);
+      gap: var(--spacing-3XL);
+    }
+  }
+</style>

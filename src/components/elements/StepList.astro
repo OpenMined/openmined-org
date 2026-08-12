@@ -1,0 +1,114 @@
+---
+/**
+ * StepList — a vertical list of numbered steps: a small high-contrast number
+ * badge beside a title + body. The reusable "process steps" list style; compose
+ * two side by side for a parallel-paths layout, or use one on its own.
+ *
+ * Rebuilt from live syfthub #brxe-e517b7 ("From Your Data to the Network",
+ * Get Queryable in 3 Steps / Query the Network). Reference:
+ * Measured off the live page.
+ *
+ * Live → token mapping:
+ *   step row       flex, badge + content, align start, gap 16px → --spacing-L ✓
+ *   step↔step gap  48px                                          → --spacing-5XL ✓
+ *   number badge   #fcfcfd on #272532, radius 2px, ~14px         → --surface-* on --text-headline,
+ *                                                                   --border-radius-XS (auto-themes)
+ *   badge pad      4.3 / 14.4px                                  → --spacing-2XS / --spacing-L
+ *   title          Inter 21/1.4                                  → global h5
+ *   title margin-b 16px                                          → --spacing-L ✓
+ *
+ * Numbering auto-increments from `start` (default 1). Titles render as the
+ * level given by `as` (default h5) to fit the surrounding outline.
+ */
+interface Step {
+  title: string;
+  body: string;
+}
+interface Props {
+  steps: Step[];
+  start?: number;
+  as?: 'h4' | 'h5' | 'h6';
+  /** Draw a vertical connecting line between step number badges. */
+  connector?: boolean;
+  /** Accent color for number badges. 'green' uses --color-green-600. */
+  accent?: 'green';
+}
+const { steps, start = 1, as = 'h5', connector = false, accent } = Astro.props;
+const TitleTag = as;
+---
+
+<ol
+  class:list={['step-list', { 'step-list--connector': connector, 'step-list--accent-green': accent === 'green' }]}
+  style={start !== 1 ? `--step-start:${start}` : undefined}
+>
+  {steps.map((step: Step, i: number) => (
+    <li class="step-list__item">
+      <span class="step-list__num" aria-hidden="true">{start + i}</span>
+      <div class="step-list__content">
+        <TitleTag class="step-list__title">{step.title}</TitleTag>
+        <p class="step-list__body">{step.body}</p>
+      </div>
+    </li>
+  ))}
+</ol>
+
+<style>
+  .step-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-5XL); /* live step↔step gap: 48px ✓ */
+  }
+  .step-list__item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-L); /* live: 16px ✓ */
+  }
+
+  /* small high-contrast number chip — dark on light, light on dark (semantic
+     tokens flip it with the theme) */
+  .step-list__num {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-2XS) var(--spacing-L); /* live: 4.3 / 14.4 */
+    border-radius: var(--border-radius-XS); /* live: 2px ✓ */
+    background-color: var(--text-headline);
+    color: var(--surface-background-bright);
+    font-size: 14px; /* badge glyph — between caption(11) and body(16), no token */
+    line-height: 1.5;
+  }
+
+  .step-list__title { margin: 0 0 var(--spacing-L); } /* live margin-b: 16px ✓ */
+  .step-list__body { margin: 0; }
+
+  /* ── Connector: vertical line between badge centers ──────── */
+  /* Live: div.line with position:relative + CSS connector on syfthub paths section */
+  .step-list--connector .step-list__item {
+    position: relative;
+    isolation: isolate; /* contain z-index stacking */
+  }
+  .step-list--connector .step-list__item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 14px;               /* ≈ badge vertical center (badge height ~29px / 2) */
+    left: 20px;              /* ≈ badge horizontal center (badge width ~40px / 2) */
+    width: 2px;
+    height: calc(100% + var(--spacing-5XL)); /* bridge to next badge center */
+    background-color: var(--text-headline);
+    z-index: -1;             /* behind badge (which is in normal flow above z:-1) */
+  }
+
+  /* ── Green accent (SyftHub column) ────────────────────── */
+  /* Live: step badge bg rgb(60,159,139) = --color-green-600; line matches */
+  .step-list--accent-green .step-list__num {
+    background-color: var(--color-green-600);
+    color: var(--surface-background-bright);
+  }
+  .step-list--accent-green.step-list--connector .step-list__item:not(:last-child)::after {
+    background-color: var(--color-green-600);
+  }
+</style>

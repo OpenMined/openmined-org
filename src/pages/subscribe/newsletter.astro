@@ -1,0 +1,23 @@
+---
+/**
+ * /subscribe/newsletter/ — single-list email opt-in (P1 pattern).
+ * Copy verbatim from the live page.
+ */
+import Page from '@layouts/Page.astro';
+import OptInLanding from '@components/sections/forms/OptInLanding.astro';
+---
+
+<Page
+  title="Subscribe to the OpenMined Newsletter"
+  description="A monthly(ish) roundup of the latest from OpenMined — new tools, research highlights, events, and ways to get involved."
+>
+  <OptInLanding heading="Subscribe to the OpenMined Newsletter" formId="0d994561-3972-4139-864a-abaa7bf16b48">
+    <Fragment slot="icon">📰</Fragment>
+    <p>A monthly(ish) roundup of the latest from OpenMined—new tools, research highlights, events, and ways to get involved.</p>
+    <Fragment slot="fine">
+      <p>This will opt you in to the OpenMined Newsletter. Want to change that later? Just use the link at the bottom of any email.</p>
+      <p>We send other emails too! <a href="/subscribe/">Opt in to the ones you want.</a></p>
+      <p>This button also confirms you agree with our <a href="/privacy-policy/">privacy policy</a>.</p>
+    </Fragment>
+  </OptInLanding>
+</Page>

@@ -1,0 +1,103 @@
+---
+interface Props {
+  variant?: 'primary' | 'outline';
+  href?: string;
+  disabled?: boolean;
+  type?: 'button' | 'submit' | 'reset';
+  class?: string;
+  /** Any extra attributes (e.g. data-donate-open, aria-*, target) are
+   *  forwarded verbatim onto the rendered <a>/<button>. */
+  [key: string]: unknown;
+}
+
+const {
+  variant = 'primary',
+  href,
+  disabled = false,
+  type = 'button',
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const classes = [
+  'btn',
+  variant === 'outline' ? 'btn--outline' : '',
+  className,
+].filter(Boolean).join(' ');
+---
+
+{href ? (
+  <a href={href} class={classes} aria-disabled={disabled ? 'true' : undefined} {...rest}>
+    <slot />
+  </a>
+) : (
+  <button type={type} class={classes} disabled={disabled} {...rest}>
+    <slot />
+  </button>
+)}
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--button-dark-color);
+    color: var(--button-light-color);
+    padding: 11px 19px;
+    min-height: 48px;
+    font-weight: 500; /* medium — non-default; body is 400 */
+    letter-spacing: 0;
+    border: none;
+    border-radius: var(--border-radius-S);
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background-color var(--transition-base),
+      color var(--transition-base),
+      border-color var(--transition-base);
+  }
+
+  .btn:hover  { background-color: var(--color-interactive-hover); color: var(--color-grayscale-50); }
+  .btn:focus  { background-color: var(--color-interactive-focus); outline: none; }
+  .btn:active { background-color: var(--color-interactive-active); }
+
+  .btn[disabled],
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    background-color: var(--color-interactive-disabled);
+    cursor: default;
+    pointer-events: none;
+  }
+
+  /* Outline variant */
+  .btn--outline {
+    background-color: transparent;
+    color: var(--button-dark-color);
+    border: 1px solid var(--button-dark-color);
+  }
+
+  .btn--outline:hover {
+    background-color: transparent;
+    border-color: var(--color-interactive-hover);
+    color: var(--color-green-700);
+  }
+
+  .btn--outline:focus {
+    color: var(--color-teal-500);
+    border-color: var(--color-teal-400);
+    background-color: var(--color-grayscale-50);
+  }
+
+  .btn--outline:active {
+    color: var(--color-teal-500);
+    background-color: var(--color-teal-50);
+    border-color: var(--color-teal-500);
+  }
+
+  .btn--outline[disabled],
+  .btn--outline:disabled {
+    background-color: transparent;
+    border-color: var(--color-interactive-disabled);
+    color: var(--color-interactive-disabled);
+  }
+</style>

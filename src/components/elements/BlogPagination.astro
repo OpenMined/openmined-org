@@ -1,0 +1,182 @@
+---
+/**
+ * BlogPagination — the "load more on scroll" control shared by every PostCard
+ * grid (`/blog`, `/blog/category/*`, `/blog/tag/*`). It sits directly after a
+ * `.blog-grid` and does double duty:
+ *
+ *   - No-JS / crawler path: a real `Prev · Page N of M · Next` nav whose links
+ *     point at the statically-built `/…/page/N/` routes, so every page is
+ *     reachable and indexable without scripting.
+ *   - Enhanced path: the script hides that nav, shows a "Load more" button, and
+ *     an IntersectionObserver on the sentinel fetches the next page, lifts its
+ *     `.blog-grid > *` cards, and appends them — infinite scroll over the real
+ *     paginated pages (progressive enhancement, no card markup duplicated in JS).
+ *
+ * `base` is page 1's path (`/blog`, `/blog/category/news`, …); page hrefs follow
+ * the `/page/N/` convention from `@utils/posts → listingPageHref`. Renders
+ * nothing when there's only one page. Assumes ONE `.blog-grid` on the page.
+ */
+import Button from '@ui/Button.astro';
+import { listingPageHref } from '@utils/posts';
+
+interface Props {
+  base: string;
+  currentPage: number;
+  totalPages: number;
+}
+const { base, currentPage, totalPages } = Astro.props;
+const hasPrev = currentPage > 1;
+const hasNext = currentPage < totalPages;
+---
+
+{totalPages > 1 && (
+  <div
+    class="blog-pagination"
+    data-blog-pagination
+    data-base={base}
+    data-current={currentPage}
+    data-total={totalPages}
+  >
+    <div class="blog-pagination__sentinel" data-sentinel aria-hidden="true"></div>
+
+    <Button variant="outline" class="blog-pagination__more" >Load more posts</Button>
+    <p class="blog-pagination__status" data-status role="status" aria-live="polite"></p>
+
+    <nav class="blog-pagination__nav" aria-label="Blog pages">
+      {hasPrev && <a class="blog-pagination__link" rel="prev" href={listingPageHref(base, currentPage - 1)}>← Previous</a>}
+      <span class="blog-pagination__current">Page {currentPage} of {totalPages}</span>
+      {hasNext && <a class="blog-pagination__link" rel="next" href={listingPageHref(base, currentPage + 1)}>Next -></a>}
+    </nav>
+  </div>
+)}
+
+<style>
+  .blog-pagination {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-L);
+    margin-top: var(--spacing-3XL);
+  }
+
+  /* Zero-height scroll trigger sitting below the grid; the observer watches it. */
+  .blog-pagination__sentinel {
+    width: 100%;
+    height: 1px;
+  }
+
+  /* No-JS nav is the default; the enhanced script hides it and reveals the button. */
+  .blog-pagination__more,
+  .blog-pagination__status {
+    display: none;
+  }
+  .blog-pagination.is-enhanced .blog-pagination__nav {
+    display: none;
+  }
+  .blog-pagination.is-enhanced .blog-pagination__more {
+    display: inline-flex;
+  }
+  .blog-pagination.is-enhanced .blog-pagination__status {
+    display: block;
+  }
+  /* All pages loaded — drop the button/status but keep the no-JS nav hidden. */
+  .blog-pagination.is-complete .blog-pagination__more,
+  .blog-pagination.is-complete .blog-pagination__status {
+    display: none;
+  }
+
+  .blog-pagination__status {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-subtle);
+  }
+
+  .blog-pagination__nav {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-XL);
+    font-weight: 500;
+  }
+  .blog-pagination__current {
+    color: var(--text-subtle);
+  }
+  .blog-pagination__link {
+    color: var(--text-headline);
+    text-decoration: none;
+    transition: color var(--transition-base);
+  }
+  .blog-pagination__link:hover {
+    color: var(--color-interactive-hover);
+  }
+</style>
+
+<script>
+  // One listing grid per page; enhance its pagination into scroll-load.
+  const root = document.querySelector<HTMLElement>('[data-blog-pagination]');
+  const grid = document.querySelector<HTMLElement>('.blog-grid');
+  const sentinel = root?.querySelector<HTMLElement>('[data-sentinel]');
+  const moreBtn = root?.querySelector<HTMLButtonElement>('.blog-pagination__more');
+  const status = root?.querySelector<HTMLElement>('[data-status]');
+
+  if (root && grid && sentinel && moreBtn && status) {
+    const base = root.dataset.base ?? '';
+    const total = Number(root.dataset.total) || 1;
+    let loaded = Number(root.dataset.current) || 1; // highest page already in the grid
+    let loading = false;
+    let observer: IntersectionObserver | null = null;
+
+    const hrefFor = (n: number) => (n <= 1 ? `${base}/` : `${base}/page/${n}/`);
+
+    const stop = () => {
+      root.classList.add('is-complete');
+      status.textContent = '';
+      observer?.disconnect();
+    };
+
+    // Fetch failed — restore the real pagination links so navigation still works.
+    const degrade = () => {
+      root.classList.remove('is-enhanced');
+      observer?.disconnect();
+      status.textContent = '';
+    };
+
+    async function loadNext() {
+      if (loading || loaded >= total) return;
+      loading = true;
+      const next = loaded + 1;
+      moreBtn!.disabled = true;
+      status!.textContent = 'Loading more posts…';
+      try {
+        const res = await fetch(hrefFor(next));
+        if (!res.ok) throw new Error(String(res.status));
+        const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
+        const cards = doc.querySelectorAll('.blog-grid > *');
+        if (!cards.length) throw new Error('no cards');
+        grid!.append(...cards); // nodes are adopted into this document on append
+        loaded = next;
+        root!.dataset.current = String(loaded);
+        loading = false;
+        moreBtn!.disabled = false;
+        if (loaded >= total) stop();
+        else status!.textContent = '';
+      } catch {
+        loading = false;
+        degrade();
+      }
+    }
+
+    // Reveal the enhanced controls only once JS is confirmed running.
+    root.classList.add('is-enhanced');
+    moreBtn.addEventListener('click', loadNext);
+
+    if ('IntersectionObserver' in window) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((e) => e.isIntersecting)) loadNext();
+        },
+        { rootMargin: '600px 0px' }, // prefetch before the sentinel scrolls into view
+      );
+      observer.observe(sentinel);
+    }
+  }
+</script>

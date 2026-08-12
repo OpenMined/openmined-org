@@ -1,0 +1,83 @@
+---
+/**
+ * /for-ai-auditors/ — one of the four "Supported Subnets" pages (home
+ * Federated-Network section). Explains OpenMined's privacy-preserving AI-audit
+ * software and links out to the body of auditing work.
+ *
+ * The "Learn about our AI auditing work with…" grid reuses @elements/LogoCard
+ * (the same card behind the home Press Room) — these six items are a subset of
+ * the Press Room list. Content verbatim from
+ * the live page.
+ */
+import Page from '@layouts/Page.astro';
+import SimpleHero from '@components/sections/hero/SimpleHero.astro';
+import ContentSection from '@components/sections/ContentSection.astro';
+import CardGrid from '@elements/CardGrid.astro';
+import LogoCard from '@elements/LogoCard.astro';
+import CtaSection from '@components/sections/cta/CtaSection.astro';
+import FormEmbed from '@elements/FormEmbed.astro';
+import Button from '@ui/Button.astro';
+import { getCollection } from 'astro:content';
+
+// "Learn about our AI auditing work with…" — org logo + blog headline per card.
+const auditing = [
+  { orgId: 'aisi', href: 'https://openmined.org/blog/uk-frontier-ai-taskforce-partners-with-openmined-to-advance-ai-safety-research/', title: 'Frontier AI Taskforce: second progress report' },
+  { orgId: 'christchurch-call', href: 'https://openmined.org/blog/new-research-shows-promise-for-safe-secure-private-auditing-of-social-media-algorithms/', title: 'Christchurch Call Initiative on Algorithmic Outcomes' },
+  { orgId: 'microsoft', href: 'https://openmined.org/blog/openmined-partners-with-microsoft-to-advance-privacy-preserving-ai-research-for-the-christchurch-call/', title: 'Expanding our commitments to countering violent extremism online' },
+  { orgId: 'x', href: 'https://openmined.org/blog/announcing-our-partnership-with-twitter-to-advance-algorithmic-transparency/', title: 'Investing in privacy enhancing tech to advance transparency in ML' },
+  { orgId: 'reddit', href: 'https://openmined.org/blog/announcing-our-partnership-with-reddit-to-expand-privacy-preserving-researcher-access/', title: 'Introducing a New Subreddit for Researchers' },
+  { orgId: 'anthropic', href: 'https://openmined.org/blog/secure-enclaves-for-ai-evaluation/', title: 'Secure Enclaves for AI Evaluation' },
+];
+
+const allOrgs = await getCollection('organizations');
+const orgById = Object.fromEntries(allOrgs.map((e) => [e.id, e.data]));
+const cards = auditing
+  .map((item) => ({ ...item, org: orgById[item.orgId] }))
+  .filter((c) => c.org !== undefined);
+---
+
+<Page
+  title="Privacy-Preserving AI Audit Tools"
+  description="OpenMined builds open-source software that enables external researchers to evaluate proprietary AI systems — answering questions about closed models without observing or copying them."
+>
+  <SimpleHero
+    eyebrow="for AI Auditors"
+    eyebrowItalic
+    heading="OpenMined builds open source software which enables external researchers to evaluate proprietary AI systems"
+    headingMax={48}
+    headingMeasure="20em"
+    lede="With this software, external researchers can answer questions about proprietary AI systems without directly observing or acquiring a copy of the AI systems they are studying."
+    ledeMeasure="45em"
+    contentWidth="col-10"
+    contentGap="tight"
+  >
+    <Button slot="actions" href="#cta">Talk to our team</Button>
+  </SimpleHero>
+
+  <!-- The privacy-transparency tradeoff -->
+  <ContentSection surface="dim" as="h4" width="col-8" align="left" headGap="tight" heading="The privacy-transparency tradeoff">
+    <div class="aud-prose">
+      <p>At the present moment, many powerful AI products and services remain unchecked by external parties. At the same time, the few external parties who do get to check these properties are often given too much access, exposing AI owners to numerous risks. This works against the interests of all parties involved: auditors, AI developers, and the billions of people who rely upon increasingly powerful AI products and services in their daily lives. Fixing this external access problem could improve AI products and services, strengthen public trust in AI, mitigate key risks to society, AI developers, and users during the audit process. Addressing this problem has imminent practical relevance given the large and growing impact of AI on our daily lives.</p>
+      <p>Since 2020, OpenMined has been working on this problem by developing open source, privacy preserving software which enables external researchers to evaluate proprietary AI models. Using this software, external researchers can answer specific questions about a closed-source AI system and its interactions with users without revealing information outside of the answers to those specific questions. During the process of developing, testing, and deploying this software, we have worked closely with a number of leading AI companies, governments, and non-profits, such as those listed below.</p>
+    </div>
+  </ContentSection>
+
+  <!-- Learn about our AI auditing work with… -->
+  <ContentSection as="h4" width="col-10" heading="Learn about our AI auditing work with...">
+    <CardGrid cols={3} gap="var(--spacing-XL)">
+      {cards.map((c) => (
+        <LogoCard org={c.org!} href={c.href} title={c.title} minHeight="220px" />
+      ))}
+    </CardGrid>
+  </ContentSection>
+
+  <!-- CTA -->
+  <div id="cta">
+    <CtaSection variant="gradient" icon={false} heading="Talk to Our Team" body="Find out more about AI Auditing from OpenMined">
+      <FormEmbed slot="form" formId="46b97761-19b1-4300-9e59-28ce97576a4c" />
+      <Fragment slot="fineprint">
+        <p>Requesting confirms you agree with our <a href="/privacy-policy/">privacy policy</a>.</p>
+      </Fragment>
+    </CtaSection>
+  </div>
+</Page>

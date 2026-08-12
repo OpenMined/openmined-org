@@ -1,0 +1,92 @@
+---
+/**
+ * TeamList — a small team/people block: an optional heading + description over a
+ * column of name·role pills (avatar or initials fallback). Used as the `team`
+ * rail widget on category archives (e.g. /blog/category/policy/), fed by the
+ * category's `people` + `description`.
+ */
+interface Person {
+  id: string;
+  name: string;
+  role?: string;
+  avatar?: string;
+}
+interface Props {
+  heading?: string;
+  description?: string;
+  people: Person[];
+}
+const { heading, description, people } = Astro.props;
+
+const initials = (name: string) =>
+  name.split(/\s+/).map((p) => p[0]).slice(0, 2).join('').toUpperCase();
+---
+
+<div class="team-list">
+  {heading && <p class="team-list__heading">{heading}</p>}
+  {description && <p class="team-list__description" set:html={description} />}
+  {people.length > 0 && (
+    <div class="team-list__people">
+      {people.map((p) => (
+        <div class="team-list__person">
+          {p.avatar
+            ? <img class="team-list__avatar" src={p.avatar} alt="" width="40" height="40" loading="lazy" />
+            : <span class="team-list__avatar team-list__avatar--fallback" aria-hidden="true">{initials(p.name)}</span>}
+          <span class="team-list__person-info">
+            <span class="team-list__person-name">{p.name}</span>
+            {p.role && <span class="team-list__person-role">{p.role}</span>}
+          </span>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+
+<style>
+  .team-list__heading {
+    margin: 0 0 var(--spacing-L);
+    font-weight: 500;
+    color: var(--text-headline);
+    font-size: 21px;
+  }
+  .team-list__description {
+    margin: 0 0 var(--spacing-L);
+    color: var(--text-body);
+  }
+  /* Pills flow horizontally and wrap; each is auto-width (a row-flex item),
+     not the full width the previous column-stretch produced. */
+  .team-list__people {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--spacing-M);
+  }
+  .team-list__person {
+    display: flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: var(--spacing-M);
+    padding: var(--spacing-XS) var(--spacing-2XL) var(--spacing-XS) var(--spacing-XS);
+    border-radius: 999px;
+    background: var(--surface-foreground-low);
+  }
+  .team-list__avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+  .team-list__avatar--fallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-foreground-high);
+    color: var(--text-subtle);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .team-list__person-info { display: flex; flex-direction: column; line-height: 1.3; }
+  .team-list__person-name { font-weight: 600; color: var(--text-headline); font-size: 14px; }
+  .team-list__person-role { color: var(--text-subtle); font-size: 12px; }
+</style>

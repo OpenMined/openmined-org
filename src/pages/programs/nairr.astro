@@ -1,0 +1,190 @@
+---
+import Page from '@layouts/Page.astro';
+import SimpleHero from '@components/sections/hero/SimpleHero.astro';
+import ContentSection from '@components/sections/ContentSection.astro';
+import FormEmbed from '@elements/FormEmbed.astro';
+import Button from '@ui/Button.astro';
+
+/**
+ * /programs/nairr/ — NAIRR Pilot partnership recruitment. Rebuilt verbatim from
+ * live https://openmined.org/programs/nairr/ (migrated verbatim). Standard site chrome.
+ *
+ * Layout matches live: hero with an OpenMined-icon "+ NAIRR Pilot" lockup (no
+ * swoop) → a strong rule → a col-8 `.prose.downsize-2` explainer (compact live
+ * heading scale: §=h2, timeline years + role/use-case heads = h3) → the apply
+ * block, which on live is ONE wide card on the brand gradient band (icon +
+ * centered lead, then left-aligned "How to Get Started" ordered list + "Apply
+ * Now" + the application form). Sibling /programs/ 301s to / (@data/redirects.mjs).
+ */
+---
+
+<Page
+  title="Partner with OpenMined through the NAIRR Pilot — OpenMined"
+  description="Join OpenMined and the National AI Research Resource (NAIRR) pilot to access 1000x more data for your research through privacy-preserving technologies and collaborative infrastructure."
+>
+  <!-- § Hero — icon + "NAIRR Pilot" lockup over the title; no graphic band -->
+  <SimpleHero
+    heading="Partner with OpenMined through the National AI Research Resource Pilot"
+    headingMax={53}
+    subhead="Unlock America’s Data Resources for AI Research"
+    subheadAs="h5"
+    lede="Join OpenMined and the NAIRR pilot to access 1000x more data for your research through privacy-preserving technologies and collaborative infrastructure."
+    ledeMeasure="40em"
+  >
+    <Fragment slot="eyebrow">
+      {/* Co-brand lockup — the exact live assets: OpenMined diamond (large SVG)
+          × the NAIRR wordmark (extracted from live, recolored to currentColor
+          so it themes). */}
+      <span class="nairr-lockup">
+        <img class="nairr-lockup__om" src="/logos/OpenMined-Icon-large.svg" alt="OpenMined" width="40" height="40" />
+        <span class="nairr-lockup__x" aria-hidden="true">×</span>
+        <img class="nairr-lockup__nairr" src="/images/nairr-wordmark.svg" alt="NAIRR" width="161" height="24" />
+      </span>
+    </Fragment>
+    <Fragment slot="actions">
+      <Button href="#apply_now">Apply Now ↓</Button>
+    </Fragment>
+  </SimpleHero>
+
+  <hr class="section-divider section-divider--strong nairr-rule" />
+
+  <!-- § Explainer — what NAIRR is, the timeline, OpenMined's role, use cases -->
+  <ContentSection width="col-6">
+    <div class="prose downsize-2">
+      <h2>What is the National AI Research Resource?</h2>
+      <p>The National Artificial Intelligence Research Resource (NAIRR) represents a transformative vision for democratizing AI research in the United States. Currently in its pilot phase, this shared national research infrastructure brings together federal agencies and non-governmental partners to provide unprecedented access to the computational resources, datasets, models, and training that researchers, educators, and students need to advance AI innovation.</p>
+
+      <h2>NAIRR: From Vision to Reality</h2>
+      <h3>2020 — The Beginning</h3>
+      <p>The NAIRR concept originated with the <a href="https://www.congress.gov/bill/116th-congress/house-bill/6216">National AI Initiative Act of 2020</a>, passed within the <a href="https://www.congress.gov/bill/116th-congress/house-bill/6395">National Defense Authorization Act for Fiscal Year 2021</a>, which established a task force co-chaired by the White House Office of Science and Technology Policy and the National Science Foundation. This bipartisan effort aimed to create a roadmap for democratizing access to AI resources across the United States.</p>
+      <h3>2023 — Task Force Recommendations</h3>
+      <p>After extensive consultation with experts from government, industry, academia, and civil rights organizations, the NAIRR Task Force released its final report in January 2023. The report laid out a comprehensive plan for implementing a national AI research infrastructure.</p>
+      <h3>2023 — Presidential Mandate</h3>
+      <p>President Biden’s Executive Order 14110 on Safe, Secure, and Trustworthy AI directed the NSF to launch the NAIRR pilot within 90 days, accelerating the timeline for this critical infrastructure.</p>
+      <h3>2024 — Pilot Launch</h3>
+      <p>On January 24, 2024, the NSF officially launched the two-year NAIRR pilot program, marking a historic moment in democratizing AI research access.</p>
+      <h3>2025 — Current Status</h3>
+      <p>The NAIRR pilot is now fully operational, having supported over 460 projects across 48 states. The pilot continues to expand, with new resources and partners joining regularly. Congressional efforts are underway to establish NAIRR as a permanent program with sustained funding, recognizing its critical importance to U.S. competitiveness in AI.</p>
+
+      <h2>OpenMined’s Role: Pioneering Privacy-Preserving AI Collaboration</h2>
+      <p>As one of the non-governmental partners in the NAIRR pilot, OpenMined brings unique capabilities that directly address NAIRR’s vision of unlocking America’s data resources for AI research.</p>
+      <h3>Our Contribution to NAIRR:</h3>
+      <h4>1. Privacy-Preserving Infrastructure</h4>
+      <ul>
+        <li>Support deploying Syft, our cutting-edge software for distributed, privacy-preserving data science and other cutting-edge technologies that enable researchers to train models on data they cannot directly access</li>
+        <li>Secure collaboration tools that maintain data owner’s control over the only copy of their data while enabling breakthrough research</li>
+      </ul>
+      <h4>2. Training and Support</h4>
+      <ul>
+        <li>Comprehensive training sessions on privacy-preserving data science techniques</li>
+        <li>Ongoing technical support through dedicated channels</li>
+        <li>Access to our global community of 16,000+ engineers and researchers</li>
+      </ul>
+      <h3>Ideal Use Cases</h3>
+      <p>Our resources are particularly suited for research consortia who need to:</p>
+      <ul>
+        <li><strong>Train models across institutional boundaries:</strong> Collaborate with other universities or research centers while keeping data secure</li>
+        <li><strong>Analyze sensitive datasets:</strong> Work with healthcare, financial, or government data that cannot be shared directly</li>
+        <li><strong>Develop privacy-preserving AI:</strong> Create new techniques for AI that respect data privacy</li>
+        <li><strong>Evaluate models privately:</strong> Test AI systems on proprietary evaluation datasets without exposing the data</li>
+      </ul>
+    </div>
+  </ContentSection>
+
+  <!-- § Apply — one wide card on the brand gradient band (hero "Apply Now ↓"
+       anchors here). Centered icon + heading + lead; left-aligned steps + form. -->
+  <section class="apply" id="apply_now">
+    <div class="apply__card">
+      <img class="apply__icon" src="/logos/OpenMined-Icon-large.svg" alt="" width="50" height="50" />
+      <h2 class="apply__heading">Ready to Transform Your Research?</h2>
+      <p class="apply__lead">Join the growing community of researchers leveraging OpenMined’s privacy-preserving technologies through the NAIRR pilot.</p>
+
+      <div class="apply__body prose downsize-2">
+        <p>Whether you’re working with sensitive healthcare data, proprietary research datasets, or distributed information across multiple institutions, we can help you unlock insights while maintaining the highest standards of privacy and security.</p>
+        <h3>How to Get Started</h3>
+        <ol>
+          <li><strong>Prepare Your Consortium:</strong> Identify at least one research partner with complementary non-public datasets</li>
+          <li><strong>Submit Your Ticket:</strong> Complete the form linked below. Upon completion you will be redirected to the full application.</li>
+          <li><strong>Select OpenMined’s Partnership:</strong> Indicate your interest in working with OpenMined</li>
+          <li><strong>Get Support:</strong> Our team will reach out with more information</li>
+        </ol>
+        <h3>Apply Now</h3>
+        <p>The NAIRR pilot represents a once-in-a-generation opportunity to democratize AI research in America. Don’t let data silos limit your research potential. Partner with OpenMined through NAIRR to access the tools, compute, and support you need to conduct groundbreaking AI research while preserving privacy.</p>
+      </div>
+
+      <FormEmbed formId="d7afa948-3472-44dd-9397-d8a0e0a9bb28" />
+
+      <div class="apply__fineprint">
+        <p>Submitting this form indicates you agree with our <a href="/privacy-policy/">privacy policy</a>.</p>
+        <p><a href="/get-involved/">Explore ways to get involved ↗</a></p>
+      </div>
+    </div>
+  </section>
+</Page>
+
+<style>
+  /* Hero co-brand lockup: OpenMined diamond × NAIRR wordmark (renders inside
+     SimpleHero's eyebrow <Text>; slot content carries this page's cid so these
+     rules apply). The wordmark SVG is currentColor, so --text-headline tints it. */
+  .nairr-lockup {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-M);
+    color: var(--text-headline);
+  }
+  .nairr-lockup__om { display: block; width: 40px; height: 40px; }
+  .nairr-lockup__x { font-size: 20px; color: var(--text-subtle); }
+  /* size by height, keep the wordmark's intrinsic aspect */
+  .nairr-lockup__nairr { display: block; height: 24px; width: auto; }
+
+  /* Strong rule between the hero and the explainer (live legal-doc hairline). */
+  .nairr-rule {
+    margin-block: 0 var(--spacing-full);
+  }
+
+  /* ── Apply card on the brand gradient band ─────────────────────────── */
+  .apply {
+    display: flex;
+    justify-content: center;
+    padding-block: var(--spacing-full);
+    padding-inline: var(--spacing-XL);
+    /* same full-spectrum raster the CtaSection gradient variant uses */
+    background-image: url('/images/cta-gradient-bg.png');
+    background-position: center;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+  }
+  .apply__card {
+    width: 100%;
+    max-width: var(--col-8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-2XL);
+    padding: var(--spacing-4XL);
+    border-radius: var(--border-radius-L);
+    background-color: var(--surface-foreground-low);
+  }
+  .apply__icon { width: 50px; height: 50px; }
+  /* centered lead block */
+  .apply__heading {
+    --h2-min: 28px; --h2-max: 36px; /* live 36px (smaller than the global h2) */
+    text-align: center;
+    margin: 0;
+  }
+  .apply__lead {
+    text-align: center;
+    max-width: var(--col-6);
+    margin: 0;
+  }
+  /* left-aligned body (steps + apply copy) fills the card width */
+  .apply__body { width: 100%; }
+  .apply__fineprint {
+    width: 100%;
+    /* Live paints grayscale-550 here in both modes (= --text-subtle). */
+    color: var(--text-subtle);
+    font-size: 14px;
+  }
+  .apply__fineprint :global(p) { margin: 0; }
+  .apply__fineprint :global(p + p) { margin-top: var(--spacing-M); }
+</style>

@@ -1,0 +1,102 @@
+---
+/**
+ * /blog/cards/ — the card source the client-side listing controls read from.
+ *
+ * Every blog listing (/blog, category, tag, author, locations, and their
+ * /page/N variants) server-renders only ONE page of cards. The moment a
+ * Filter / Sort / Search is applied the result set can be any subset of all
+ * 371 posts in any order, so the controller needs every card. Rather than
+ * duplicate PostCard's markup in JavaScript — which would fork the card's
+ * structure, its overlay-text rules, and its `<Image>` srcsets — this route
+ * renders the real component once for every post, and the controller lifts the
+ * nodes it needs straight into the listing grid. Same idiom BlogPagination
+ * already uses to scroll-load `/page/N/`, just over one document instead of 31.
+ *
+ * Each card carries its taxonomy as data-attributes (PostCard → `filterMeta`)
+ * so filtering and sorting are pure DOM reads. `data-search` is the fallback
+ * haystack used only when the Pagefind index isn't reachable (i.e. `astro dev`,
+ * which never runs the postbuild indexer).
+ *
+ * It is a real route, not an endpoint, so PostCard renders through the normal
+ * Astro pipeline (scoped-style ids and optimized image URLs identical to the
+ * listing pages — that's what makes the lifted nodes style correctly). It ships
+ * no site chrome, is noindex, is excluded from the sitemap (astro.config.mjs →
+ * sitemap filter), and carries `data-pagefind-ignore` so its 371 card titles
+ * never pollute the search index.
+ */
+import PostCard from '@elements/PostCard.astro';
+import { getCollection, getEntries } from 'astro:content';
+import { postSlug, postLocations } from '@utils/posts';
+
+const includeDrafts = import.meta.env.DEV;
+
+const posts = (await getCollection('blog', ({ data }) => includeDrafts || !data.draft))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const [cats, tags, people] = await Promise.all([
+  getCollection('categories'),
+  getCollection('tags'),
+  getCollection('people'),
+]);
+const catLabel = (id: string) => cats.find((c) => c.id === id)?.data.label ?? id;
+const tagLabel = (id: string) => tags.find((t) => t.id === id)?.data.label ?? id;
+const personName = (id: string) => people.find((p) => p.id === id)?.data.name ?? id;
+
+const cards = posts.map((p) => {
+  const catIds = p.data.categories.map((c) => c.id);
+  const tagIds = p.data.tags.map((t) => t.id);
+  const authorIds = p.data.authors.map((a) => a.id);
+  const locations = postLocations(p);
+  return {
+    href: `/blog/${postSlug(p)}/`,
+    title: p.data.title,
+    date: p.data.date,
+    category: { slug: catIds[0], label: catLabel(catIds[0]) },
+    cover: p.data.cover,
+    coverAlt: p.data.coverAlt,
+    cardText: p.data.cardText,
+    draft: p.data.draft,
+    filterMeta: {
+      slug: postSlug(p),
+      cats: catIds,
+      tags: tagIds,
+      authors: authorIds,
+      locations: locations.map((l) => l.slug),
+      search: [
+        p.data.title,
+        p.data.subtitle ?? '',
+        p.data.excerpt ?? '',
+        ...catIds.map(catLabel),
+        ...tagIds.map(tagLabel),
+        ...authorIds.map(personName),
+        ...locations.map((l) => l.label),
+      ].join(' ').toLowerCase(),
+    },
+  };
+});
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Blog card source</title>
+  </head>
+  <body data-pagefind-ignore>
+    <div class="blog-grid">
+      {cards.map((c) => (
+        <PostCard
+          href={c.href}
+          title={c.title}
+          date={c.date}
+          category={c.category}
+          cover={c.cover}
+          coverAlt={c.coverAlt}
+          cardText={c.cardText}
+          draft={c.draft}
+          filterMeta={c.filterMeta}
+        />
+      ))}
+    </div>
+  </body>
+</html>

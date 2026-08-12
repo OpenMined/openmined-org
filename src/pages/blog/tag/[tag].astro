@@ -1,0 +1,98 @@
+---
+/**
+ * /blog/tag/[tag] — tag archive. URL parity with live (`/blog/tag/<slug>/`); the
+ * rail "Popular Topics" / "Solutions & Resources" / "Popular Tags" links point
+ * here. A page is generated for every tag in the registry so those links always
+ * resolve; a tag with no published posts simply shows an empty grid.
+ *
+ * Simpler than the category archive — no featured/rail header, just the toolbar
+ * (tag label + count) over the shared PostCard grid.
+ */
+import BlogListing from '@layouts/BlogListing.astro';
+import PostCard from '@elements/PostCard.astro';
+import BlogToolbar from '@components/sections/blog/BlogToolbar.astro';
+import BlogPagination from '@elements/BlogPagination.astro';
+import { getCollection, getEntry } from 'astro:content';
+import { postSlug, pageCount, pageSlice } from '@utils/posts';
+
+export async function getStaticPaths() {
+  const tags = await getCollection('tags');
+  return tags.map((t) => ({ params: { tag: t.id }, props: { label: t.data.label } }));
+}
+
+const { tag } = Astro.params;
+const { label } = Astro.props;
+const includeDrafts = import.meta.env.DEV;
+
+const posts = (await getCollection('blog', ({ data }) => (includeDrafts || !data.draft) && data.tags.some((t) => t.id === tag)))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+// Page 1 renders 12 cards; the rest stream from /blog/tag/<tag>/page/N/.
+const total = posts.length;
+const totalPages = pageCount(total);
+const cards = await Promise.all(
+  pageSlice(posts, 1).map(async (p) => {
+    const cat = await getEntry(p.data.categories[0]);
+    return {
+      href: `/blog/${postSlug(p)}/`,
+      title: p.data.title,
+      date: p.data.date,
+      category: { slug: cat.id, label: cat.data.label },
+      cover: p.data.cover,
+      coverAlt: p.data.coverAlt,
+      cardText: p.data.cardText,
+      draft: p.data.draft,
+    };
+  })
+);
+---
+
+<BlogListing title={`${label} — Blog — OpenMined`} description={`OpenMined blog posts tagged ${label}.`}>
+  <section class="tag-archive container content-top-rule">
+    <BlogToolbar heading={label} count={total} scope={{ tag }} />
+
+    {total > 0 ? (
+      <div class="blog-grid">
+        {cards.map((c) => (
+          <PostCard
+            href={c.href}
+            title={c.title}
+            date={c.date}
+            category={c.category}
+            cover={c.cover}
+            coverAlt={c.coverAlt}
+            cardText={c.cardText}
+            draft={c.draft}
+          />
+        ))}
+      </div>
+    ) : (
+      <p class="tag-archive__empty">No posts tagged “{label}” yet.</p>
+    )}
+
+    <BlogPagination base={`/blog/tag/${tag}`} currentPage={1} totalPages={totalPages} />
+  </section>
+</BlogListing>
+
+<style>
+  .tag-archive {
+    /* stroke from .content-top-rule; own top padding (decoupled from the rule) */
+    padding-top: var(--spacing-3XL);
+    padding-bottom: var(--spacing-full);
+  }
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: var(--spacing-XL);
+    row-gap: var(--spacing-2XL);
+  }
+  .tag-archive__empty {
+    color: var(--text-subtle);
+  }
+  @media (max-width: 1099px) {
+    .blog-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 767px) {
+    .blog-grid { grid-template-columns: 1fr; }
+  }
+</style>

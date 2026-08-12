@@ -1,0 +1,90 @@
+---
+/**
+ * ButtonCta — generic, reusable centered call-to-action band: heading + optional
+ * body + a button (passed via the default slot). The lean sibling of CtaSection
+ * (which is the form-capture card). No page prefix = generic.
+ *
+ * Rebuilt from live #brxe-yspdrb (foundation "Get Involved" → /get-involved/).
+ * Measured off the live page.
+ *
+ * Live → token mapping:
+ *   section background     #f4f3f6                        → --surface-background-dim (themed)
+ *   container width        ~600px                         → --col-6 (640)
+ *   section padding-block  112px                          → --spacing-full (88, snap)
+ *   h4                     Rubik 27px/1.2                 → global h4 (no override)
+ *   h4 margin-bottom       24px                           → --spacing-2XL ✓
+ *   body margin-bottom     24px                           → --spacing-2XL ✓
+ *   button                 primary, "Get Started"         → Button (slotted)
+ */
+import Text from '@ui/Text.astro';
+interface Props {
+  heading: string;
+  body?: string;
+  /** Band surface: 'dim' (default, light tinted) | 'bright' (white) | 'dark' (locked always-dark). */
+  surface?: 'dim' | 'bright' | 'dark';
+  /** Optional readability max-widths (any length) for the heading / body, via the
+   *  global .measure utility — centered, strips at ≤767px. Same convention as
+   *  SimpleHero's headingMeasure/ledeMeasure. Omit for the full col-6 width. */
+  headingMeasure?: string;
+  bodyMeasure?: string;
+}
+const { heading, body, surface = 'dim', headingMeasure, bodyMeasure } = Astro.props;
+---
+
+<section
+  class:list={['button-cta', { 'button-cta--bright': surface === 'bright', 'button-cta--dark': surface === 'dark' }]}
+  data-section={surface === 'dark' ? 'always-dark' : undefined}
+>
+  <div class="container">
+    <div class="button-cta__inner">
+      <Text as="h4" class="button-cta__heading" measure={headingMeasure}>{heading}</Text>
+      {body && <Text as="p" class="button-cta__body" measure={bodyMeasure}>{body}</Text>}
+      <div class="button-cta__action"><slot /></div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .button-cta {
+    padding-block: var(--spacing-full); /* live: 112px → 88 (standardized rhythm) */
+    background-color: var(--surface-background-dim); /* live: #f4f3f6 */
+  }
+  .button-cta--bright { background-color: var(--surface-background-bright); }
+  /* always-dark variant: data-section flips the surface/text tokens; use the
+     main dark surface (not the near-black dim) for the band fill. */
+  .button-cta--dark {
+    background-color: var(--surface-background-default);
+  }
+
+  .button-cta__inner {
+    max-width: var(--col-6); /* live container ~600px → 640 */
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  /* .button-cta__heading on <h4> — type from global h4 */
+  .button-cta__heading {
+    margin-bottom: var(--spacing-2XL); /* live: 24px ✓ */
+  }
+
+  .button-cta__body {
+    margin-bottom: var(--spacing-2XL); /* live: 24px ✓ */
+  }
+
+  /* when measured (headingMeasure/bodyMeasure), center the constrained block in
+     the col-6 inner. width itself comes from .measure — no max-width here. */
+  .button-cta__heading.measure,
+  .button-cta__body.measure {
+    margin-inline: auto;
+  }
+
+  /* Multi-button row — matches the SimpleHero actions pattern: centered, wraps,
+     --spacing-XL between buttons (10px row-gap when wrapped). */
+  .button-cta__action {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px var(--spacing-XL);
+  }
+</style>

@@ -1,0 +1,225 @@
+---
+/**
+ * HomeHero — homepage hero section.
+ *
+ * Rebuilt from live #brxe-aapfrl.
+ *
+ * Live → token mapping:
+ *   bg                  transparent (inherits --surface-background-default)
+ *   section pad-bottom  100px desktop / 44px mobile   TODO(decision: no tokens map)
+ *   section margin-bot  117px desktop / 0 mobile      TODO(decision: no token maps)
+ *   h2                  Rubik 44px / 1.2              font-family + --text-headline
+ *   h2 margin-bottom    32px                          → --spacing-3XL
+ *   taglines mb         40px                          → --spacing-4XL
+ *   how-we-help mb      12px                          → --spacing-M
+ *   how-we-help gap     16px                          → --spacing-L
+ *   grid margin-bottom  16px                          → --spacing-L
+ *   bio margin-bottom   40px                          → --spacing-4XL
+ *   cta gap             22px                          TODO(decision: between --spacing-XL 20px and --spacing-2XL 24px)
+ *   inner content width 1080px (within 1300px container, 110px margins each side)
+ *   bio max-width       735px
+ *   stream embed        absolute, z-index 1, bleeds ~388px below section bottom
+ */
+import DiamondEmbed from '@components/graphics/DiamondEmbed.astro';
+import StreamEmbed from '@components/graphics/StreamEmbed.astro';
+import Button from '@ui/Button.astro';
+import Link from '@ui/Link.astro';
+import Text from '@ui/Text.astro';
+---
+
+<section class="home-hero">
+  <div class="container home-hero__container">
+    <div class="home-hero__inner">
+
+      <!-- Two-column grid: text left, diamond right -->
+      <div class="home-hero__grid">
+
+        <div class="home-hero__text">
+          <Text as="h1" class="home-hero__heading">
+            The missing layer for collective intelligence
+          </Text>
+
+          <Text as="p" class="home-hero__taglines">
+            -> Unlock insights from data you can't access.<br />
+            -> Create value from data you can't share.
+          </Text>
+
+          <div class="home-hero__hwh">
+            <span class="home-hero__hwh-label">How We Help:</span>
+            <div class="home-hero__hwh-links">
+              <Link href="/for-publishers/"            variant="hover-line">Publishers</Link>
+              <Link href="/for-creators/"              variant="hover-line">Creators</Link>
+              <Link href="/for-biomedical-researchers/" variant="hover-line">Genomics</Link>
+              <Link href="/for-ai-auditors/"           variant="hover-line">AI Auditors</Link>
+            </div>
+          </div>
+        </div>
+
+        <div class="home-hero__visual">
+          <DiamondEmbed />
+        </div>
+
+      </div>
+
+      <!-- Bio + CTAs -->
+      <div class="home-hero__bio">
+        <Text as="p" class="home-hero__bio-text">
+          We're OpenMined, a non-profit community building technology that enables secure computation across siloed data — unlocking collective intelligence while preserving <Link href="/attribution-based-control/">attribution-based control</Link>.
+        </Text>
+        <div class="home-hero__ctas">
+          <Button data-donate-open>Donate</Button>
+          <Button variant="outline" href="/foundation/">About the Foundation</Button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Rainbow stream decoration — intentionally bleeds below section boundary.
+       data-fade → fades in on page load (WebGL canvas, no load event of its own). -->
+  <div class="home-hero__stream" aria-hidden="true" data-fade>
+    <StreamEmbed />
+  </div>
+</section>
+
+<style>
+  .home-hero {
+    position: relative;
+    overflow: visible;
+    padding-bottom: var(--spacing-max);
+    margin-bottom: var(--spacing-max);
+  }
+
+  /* z-index lifts text/diamond above the stream decoration */
+  .home-hero__container {
+    position: relative;
+    z-index: 5;
+  }
+
+  /* Narrow inner area: 10 of 12 grid columns = var(--col-10) = 1080px */
+  .home-hero__inner {
+    max-width: var(--col-10);
+    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ── Two-column grid ───────────────────────────────────────────── */
+  .home-hero__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    width: 100%;
+    margin-bottom: var(--spacing-L); /* live: 16px */
+  }
+
+  .home-hero__text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* .home-hero__heading on <h1> — all type from global h1;
+     --h1-max caps the desktop size, mobile floor + fluid rate stay automatic */
+  .home-hero__heading {
+    --h1-max: 44px;
+    margin-bottom: var(--spacing-3XL); /* live: 32px */
+  }
+
+  .home-hero__taglines {
+    margin-bottom: var(--spacing-4XL); /* live: 40px */
+  }
+
+  /* "How We Help: Publishers Creators …" row */
+  .home-hero__hwh {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 0 var(--spacing-L); /* live: 16px */
+  }
+
+  /* .home-hero__hwh-label on <span> — all type from body defaults */
+
+  .home-hero__hwh-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--spacing-L); /* live: 16px */
+  }
+
+  /* Override link weight to match live's font-weight: 600 */
+  .home-hero__hwh-links :global(.link-hover-line) {
+    font-weight: 600;
+  }
+
+  /* ── Diamond visual ────────────────────────────────────────────── */
+  .home-hero__visual {
+    /* DiamondEmbed is self-sizing via its aspect-ratio logic */
+  }
+
+  /* ── Bio block ─────────────────────────────────────────────────── */
+  .home-hero__bio {
+    max-width: 735px; /* live: 735px */
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .home-hero__bio-text {
+    margin-bottom: var(--spacing-4XL); /* live: 40px */
+  }
+
+  .home-hero__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    /* TODO(decision: live gap 22px — between --spacing-XL 20px and --spacing-2XL 24px) */
+    gap: 10px var(--spacing-XL);
+  }
+
+  /* ── Stream decoration ─────────────────────────────────────────── */
+  /* position: absolute anchored by bottom so the stream's bottom edge sits
+     65.3% of streamH below the section's outer bottom. The section's
+     padding-bottom (above) reserves proportional space so content + stream
+     compose correctly as vw scales. z-index 1 = above bg (0), below container (5). */
+  .home-hero__stream {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(-100vw / 2.0 * 0.59);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+     MOBILE (≤ 991px)
+     ══════════════════════════════════════════════════════════════════ */
+  @media (max-width: 991px) {
+    .home-hero {
+      /* live mobile: padding-bottom 44px at 390px = 27.3% of streamH */
+      padding-bottom: calc(100% / 2.0 * 0.273);
+      margin-bottom: 0;
+    }
+
+    .home-hero__inner {
+      max-width: 100%;
+    }
+
+    /* Stack to single column: text first, diamond below */
+    .home-hero__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .home-hero__bio {
+      max-width: 100%;
+    }
+
+    .home-hero__stream {
+      /* live mobile: bleed 48.4% of streamH below section */
+      bottom: calc(-100vw / 2.0 * 0.484);
+    }
+  }
+</style>

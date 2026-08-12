@@ -1,0 +1,32 @@
+---
+/**
+ * Text — the canonical text element for the site. Polymorphic (`as`) with the
+ * global .measure readability cap built in, so ANY text node is measure-ready
+ * with no per-component prop plumbing: set `measure` to cap line length (any
+ * length; auto-strips ≤767px; see global.css → .measure). Use it for headings,
+ * paragraphs, labels, list items — in components and in page markup alike.
+ *
+ * Why a primitive: measure (and any future text-level concern) lives in ONE
+ * place, so enabling it on a new surface never means retrofitting per-component
+ * props again — the reason we favor this over `{part}Measure` props.
+ *
+ * NB: like the raw .measure utility this only CAPS width, it doesn't center —
+ * centering stays the layout's job (text-align / margin on the container). And
+ * never pair a scoped `max-width` with this on the same node (a scoped max-width
+ * beats .measure and blocks the mobile strip).
+ *
+ *   as       tag name — 'p' (default) | 'h1'…'h6' | 'span' | 'div' | 'li' | …
+ *   measure  readability max-width via --measure (e.g. '40em', '65ch', 'var(--col-6)')
+ *   class    forwarded to the element; any other attributes pass through too
+ */
+interface Props {
+  as?: string;
+  measure?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+const { as: Tag = 'p', measure, class: className, style: styleProp, ...rest } = Astro.props;
+const style = [styleProp, measure && `--measure: ${measure}`].filter(Boolean).join('; ') || undefined;
+---
+
+<Tag class:list={[className, { measure: !!measure }]} style={style} {...rest}><slot /></Tag>

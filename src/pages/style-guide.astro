@@ -1,0 +1,1870 @@
+---
+import Page from '@layouts/Page.astro';
+import Button from '@ui/Button.astro';
+import Input from '@ui/Input.astro';
+import Textarea from '@ui/Textarea.astro';
+import Select from '@ui/Select.astro';
+import Checkbox from '@ui/Checkbox.astro';
+import Radio from '@ui/Radio.astro';
+import CodeBlock from '@ui/CodeBlock.astro';
+import Blockquote from '@ui/Blockquote.astro';
+import ThemeToggle from '@ui/ThemeToggle.astro';
+import MiniToggle from '@ui/MiniToggle.astro';
+import Link from '@ui/Link.astro';
+import Logo from '@components/layout/Logo.astro';
+import DiamondEmbed from '@components/graphics/DiamondEmbed.astro';
+import StreamEmbed from '@components/graphics/StreamEmbed.astro';
+import CtaSection from '@components/sections/cta/CtaSection.astro';
+import FormEmbed from '@elements/FormEmbed.astro';
+import Icon from '@elements/Icon.astro';
+import IconCard from '@elements/IconCard.astro';
+import CardGrid from '@elements/CardGrid.astro';
+import ComparisonTable from '@elements/ComparisonTable.astro';
+import LinkCard from '@elements/LinkCard.astro';
+import StepList from '@elements/StepList.astro';
+import StepRows from '@elements/StepRows.astro';
+import LogoCard from '@elements/LogoCard.astro';
+import SpeakerRoster from '@elements/SpeakerRoster.astro';
+import FlowDiagram from '@elements/FlowDiagram.astro';
+import Tabs from '@elements/Tabs.astro';
+import Accordion from '@ui/Accordion.astro';
+
+
+/* ── Color families ── */
+const colorFamilies = [
+  {
+    name: 'Grayscale',
+    prefix: 'grayscale',
+    // 17 steps per brand doc — no 450, 925, 975 (not in palette)
+    steps: [50, 100, 150, 200, 300, 400, 500, 550, 600, 700, 750, 800, 850, 900, 950, 1000],
+  },
+  { name: 'Gold',   prefix: 'gold',   steps: [50,100,200,300,400,500,600,700,800,900,950] },
+  { name: 'Orange', prefix: 'orange', steps: [50,100,200,300,400,500,600,700,800,900,950] },
+  { name: 'Red',    prefix: 'red',    steps: [50,100,200,300,400,500,600,700,800,900,950] },
+  { name: 'Violet', prefix: 'violet', steps: [50,100,200,300,400,500,600,700,800,900,950] },
+  { name: 'Blue',   prefix: 'blue',   steps: [50,100,200,300,400,500,600,700,800,900,950] },
+  { name: 'Teal',   prefix: 'teal',   steps: [50,100,200,300,400,500,600,700,800,900,950] },
+  { name: 'Green',  prefix: 'green',  steps: [50,100,200,300,400,500,600,700,800,900,950] },
+  { name: 'Lime',   prefix: 'lime',   steps: [50,100,200,300,400,500,600,700,800,900,950] },
+  { name: 'Yellow', prefix: 'yellow', steps: [50,100,200,300,400,500,600,700,800,900,950] },
+];
+
+/* 7 gradients per brand doc — no "full" or "blue-teal" (not defined) */
+const gradients = [
+  { name: '--gradient-gold-orange',  label: 'Gold → Orange' },
+  { name: '--gradient-orange-red',   label: 'Orange → Red' },
+  { name: '--gradient-red-violet',   label: 'Red → Violet' },
+  { name: '--gradient-violet-blue',  label: 'Violet → Blue' },
+  { name: '--gradient-teal-green',   label: 'Teal → Green' },
+  { name: '--gradient-green-lime',   label: 'Green → Lime' },
+  { name: '--gradient-lime-yellow',  label: 'Lime → Yellow' },
+];
+
+const semanticBgSurfaces = [
+  { token: '--surface-background-default',  label: 'Background Default' },
+  { token: '--surface-background-bright',   label: 'Background Bright' },
+  { token: '--surface-background-dim',      label: 'Background Dim' },
+];
+
+const semanticFgSurfaces = [
+  { token: '--surface-foreground-lowest',   label: 'Foreground Lowest' },
+  { token: '--surface-foreground-low',      label: 'Foreground Low' },
+  { token: '--surface-foreground-default',  label: 'Foreground Default' },
+  { token: '--surface-foreground-high',     label: 'Foreground High' },
+  { token: '--surface-foreground-highest',  label: 'Foreground Highest' },
+];
+
+const darkBgSurfaces = [
+  { token: '--dark-surface-background-default',  label: 'Background Default' },
+  { token: '--dark-surface-background-bright',   label: 'Background Bright' },
+  { token: '--dark-surface-background-dim',      label: 'Background Dim' },
+];
+
+const darkFgSurfaces = [
+  { token: '--dark-surface-foreground-lowest',   label: 'Foreground Lowest' },
+  { token: '--dark-surface-foreground-low',      label: 'Foreground Low' },
+  { token: '--dark-surface-foreground-default',  label: 'Foreground Default' },
+  { token: '--dark-surface-foreground-high',     label: 'Foreground High' },
+  { token: '--dark-surface-foreground-highest',  label: 'Foreground Highest' },
+];
+
+const textTokens = [
+  '--text-headline', '--text-body', '--text-subtle',
+  '--text-headline-light', '--text-body-light',
+];
+
+const interactiveTokens = [
+  '--color-interactive-default', '--color-interactive-hover',
+  '--color-interactive-focus', '--color-interactive-active', '--color-interactive-disabled',
+];
+
+/* Spacing — 12 steps that actually exist in tokens.css */
+const spacingSteps = [
+  { name: '3XS',  token: '--spacing-3XS' },
+  { name: '2XS',  token: '--spacing-2XS' },
+  { name: 'XS',   token: '--spacing-XS' },
+  { name: 'S',    token: '--spacing-S' },
+  { name: 'M',    token: '--spacing-M' },
+  { name: 'L',    token: '--spacing-L' },
+  { name: 'XL',   token: '--spacing-XL' },
+  { name: '2XL',  token: '--spacing-2XL' },
+  { name: '3XL',  token: '--spacing-3XL' },
+  { name: '4XL',  token: '--spacing-4XL' },
+  { name: '5XL',  token: '--spacing-5XL' },
+  { name: 'Full', token: '--spacing-full' },
+];
+
+const radii = [
+  { name: 'XS',   token: '--border-radius-XS' },
+  { name: 'S',    token: '--border-radius-S' },
+  { name: 'M',    token: '--border-radius-M' },
+  { name: 'L',    token: '--border-radius-L' },
+  { name: 'XL',   token: '--border-radius-XL' },
+  { name: 'Full', token: '--border-radius-full' },
+];
+
+const shadows = [
+  { name: 'sm', token: '--shadow-sm' },
+  { name: 'md', token: '--shadow-md' },
+  { name: 'lg', token: '--shadow-lg' },
+];
+
+const outlines = [
+  { name: 'Strong', token: '--border-strong', value: '1px solid — headline color (visible hairline)' },
+  { name: 'Medium', token: '--border-medium', value: '1px solid — surface-foreground-high / grayscale-400 (media frames, image outlines)' },
+  { name: 'Subtle', token: '--border-subtle', value: '1px solid — surface-foreground (quiet hairline)' },
+];
+
+/* 2 transition tokens */
+const transitions = [
+  { name: 'base',  token: '--transition-base',  value: '0.4s ease — buttons, links, icons, surfaces' },
+  { name: 'theme', token: '--transition-theme', value: '0.4s ease — theme switch bg/color transitions' },
+];
+
+// Every locally hosted icon (src/assets/icons/*.svg), auto-enumerated so this
+// specimen stays complete as the set grows — no manual list to maintain.
+// Rendered via @elements/Icon; the same glob backs Icon.astro's own lookup.
+const hostedIcons = Object.keys(import.meta.glob('../assets/icons/*.svg'))
+  .map((path) => path.split('/').pop()!.replace('.svg', ''))
+  .sort();
+
+// Categorized by ROLE / provenance, not theme — three groups:
+//   • Interface — glyphs wired into a control (nav, disclosure, toolbar, copy).
+//     Fixed jobs; repurpose with care.
+//   • Brand logos — external third-party marks (social + tech), prefixed `logo-`.
+//   • Content — the a-la-carte editorial set dropped into page bodies as needed.
+// Interface + Brand logos are explicit lists (filtered to real files so a stale
+// entry can't throw); Content is the computed remainder, so any NEWLY added icon
+// defaults into Content until it's promoted — the grid never drops an icon.
+const hostedSet = new Set(hostedIcons);
+const interfaceIcons = [
+  'menu', 'close', 'chevron-down', 'search', 'copy', 'checkmark', 'filter', 'sort',
+].filter((n) => hostedSet.has(n));
+const brandLogos = [
+  'logo-github', 'logo-x', 'logo-linkedin', 'logo-youtube', 'logo-bluesky',
+  'logo-python', 'logo-node', 'logo-flower',
+].filter((n) => hostedSet.has(n));
+const roleBound = new Set([...interfaceIcons, ...brandLogos]);
+const contentIcons = hostedIcons.filter((n) => !roleBound.has(n));
+
+const iconGroups = [
+  {
+    name: 'Interface',
+    desc: 'Glyphs wired into a control — nav / burger, disclosure carets, the code-copy button, the (deferred) blog toolbar. These have a fixed job.',
+    names: interfaceIcons,
+  },
+  {
+    name: 'Content',
+    desc: 'The a-la-carte editorial set — dropped into page bodies wherever a concept needs a mark. Includes the colored comparison pair check-solid (green) / x-solid (red); everything else takes currentColor. New icons land here by default.',
+    names: contentIcons,
+  },
+  {
+    name: 'Brand logos',
+    desc: 'External third-party marks (social platforms + tech), prefixed `logo-` to signal “not our glyph.” logo-x is the X (Twitter) logo — distinct from the close and x-solid glyphs.',
+    names: brandLogos,
+  },
+];
+
+// Ionicons (CDN, opt-in) — a small illustrative sample of the novel one-off
+// glyphs available on pages that set the `ionicons` prop (see Base.astro).
+const icons = [
+  'logo-github', 'logo-twitter', 'logo-linkedin', 'logo-youtube',
+  'arrow-forward-outline', 'arrow-back-outline', 'chevron-forward-outline', 'chevron-down-outline',
+  'close-outline', 'menu-outline', 'search-outline', 'moon-outline', 'sunny-outline',
+  'copy-outline', 'link-outline', 'open-outline', 'download-outline',
+  'checkmark-circle-outline', 'alert-circle-outline', 'information-circle-outline',
+  'lock-closed-outline', 'shield-checkmark-outline', 'eye-outline', 'layers-outline',
+];
+
+const selectOptions = [
+  { value: 'opt1', label: 'Option 1' },
+  { value: 'opt2', label: 'Option 2' },
+  { value: 'opt3', label: 'Option 3' },
+];
+
+const logoGroups = [
+  {
+    group: 'Horizontal',
+    logos: [
+      { file: 'OpenMined-Logo.svg',           label: 'Full color',  dark: false },
+      { file: 'OpenMined-Logo-Dark.svg',       label: 'Reversed',    dark: true  },
+      { file: 'OpenMined-Logo-Ghost.svg',      label: 'Ghost',       dark: true  },
+      { file: 'OpenMined-Logo-Mono-White.svg', label: 'Mono white',  dark: true  },
+      { file: 'OpenMined-Logo-Mono-Black.svg', label: 'Mono black',  dark: false },
+    ],
+  },
+  {
+    group: 'Stacked',
+    logos: [
+      { file: 'OpenMined-Logo-Stacked.svg',           label: 'Full color', dark: false },
+      { file: 'OpenMined-Logo-Stacked-Dark.svg',       label: 'Reversed',   dark: true  },
+      { file: 'OpenMined-Logo-Stacked-Ghost.svg',      label: 'Ghost',      dark: true  },
+      { file: 'OpenMined-Logo-Stacked-Mono-White.svg', label: 'Mono white', dark: true  },
+      { file: 'OpenMined-Logo-Stacked-Mono-Black.svg', label: 'Mono black', dark: false },
+    ],
+  },
+  {
+    group: 'Icon mark',
+    logos: [
+      { file: 'OpenMined-Icon.svg', label: 'Icon mark', dark: true },
+    ],
+  },
+];
+---
+
+<Page title="Style Guide — OpenMined" ionicons searchable={false}>
+  <div class="sg-layout" data-pagefind-ignore>
+    <!-- Sidebar -->
+    <aside class="sg-sidebar">
+      <div class="sg-sidebar__inner">
+        <p class="sg-nav__heading">Style Guide Sections</p>
+        <nav class="sg-nav">
+          <a href="#colors">Colors</a>
+          <a href="#gradients">Gradients</a>
+          <a href="#surfaces">Surfaces</a>
+          <a href="#typography">Typography</a>
+          <a href="#prose">Prose</a>
+          <a href="#spacing">Spacing</a>
+          <a href="#styles">Styles</a>
+          <a href="#elements">Elements</a>
+          <a href="#product-elements">New Elements</a>
+          <a href="#icons">Icons</a>
+          <a href="#graphics">Graphics</a>
+          <a href="#logos">Logos</a>
+          <a href="#sections">Sections</a>
+          <a href="#donate">Donate Modal</a>
+          <a href="#search">Search Modal</a>
+          <a href="#footer">Footer</a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="sg-main">
+
+      <div class="sg-header">
+        <h1>OpenMined Design System</h1>
+        <p class="text-subtitle">Style guide scaffold — tokens, typography, components.</p>
+      </div>
+
+      <!-- COLORS -->
+      <section class="sg-section" id="colors">
+        <h2 class="sg-section__title">Colors</h2>
+
+        {colorFamilies.map(family => (
+          <div class="sg-color-family">
+            <h3 class="sg-subsection-title">{family.name}</h3>
+            <div class="sg-swatches">
+              {family.steps.map(step => (
+                <div class="sg-swatch">
+                  <div
+                    class="sg-swatch__color"
+                    style={`background-color: var(--color-${family.prefix}-${step});`}
+                  ></div>
+                  <span class="sg-swatch__label">{step}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+
+        <h3 class="sg-subsection-title" style="margin-top: var(--spacing-3XL);">Interactive States</h3>
+        <div class="sg-swatches">
+          {interactiveTokens.map(token => (
+            <div class="sg-swatch">
+              <div class="sg-swatch__color" style={`background-color: var(${token});`}></div>
+              <span class="sg-swatch__label">{token.replace('--color-interactive-', '')}</span>
+            </div>
+          ))}
+        </div>
+
+        <h3 class="sg-subsection-title" style="margin-top: var(--spacing-3XL);">Text Tokens</h3>
+        <div class="sg-token-table">
+          {textTokens.map(token => (
+            <div class="sg-token-row">
+              <div class="sg-swatch__color sg-swatch__color--sm" style={`background-color: var(${token});`}></div>
+              <code>{token}</code>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- GRADIENTS -->
+      <section class="sg-section" id="gradients">
+        <h2 class="sg-section__title">Gradients</h2>
+        <p class="sg-section__desc">7 directional gradients at 67° per brand spec. No "full" or "blue-teal" tokens exist.</p>
+        <div class="sg-gradients">
+          {gradients.map(g => (
+            <div class="sg-gradient-row">
+              <div class="sg-gradient-strip" style={`background: var(${g.name});`}></div>
+              <div class="sg-gradient-meta">
+                <code>{g.name}</code>
+                <span class="sg-gradient-label">{g.label}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- SURFACES -->
+      <section class="sg-section" id="surfaces">
+        <h2 class="sg-section__title">Surfaces</h2>
+        <h3 class="sg-subsection-title">Semantic (theme-responsive)</h3>
+        <div class="sg-surface-wrap" style="background: var(--surface-background-default);">
+          <div class="sg-surface-grid sg-surface-grid--3">
+            {semanticBgSurfaces.map(s => (
+              <div class="sg-surface-cell" style={`background-color: var(${s.token}); border: 1px solid var(--surface-foreground-default);`}>
+                <code>{s.token}</code>
+                <span>{s.label}</span>
+              </div>
+            ))}
+          </div>
+          <div class="sg-surface-grid sg-surface-grid--5">
+            {semanticFgSurfaces.map(s => (
+              <div class="sg-surface-cell" style={`background-color: var(${s.token}); border: 1px solid var(--surface-foreground-default);`}>
+                <code>{s.token}</code>
+                <span>{s.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <h3 class="sg-subsection-title" style="margin-top: var(--spacing-3XL);">Invert Tokens</h3>
+        <div class="sg-surface-wrap" style="background: var(--dark-surface-background-default);">
+          <div class="sg-surface-grid sg-surface-grid--3">
+            {darkBgSurfaces.map(s => (
+              <div class="sg-surface-cell" style={`background-color: var(${s.token}); border: 1px solid var(--dark-surface-foreground-default);`}>
+                <code style="color: var(--text-headline-light);">{s.token}</code>
+                <span style="color: var(--text-body-light);">{s.label}</span>
+              </div>
+            ))}
+          </div>
+          <div class="sg-surface-grid sg-surface-grid--5">
+            {darkFgSurfaces.map(s => (
+              <div class="sg-surface-cell" style={`background-color: var(${s.token}); border: 1px solid var(--dark-surface-foreground-default);`}>
+                <code style="color: var(--text-headline-light);">{s.token}</code>
+                <span style="color: var(--text-body-light);">{s.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <!-- TYPOGRAPHY -->
+      <section class="sg-section" id="typography">
+        <h2 class="sg-section__title">Typography</h2>
+
+        <h3 class="sg-subsection-title">Page Scale — Headings &amp; Body</h3>
+        <div class="sg-type-specimens">
+          <div class="sg-type-row">
+            <span class="sg-type-label">H1 · Rubik 400</span>
+            <h1 class="sg-type-demo">The Quick Brown Fox</h1>
+          </div>
+          <div class="sg-type-row">
+            <span class="sg-type-label">H2 · Rubik 400</span>
+            <h2 class="sg-type-demo">The Quick Brown Fox</h2>
+          </div>
+          <div class="sg-type-row">
+            <span class="sg-type-label">H3 · Rubik 400</span>
+            <h3 class="sg-type-demo">The Quick Brown Fox</h3>
+          </div>
+          <div class="sg-type-row">
+            <span class="sg-type-label">H4 · Rubik 400</span>
+            <h4 class="sg-type-demo">The Quick Brown Fox</h4>
+          </div>
+          <div class="sg-type-row">
+            <span class="sg-type-label">H5 · Inter 400</span>
+            <h5 class="sg-type-demo">The Quick Brown Fox Jumps</h5>
+          </div>
+          <div class="sg-type-row">
+            <span class="sg-type-label">H6 · Inter 400</span>
+            <h6 class="sg-type-demo">The Quick Brown Fox Jumps Over</h6>
+          </div>
+          <div class="sg-type-row">
+            <span class="sg-type-label">.text-subtitle · Inter 400 21px</span>
+            <p class="text-subtitle sg-type-demo">The quick brown fox jumps over the lazy dog.</p>
+          </div>
+          <div class="sg-type-row">
+            <span class="sg-type-label">.text-eyebrow</span>
+            <p class="text-eyebrow sg-type-demo">Who It's For</p>
+          </div>
+          <div class="sg-type-row">
+            <span class="sg-type-label">Body · Inter 400 16px</span>
+            <p class="sg-type-demo">The quick brown fox jumps over the lazy dog. Vivamus lacinia odio vitae vestibulum vestibulum lorem ipsum dolor sit amet.</p>
+          </div>
+          <div class="sg-type-row">
+            <span class="sg-type-label">Body 300 (light)</span>
+            <p style="font-weight:300;" class="sg-type-demo">The quick brown fox jumps over the lazy dog. Vivamus lacinia odio vitae vestibulum vestibulum lorem ipsum dolor sit amet.</p>
+          </div>
+          <div class="sg-type-row">
+            <span class="sg-type-label">Body italic</span>
+            <p style="font-style:italic;" class="sg-type-demo">The quick brown fox jumps over the lazy dog.</p>
+          </div>
+          <div class="sg-type-row">
+            <span class="sg-type-label">.text-caption · Inter 500 11px</span>
+            <span class="text-caption sg-type-demo">Caption — labels, metadata, timestamps, small print</span>
+          </div>
+          <div class="sg-type-row">
+            <span class="sg-type-label">.text-caption-error</span>
+            <span class="text-caption-error sg-type-demo">This field is required.</span>
+          </div>
+        </div>
+
+        <h3 class="sg-subsection-title" style="margin-top: var(--spacing-4XL);">Article Scale</h3>
+        <p class="sg-section__desc">Long-form reading context. Rendered inside <code>.prose</code> — typography gets intentional style rules in this context.</p>
+        <div class="prose sg-article-demo">
+          <h2>Federated Learning and the Future of Collaborative AI</h2>
+          <p>Privacy-preserving machine learning has emerged as one of the defining challenges of the AI era. As organizations accumulate vast stores of sensitive data — medical records, financial transactions, behavioral signals — the traditional approach of centralizing that data for model training becomes untenable both legally and ethically.</p>
+          <p>Federated learning inverts the paradigm: instead of bringing data to the model, we bring the model to the data. Each participant trains locally, shares only gradient updates, and never exposes raw records. See the <a href="#">original Syft paper</a> for the full protocol.</p>
+
+          <h3>Why Centralization Fails</h3>
+          <p>The costs of centralized training are not merely regulatory. Moving petabytes of sensitive data introduces exfiltration risk at every step — in transit, at rest, and in the hands of whoever operates the central silo. A breach at the aggregation point can compromise every contributing institution simultaneously.</p>
+
+          <Blockquote>
+            <p>"The question is not whether we can build AI systems that learn from private data — the question is whether we can do so without ever moving the data at all."</p>
+          </Blockquote>
+
+          <p>Differential privacy adds a second line of defense: calibrated noise injected into gradient updates ensures that no individual training example can be reverse-engineered from the published model weights, even by an adversary with full access to the final checkpoint.</p>
+
+          <h4>Gradient Compression</h4>
+          <p>Modern federated systems combine gradient sparsification with quantization to reduce communication overhead by several orders of magnitude, making participation viable over commodity bandwidth. The tradeoff between compression ratio and convergence speed remains an active area of research.</p>
+
+          <figure>
+            <div class="sg-article-img-placeholder"></div>
+            <figcaption>Figure 1: Gradient aggregation in a federated learning round. Each participant trains on local data; only compressed updates are shared with the central coordinator — raw records never leave the source.</figcaption>
+          </figure>
+
+          <h5>Aggregation Protocols</h5>
+          <p>Secure aggregation uses cryptographic masking so the central coordinator sees only the sum of participant gradients — never any individual update. Combined with differential privacy, this provides composable privacy guarantees.</p>
+
+          <p>Using Syft, connecting to a remote data owner and requesting access requires only a few lines:</p>
+
+          <CodeBlock lang="python">{`import syft as sy
+
+# Connect to a remote data owner's node
+data_owner = sy.connect("https://hospital-a.example.com")
+
+# Request access — data never leaves the owner's server
+dataset = data_owner.datasets["patient_records"].request_access(
+    reason="Training federated model for disease prediction"
+)
+
+# Train locally on the approved dataset
+model.fit(dataset.features, dataset.labels)`}</CodeBlock>
+
+          <h6>Implementation Considerations</h6>
+          <p>Practical deployments must account for client dropout, non-IID data distributions, and adversarial participants who may submit poisoned gradients. Robust aggregation rules such as Krum and coordinate-wise median provide tolerance against a bounded fraction of Byzantine participants.</p>
+        </div>
+
+        <h3 class="sg-subsection-title" style="margin-top: var(--spacing-4XL);">Responsive Scale</h3>
+        <p class="sg-section__desc">All headings fluidly scale between a mobile floor and desktop ceiling via <code>clamp()</code>. The vw rate hits the desktop max exactly at the 1300px container width; below ~767px the floor locks in. Resize the browser to observe. To cap a specific heading smaller, set <code>--hN-max</code> on a parent — no <code>@media</code> needed in the component.</p>
+        <div class="sg-scale-table">
+          <div class="sg-scale-row sg-scale-row--head">
+            <span>Level</span><span>Mobile floor</span><span>vw rate</span><span>Desktop max</span><span>Override token</span>
+          </div>
+          {[
+            { level: 'h1', min: '36px', vw: '4.69vw', max: '61px' },
+            { level: 'h2', min: '28px', vw: '3.62vw', max: '47px' },
+            { level: 'h3', min: '24px', vw: '2.77vw', max: '36px' },
+            { level: 'h4', min: '22px', vw: '2.08vw', max: '27px' },
+            { level: 'h5', min: '18px', vw: '1.62vw', max: '21px' },
+            { level: 'h6', min: '16px', vw: '1.54vw', max: '20px' },
+          ].map(r => (
+            <div class="sg-scale-row">
+              <span>{r.level}</span>
+              <span>{r.min}</span>
+              <span>{r.vw}</span>
+              <span>{r.max}</span>
+              <code>--{r.level}-max</code>
+            </div>
+          ))}
+        </div>
+
+        <p class="sg-section__desc" style="margin-top: var(--spacing-3XL);">Custom desktop max — the second heading sets <code>--h1-max: 42px</code> on its row. The mobile floor (36px) and fluid rate are unchanged.</p>
+        <div class="sg-type-specimens">
+          <div class="sg-type-row">
+            <span class="sg-type-label">H1 · default (61px)</span>
+            <h1 class="sg-type-demo">Private AI for Healthcare</h1>
+          </div>
+          <div class="sg-type-row" style="--h1-max: 42px">
+            <span class="sg-type-label">H1 · --h1-max: 42px</span>
+            <h1 class="sg-type-demo">A Federated Learning Platform for Medical Institutions</h1>
+          </div>
+        </div>
+
+        <h3 class="sg-subsection-title" style="margin-top: var(--spacing-4XL);">.measure — Readability line-length</h3>
+        <p class="sg-section__desc">Add <code>class="measure"</code> to any text element and set <code>--measure</code> to constrain its line length. Accepts any length unit — <code>em</code>, <code>ch</code>, <code>px</code>, <code>var(--col-N)</code>. Strips to no constraint at ≤767px. Resize to observe.</p>
+        <div class="sg-measure-demos">
+          <div class="sg-measure-item">
+            <span class="sg-type-label">No measure (full width)</span>
+            <p class="sg-measure-text">Privacy-preserving machine learning has emerged as one of the defining challenges of the AI era. As organizations accumulate vast stores of sensitive data — medical records, financial transactions, behavioral signals — the traditional approach of centralizing that data for model training becomes untenable both legally and ethically.</p>
+          </div>
+          <div class="sg-measure-item">
+            <span class="sg-type-label">--measure: 55em</span>
+            <p class="measure sg-measure-text" style="--measure: 55em">Privacy-preserving machine learning has emerged as one of the defining challenges of the AI era. As organizations accumulate vast stores of sensitive data — medical records, financial transactions, behavioral signals — the traditional approach of centralizing that data for model training becomes untenable both legally and ethically.</p>
+          </div>
+          <div class="sg-measure-item">
+            <span class="sg-type-label">--measure: 35em</span>
+            <p class="measure sg-measure-text" style="--measure: 35em">Privacy-preserving machine learning has emerged as one of the defining challenges of the AI era. As organizations accumulate vast stores of sensitive data — medical records, financial transactions, behavioral signals — the traditional approach of centralizing that data for model training becomes untenable both legally and ethically.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROSE -->
+      <section class="sg-section" id="prose">
+        <h2 class="sg-section__title">Prose</h2>
+        <p class="sg-section__desc">
+          <code>.prose</code> is the typographic scope; <code>.prose-article</code>
+          adds the article-body layout — a named-column breakout grid applied to
+          long-form bodies (<code>.prose.prose-article</code>). Authored content
+          sits in the <code>content</code> reading column (<code>--col-6</code>);
+          elements with <code>.breakout</code> / <code>.is-style-wide-style</code>
+          widen to the <code>wide</code> zone (<code>--col-8</code>), and
+          <code>.breakout--full</code> / <code>.is-style-full-width-style</code>
+          fill the container edge-to-edge. (Here <code>wide</code> and
+          <code>full</code> coincide — the container is capped at
+          <code>--col-8</code>.) The grey frame marks the container bounds.
+        </p>
+
+        <div class="sg-prose-frame">
+          <div class="prose prose-article">
+            <h2>The reading column</h2>
+            <p>Long-form content sits in a constrained reading column for legibility — roughly 60–75 characters per line. Body copy, headings, lists, and blockquotes all default to this <code>content</code> zone regardless of element type; only an explicit breakout class widens an element.</p>
+            <h3>A second-level heading</h3>
+            <p>Paragraphs flow at the reading width. Bare links get the animated underline in any paragraph or <a href="#prose">prose</a> region, never on component links.</p>
+            <ul>
+              <li>List items stay in the reading column.</li>
+              <li>So do blockquotes, tables, and code blocks unless tagged.</li>
+            </ul>
+
+            <figure class="breakout">
+              <img src="/images/abc/ABC-Graphic-1.svg" width="3840" height="2160" loading="lazy"
+                alt="Example wide-breakout figure." />
+              <figcaption>A <code>.breakout</code> figure widens to the <code>wide</code> zone (<code>--col-8</code>); its caption rides along.</figcaption>
+            </figure>
+
+            <p>Back to the reading column after the breakout. The grid restores the narrow measure automatically — no wrapper needed on ordinary children.</p>
+
+            <div class="breakout--full sg-prose-fullblock">
+              .breakout--full → fills the container edge-to-edge
+            </div>
+
+            <p>And back to the reading column once more.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SPACING -->
+      <section class="sg-section" id="spacing">
+        <h2 class="sg-section__title">Spacing</h2>
+        <p class="sg-section__desc">12 defined steps. Values above <code>--spacing-full</code> (88px) are not in the token system.</p>
+        <div class="sg-spacing-list">
+          {spacingSteps.map(s => (
+            <div class="sg-spacing-row">
+              <code class="sg-spacing-label">{s.token}</code>
+              <div class="sg-spacing-bar" style={`width: var(${s.token}); height: 20px; background: var(--color-teal-400); border-radius: 2px; flex-shrink: 0;`}></div>
+              <span class="sg-spacing-name">{s.name}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- STYLES -->
+      <section class="sg-section" id="styles">
+        <h2 class="sg-section__title">Styles</h2>
+
+        <div class="sg-group" id="radii">
+          <h3 class="sg-group-heading">Border Radius</h3>
+          <div class="sg-radius-grid">
+            {radii.map(r => (
+              <div class="sg-radius-cell">
+                <div class="sg-radius-box" style={`border-radius: var(${r.token});`}></div>
+                <code>{r.token}</code>
+                <span>{r.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div class="sg-group" id="outlines">
+          <h3 class="sg-group-heading">Outlines</h3>
+          <p class="sg-section__desc">3 themed <code>1px solid</code> shorthands. Drop into <code>border:</code> directly. All flip with the page theme.</p>
+          <div class="sg-outline-grid">
+            {outlines.map(o => (
+              <div class="sg-outline-cell">
+                <div class="sg-outline-box" style={`border: var(${o.token});`}></div>
+                <code>{o.token}</code>
+                <span>{o.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div class="sg-group" id="shadows">
+          <h3 class="sg-group-heading">Shadows</h3>
+          <div class="sg-shadow-grid">
+            {shadows.map(s => (
+              <div class="sg-shadow-cell" style={`box-shadow: var(${s.token});`}>
+                <code>{s.token}</code>
+                <span>{s.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div class="sg-group" id="transitions">
+          <h3 class="sg-group-heading">Transitions</h3>
+          <p class="sg-section__desc">2 tokens. Both are <code>0.4s ease</code>. Hover each box to preview.</p>
+          <div class="sg-transition-grid">
+            {transitions.map(t => (
+              <div class="sg-transition-cell">
+                <div
+                  class="sg-transition-box"
+                  style={`transition: background-color var(${t.token});`}
+                >
+                  Hover me
+                </div>
+                <code>{t.token}</code>
+                <span>{t.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <!-- ELEMENTS -->
+      <section class="sg-section" id="elements">
+        <h2 class="sg-section__title">Elements</h2>
+
+        <div class="sg-group" id="buttons">
+          <h3 class="sg-group-heading">Buttons</h3>
+          <h4 class="sg-subsection-title">Variants</h4>
+          <div class="sg-component-row">
+            <Button href="#">Primary</Button>
+            <Button href="#" variant="outline">Outline</Button>
+            <Button disabled>Disabled Primary</Button>
+            <Button variant="outline" disabled>Disabled Outline</Button>
+          </div>
+          <h4 class="sg-subsection-title">With Icon</h4>
+          <div class="sg-component-row">
+            <Button href="#">
+              <span class="btn-icon-row">
+                Get Started
+                <ion-icon name="arrow-forward-outline"></ion-icon>
+              </span>
+            </Button>
+            <Button href="#" variant="outline">
+              <span class="btn-icon-row">
+                <ion-icon name="logo-github"></ion-icon>
+                View on GitHub
+              </span>
+            </Button>
+          </div>
+          <h4 class="sg-subsection-title">As button element</h4>
+          <div class="sg-component-row">
+            <Button type="button">Button Type</Button>
+            <Button type="submit">Submit Type</Button>
+          </div>
+        </div>
+
+        <div class="sg-group" id="theme-toggle">
+          <h3 class="sg-group-heading">Theme Toggle</h3>
+          <p class="sg-section__desc">
+            Two sizes. Both carry <code>.js-switch-theme</code> so the global handler in
+            <code>Base.astro</code> toggles <code>[data-theme]</code>.
+            <code>ThemeToggle</code> (46×26px) for prominent placement.
+            <code>MiniToggle</code> (20×11px) for the header corner.
+          </p>
+          <div class="sg-component-row">
+            <ThemeToggle />
+            <MiniToggle />
+          </div>
+        </div>
+
+        <div class="sg-group" id="links">
+          <h3 class="sg-group-heading">Links</h3>
+          <p class="sg-section__desc">
+            Author links via the canonical <code>&lt;Link&gt;</code> component — variants
+            <code>inline</code>, <code>nav</code>, <code>subtle</code>, <code>absolute-cover</code>.
+          </p>
+          <div class="sg-component-col">
+            <div class="sg-link-row">
+              <span class="sg-type-label">Bare <code>a</code> inside <code>.prose</code></span>
+              <div class="prose"><p>Visit <a href="#">the OpenMined documentation</a> to get started.</p></div>
+            </div>
+            <div class="sg-link-row">
+              <span class="sg-type-label"><code>&lt;Link variant="inline"&gt;</code></span>
+              <p><Link href="#" variant="inline">Genomics — Join the Beta</Link></p>
+            </div>
+            <div class="sg-link-row">
+              <span class="sg-type-label"><code>&lt;Link variant="inline"&gt;</code> with icon</span>
+              <p>
+                <Link href="#" variant="inline" class="sg-link-icon">
+                  Read the case study
+                  <ion-icon name="arrow-forward-outline" class="sg-link-icon__icon"></ion-icon>
+                </Link>
+              </p>
+            </div>
+            <div class="sg-link-row">
+              <span class="sg-type-label"><code>&lt;Link variant="nav"&gt;</code></span>
+              <p>
+                <Link href="#" variant="nav">Foundation</Link>
+                <Link href="#" variant="nav">Blog</Link>
+                <Link href="#" variant="nav">Careers</Link>
+              </p>
+            </div>
+            <div class="sg-link-row">
+              <span class="sg-type-label"><code>&lt;Link variant="subtle"&gt;</code></span>
+              <p><Link href="#" variant="subtle">Privacy Policy</Link> · <Link href="#" variant="subtle">Terms of Service</Link></p>
+            </div>
+            <div class="sg-link-row">
+              <span class="sg-type-label"><code>&lt;Link variant="hover-line"&gt;</code> — no underline at rest, currentColor line on hover</span>
+              <p>
+                <Link href="#" variant="hover-line">Publishers</Link>
+                <Link href="#" variant="hover-line">Creators</Link>
+                <Link href="#" variant="hover-line">AI Auditors</Link>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="sg-group" id="forms">
+          <h3 class="sg-group-heading">Forms</h3>
+          <div class="sg-form-demo">
+            <Input id="demo-name"     name="name"     label="Full Name"        placeholder="Enter your full name" />
+            <Input id="demo-email"    name="email"    label="Email Address"    placeholder="you@example.com" type="email" />
+            <Input id="demo-disabled" name="disabled" label="Disabled Input"   placeholder="Not editable" disabled />
+            <Textarea id="demo-message" name="message" label="Message"         placeholder="Tell us about your use case..." />
+            <Select id="demo-select"  name="select"   label="Select an option" options={selectOptions} placeholder="Choose one..." />
+            <div class="sg-form-checks">
+              <Checkbox id="demo-check1" name="check"  label="I agree to the terms of service" />
+              <Checkbox id="demo-check2" name="check2" label="Subscribe to newsletter" />
+              <Checkbox id="demo-check3" name="check3" label="Disabled checkbox" disabled />
+            </div>
+            <div class="sg-form-checks">
+              <Radio id="demo-radio1" name="radio" label="Option A" value="a" />
+              <Radio id="demo-radio2" name="radio" label="Option B" value="b" />
+              <Radio id="demo-radio3" name="radio" label="Option C (disabled)" value="c" disabled />
+            </div>
+            <div class="sg-form-submit">
+              <Button type="submit">Submit Form</Button>
+            </div>
+            <div class="sg-hubspot-stub">
+              <p class="text-caption">[ HubSpot Form Embed — stub placeholder ]</p>
+              <p class="text-caption" style="margin-top: var(--spacing-XS);">HubSpot script injection renders here. Styles defined in a later phase.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CARDS & COMPARISON (reusable cross-page primitives) -->
+      <section class="sg-section" id="cards">
+        <h2 class="sg-section__title">Cards &amp; Comparison</h2>
+        <p class="sg-section__desc">Reusable across product pages (syft-flwr, syftbox). Icons come from the hosted set (see <a href="#icons">Icons</a>).</p>
+
+        <div class="sg-group" id="card-hover">
+          <h3 class="sg-group-heading">Card hover — <code>.card-float</code></h3>
+          <p class="sg-section__desc">
+            The one hover language for every whole-card <em>link</em>: the card rises
+            <code>--card-float-lift</code>, swells <code>--card-float-scale</code>, and its
+            shadow grows one step up the scale — a physical card lifting off the surface and
+            coming nearer the eye. Set the resting shadow with
+            <code>--card-float-shadow</code> (never a scoped <code>box-shadow</code> — it would
+            outrank the utility) and the raised one with
+            <code>--card-float-shadow-hover</code>. A card that is <em>not</em> itself a click
+            target must not carry it: the gesture is the affordance. Hover each.
+          </p>
+          <div class="sg-cardfloat-grid">
+            <a href="#card-hover" class="sg-cardfloat card-float">
+              <strong>Flat card</strong>
+              <span>no shadow &rarr; <code>--shadow-md</code></span>
+              <span class="sg-cardfloat__note">defaults — just add the class (PostCard, LinkCard)</span>
+            </a>
+            <a href="#card-hover" class="sg-cardfloat sg-cardfloat--raised card-float">
+              <strong>Raised card</strong>
+              <span><code>--shadow-md</code> &rarr; <code>--shadow-lg</code></span>
+              <span class="sg-cardfloat__note">rests with a shadow already (LogoCard / Press Room)</span>
+            </a>
+            <div class="sg-cardfloat sg-cardfloat--static">
+              <strong>Not a link</strong>
+              <span>no float, by design</span>
+              <span class="sg-cardfloat__note">IconCard, .ways-card, section cards</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sg-group" id="icon-cards">
+          <h3 class="sg-group-heading">IconCard — surface "default", h5 title</h3>
+          <CardGrid min="400px" gap="var(--spacing-XL)">
+            <IconCard icon="network-discovery" title="Network Discovery:">
+              <p>Automatically detect participating data sites, eliminating manual node configuration.</p>
+            </IconCard>
+            <IconCard icon="lock" title="Secure Data Storage & Management">
+              <p>Provides secure, append-only storage with built-in access control.</p>
+            </IconCard>
+          </CardGrid>
+
+          <h3 class="sg-group-heading" style="margin-top: var(--spacing-3XL);">IconCard — surface "dim", strong (label) title</h3>
+          <CardGrid min="400px" gap="var(--spacing-XL)">
+            <IconCard icon="circle-check" surface="dim" titleAs="strong" title="Healthcare & Life Sciences:">
+              <p>Enable multi-hospital research consortia to train models on sensitive patient data.</p>
+            </IconCard>
+            <IconCard icon="circle-check" surface="dim" titleAs="strong" title="Financial Services:">
+              <p>Facilitate cross-enterprise fraud detection or federated credit scoring.</p>
+            </IconCard>
+          </CardGrid>
+
+          <h3 class="sg-group-heading" style="margin-top: var(--spacing-3XL);">IconCard — layout "stacked" (icon above, left-aligned)</h3>
+          <CardGrid cols={3} gap="var(--spacing-XL)">
+            <IconCard icon="ban" surface="dim" layout="stacked" title="Irreversible">
+              <p>Once trained, your content cannot be untangled from the rest of the training data and model.</p>
+            </IconCard>
+            <IconCard icon="eye-off" surface="dim" layout="stacked" title="Invisible">
+              <p>Provenance is broken. Inside the “black box,” you cannot track usage or attribute value.</p>
+            </IconCard>
+            <IconCard icon="shield-alert" surface="dim" layout="stacked" title="Unenforceable">
+              <p>You cannot enforce pricing or any terms given no traceability.</p>
+            </IconCard>
+          </CardGrid>
+        </div>
+
+        <div class="sg-group" id="comparison">
+          <h3 class="sg-group-heading">ComparisonTable</h3>
+          <ComparisonTable
+            columns={[
+              {
+                title: 'The Challenge:',
+                subtitle: 'Manual Deployment',
+                icon: 'x-solid',
+                rows: [
+                  '<b>Weeks coordinating VPNs & firewalls</b> just to connect data sites.',
+                  '<b>No separation of user roles,</b> forcing custom auth systems.',
+                  '<b>No native way to approve code,</b> requiring manual governance.',
+                ],
+              },
+              {
+                title: 'The Solution:',
+                subtitle: 'syft-flwr',
+                icon: 'check-solid',
+                rows: [
+                  '<b>Auto-discovery of data sites.</b> A secure, zero-config network.',
+                  '<b>Distinct roles</b> for Data Owners and Data Scientists.',
+                  '<b>Built-in request/review/approve</b> with an immutable audit log.',
+                ],
+              },
+            ]}
+          />
+        </div>
+      </section>
+
+      <!-- NEW ELEMENTS (syfthub / pysyft) -->
+      <section class="sg-section" id="product-elements">
+        <h2 class="sg-section__title">New Elements</h2>
+        <p class="sg-section__desc">Reusable pieces built for syfthub &amp; pysyft: link cards, numbered step lists, an equation flow, tabs, and a disclosure/FAQ accordion.</p>
+
+        <div class="sg-group" id="link-cards">
+          <h3 class="sg-group-heading">LinkCard — whole-card link, leading icon + title/subtitle + trailing arrow (3-up)</h3>
+          <CardGrid cols={3} gap="var(--spacing-XL)">
+            <LinkCard href="#" icon="zap" title="Quickstart" subtitle="Get up and running in 5 minutes" />
+            <LinkCard href="#" icon="installation" title="Installation" subtitle="Desktop app or Docker deployment" />
+            <LinkCard href="#" icon="core-concepts" title="Core Concepts" subtitle="Learn the building blocks" />
+          </CardGrid>
+        </div>
+
+        <div class="sg-group" id="step-list">
+          <h3 class="sg-group-heading">StepList — numbered process steps (composed 2-up)</h3>
+          <div class="sg-two-col">
+            <div>
+              <h4 style="margin-bottom: var(--spacing-L);">Get Queryable in 3 Steps</h4>
+              <StepList steps={[
+                { title: 'Add Your Data', body: 'Create a dataset from your documents, files, or folders. Automatic processing and indexing begins immediately.' },
+                { title: 'Create an Endpoint', body: 'Combine your dataset with an AI model. Configure access policies, pricing, and test with the built-in query interface.' },
+                { title: 'Publish to SyftHub', body: 'Make your endpoint discoverable. Choose visibility, monitor usage, and adjust policies anytime.' },
+              ]} />
+            </div>
+            <div>
+              <h4 style="margin-bottom: var(--spacing-L);">Query the Network</h4>
+              <StepList steps={[
+                { title: 'Select Sources', body: 'Choose which endpoints to query—specific data owners, categories, or criteria. Selection is explicit and transparent.' },
+                { title: 'Distribute Query', body: 'Query goes to all selected endpoints simultaneously. Each processes on its own infrastructure—data never leaves the owner.' },
+                { title: 'Synthesize with Citations', body: 'Responses are combined into a coherent answer with inline citations linking each claim to its source.' },
+              ]} />
+            </div>
+          </div>
+        </div>
+
+        <div class="sg-group" id="step-rows">
+          <h3 class="sg-group-heading">StepRows — two-column numbered stepper (badge + title left, detail card right)</h3>
+          <StepRows steps={[
+            {
+              title: 'Computation moves to your data',
+              items: [
+                { icon: 'settings', text: 'Setup a datasite — zero technical setup (&lt;30 mins)' },
+                { icon: 'database', text: 'Link your content from folders or your CMS' },
+              ],
+            },
+            {
+              title: 'Define your policies based on AI’s identity and intent',
+              items: [
+                { icon: 'lock', text: 'Allow Readers Bots? Free access.' },
+                { icon: 'circle-check', text: 'Allow Trading Bots? 0.05¢ per query.' },
+              ],
+            },
+            {
+              title: 'The network enforces your policies',
+              items: [
+                { icon: 'network-discovery', text: 'The network protocol manages the exchange, ensuring policies are respected when AI queries your content' },
+                { icon: 'dollar-sign', text: '100% of the proceeds go to you, no intermediaries' },
+              ],
+            },
+          ]} />
+        </div>
+
+        <div class="sg-group" id="logo-cards">
+          <h3 class="sg-group-heading">LogoCard — org logo + caption, whole-card link (Press Room / auditors; 3-up, relaxed height)</h3>
+          <CardGrid cols={3} gap="var(--spacing-XL)">
+            <LogoCard org={{ id: 'aisi', name: 'AI Security Institute', logo: '/logos/orgs/aisi.svg' }} href="#" title="Frontier AI Taskforce: second progress report" minHeight="220px" />
+            <LogoCard org={{ id: 'reddit', name: 'Reddit', logo: '/logos/orgs/reddit.svg' }} href="#" title="Introducing a New Subreddit for Researchers" minHeight="220px" />
+            <LogoCard org={{ id: 'anthropic', name: 'Anthropic', logo: '/logos/orgs/anthropic.svg' }} href="#" title="Secure Enclaves for AI Evaluation" minHeight="220px" />
+          </CardGrid>
+        </div>
+
+        <div class="sg-group" id="speaker-roster">
+          <h3 class="sg-group-heading">SpeakerRoster — event/session speakers (circular headshot + name·role·org; 2-up, 1-up mobile)</h3>
+          <SpeakerRoster
+            heading="Speakers:"
+            speakers={[
+              { name: 'Dawn Chen', role: 'PhD Student', org: 'Harvard University', avatar: '/images/summit-2026/speaker-dawn-chen.png' },
+              { name: 'Binay Panda', role: 'Professor of Biotechnology', org: 'Jawaharlal Nehru University', avatar: '/images/summit-2026/speaker-binay-panda.webp' },
+              { name: 'Madhava Jay', role: 'Software Engineer', org: 'OpenMined Foundation', avatar: '/images/summit-2026/speaker-madhava-jay.png' },
+              { name: 'Rana Dajani', role: 'Professor of Biology and Biotechnology', org: 'Hashemite University', avatar: '/images/summit-2026/speaker-rana-dajani.jpg' },
+              { name: 'Ada Lovelace', role: 'Mathematician', org: 'Analytical Engine (no-avatar fallback)' },
+            ]}
+          />
+        </div>
+
+        <div class="sg-group" id="flow-diagram">
+          <h3 class="sg-group-heading">FlowDiagram — icon+label nodes joined by operator glyphs</h3>
+          <FlowDiagram
+            nodes={[
+              { icon: 'database', label: 'Your Data' },
+              { icon: 'sparkles', label: 'AI Model' },
+              { icon: 'code', label: 'Endpoint' },
+              { icon: 'settings', label: 'Your Rules' },
+              { icon: 'globe', label: 'Controlled Sharing' },
+            ]}
+            operators={[
+              { glyph: '+' },
+              { glyph: '->', accent: true },
+              { glyph: '+' },
+              { glyph: '=', accent: true },
+            ]}
+          />
+        </div>
+
+        <div class="sg-group" id="tabs">
+          <h3 class="sg-group-heading">Tabs — segmented control swapping whole panels</h3>
+          <Tabs tabs={['For Researchers', 'For Data Owners']} label="How it works" center>
+            <div slot="panel-0">
+              <StepList steps={[
+                { title: 'Find a Datasite', body: 'Browse available datasites or collaborate with a data owner to launch a new one.' },
+                { title: 'Submit a Proposal', body: 'Send your research code to the datasite owner for review.' },
+                { title: 'Download Results', body: 'Once approved by the datasite owner, download the results of your query.' },
+              ]} />
+            </div>
+            <div slot="panel-1">
+              <StepList steps={[
+                { title: 'Launch a Secure Datasite', body: 'Stand up a datasite to make your data available for approved research without exposing it.' },
+                { title: 'Review Research Proposals', body: 'Inspect the code researchers submit before anything runs against your data.' },
+                { title: 'Approve compliant projects', body: 'Approve the projects that meet your policies; results are returned, raw data stays put.' },
+              ]} />
+            </div>
+          </Tabs>
+        </div>
+
+        <div class="sg-group" id="accordion">
+          <h3 class="sg-group-heading">Accordion — native &lt;details&gt; disclosure (stack for an FAQ)</h3>
+          <div class="sg-accordion-stack">
+            <Accordion title="How does Syft ensure the analysis doesn’t reveal personal or protected information?" open>
+              <p>Syft preserves data privacy by enabling data scientists to study data without ever seeing or copying it — code is sent to the data and only approved results are returned.</p>
+            </Accordion>
+            <Accordion title="What security measures does Syft implement?">
+              <p>Access is mediated by per-datasite policies, request review, and an immutable audit log of every approved computation.</p>
+            </Accordion>
+            <Accordion title="Where else is Syft deployed?">
+              <p>Across research consortia, public institutions, and enterprises collaborating on sensitive data.</p>
+            </Accordion>
+          </div>
+        </div>
+      </section>
+
+      <!-- ICONS -->
+      <section class="sg-section" id="icons">
+        <h2 class="sg-section__title">Icons</h2>
+
+        <div class="sg-group" id="hosted-icons">
+          <h3 class="sg-group-heading">Hosted — local SVG set ({hostedIcons.length})</h3>
+          <p class="sg-section__desc">
+            The complete set we ship: inlined from <code>src/assets/icons/</code> via
+            <code>&lt;Icon name="…" /&gt;</code> (<code>@elements/Icon</code>). No CDN — they paint
+            with the document and take <code>currentColor</code>. Grouped by role — Interface (wired
+            into controls), Content (a-la-carte editorial), Brand logos (third-party). Content is the
+            computed remainder, so a newly added icon always shows up. Reference every page/element
+            icon by name from here.
+          </p>
+          {iconGroups.map((group) => (
+            <div class="sg-icon-group">
+              <h4 class="sg-icon-group__title">{group.name} <span class="text-caption">({group.names.length})</span></h4>
+              <p class="sg-icon-group__desc text-caption">{group.desc}</p>
+              <div class="sg-icon-grid">
+                {group.names.map((name) => (
+                  <div class="sg-icon-cell">
+                    <Icon name={name} size={28} />
+                    <span class="text-caption">{name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div class="sg-group" id="cdn-icons">
+          <h3 class="sg-group-heading">Ionicons — CDN, opt-in</h3>
+          <p class="sg-section__desc">
+            Loaded only on pages that set the <code>ionicons</code> prop (see <code>Base.astro</code>) —
+            reserved for novel one-off glyphs not worth hosting. Sample below; the full library is at
+            <code>ionic.io/ionicons</code>. Usage: <code>&lt;ion-icon name="arrow-forward-outline"&gt;&lt;/ion-icon&gt;</code>
+          </p>
+          <div class="sg-icon-grid">
+            {icons.map(name => (
+              <div class="sg-icon-cell">
+                <ion-icon name={name} class="sg-icon"></ion-icon>
+                <span class="text-caption">{name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <!-- GRAPHICS -->
+      <section class="sg-section" id="graphics">
+        <h2 class="sg-section__title">Graphics</h2>
+        <p class="sg-section__desc">WebGL animated brand components.</p>
+
+        <h3 class="sg-subsection-title">Diamond Embed (SDF WebGL)</h3>
+        <div class="sg-diamond-demo">
+          <DiamondEmbed id="diamond-sg" labelLeft="Non-Public Data" labelRight="Attributable Insights" />
+        </div>
+
+        <h3 class="sg-subsection-title" style="margin-top: var(--spacing-3XL);">Stream Embed (Gradient WebGL)</h3>
+        <div class="sg-stream-demo">
+          <StreamEmbed id="stream-sg" />
+        </div>
+      </section>
+
+      <!-- LOGOS -->
+      <section class="sg-section" id="logos">
+        <h2 class="sg-section__title">Logos</h2>
+        <p class="sg-section__desc">All approved logo variants. SVG source files in <code>public/logos/</code>.</p>
+
+        <h3 class="sg-subsection-title"><code>&lt;Logo /&gt;</code> — theme-aware component</h3>
+        <p class="sg-section__desc">
+          Swaps full-color ↔ white-on-dark with the page theme via the
+          <code>.logo-color</code>/<code>.logo-white</code> convention in <code>global.css</code>.
+        </p>
+        <div class="sg-component-row" style="padding: var(--spacing-XL); background: var(--surface-background-bright); border-radius: var(--border-radius-M);">
+          <Logo />
+        </div>
+
+        {logoGroups.map(group => (
+          <div class="sg-logo-group">
+            <h3 class="sg-subsection-title" style="margin-top: var(--spacing-4XL);">{group.group}</h3>
+            <div class="sg-logo-grid">
+              {group.logos.map(({ file, label, dark }) => (
+                <div
+                  class:list={['sg-logo-cell', dark ? 'sg-logo-cell--dark' : 'sg-logo-cell--light']}
+                  data-section={dark ? 'always-dark' : 'always-light'}
+                >
+                  <img src={`/logos/${file}`} alt={`OpenMined ${label}`} class="sg-logo-img" />
+                  <span class="text-caption">{label}</span>
+                  <a class="sg-logo-download" href={`/logos/${file}`} download={file}>
+                    <ion-icon name="download-outline"></ion-icon> {file}
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+
+        <h3 class="sg-subsection-title" style="margin-top: var(--spacing-4XL);">Product logos</h3>
+        <div class="sg-logo-grid">
+          <div class="sg-logo-cell sg-logo-cell--light" data-section="always-light">
+            <img src="/logos/SyftBox-Logo.svg" alt="SyftBox" class="sg-logo-img" />
+            <span class="text-caption">SyftBox</span>
+            <a class="sg-logo-download" href="/logos/SyftBox-Logo.svg" download="SyftBox-Logo.svg">
+              <ion-icon name="download-outline"></ion-icon> SyftBox-Logo.svg
+            </a>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- SECTIONS -->
+      <section class="sg-section" id="sections">
+        <h2 class="sg-section__title">Sections</h2>
+        <p class="sg-section__desc">
+          <code>&lt;CtaSection /&gt;</code> — reusable call-to-action band. Always renders a
+          form via the required <code>form</code> slot; <code>heading</code>/<code>body</code> are
+          props and copy varies per placement. <code>variant</code> is
+          <code>gradient</code> (shown), <code>dark</code>, or <code>invert</code>. The card
+          follows the page theme — toggle above to check light/dark. Other full-bleed
+          sections (Partnerships, Press Room) are reviewed on-page, not here.
+          The form is the <strong>live HubSpot embed</strong> (home newsletter,
+          <code>b7a08fdc</code>) rendered via <code>@elements/FormEmbed</code> — it
+          exercises the full <code>.hs-form</code> skin (text/email inputs, textarea,
+          checkboxes, submit) and is the canonical surface for tuning that skin.
+        </p>
+        <div class="sg-bleed">
+          <CtaSection
+            heading="Take Control of Your Data's Future"
+            body="Join the OpenMined community to stay informed, get involved, and shape how privacy and AI evolve together."
+          >
+            <FormEmbed slot="form" formId="b7a08fdc-0fb5-4938-99e8-4a09e7bbc09e" />
+            <Fragment slot="fineprint">
+              <p>Joining subscribes you to the <em>OpenMined Newsletter</em> and confirms you agree with our <a href="/privacy-policy/">privacy policy</a>.</p>
+              <p><a href="/get-involved/">Explore ways to get involved ↗</a></p>
+            </Fragment>
+          </CtaSection>
+        </div>
+      </section>
+
+
+      <!-- DONATE MODAL -->
+      <section class="sg-section" id="donate">
+        <h2 class="sg-section__title">Donate Modal</h2>
+        <p class="sg-section__desc">
+          <code>&lt;DonateModal /&gt;</code> — the site-wide "Secure Donation" dialog,
+          mounted once globally in <code>Base.astro</code> and opened by any
+          <code>[data-donate-open]</code> trigger (header nav, hero/foundation/footer
+          Donate buttons, the get-involved card). A native <code>&lt;dialog&gt;</code>
+          (top-layer, <code>::backdrop</code>, Esc-to-close). It stays the light
+          "dim panel" treatment in both themes (<code>data-section="always-light"</code>),
+          faithful to live. Submit POSTs to <code>/api/create-donation</code> (an
+          on-demand route on Cloudflare Workers) which creates a Stripe Checkout Session and
+          redirects; dormant until <code>STRIPE_SECRET_KEY</code> is set. Open it to
+          check tabs, presets, custom amount, and the currency symbol swap.
+        </p>
+        <Button data-donate-open>Open donation dialog</Button>
+      </section>
+
+
+      <!-- SEARCH MODAL -->
+      <section class="sg-section" id="search">
+        <h2 class="sg-section__title">Search Modal</h2>
+        <p class="sg-section__desc">
+          <code>&lt;SearchModal /&gt;</code> — the site-wide full-screen search dialog,
+          mounted once globally in <code>Base.astro</code> and opened by any
+          <code>[data-search-open]</code> trigger (the header carries two: one in the
+          desktop nav between the links and the social icons, one in the mobile bar
+          beside the burger). Rebuilt from live's <code>.bricks-search-overlay</code>:
+          a full-viewport scrim, one centered field with the magnifier inside its
+          leading edge, and a large close glyph in the corner. Live renders a "Search
+          site" title above the field but hides it, so there is deliberately no
+          heading. A native <code>&lt;dialog&gt;</code>, so it paints over the sticky
+          header from the top layer with no <code>z-index</code> at all. Enter is a
+          plain GET to <a href="/search/">/search/</a> — no JS handler; the script
+          only blocks a blank query and clears the field on open. Open it to check the
+          scrim in both themes, the focus ring, and the close-glyph inset at mobile.
+        </p>
+        <Button data-search-open>Open search dialog</Button>
+      </section>
+
+
+      <!-- FOOTER -->
+      <section class="sg-section" id="footer">
+        <h2 class="sg-section__title">Footer</h2>
+        <p class="sg-section__desc">
+          <code>&lt;Footer /&gt;</code> is mounted as the default <code>footer</code> slot in
+          <code>layouts/Page.astro</code> — it renders at the bottom of this page.
+          Scroll down to inspect light/dark and desktop/mobile in context.
+          Override per-page via <code>&lt;CustomFooter slot="footer" /&gt;</code>.
+        </p>
+      </section>
+
+    </main>
+  </div>
+</Page>
+
+<style>
+  /* ── Layout ── */
+  .sg-layout {
+    display: flex;
+    min-height: 100vh;
+    align-items: flex-start;
+  }
+
+  .sg-sidebar {
+    position: sticky;
+    top: 0;
+    width: 220px;
+    flex-shrink: 0;
+    height: 100vh;
+    overflow-y: auto;
+    border-right: 1px solid var(--surface-foreground-default);
+    background: var(--surface-background-subtle, var(--surface-background-dim));
+  }
+
+  .sg-sidebar__inner {
+    padding: var(--spacing-L);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-L);
+  }
+
+  .sg-nav__heading {
+    color: var(--text-subtle);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .sg-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .sg-nav a {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-body);
+    text-decoration: none;
+    padding: 5px var(--spacing-S);
+    border-radius: var(--border-radius-XS);
+    transition: background-color var(--transition-base), color var(--transition-base);
+  }
+
+  .sg-nav a:hover {
+    background: var(--surface-foreground-low);
+    color: var(--text-headline);
+  }
+
+  /* ── Main ── */
+  .sg-main {
+    flex: 1;
+    min-width: 0;
+    padding: var(--spacing-3XL);
+  }
+
+  /* Let a full-bleed section specimen break out of the main padding so it
+     renders edge-to-edge (as it would on a real page). */
+  .sg-bleed {
+    margin-inline: calc(-1 * var(--spacing-3XL));
+  }
+
+  .sg-header {
+    margin-bottom: var(--spacing-4XL);
+    padding-bottom: var(--spacing-2XL);
+    border-bottom: 1px solid var(--surface-foreground-default);
+  }
+
+  .sg-header h1 { margin-bottom: var(--spacing-M); }
+
+  /* ── Section ── */
+  .sg-section {
+    margin-bottom: var(--spacing-4XL);
+    padding-bottom: var(--spacing-4XL);
+    border-bottom: 1px solid var(--surface-foreground-default);
+  }
+
+  .sg-section__title {
+    margin-bottom: var(--spacing-2XL);
+    font-size: 24px;
+    color: var(--text-headline);
+  }
+
+  .sg-section__desc {
+    color: var(--text-body);
+    margin-bottom: var(--spacing-2XL);
+  }
+
+  .sg-subsection-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-subtle);
+    margin-bottom: var(--spacing-L);
+    font-family: var(--font-primary);
+  }
+
+  /* ── Colors ── */
+  .sg-color-family { margin-bottom: var(--spacing-3XL); }
+
+  .sg-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-XS);
+  }
+
+  .sg-swatch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .sg-swatch__color {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--border-radius-XS);
+    border: 1px solid var(--surface-foreground-default);
+  }
+
+  .sg-swatch__color--sm {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    border-radius: 3px;
+  }
+
+  .sg-swatch__label { font-size: 10px; color: var(--text-subtle); }
+
+  .sg-token-table { display: flex; flex-direction: column; gap: var(--spacing-S); }
+  .sg-token-row { display: flex; align-items: center; gap: var(--spacing-M); }
+
+  /* ── Gradients ── */
+  .sg-gradients { display: flex; flex-direction: column; gap: var(--spacing-L); }
+  .sg-gradient-row { display: flex; align-items: center; gap: var(--spacing-L); }
+
+  .sg-gradient-strip {
+    width: 340px;
+    height: 44px;
+    border-radius: var(--border-radius-S);
+    flex-shrink: 0;
+  }
+
+  .sg-gradient-meta { display: flex; flex-direction: column; gap: 4px; }
+  .sg-gradient-label { font-size: 13px; color: var(--text-body); }
+
+  /* ── Surfaces ── */
+  .sg-surface-wrap {
+    padding: var(--spacing-L);
+    border-radius: var(--border-radius-M);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-M);
+  }
+
+  .sg-surface-grid {
+    display: grid;
+    gap: var(--spacing-M);
+  }
+
+  .sg-surface-grid--3 { grid-template-columns: repeat(3, 1fr); }
+  .sg-surface-grid--5 { grid-template-columns: repeat(5, 1fr); }
+
+  .sg-surface-cell {
+    padding: var(--spacing-L);
+    border-radius: var(--border-radius-S);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-XS);
+  }
+
+  .sg-surface-cell code { font-size: 10px; word-break: break-all; background: none; padding: 0; }
+  .sg-surface-cell span { font-size: 11px; color: var(--text-body); }
+
+  /* ── Typography ── */
+  .sg-type-specimens { display: flex; flex-direction: column; gap: 0; }
+
+  .sg-type-row {
+    display: flex;
+    align-items: baseline;
+    gap: var(--spacing-2XL);
+    padding: var(--spacing-M) 0;
+    border-bottom: 1px solid var(--surface-foreground-lowest);
+  }
+
+  .sg-type-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-subtle);
+    min-width: 180px;
+    flex-shrink: 0;
+    font-family: var(--font-primary);
+  }
+
+  .sg-type-demo { margin: 0; }
+
+  .sg-article-demo {
+    border: 1px solid var(--surface-foreground-default);
+    border-radius: var(--border-radius-M);
+    padding: var(--spacing-4XL);
+  }
+
+  /* ── Responsive scale table ── */
+  .sg-scale-table {
+    border: var(--border-subtle);
+    border-radius: var(--border-radius-S);
+    overflow: hidden;
+  }
+
+  .sg-scale-row {
+    display: grid;
+    grid-template-columns: 48px repeat(4, 1fr);
+    gap: var(--spacing-L);
+    padding: var(--spacing-M) var(--spacing-L);
+    border-bottom: 1px solid var(--surface-foreground-lowest);
+    font-size: 13px;
+    color: var(--text-body);
+    align-items: center;
+  }
+
+  .sg-scale-row:last-child { border-bottom: none; }
+
+  .sg-scale-row--head {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-subtle);
+    background: var(--surface-foreground-lowest);
+  }
+
+  .sg-scale-row code { font-size: 12px; }
+
+  /* ── .measure demos ── */
+  .sg-measure-demos {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2XL);
+  }
+
+  .sg-measure-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-XS);
+  }
+
+  .sg-measure-text {
+    background: var(--surface-foreground-lowest);
+    padding: var(--spacing-L);
+    border-radius: var(--border-radius-S);
+    margin: 0;
+  }
+
+  .sg-article-img-placeholder {
+    width: 100%;
+    aspect-ratio: 16 / 7;
+    background: var(--surface-foreground-low);
+    border-radius: var(--border-radius-S);
+  }
+
+  /* Prose specimen — dashed frame marks the .prose container bounds so the
+     content / wide / full zones are legible.
+
+     `overflow-x: clip` is the same backstop `article.post` carries, and it is
+     needed for the same reason: `.breakout--full` sizes itself to the VIEWPORT
+     (`min(--container-full, 100vw - gutters)`) and overflows its grid track to
+     get edge-to-edge. In a real post that track is centred in the page, so the
+     overflow is symmetric and lands in the gutters; here the specimen sits in the
+     narrower main column beside `.sg-sidebar`, so the same block ran up to 132px
+     past the right edge and made the style guide itself scroll sideways at every
+     width. Clipping keeps the specimen honest about its own container instead. */
+  .sg-prose-frame {
+    border: 1px dashed var(--surface-foreground-default);
+    border-radius: var(--border-radius-S);
+    padding-block: var(--spacing-2XL);
+    /* The frame stands in for the page shell here, so it owns the gutter —
+       `.prose-article` no longer carries one of its own. */
+    padding-inline: var(--spacing-XL);
+    overflow-x: clip;
+  }
+  .sg-prose-fullblock {
+    background: var(--color-teal-400);
+    color: #fff;
+    text-align: center;
+    padding: var(--spacing-L);
+    border-radius: var(--border-radius-S);
+    font-family: monospace;
+    font-size: 14px;
+  }
+
+  /* ── Spacing ── */
+  .sg-spacing-list { display: flex; flex-direction: column; gap: var(--spacing-S); }
+
+  .sg-spacing-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-L);
+  }
+
+  .sg-spacing-label { font-size: 12px; min-width: 160px; }
+  .sg-spacing-name { font-size: 11px; color: var(--text-subtle); }
+
+  /* ── Border Radius ── */
+  .sg-radius-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2XL);
+    align-items: flex-end;
+  }
+
+  .sg-radius-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-S);
+  }
+
+  .sg-radius-box {
+    width: 72px;
+    height: 72px;
+    background: var(--surface-foreground-low);
+    border: 2px solid var(--surface-foreground-high);
+  }
+
+  .sg-radius-cell code, .sg-radius-cell span { font-size: 11px; color: var(--text-subtle); text-align: center; }
+
+  /* ── Outlines ── */
+  .sg-outline-grid { display: flex; gap: var(--spacing-3XL); flex-wrap: wrap; align-items: flex-start; }
+
+  .sg-outline-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-S);
+    max-width: 200px;
+  }
+
+  .sg-outline-box {
+    width: 160px;
+    height: 72px;
+    border-radius: var(--border-radius-S);
+  }
+
+  .sg-outline-cell code, .sg-outline-cell span { font-size: 11px; color: var(--text-subtle); text-align: center; }
+
+  /* ── Shadows ── */
+  .sg-shadow-grid { display: flex; gap: var(--spacing-3XL); flex-wrap: wrap; }
+
+  .sg-shadow-cell {
+    width: 160px;
+    height: 100px;
+    background: var(--surface-background-dim, var(--surface-foreground-lowest));
+    border-radius: var(--border-radius-M);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-XS);
+  }
+
+  .sg-shadow-cell code, .sg-shadow-cell span { font-size: 11px; color: var(--text-body); }
+
+  /* ── Card float ──
+     Bare specimen boxes: `.card-float` supplies the whole hover, so the only
+     thing declared per-cell is the resting shadow VAR (never box-shadow) and
+     enough surface to see it against. */
+  .sg-cardfloat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+    gap: var(--spacing-2XL);
+    /* the raised cell's shadow needs room to grow into */
+    padding-block: var(--spacing-S) var(--spacing-2XL);
+  }
+  .sg-cardfloat {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-XS);
+    min-height: 130px;
+    padding: var(--spacing-2XL);
+    border-radius: var(--border-radius-S);
+    background-color: var(--surface-background-bright);
+    color: var(--text-body);
+    text-decoration: none;
+  }
+  .sg-cardfloat--raised {
+    --card-float-shadow: var(--shadow-md);
+    --card-float-shadow-hover: var(--shadow-lg);
+  }
+  .sg-cardfloat--static { opacity: 0.75; }
+  .sg-cardfloat strong { color: var(--text-headline); }
+  .sg-cardfloat span { font-size: 12px; }
+  .sg-cardfloat__note { color: var(--text-subtle); }
+
+  /* ── Transitions ── */
+  .sg-transition-grid { display: flex; gap: var(--spacing-2XL); flex-wrap: wrap; align-items: flex-start; }
+
+  .sg-transition-cell {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-S);
+    max-width: 240px;
+  }
+
+  .sg-transition-box {
+    width: 160px;
+    height: 72px;
+    background: var(--surface-foreground-low);
+    border-radius: var(--border-radius-S);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    cursor: default;
+    border: 1px solid var(--surface-foreground-default);
+  }
+
+  .sg-transition-box:hover { background: var(--color-teal-100); }
+  :global([data-theme="dark"]) .sg-transition-box:hover { background: var(--color-teal-900); }
+
+  .sg-transition-cell code { font-size: 12px; }
+  .sg-transition-cell span { font-size: 11px; color: var(--text-subtle); line-height: 1.4; }
+
+  /* ── Component rows ── */
+  .sg-component-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-L);
+    align-items: center;
+    margin-bottom: var(--spacing-3XL);
+  }
+
+  .sg-component-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-L);
+  }
+
+  /* Button with icon */
+  .btn-icon-row {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-S);
+  }
+
+  /* ── Links ── */
+  .sg-link-row {
+    display: flex;
+    align-items: baseline;
+    gap: var(--spacing-2XL);
+    padding: var(--spacing-M) 0;
+    border-bottom: 1px solid var(--surface-foreground-lowest);
+  }
+
+  .sg-link-row .sg-type-label { min-width: 200px; flex-shrink: 0; }
+
+  .link-subtle {
+    color: var(--text-subtle);
+    text-decoration: none;
+    transition: opacity var(--transition-base);
+  }
+  .link-subtle:hover { opacity: 0.7; }
+
+  .link-nav { text-decoration: none; color: var(--text-body); }
+
+  .sg-link-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-XS);
+  }
+  .sg-link-icon__icon { font-size: 14px; flex-shrink: 0; }
+
+  /* ── Forms ── */
+  .sg-form-demo {
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-L);
+  }
+
+  .sg-form-checks { display: flex; flex-direction: column; gap: var(--spacing-M); }
+
+  .sg-hubspot-stub {
+    padding: var(--spacing-2XL);
+    border: 2px dashed var(--surface-foreground-default);
+    border-radius: var(--border-radius-S);
+    text-align: center;
+  }
+
+  /* ── Icons ── */
+  .sg-icon-grid { display: flex; flex-wrap: wrap; gap: var(--spacing-L); }
+
+  .sg-icon-group { margin-top: var(--spacing-2XL); }
+  .sg-icon-group:first-of-type { margin-top: var(--spacing-L); }
+  .sg-icon-group__title { margin: 0 0 var(--spacing-3XS); }
+  .sg-icon-group__desc { margin: 0 0 var(--spacing-M); color: var(--text-subtle); max-width: 60ch; }
+
+  .sg-icon-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-XS);
+    width: 80px;
+  }
+
+  .sg-icon { font-size: 28px; color: var(--text-body); }
+  .sg-icon-cell span { text-align: center; word-break: break-all; }
+
+  /* ── Grouped sub-sections (Styles, Elements) ── */
+  .sg-group {
+    margin-top: var(--spacing-4XL);
+    padding-top: var(--spacing-4XL);
+    border-top: 1px solid var(--surface-foreground-lowest);
+  }
+  .sg-group:first-of-type {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  /* specimen-only layout helpers */
+  .sg-two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-5XL);
+  }
+  .sg-accordion-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-L);
+  }
+  @media (max-width: 767px) {
+    .sg-two-col { grid-template-columns: 1fr; }
+  }
+
+  .sg-group-heading {
+    font-family: var(--font-primary);
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text-headline);
+    margin-bottom: var(--spacing-2XL);
+  }
+
+  /* ── Form submit ── */
+  .sg-form-submit :global(.btn) {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* ── Graphics ── */
+  .sg-diamond-demo {
+    width: 100%;
+    max-width: 600px;
+    /* No fixed height — DiamondEmbed sets aspect-ratio via JS */
+  }
+
+  .sg-stream-demo {
+    width: 100%;
+    /* No fixed height — StreamEmbed sets aspect-ratio via JS */
+  }
+
+  /* ── Logos ── */
+  .sg-logo-group { margin-bottom: var(--spacing-4XL); }
+
+  /* `minmax(0, 1fr)`, not `1fr`: a bare `1fr` track is `minmax(auto, 1fr)`, so it
+     cannot shrink below its content's min-content width. Each cell's floor is
+     284px (a 220px logo + 2 × --spacing-3XL padding), so three of them held the
+     grid at 900px and pushed the style guide itself into a sideways scroll of up
+     to 164px between 992 and 1199, where the sidebar leaves the main column
+     narrower than that. Zeroing the track minimum lets the cells shrink and the
+     logos scale inside them (`img` is already `max-width: 100%` globally). */
+  .sg-logo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--spacing-2XL);
+  }
+
+  .sg-logo-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-M);
+    padding: var(--spacing-3XL);
+    border-radius: var(--border-radius-M);
+    min-height: 180px;
+  }
+
+  .sg-logo-cell--light {
+    background: var(--surface-background-default);
+    border: 1px solid var(--surface-foreground-default);
+  }
+
+  /* always-dark context provides the dark palette; no hardcoding needed */
+  .sg-logo-cell--dark { background: var(--surface-background-dim); }
+
+  .sg-logo-img { max-width: 220px; max-height: 80px; object-fit: contain; }
+
+  .sg-logo-download {
+    color: var(--text-subtle);
+    /* Filenames are single long tokens with no break opportunity, so they set the
+       cell's min-content width once the tracks can shrink (above). */
+    overflow-wrap: anywhere;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-XS);
+    font-size: 11px;
+    transition: color var(--transition-base);
+  }
+  .sg-logo-download:hover { color: var(--color-interactive-hover); }
+
+  /* ── Responsive ── */
+  @media (max-width: 991px) {
+    /* `align-items: stretch` overrides the desktop `flex-start`, and the stacked
+       layout needs it: on the column axis `flex-start` sizes each child to its
+       own content instead of the container, so `.sg-main` became as wide as its
+       widest specimen — 708px at a 390px viewport — and took the whole page
+       sideways with it. (`.sg-main`'s `min-width: 0` can't help; that governs
+       shrinking below min-content, not this.) Stretched, the column is the
+       viewport width and specimens that scroll internally, like `.code-block`,
+       go back to doing so. */
+    .sg-layout { flex-direction: column; align-items: stretch; }
+    .sg-sidebar {
+      position: static;
+      width: 100%;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--surface-foreground-default);
+    }
+    .sg-nav { flex-direction: row; flex-wrap: wrap; }
+    .sg-main { padding: var(--spacing-2XL); }
+    .sg-bleed { margin-inline: calc(-1 * var(--spacing-2XL)); }
+    .sg-surface-grid--3 { grid-template-columns: repeat(3, 1fr); }
+    .sg-surface-grid--5 { grid-template-columns: repeat(3, 1fr); }
+    .sg-gradient-strip { width: 200px; }
+    .sg-logo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  @media (max-width: 767px) {
+    .sg-surface-grid--3,
+    .sg-surface-grid--5 { grid-template-columns: repeat(2, 1fr); }
+    .sg-type-row { flex-direction: column; align-items: flex-start; gap: var(--spacing-XS); }
+    .sg-type-label { min-width: auto; }
+    .sg-link-row { flex-direction: column; gap: var(--spacing-XS); }
+    .sg-logo-grid { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>

@@ -1,0 +1,74 @@
+---
+title: "What is the Diffie-Hellman key exchange protocol?"
+slug: diffie-hellman-key-exchange
+date: 2020-07-09T20:28:33
+updated: 2024-12-09T20:47:10
+categories: [research]
+tags: [private-set-intersection]
+authors: [will-clark]
+draft: false
+legacyId: 2151
+---
+
+__****This post is part of our [Privacy-Preserving Data Science, Explained](https://blog.openmined.org/private-machine-learning-explained/) series.****__
+
+This post introduces the [Diffie-Hellman key exchange protocol](https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange). In the [previous post](https://blog.openmined.org/private-set-intersection-with-the-paillier-cryptosystem/) we saw how to build a private set intersection (PSI) protocol on top of the [Paillier cryptosystem](https://blog.openmined.org/the-paillier-cryptosystem/). We can also build a PSI protocol on top of the Diffie-Hellman key exchange protocol, as we’ll see next time.
+
+## The problem
+
+Alice and Bob want to send encrypted messages to each other using a [symmetric encryption scheme](https://en.wikipedia.org/wiki/Symmetric-key_algorithm), so they need a shared secret key for encryption and decryption. How do they agree on a secret key without revealing it to Eve who is eavesdropping on all their communications?
+
+## The solution
+
+The solution to the problem is to find two secret-based one-way functions whose composition is commutative. Let’s break this down…
+
+-   _Secret-based_ means that in order to apply the function to an input it is necessary to know a secret parameter.
+-   A _one-way function_ is a function for which it is easy to compute the output given an input value, but hard to compute the input given an output value. A good example would be a cryptographic hash function which uses a salt as a secret parameter.
+-   _Function composition_ is where you combine two or more functions into a single function, by applying each function to the output of the previous function. For example, suppose you had two functions, (addFive(x) = x + 5) and (multiplyByThree(x) = x times 3). You could compose a new function (addFiveThenMultiplyByThree(x) = multiplyByThree(addFive(x))) out of those.
+-   _Commutative_ means that the order does not matter, so in the context of function composition it means it does not matter which function you apply first. The example above is not commutative because the order matters: adding 5 then multiplying by 3 is not the same thing as multiplying by 3 then adding 5.
+
+Note that cryptographic hash functions with secret salts, although one-way, generally do not meet the requirement because their composition is not commutative: (SHA256(secret\_1 Vert SHA256(secret\_2 Vert input))) is not the same as (SHA256(secret\_2 Vert SHA256(secret\_1 Vert input))).
+
+The original proposal from Diffie and Hellman is to use modular exponentiation as detailed below. This is because it is easy to compute (g^e mod p) but difficult to compute the values of (g) and (e) given only the output and the modulus (p). So if you pick two secret exponents (a) and (b) you get two one-way functions: (f\_1(x) = x^a mod p) and (f\_2(x) = x^b mod p). Moreover, the composition of these functions is commutative because ((g^a)^b = (g^b)^a mod p).
+
+## The protocol
+
+1.  Alice randomly generates a private key (a), and picks a large prime (p) and a number (g), which is a [primitive root](https://en.wikipedia.org/wiki/Primitive_root_modulo_n) modulo (p).
+2.  Alice calculates (A = g^a mod p).
+3.  Alice sends (p), (g), and the calculated value (A) to Bob.
+4.  Bob randomly generates a private key (b).
+5.  Bob calculates (g^{ab} mod p) by calculating (A^b mod p).
+6.  Bob calculates (B = g^b mod p).
+7.  Bob sends the calculated value (B) back to Alice.
+8.  Alice calculates (g^{ab} mod p) by calculating (B^a mod p).
+
+Alice and Bob now share a secret key (g^{ab} mod p). Eve the eavesdropper has seen only (g), (p), (A), and (B). She is unable to derive the value of (a) from (A) or (b) from (B) efficiently without solving the [discrete logarithm problem](https://en.wikipedia.org/wiki/Discrete_logarithm). And without either of those values she is unable to calculate the secret key.
+
+## Code
+
+As usual, I have implemented the Diffie-Hellman key exchange protocol in my [learning repository](https://github.com/willclarktech/privacy-implementations), and the usual warning applies:
+
+**WARNING: This library is not recommended for production use. It was written for learning purposes only.**
+
+```js
+const diffieHellman = require("./build/cryptosystem/diffie-hellman");
+
+const alice = new diffieHellman.Party(); // Slow! Finding appropriate prime numbers.
+const { g, p } = alice;
+const bob = new diffieHellman.Party({ g, p });
+
+const aliceIntermediateValue = alice.raise(g);
+const bobIntermediateValue = bob.raise(g);
+
+const aliceSecret = alice.raise(bobIntermediateValue);
+const bobSecret = bob.raise(aliceIntermediateValue); // Same as aliceSecret
+```
+
+## Summary
+
+In this post we’ve seen how the Diffie-Hellman key exchange protocol allows two parties to agree on a single secret without an eavesdropper discovering what it is. Also note that Alice and Bob do not reveal their respective private keys to each other. This is an important fact, as we’ll see in the next post, where we build a PSI protocol on top of this.
+
+## Links
+
+-   [Original paper](https://ee.stanford.edu/~hellman/publications/24.pdf)
+-   [Node.js implementation](https://github.com/willclarktech/privacy-implementations/tree/a7797d7/src/cryptosystem/diffie-hellman) from my privacy learning repository

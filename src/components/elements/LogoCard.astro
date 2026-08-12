@@ -1,0 +1,124 @@
+---
+/**
+ * LogoCard — a whole-card link: an org logo centered on an always-light white
+ * card, with a caption title beneath. The logo renders in its natural brand
+ * colors on a fixed light surface (legible in both page themes). Lifts on hover
+ * via the shared `.card-float` utility (`global.css → .card-float`).
+ *
+ * The reusable card behind the home "Press Room" grid and the for-ai-auditors
+ * "Learn about our AI auditing work with…" grid — same anatomy, different copy.
+ *
+ * Rebuilt from live home #brxe-e88833 (Press Room). Reference:
+ * Measured off the live page.
+ *
+ * Live → token mapping:
+ *   card padding     48 / 24 / 18px (mobile 30/20/20) → 5XL / 2XL / L
+ *   card radius      6px                              → --border-radius-S
+ *   card shadow      0 24 48 -8 … (= --shadow-lg)      → --shadow-md at rest, lg on hover
+ *                    Deliberately re-seated one step down the scale (approved
+ *                    2026-07-29) so the hover has somewhere to grow into: lg is
+ *                    the top of the scale, and the shared card hover is "one
+ *                    step up". Live's exact value is now the RAISED state.
+ *   card bg          #fff                             → --surface-background-default (always-light)
+ *   title            Inter 14px / 500 / 21            → 14px / 500 / 1.5
+ *
+ * Card height is a prop (`minHeight`) so the tall Press Room card (310px) and
+ * the shorter auditors card share one component. The logo sits in a fixed 4:3
+ * box (100% of the inner width) so every logo box is a consistent shape across
+ * the grid; the mark is contained within it (fills the box, preserves aspect).
+ */
+import OrgLogo from '@components/media/OrgLogo.astro';
+
+interface OrgData {
+  id: string;
+  name: string;
+  logo: string;
+  monochrome?: boolean;
+  url?: string;
+}
+
+interface Props {
+  org: OrgData;
+  href: string;
+  title: string;
+  /** Card min-height (live Press Room: 310px). */
+  minHeight?: string;
+}
+const { org, href, title, minHeight = '310px' } = Astro.props;
+const external = /^https?:\/\//.test(href);
+---
+
+<a
+  class="logo-card card-float"
+  data-section="always-light"
+  href={href}
+  style={`--logo-card-min:${minHeight}`}
+  {...external ? { target: '_blank', rel: 'noopener noreferrer' } : {}}
+>
+  <span class="logo-card__logo">
+    <OrgLogo org={org} />
+  </span>
+  <p class="logo-card__title">{title}</p>
+</a>
+
+<style>
+  /* Card — always-light: white surface in both page themes.
+     A raised card: it rests with a shadow and grows one step on hover. The
+     resting shadow is declared as `--card-float-shadow`, NOT `box-shadow` — a
+     scoped box-shadow here would outrank the utility and pin the card flat
+     (see `global.css → .card-float`). */
+  .logo-card {
+    --card-float-shadow: var(--shadow-md);
+    --card-float-shadow-hover: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: var(--spacing-5XL) var(--spacing-2XL) var(--spacing-L); /* live: 48/24/18 */
+    min-height: var(--logo-card-min);
+    border-radius: var(--border-radius-S);
+    background-color: var(--surface-background-default);
+    text-decoration: none;
+  }
+
+  /* Consistent logo box: full inner width, fixed 4:3 aspect — so every card's
+     logo occupies an identically-shaped area regardless of card width. The
+     mark is positioned absolutely so it contributes no height: only aspect-ratio
+     governs the box (an in-flow logo would let the flex item grow past 4:3). */
+  .logo-card__logo {
+    flex: none;
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+  }
+  /* Mark inset within the box, contained (fills the available space, keeps its
+     own aspect). Color-mode OrgLogo renders the <img> AS .org-logo; mono renders
+     a <span> wrapping an <svg>. Size both, overriding OrgLogo's defaults. */
+  .logo-card__logo :global(.org-logo) {
+    position: absolute;
+    top: 12%;
+    left: 5%;
+    width: 90%;
+    height: 54%;
+    object-fit: contain;
+  }
+  .logo-card__logo :global(.org-logo svg) {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+  }
+
+  .logo-card__title {
+    margin: 0;
+    color: var(--text-body);
+    font-size: 14px;  /* live: 14px (no token) */
+    font-weight: 500; /* live: medium */
+    line-height: 1.5;
+  }
+
+  @media (max-width: 991px) {
+    .logo-card {
+      padding: var(--spacing-3XL) var(--spacing-XL) var(--spacing-XL); /* live mobile: 30/20/20 */
+    }
+  }
+</style>

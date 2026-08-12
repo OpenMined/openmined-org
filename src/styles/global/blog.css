@@ -1,0 +1,145 @@
+/* ══════════════════════════════════════════════════════════════════
+   BLOG — listing page chrome
+   The pinned category nav + toolbar contract, and the results footer cloned
+   from a <template> (a clone carries no scoped-style id, so these rules
+   cannot live in the component's own <style>).
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Blog listing sticky chrome ───────────────────────────────────────
+   The category nav and the toolbar each pin as they reach the top of the
+   scroll area, stacked — nav above bar — so the toolbar's expanded search
+   field always has a clear row of its own. Live does the same
+   (`.category-sticky.js-sticky` at `top: 0`, the toolbar block at
+   `top: <nav height>`), and un-sticks its site header on these pages so the
+   two don't compete; ours does that via `@layouts/BlogListing.astro`.
+
+   Both bars keep their in-flow box exactly as it was: the breathing room
+   above and the background that hides cards passing beneath come from `top`
+   plus the `::before` bleed below, never padding. Turning stickiness on
+   therefore changes no page spacing, and the bleed extends the background
+   past the container edges the way live's over-wide bar does.
+
+   Shared here rather than scoped because the two bars are separate
+   components (`BlogCategoryNav`, `BlogToolbar`) that have to agree on one
+   gap and one stacking order. `--blog-sticky-nav-h` is the pinned nav's
+   bottom edge; BlogToolbar's script publishes the measured value (which is
+   what makes a wrapped nav come out right) over the one-line fallback. */
+.blog-sticky {
+  --blog-sticky-gap: var(--spacing-2XL); /* live 26px above the pinned nav */
+  position: sticky;
+  /* `--z-base`, NOT `--z-sticky`: this is page chrome, and the site header is the
+     layer above it. Sharing `--z-sticky` with the header let these bars win on DOM
+     order and paint over the header's nav submenu. Still clears the cards it pins
+     over (`--z-card`), which is the only thing it has to beat. */
+  z-index: var(--z-base);
+  /* No fill until it actually pins. Unpinned, the bar sits in normal flow with
+     nothing behind it to hide, so the fill bought nothing visually — but it still
+     painted, and `--z-base` is above `--z-card`, so a hovered card's tilted near
+     edge disappeared under the band instead of overlapping it (the featured post
+     sits directly under the category nav on the listing).
+     `is-stuck` is set by BlogToolbar's script, which tracks BOTH bars; the mobile
+     width where the toolbar goes static never gets the class, so it never fills.
+     The ::before bleed inherits this, so it follows for free. */
+  background-color: transparent;
+  /* The fill switches INSTANTLY, deliberately. The category nav is a <nav>, so it
+     is caught by the theme-fade rule above (`background-color
+     var(--transition-theme)`, 0.4s) — which would fade this fill in as the bar
+     pins, leaving a half-opaque band with content sliding visibly through it for
+     the first 0.4s of a fast scroll. The fill's whole job is to be opaque the
+     moment the bar starts covering something. No loss while pinned: the bar then
+     carries the page's own background, so there is nothing to cross-fade against.
+     `color` is restated at the theme duration because naming only background-color
+     here would drop it from the inherited list and snap the bar's text on a theme
+     switch while the rest of the page fades. */
+  transition: background-color 0s, color var(--transition-theme);
+}
+.blog-sticky.is-stuck {
+  background-color: var(--surface-background-default);
+}
+
+/* The background bleed, as a pseudo-element rather than a box-shadow spread: a
+   shadow is paint-only, so it hid the cards behind the band but still let clicks
+   through to them — a 72px strip of invisible-but-clickable card titles across
+   the top of the viewport. This is part of the bar's own hit area, so the band
+   swallows those clicks like the padding it stands in for. Absolute, so it still
+   costs no layout; `z-index: -1` is clamped inside the bar's own stacking
+   context, putting it behind the bar's content but above the page.
+
+   It bleeds top and sides but STOPS AT THE BAR'S BOTTOM EDGE. The gap below a
+   bar equals `--blog-sticky-gap`, so a symmetric bleed landed exactly flush with
+   the top of whatever follows — fine while nothing moves, but a hovered card
+   lifting `--card-float-lift` slid its top edge under the band and looked
+   sheared off. Nothing needs covering down there: while pinned, the bar's own
+   background hides what passes behind it, and the top bleed covers the gap above
+   (between the viewport edge, or between a stacked nav and this bar).
+
+   The two axes are DIFFERENT quantities and must not share one value. Vertically
+   the bleed is the gap it covers (`--blog-sticky-gap`). Horizontally it is the
+   PAGE GUTTER — `.container` reserves `--spacing-XL` each side, so bleeding by
+   the 24px vertical gap instead put the band 4px past the viewport edge and made
+   every blog listing scroll sideways by 4px at any width below the container cap.
+   The gutter is also the most it can ever bleed without overflowing, and it
+   loses nothing: what the bleed has to cover is the cards, and they stop at the
+   content edge. */
+.blog-sticky::before {
+  content: '';
+  position: absolute;
+  inset-block: calc(-1 * var(--blog-sticky-gap)) 0;
+  inset-inline: calc(-1 * var(--spacing-XL));
+  z-index: -1;
+  background-color: inherit;
+}
+
+.blog-sticky--nav {
+  top: var(--blog-sticky-gap);
+}
+
+/* Alone (tag / locations archives, which render no category nav) the bar pins
+   straight to the top gap. */
+.blog-sticky--bar {
+  top: var(--blog-sticky-gap);
+}
+
+/* Behind a pinned nav it stacks under it. The nav is an earlier sibling in the
+   same section on every listing that has one, so no wrapper is needed. */
+.blog-sticky--nav ~ .blog-sticky--bar {
+  top: calc(var(--blog-sticky-nav-h, calc(1lh + var(--blog-sticky-gap))) + var(--blog-sticky-gap));
+}
+
+@media (max-width: 767px) {
+  /* Live pins only the category nav at mobile. The toolbar is two rows wide
+     here, and a pinned nav + bar would hold most of a 390px viewport. */
+  .blog-sticky--bar {
+    position: static;
+  }
+  /* The bleed goes with the pinning — an absolute child of a static box would
+     anchor to some ancestor instead of the bar. */
+  .blog-sticky--bar::before {
+    display: none;
+  }
+}
+
+
+/* ── Blog listing results footer ─────────────────────────────────────
+   The footer BlogToolbar's controller puts under the grid while a Topic /
+   Sort / Search is applied — it stands in for BlogPagination's own
+   load-more block, which steps aside for the duration. Its markup is a
+   <template> in BlogToolbar cloned into the page, and a clone carries no
+   scoped-style id, so these rules can't live in that component's <style>.
+   Shape deliberately matches `BlogPagination.astro → .blog-pagination`. */
+.blog-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-L);
+  margin-top: var(--spacing-3XL);
+}
+.blog-results__empty {
+  margin: 0;
+  color: var(--text-subtle);
+}
+/* Matches `BlogPagination.astro → .blog-pagination__sentinel`. */
+.blog-results__sentinel {
+  width: 100%;
+  height: 1px;
+}

@@ -1,0 +1,114 @@
+---
+/**
+ * SyftFlwrBuildPaths — syft-flwr's bottom CTA: a colorful gradient band with ONE
+ * light panel card that holds the heading + intro and BOTH paths ("serious
+ * projects" → Request-a-Demo form, "tinkerers" → tutorial) side by side.
+ * Page-specific (the 2-path layout is unique to syft-flwr); the home CTA's
+ * CtaSection is the single-form variant.
+ *
+ * Rebuilt from live "Build with syft-flwr, your way" (one panel card, two 380px
+ * form columns). The "serious projects" path is the live HubSpot "Request a Demo"
+ * form (formId ac54ca2c); the "tinkerers" path pairs the Take-the-Tutorial button
+ * with the Slack-community "Get my invite" form (formId 1f5e3937). Both embedded
+ * via @elements/FormEmbed. An OpenMined brand mark sits above the headline.
+ *
+ * Live → token mapping (measured off production):
+ *   band bg          full-spectrum gradient   → /images/cta-gradient-bg.png (shared)
+ *   panel card       one card, always-light    → --surface-foreground-low (always-light)
+ *   card radius      16px                       → --border-radius-L
+ *   card padding     40 / 80 / 72              → --spacing-4XL / --spacing-full (snap)
+ *   two paths        flex row, 380px each, gap 88 → flex columns, gap --spacing-full
+ */
+import Button from '@ui/Button.astro';
+import FormEmbed from '@elements/FormEmbed.astro';
+import Text from '@ui/Text.astro';
+---
+
+<section class="build-paths">
+  <div class="container">
+    {/* No data-section: the card themes off --surface-foreground-low, matching live. */}
+    <div class="build-paths__card">
+      <div class="build-paths__head">
+        <img class="build-paths__icon" src="/logos/OpenMined-Icon.svg" alt="" width="56" height="56" />
+        <Text as="h3" class="build-paths__heading">Build with syft-flwr, your way</Text>
+        <Text as="p" class="build-paths__intro" measure="30em">
+          syft-flwr is ready for hands-on teams and curious tinkerers. Choose the path that fits your work.
+        </Text>
+      </div>
+
+      <div class="build-paths__paths">
+        <div class="build-paths__path">
+          <Text as="h4" class="build-paths__path-title">For serious projects</Text>
+          <Text as="p" class="build-paths__path-body">
+            Launch or scale a real federation project with guided support from our team.
+          </Text>
+          <FormEmbed formId="ac54ca2c-aa24-4450-b73d-cf228144bdff" />
+        </div>
+
+        <div class="build-paths__path">
+          <Text as="h4" class="build-paths__path-title">For tinkerers and explorers</Text>
+          <Text as="p" class="build-paths__path-body">
+            Kick the tires with docs and a walkthrough tutorial. Get unstuck fast in our community.
+          </Text>
+          <Button variant="outline" href="https://openmined.org/blog/zero-setup-federated-learning-google-colab/">Take the Tutorial</Button>
+          <!-- Slack community "Get my invite" form — live formId 1f5e3937 (probe-forms.mjs) -->
+          <FormEmbed formId="1f5e3937-1146-473c-bbe4-d526ffd1b91a" />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .build-paths {
+    padding-block: var(--spacing-full);
+    background-image: url('/images/cta-gradient-bg.png');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+  }
+
+  /* one light panel card holding heading + both paths */
+  .build-paths__card {
+    max-width: var(--col-10);
+    margin-inline: auto;
+    padding: var(--spacing-4XL) var(--spacing-full) var(--spacing-full); /* live: 40/80/72 */
+    border-radius: var(--border-radius-L); /* live: 16px */
+    background-color: var(--surface-foreground-low);
+  }
+
+  .build-paths__head {
+    text-align: center;
+    max-width: var(--col-8);
+    margin: 0 auto var(--spacing-5XL);
+  }
+  /* OpenMined icon above the headline (live: brand mark over the CTA title) */
+  .build-paths__icon {
+    display: block;
+    width: 56px;
+    height: 56px;
+    margin: 0 auto var(--spacing-XL);
+  }
+  .build-paths__heading { margin-bottom: var(--spacing-L); }
+  /* subtitle: width via .measure (measure="30em" in markup); centered here */
+  .build-paths__intro {
+    margin: 0 auto;
+  }
+
+  /* two form paths side by side */
+  .build-paths__paths {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-full); /* live: 88px */
+  }
+  .build-paths__path {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2XL);
+  }
+  @media (max-width: 991px) {
+    .build-paths__paths { grid-template-columns: 1fr; }
+  }
+  .build-paths__path-title { margin: 0; }
+  .build-paths__path-body { margin: 0; }
+</style>

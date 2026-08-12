@@ -1,0 +1,26 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      // Whole-project type check, once. Bound to the default build shortcut
+      // (Cmd+Shift+B) because the editor only reports errors for files you have
+      // open — this is the only thing that reads all of src/.
+      "label": "type-check",
+      "type": "npm",
+      "script": "check",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      // Same check, re-run on every save. Leave it running in a terminal while
+      // working; file:line in its output is clickable.
+      "label": "type-check (watch)",
+      "type": "shell",
+      "command": "npm run check -- --watch --preserveWatchOutput",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    }
+  ]
+}

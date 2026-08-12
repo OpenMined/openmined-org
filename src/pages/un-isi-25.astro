@@ -1,0 +1,180 @@
+---
+import Page from '@layouts/Page.astro';
+import SimpleHero from '@components/sections/hero/SimpleHero.astro';
+import CtaSection from '@components/sections/cta/CtaSection.astro';
+import FormEmbed from '@elements/FormEmbed.astro';
+// Co-brand lockup (OM diamond × UN PET Lab). Inlined so its wordmark, recolored
+// to `currentColor`, flips with the page theme — live is light-only, but our
+// theme-aware surface would hide a black wordmark on the dark hero. The OM
+// diamond + UN globe keep their fixed brand colors. Build-time `?raw` import
+// (workerd-safe — no runtime fs).
+import lockupSvg from '@assets/un-pet-lab-lockup.svg?raw';
+
+/**
+ * /un-isi-25/ — OpenMined × UN PET Lab hub. Rebuilt VERBATIM from live
+ * https://openmined.org/un-isi-25/.
+ * Standard site chrome. Layout mirrors live: co-brand lockup over a centered
+ * hero + lede, a divider, then an image-left ISI row and three divider-separated
+ * prose blocks in one centered column, closing on the gradient CTA form band.
+ *
+ * The event (ISI Congress) is past (9 Oct 2025), but the page is kept as an
+ * evergreen program hub (UN PET Lab, recordings, case-study repo, the active
+ * syft_flwr FL pilot); the ISI section stays verbatim (its papers + slides links
+ * remain valuable). Assets localized → public/images/: the co-brand lockup SVG
+ * (inline on live), the ISI Congress banner, and the CTA box icon.
+ */
+---
+
+<Page
+  title="OpenMined × UN PET Lab — OpenMined"
+  description="OpenMined co-founded the UN PET Lab in 2019 with National Statistics Offices and the UN Statistics Division — advancing privacy-enhancing technologies for official statistics."
+>
+  <!-- § Hero — co-brand lockup over centered title + lede. Top padding dialed to
+       live's ~40px via the --hero-pad-top seam (no new SimpleHero padTop variant). -->
+  <div class="un-isi-hero">
+    <SimpleHero heading="OpenMined + UN PET Lab" ledeMeasure="44em">
+      <Fragment slot="eyebrow">
+        <span class="un-isi-lockup" role="img" aria-label="OpenMined × UN PET Lab" set:html={lockupSvg} />
+      </Fragment>
+      <p>OpenMined co-founded the UN PET Lab in 2019, in collaboration with National Statistics Offices and the UN Statistics Division. This group explores practical applications of PETs in official statistics, and contributed to the development of the <a href="https://unstats.un.org/bigdata/task-teams/privacy/guide/2023_UN%20PET%20Guide.pdf">UN PET Guide</a>. To join the PET Lab, please email <a href="mailto:dave@openmined.org">dave@openmined.org</a></p>
+    </SimpleHero>
+  </div>
+
+  <!-- § Body — centered stack. The ISI row sits in the wide col-8 track (its
+       intro divider matches); the three following sections + their dividers
+       drop to a centered col-6 track (matches live's narrower after-column). -->
+  <section class="un-isi">
+    <div class="container un-isi__col">
+      <hr class="section-divider" />
+
+      <!-- ISI World Statistics Congress 2025 — equal 2-col: title+image LEFT,
+           copy RIGHT. -->
+      <div class="un-isi__media">
+        <div class="un-isi__media-lead">
+          <h3 class="un-isi__media-title">ISI World Statistics Congress 2025</h3>
+          <div class="un-isi__media-img">
+            <img src="/images/un-isi-congress.png" alt="ISI World Statistics Congress 2025 — The Hague" width="1024" height="576" data-fade />
+          </div>
+        </div>
+        <div class="un-isi__media-text">
+          <p>We are presenting the work of the PET Lab at the ISI World Statistics Congress in The Hague in session <a href="https://www.isi-next.org/conferences/session/719/details/">IPS 882 – The Role Of Privacy-Enhancing Technologies In New Data Partnership Scenarios For Official Statistics</a>, on Thursday, 9th October 2025, 10:50am-12:30 pm.</p>
+          <p>We will present two papers recently published in a special edition of the Statistical Journal of the IAOS on PETs (<a href="https://journals.sagepub.com/toc/sjib/41/3">Volume 41, Issue 3</a>):</p>
+          <ol>
+            <li><a href="https://doi.org/10.1177/18747655251355707">How Privacy Enhancing Technologies can advance responsible data sharing</a>, Ronald Jansen (United Nations), Dave Buckley (OpenMined), Matjaz Jug (Statistics Netherlands), and Keping Yao (United Nations)</li>
+            <li><a href="https://doi.org/10.1177/18747655251355702">Now is the time for Privacy Enhancing Technologies to empower official statistics</a>, Dave Buckley (OpenMined), Andrew Trask (OpenMined)</li>
+          </ol>
+          <p>Slides are available <a href="https://docs.google.com/presentation/d/e/2PACX-1vS94nC9VwWDs2Js7k8wlfjbhMTtMq_Eu_ozbaXZ7dK70QBKQiYa4Y4UP7Gk4dE_ReZc8bBkqcHhq6T9/pub?start=false&loop=false&delayms=3000&slide=id.g38917d51916_0_589">here</a>.</p>
+        </div>
+      </div>
+
+      <!-- Narrow track: 3 prose blocks + their dividers, centered at col-6. -->
+      <div class="un-isi__narrow">
+        <hr class="section-divider" />
+
+        <div class="un-isi__block">
+          <h3>Recordings of UN PET Lab presentations</h3>
+          <p>The UN PET Lab has hosted presentations on various aspects of PETs research, development, and deployment from various statistics offices, PETs providers, researchers, regulators, and government agencies. Recordings and slides from these presentations are available <a href="https://unstats.un.org/bigdata/task-teams/privacy/un-pet-lab/community-presentations/">here</a>.</p>
+        </div>
+
+        <hr class="section-divider" />
+
+        <div class="un-isi__block">
+          <h3>Case study repository</h3>
+          <p>OpenMined supports the development of the <a href="https://unstats.un.org/wiki/spaces/UGTTOPPT/pages/150012018/Case+study+repository">UN’s PET Case Study repository</a>, encouraging organisations to share information about PETs deployments for statistics that they have undertaken.</p>
+          <p>We are actively looking to expand the repository with new case studies and welcome new contributions from NSOs, government agencies, or PETs developers who have worked on PETs deployments in statistics. See <a href="https://unstats.un.org/wiki/spaces/UGTTOPPT/pages/170819660/Contributing+to+the+repository">here</a> for information on how to contribute.</p>
+        </div>
+
+        <hr class="section-divider" />
+
+        <div class="un-isi__block">
+          <h3>Federated learning program</h3>
+          <p>OpenMined is currently collaborating with a number of NSOs to support a first-of-its-kind cross-border federated learning deployment using OpenMined’s <a href="https://github.com/OpenMined/syft-flwr">syft_flwr</a> library. If you are interested in learning more or participating in this pilot, please contact <a href="mailto:osam@openmined.org">osam@openmined.org</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- § CTA — gradient band, box icon, 2-para body + Slack/newsletter opt-in form.
+       Long heading → cap --h3-max to live's 27px (snap 28) on the wrapper so the
+       CTA card title matches live's smaller treatment (weight/leading already
+       match the h3 default). -->
+  <div class="un-isi-cta">
+    <CtaSection
+      variant="gradient"
+      iconSrc="/images/un-pet-box.svg"
+      heading="Leverage new privacy-enhancing tools to unlock high-value data for official statistics"
+    >
+      <Fragment slot="body">
+        <p>PETs are increasingly being leveraged by NSOs to facilitate private inter-agency analyses, safe data disclosure, and secure international collaboration.</p>
+        <p>OpenMined is building free, open-source tools to make it easier for NSOs to reap the benefits of these technologies. We’d love to share them with you – sign up below.</p>
+      </Fragment>
+      <FormEmbed slot="form" formId="2c3dcdb7-8c7b-41ce-8a93-dca555fabd34" />
+    </CtaSection>
+  </div>
+</Page>
+
+<style>
+  /* Hero top padding — dial to live's ~40px via SimpleHero's --hero-pad-top seam
+     (inherits into the nested .simple-hero); avoids a bespoke padTop variant. */
+  .un-isi-hero { --hero-pad-top: var(--spacing-4XL); }
+
+  /* Hero co-brand lockup (OM diamond × UN PET Lab). Injected via set:html, so the
+     <svg> carries no scoped attr — reach it with :global(svg). The leading `span`
+     lifts specificity just past SimpleHero's `.simple-hero__eyebrow :global(svg)`
+     32px cap so the wide lockup shows at its intended size. */
+  .un-isi-lockup { display: inline-flex; }
+  span.un-isi-lockup :global(svg) {
+    display: block;
+    width: 300px;
+    height: auto;
+    margin-bottom: var(--spacing-4XL);
+  }
+
+  /* Body: centered col-8 track holding the ISI row; the narrow track below it
+     drops to col-6. Both are flex columns so section rhythm is one gap value
+     around each hairline. */
+  .un-isi { margin-bottom: var(--spacing-full); }
+  .un-isi__col {
+    max-width: var(--col-8);
+    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-full);
+  }
+  .section-divider { margin: 0; } /* rhythm comes from the flex gap, not the rule */
+
+  /* Narrow track: 3 prose blocks + their dividers, centered at col-6. */
+  .un-isi__narrow {
+    max-width: var(--col-6);
+    margin-inline: auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-full);
+  }
+
+  /* ISI row: equal 2-col grid — title+image LEFT, copy RIGHT. */
+  .un-isi__media {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-4XL);
+    align-items: start;
+  }
+  .un-isi__media-title { margin: 0 0 var(--spacing-L); }
+  .un-isi__media-img img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--border-radius-M);
+  }
+
+  /* CTA card title: live caps this long heading at 27px (h3 default is 36) —
+     snap to 28. Weight (400) + leading (1.2) already match the h3 default. */
+  .un-isi-cta { --h3-max: 28px; }
+
+  @media (max-width: 767px) {
+    .un-isi__col,
+    .un-isi__narrow { gap: var(--spacing-4XL); }
+    .un-isi__media { grid-template-columns: 1fr; gap: var(--spacing-2XL); }
+  }
+</style>

@@ -1,0 +1,89 @@
+---
+/**
+ * FlowDiagram — a horizontal "equation" flow: icon+label node cards interleaved
+ * with operator glyphs (+, →, =). Reads like a formula
+ * (Data + Model → Endpoint + Rules = Sharing). Reusable for any short
+ * process/equation flow; stacks vertically on mobile.
+ *
+ * Rebuilt from live syfthub #brxe-e13919 ("How It Works"). Reference:
+ * Measured off the live page.
+ *
+ * Live → token mapping:
+ *   node card    #f4f3f6, radius 6px            → --surface-background-dim, --border-radius-S
+ *   node icon    40px, currentColor (headline)  → Icon size 40
+ *   accent op    → and = in #3c9f8b             → --color-green-600
+ *   neutral op   + in dark                       → --text-subtle
+ *
+ * Pass `nodes` (icon + label) and `operators` (glyph + accent flag); there must
+ * be exactly nodes.length - 1 operators.
+ */
+import Icon from '@elements/Icon.astro';
+
+interface Node { icon: string; label: string }
+interface Op { glyph: string; accent?: boolean }
+interface Props {
+  nodes: Node[];
+  operators: Op[];
+}
+const { nodes, operators } = Astro.props;
+---
+
+<div class="flow">
+  {nodes.map((node, i) => (
+    <>
+      <div class="flow__node">
+        <Icon name={node.icon} size={40} class="flow__icon" />
+        <span class="flow__label">{node.label}</span>
+      </div>
+      {i < operators.length && (
+        <span
+          class:list={['flow__op', { 'flow__op--accent': operators[i].accent }]}
+          aria-hidden="true"
+        >{operators[i].glyph}</span>
+      )}
+    </>
+  ))}
+</div>
+
+<style>
+  .flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-L);
+  }
+
+  .flow__node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-M);
+    min-width: 150px;
+    padding: var(--spacing-3XL) var(--spacing-L);
+    border-radius: var(--border-radius-S); /* live: 6px ✓ */
+    background-color: var(--surface-background-dim);
+    color: var(--text-headline); /* drives currentColor on the icon */
+    text-align: center;
+  }
+  .flow__label {
+    color: var(--text-body);
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .flow__op {
+    flex: none;
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--text-subtle); /* neutral "+" */
+  }
+  .flow__op--accent { color: var(--color-green-600); } /* "→" / "=" */
+
+  /* stack vertically on mobile; rotate operator glyphs to read top-to-bottom */
+  @media (max-width: 767px) {
+    .flow { flex-direction: column; }
+    .flow__node { width: 100%; max-width: 280px; }
+    .flow__op { transform: rotate(90deg); }
+  }
+</style>

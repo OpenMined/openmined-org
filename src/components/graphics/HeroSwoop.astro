@@ -1,0 +1,117 @@
+---
+/**
+ * HeroSwoop — the site-wide decorative "swoop" band that sits at the bottom of a
+ * hero, behind the page's z-content, tucked up behind the hero's own content and
+ * bleeding down behind the section below it. Reused across heroes (SimpleHero
+ * today); drop it into a hero's `swoop` slot.
+ *
+ * Live construct (foundation/syft-flwr heroes, #brxe-72ac7e): a full-bleed image,
+ * z-index below content, absolutely positioned with calculated negative offsets so
+ * it takes NO layout space — the hero's own padding governs the rhythm and the
+ * image just floats behind everything. This mirrors HomeHero's StreamEmbed (the
+ * site's other bleeding hero graphic) and rejoins the token-driven spacing scale.
+ *
+ * How it works:
+ *   - The wrapper is full-bleed (100vw, centered to the viewport regardless of the
+ *     hero's max-width column), absolutely positioned, and anchored to the hero's
+ *     bottom edge (bottom:0). It contributes ZERO layout height — the hero's
+ *     `padding-bottom` (a spacing token) owns the content→next-section gap. Place
+ *     it as the last child of the hero (a section-level sibling of the content).
+ *   - The image scales by intrinsic aspect (height:auto over width:100%) and is
+ *     pushed DOWN by `bleed × its natural height` so it bleeds below the hero
+ *     (behind the next section); the remainder rises above the anchor, tucking up
+ *     behind the hero content. z-index:-1 (matching live) drops it below ALL
+ *     in-flow content — the hero's own content AND every following section paint
+ *     above it automatically, so no page needs to lift its next section. A next
+ *     section with an opaque background will (correctly) cover the bleed.
+ *   - One fraction of the image's natural height H (= 100vw × aspect) tunes it:
+ *       bleed  how far it extends below the hero  (default .45)
+ *   - Hidden on mobile (≤991px), matching live (the band is desktop-only).
+ *
+ * The host hero just needs `position: relative`, `overflow-x: clip`, and a
+ * `padding-bottom` that reserves the visible gap (see SimpleHero --has-swoop).
+ *
+ * Anchor variants (`anchor` prop):
+ *   'bottom' (default) — the standard treatment above: the band is anchored to
+ *     the hero's bottom edge, rises up behind the hero content, and bleeds DOWN
+ *     into the next section by `bleed`. Foundation / syft-flwr heroes.
+ *   'top' — the band is anchored to the hero's TOP edge and flows its full
+ *     natural height DOWNWARD from there: it starts at the top of a (narrow) hero,
+ *     paints behind the hero content, and continues under the section that
+ *     follows. No downward push (bleed does not apply). Used on /pysyft/faqs/.
+ *   'center' — the band is vertically CENTERED in the hero's box (its midline on
+ *     the hero's midline), painting behind the hero content and bleeding equally
+ *     above and below. Neither edge-anchored nor pushed (bleed does not apply).
+ *     Used on the campaign heroes (/federated-learning/co-design/, /talk-to-the-world/).
+ *
+ * Props:
+ *   src            image path under /  (required)
+ *   width, height  intrinsic px — set the aspect ratio used for vw scaling (required)
+ *   bleed          optional fraction override (0–1) — how far it bleeds below
+ *                  (bottom anchor only)
+ *   anchor         'bottom' (default) | 'top' | 'center' — see Anchor variants above
+ *   alt            decorative by default ("")
+ */
+interface Props {
+  src: string;
+  width: number;
+  height: number;
+  bleed?: number;
+  anchor?: 'top' | 'bottom' | 'center';
+  alt?: string;
+}
+const { src, width, height, bleed = 0.45, anchor = 'bottom', alt = '' } = Astro.props;
+const aspect = height / width;
+---
+
+<div
+  class:list={['hero-swoop', `hero-swoop--${anchor}`]}
+  aria-hidden={alt === '' ? 'true' : undefined}
+  style={`--swoop-aspect:${aspect}; --swoop-bleed:${bleed};`}
+>
+  <img src={src} width={width} height={height} alt={alt} data-fade />
+</div>
+
+<style>
+  .hero-swoop {
+    /* full-bleed, centered to the viewport regardless of the hero's column;
+       absolute + anchored (top or bottom) → zero layout height */
+    position: absolute;
+    width: 100vw;
+    left: 50%;
+    margin-left: -50vw;
+    z-index: var(--z-below); /* below all in-flow content — see the doc block above */
+    pointer-events: none;
+  }
+  /* bottom anchor (default): sit at the hero's bottom edge */
+  .hero-swoop--bottom { bottom: 0; }
+  /* top anchor: start at the hero's top edge and flow downward */
+  .hero-swoop--top { top: 0; }
+  /* center anchor: put the wrapper on the hero's vertical midline; the image
+     rule below lifts it by half its own height so it centers on that line */
+  .hero-swoop--center { top: 50%; }
+
+  .hero-swoop img {
+    display: block;
+    width: 100%;
+    height: auto; /* scale by intrinsic aspect ratio */
+  }
+  /* bottom: push the image down by bleed × its natural height (100vw × aspect)
+     so it bleeds below the hero into the next section; the rest rises above the
+     bottom anchor, tucking up behind the hero content */
+  .hero-swoop--bottom img {
+    transform: translateY(calc(100vw * var(--swoop-aspect) * var(--swoop-bleed)));
+  }
+  /* top: no push — the band starts at the hero top and flows its full natural
+     height downward, behind the hero content and under the section below */
+  /* center: lift by half the image's natural height so its midline lands on the
+     hero midline (the wrapper's top:50% anchor), bleeding equally up and down */
+  .hero-swoop--center img {
+    transform: translateY(calc(-100vw * var(--swoop-aspect) / 2));
+  }
+
+  /* desktop-only, like live */
+  @media (max-width: 991px) {
+    .hero-swoop { display: none; }
+  }
+</style>

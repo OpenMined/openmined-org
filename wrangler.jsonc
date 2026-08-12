@@ -1,0 +1,25 @@
+{
+  // Cloudflare Workers config (this is the SOURCE config; at build the adapter
+  // augments it into dist/server/wrangler.json with `main` + the static-asset
+  // binding). @astrojs/cloudflare v14 is Workers-only — deploy with
+  // `wrangler deploy`, set prod secrets with `wrangler secret put <KEY>` (NOT the
+  // `wrangler pages …` commands). Consumed for both local dev (platformProxy:
+  // astro dev runs SSR under workerd) and the production Worker.
+  //
+  // nodejs_compat + a recent compatibility_date give the workerd runtime the
+  // Node globals our render path expects (notably `process`), so pages render
+  // in dev exactly as they prerender at build. node:fs is NOT provided (workerd
+  // has no filesystem) — build-time file reads go through the Vite bundler
+  // instead (see OrgLogo.astro, Icon.astro).
+  // `name` MUST match the Worker that exists in the Cloudflare account this repo
+  // deploys to, and must match any `--name` override in the Workers Builds deploy
+  // command. With those out of sync, a wrangler command run WITHOUT `--name`
+  // targets a different Worker — and because wrangler's non-interactive fallback
+  // answers "yes", it silently CREATES that Worker rather than failing, which is
+  // how a stray Worker and a misdirected secret happened once already. Prefer
+  // keeping the name here and passing no `--name` at all, so there is only one
+  // place for it to be wrong.
+  "name": "openmined-org",
+  "compatibility_date": "2024-11-01",
+  "compatibility_flags": ["nodejs_compat"]
+}

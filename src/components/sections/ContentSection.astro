@@ -1,0 +1,223 @@
+---
+/**
+ * ContentSection — generic full-width content band: a centered heading + optional
+ * intro over a slotted body (a CardGrid, ComparisonTable, link list, …). Keeps
+ * the product pages' many "heading + intro + grid" sections consistent without
+ * repeating markup. No page prefix = generic.
+ *
+ * Props:
+ *   heading  — section heading text
+ *   as       — heading level ('h3' | 'h4'), default 'h3'
+ *   intro    — optional intro paragraph (centered, readable width); may be HTML
+ *   align    — 'center' (default) | 'left' for the heading/intro block
+ *   headGap  — space between the head (title/intro) block and the body below:
+ *              'default' (--spacing-5XL) for a head over a CARD/STEP/GRID layout;
+ *              'tight' (--spacing-L) for a head over RUNNING BODY COPY (prose),
+ *              matching the title→intro rhythm. Whether the body is prose vs. a
+ *              content layout can't be inferred from the slot (layouts have many
+ *              roots and are often wrapped), so it's declared here.
+ *   width    — content width: 'full' (1300, default) | 'col-10' (1080) | 'col-8' (860) | 'col-6' (640), centered
+ *   measure  — optional readability max-width for the whole content column, any
+ *              length (e.g. '44.5em', '68ch'). Composes with .container (caps its
+ *              width) and strips at ≤767px like any .measure element. Use instead
+ *              of `width` when a band should be sized by line-length, not a column
+ *              token; if both are set the smaller wins.
+ *   headWidth — optional narrower measure for the heading+intro block alone
+ *              ('col-8' | 'col-6'), independent of width. Use when the live head
+ *              is narrower than the card body below it (e.g. a col-6 centered
+ *              head over a col-10 card grid). Omit to let the head fill width.
+ *   surface  — band fill: 'none' (default) | 'dim' (full-bleed tinted band) |
+ *              'dark' (full-bleed always-dark statement band — locks to dark
+ *              surface + light text regardless of page theme). A filled band
+ *              switches outer margin → inner padding so adjacent sections sit
+ *              flush against the fill.
+ *   bgImage  — optional full-bleed background image (path under /); layers over
+ *              the surface fill. Use with surface for a tinted + image band.
+ *   band     — optional decorative graphic (path under /) rendered as a
+ *              full-bleed horizontal BAND behind the content, vertically
+ *              centered and bleeding past the column gutters (the live om_flow
+ *              gradient look). Unlike bgImage (cover), it keeps its aspect and
+ *              sits as a band, with content layered above it.
+ */
+import Icon from '@elements/Icon.astro';
+import Text from '@ui/Text.astro';
+
+interface Props {
+  /** Small kicker label above the heading (e.g. "The Ecosystem"). */
+  eyebrow?: string;
+  /** Optional Icon name shown before the eyebrow text. */
+  eyebrowIcon?: string;
+  heading?: string;
+  as?: 'h2' | 'h3' | 'h4';
+  intro?: string;
+  /** Readability max-width for the intro paragraph (any length). Defaults to
+   *  var(--col-8) — the historical intro cap — now driven via .measure so it
+   *  strips on mobile and can be overridden per instance. */
+  introMeasure?: string;
+  align?: 'center' | 'left';
+  headGap?: 'default' | 'tight';
+  width?: 'full' | 'col-10' | 'col-8' | 'col-6';
+  measure?: string;
+  headWidth?: 'col-8' | 'col-6';
+  surface?: 'none' | 'dim' | 'dark';
+  bgImage?: string;
+  band?: string;
+  /** Zero the section's TOP margin. Use when this section directly follows a
+   *  hero on an article-style page (default surface, prose body): the hero's
+   *  own padding-bottom already owns the gap, so the section's own margin-top
+   *  would double it. No effect on a filled band (those use padding, not margin). */
+  flushTop?: boolean;
+}
+const { eyebrow, eyebrowIcon, heading, as = 'h3', intro, introMeasure = 'var(--col-8)', align = 'center', headGap = 'default', width = 'full', measure, headWidth, surface = 'none', bgImage, band, flushTop = false } = Astro.props;
+const isBand = surface !== 'none' || !!bgImage;
+const hasHead = eyebrow || eyebrowIcon || heading || intro;
+---
+
+<section
+  class:list={['content-section', { 'content-section--band': isBand, 'content-section--dim': surface === 'dim', 'content-section--dark': surface === 'dark', 'content-section--banded': !!band, 'content-section--flush-top': flushTop }]}
+  data-section={surface === 'dark' ? 'always-dark' : undefined}
+  style={bgImage ? `--cs-bg-image:url('${bgImage}')` : undefined}
+>
+  {band && (
+    <div class="content-section__band" aria-hidden="true"><img src={band} alt="" data-fade /></div>
+  )}
+  <div
+    class:list={['container', { 'container--col-10': width === 'col-10', 'container--col-8': width === 'col-8', 'container--col-6': width === 'col-6', measure: !!measure }]}
+    style={measure ? `--measure: ${measure}` : undefined}
+  >
+    {hasHead && (
+      <div class:list={['content-section__head', `content-section__head--${align}`, headWidth && `content-section__head--w-${headWidth}`, headGap === 'tight' && 'content-section__head--tight']}>
+        {(eyebrow || eyebrowIcon) && (
+          <Text as="p" class="content-section__eyebrow text-eyebrow">
+            {eyebrowIcon && <Icon name={eyebrowIcon} size={20} />}
+            {eyebrow}
+          </Text>
+        )}
+        {heading && <Text as={as} class="content-section__heading">{heading}</Text>}
+        {intro && <p class="content-section__intro measure" style={`--measure: ${introMeasure}`} set:html={intro}></p>}
+      </div>
+    )}
+    <slot />
+  </div>
+</section>
+
+<style>
+  .content-section {
+    margin-block: var(--spacing-full);
+  }
+  /* article-style pages: hero padding-bottom owns the gap, so drop this
+     section's top margin to avoid doubling it (see flushTop prop). */
+  .content-section--flush-top {
+    margin-top: 0;
+  }
+
+  /* Tinted / image band: full-bleed fill, so trade outer margin for inner
+     padding — adjacent sections then sit flush against the tint. */
+  .content-section--band {
+    margin-block: 0;
+    padding-block: var(--spacing-full);
+  }
+  .content-section--dim {
+    background-color: var(--surface-background-dim);
+  }
+  /* Always-dark statement band. data-section="always-dark" locks the surface +
+     text tokens to dark, so the fill + all descendant text stay dark-legible
+     regardless of page theme (live "This is bigger than revenue" band). */
+  .content-section--dark {
+    background-color: var(--surface-background-default);
+  }
+  /* Optional background image layered over the surface fill (set via --cs-bg-image). */
+  .content-section[style*='--cs-bg-image'] {
+    background-image: var(--cs-bg-image);
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+  }
+
+  /* Decorative full-bleed band (live om_flow gradient): keeps the section in
+     flow, lays the image behind the content as a centered horizontal band that
+     bleeds past the gutters. Content is lifted above it. */
+  .content-section--banded {
+    position: relative;
+    overflow-x: clip;
+  }
+  .content-section__band {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100vw;
+    margin-left: -50vw;
+    transform: translateY(-50%);
+    z-index: 0;
+    pointer-events: none;
+  }
+  .content-section__band img {
+    display: block;
+    width: 100%;
+    height: auto; /* keep the band's intrinsic aspect, scale with viewport width */
+  }
+  .content-section--banded .container {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* narrower content widths — override .container's full max-width. */
+  .container--col-10 {
+    max-width: var(--col-10);
+  }
+  .container--col-8 {
+    max-width: var(--col-8);
+  }
+  .container--col-6 {
+    max-width: var(--col-6);
+  }
+
+  .content-section__head {
+    margin-bottom: var(--spacing-5XL);
+  }
+  /* tight: head sits over running body copy, not a card/grid layout — use the
+     title→intro rhythm instead of the larger head-over-layout separation. */
+  .content-section__head--tight {
+    margin-bottom: var(--spacing-L);
+  }
+  .content-section__head--center {
+    text-align: center;
+  }
+  /* Optional narrower head measure (independent of the body width). Auto
+     margins center it when align=center; harmless (0) at full width. */
+  .content-section__head--w-col-8 {
+    max-width: var(--col-8);
+  }
+  .content-section__head--w-col-6 {
+    max-width: var(--col-6);
+  }
+  .content-section__head--center.content-section__head--w-col-8,
+  .content-section__head--center.content-section__head--w-col-6 {
+    margin-inline: auto;
+  }
+
+  /* small kicker label above the heading — matches SimpleHero's eyebrow
+     treatment (subtle color, optional leading icon). Follows the head align. */
+  .content-section__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-S);
+    margin-bottom: var(--spacing-M);
+    color: var(--text-body);
+  }
+
+  .content-section__heading {
+    margin-bottom: var(--spacing-L);
+  }
+
+  .content-section__intro {
+    /* width comes from .measure (--measure defaults to col-8 via introMeasure);
+       no scoped max-width — it would beat .measure and block the mobile strip. */
+    margin: 0;
+    /* leading comes from the body default (1.5) — live measures every section
+       body paragraph at 1.5; 1.75 is the article body only. */
+  }
+  .content-section__head--center .content-section__intro {
+    margin-inline: auto;
+  }
+</style>

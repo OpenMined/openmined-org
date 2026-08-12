@@ -1,0 +1,130 @@
+---
+/**
+ * /blog/page/N — pages 2..N of the main listing. Page 1 lives at /blog
+ * (index.astro) with the featured + Popular Topics header; these continuation
+ * pages carry just the category nav, the "Recent" toolbar, and the next slice
+ * of the SAME featured-excluded, newest-first pool index.astro paginates.
+ *
+ * These are real, indexable pages (no-JS pagination lands here); with JS,
+ * BlogPagination fetches them and appends their cards to the page-1 grid.
+ * The `/page/N/` segment sidesteps the `/blog/[…slug]` post catch-all.
+ */
+import BlogListing from '@layouts/BlogListing.astro';
+import PostCard from '@elements/PostCard.astro';
+import BlogCategoryNav from '@elements/BlogCategoryNav.astro';
+import BlogToolbar from '@components/sections/blog/BlogToolbar.astro';
+import BlogPagination from '@elements/BlogPagination.astro';
+import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
+import { postSlug, resolveFeatured, pageCount, pageSlice } from '@utils/posts';
+import blogConfig from '@data/blog.json';
+
+export async function getStaticPaths() {
+  const includeDrafts = import.meta.env.DEV;
+  const allPosts = (await getCollection('blog', ({ data }) => includeDrafts || !data.draft))
+    .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+  // Same featured exclusion as index.astro, so page slices stay contiguous.
+  const featuredEntry = resolveFeatured(allPosts, blogConfig.featured, 'the main blog');
+  const posts = featuredEntry ? allPosts.filter((p) => p.id !== featuredEntry.id) : allPosts;
+
+  const totalPages = pageCount(posts.length);
+  // Page 1 is /blog; generate the rest here.
+  return Array.from({ length: Math.max(0, totalPages - 1) }, (_, i) => {
+    const page = i + 2;
+    return {
+      params: { page: String(page) },
+      props: {
+        page,
+        totalPages,
+        exclude: featuredEntry && postSlug(featuredEntry),
+        entries: pageSlice(posts, page),
+      },
+    };
+  });
+}
+
+const { page, totalPages, exclude, entries } = Astro.props;
+
+const resolveCard = async (p: CollectionEntry<'blog'>) => {
+  const cat = (await getEntry(p.data.categories[0]))!;
+  return {
+    href: `/blog/${postSlug(p)}/`,
+    title: p.data.title,
+    date: p.data.date,
+    category: { slug: cat.id, label: cat.data.label },
+    cover: p.data.cover,
+    coverAlt: p.data.coverAlt,
+    cardText: p.data.cardText,
+    draft: p.data.draft,
+  };
+};
+const cards = await Promise.all(entries.map(resolveCard));
+
+// Category nav — same 7 nav categories as /blog.
+const NAV_ORDER = ['news', 'product', 'research', 'policy', 'stories', 'community', 'foundation'];
+const cats = await getCollection('categories');
+const navCats = NAV_ORDER
+  .map((id) => cats.find((c) => c.id === id))
+  .filter((c) => c !== undefined)
+  .map((c) => ({ id: c.id, label: c.data.label }));
+---
+
+<BlogListing title={`Blog — page ${page} — OpenMined`} description="Research, product, policy, and community writing from OpenMined.">
+  <section class="blog-index container content-top-rule">
+    <h1 class="visually-hidden">Blog — page {page}</h1>
+
+    <BlogCategoryNav categories={navCats} active="all" />
+
+    {/* No count — see the note in index.astro (live never reveals its own). */}
+    <BlogToolbar heading="Recent" scope={{ exclude }} />
+
+    <div class="blog-grid">
+      {cards.map((c) => (
+        <PostCard
+          href={c.href}
+          title={c.title}
+          date={c.date}
+          category={c.category}
+          cover={c.cover}
+          coverAlt={c.coverAlt}
+          cardText={c.cardText}
+          draft={c.draft}
+        />
+      ))}
+    </div>
+
+    <BlogPagination base="/blog" currentPage={page} totalPages={totalPages} />
+  </section>
+</BlogListing>
+
+<style>
+  .blog-index {
+    /* Same value as page 1 (index.astro) — one .blog-index, one top padding. */
+    padding-top: var(--spacing-5XL);
+    padding-bottom: var(--spacing-full);
+  }
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: var(--spacing-XL);
+    row-gap: var(--spacing-2XL);
+    margin-top: var(--spacing-3XL);
+  }
+  @media (max-width: 1099px) {
+    .blog-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 767px) {
+    .blog-grid { grid-template-columns: 1fr; }
+  }
+</style>

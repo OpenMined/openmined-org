@@ -1,0 +1,83 @@
+/* ══════════════════════════════════════════════════════════════════
+   THEMING — color-mode contexts
+   The three `data-section` values that override the page theme at the element
+   level, and the logo asset swap that follows `data-theme`. Everything here
+   remaps semantic tokens; nothing sets a palette value directly.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Section theming ─────────────────────────────────────────────── */
+
+/* always-dark: locked dark surface regardless of page theme */
+[data-section="always-dark"] {
+  --surface-background-default:  var(--color-grayscale-800);
+  --surface-background-bright:   var(--color-grayscale-700);
+  --surface-background-dim:      var(--color-grayscale-950);
+  --surface-foreground-lowest:   var(--color-grayscale-900);
+  --surface-foreground-low:      var(--color-grayscale-850);
+  --surface-foreground-default:  var(--color-grayscale-750);
+  --surface-foreground-high:     var(--color-grayscale-700);
+  --surface-foreground-highest:  var(--color-grayscale-600);
+  --text-headline:               var(--color-grayscale-50);
+  --text-body:                   var(--color-grayscale-400);
+  --text-headline-light:         var(--color-grayscale-850);
+  --text-body-light:             var(--color-grayscale-750);
+  --button-dark-color:           var(--color-grayscale-50);
+  --button-light-color:          var(--color-grayscale-800);
+  color-scheme: dark;
+  /* re-establish color so descendants inherit the remapped --text-body,
+     not the value already computed at body level */
+  color: var(--text-body);
+}
+
+/* always-light: locked light surface regardless of page theme.
+   Mirrors always-dark. Use on cards, panels, or any element that must
+   always display on a light surface — ensures dark text on light bg in both modes.
+
+   NOT for form cards. `.prose .hs-form-card` was listed here on the assumption
+   that HubSpot's embedded form design is light-only; measuring live (2026-08-05,
+   dark session) shows its form cards theme like any other surface — the card
+   goes grayscale-200 → 850 and the fields 50 → 950. Six form surfaces carried
+   this lock and all have been moved back onto the themed tokens. */
+[data-section="always-light"] {
+  --surface-background-default:  var(--color-grayscale-50);
+  --surface-background-bright:   var(--color-grayscale-00);
+  --surface-background-dim:      var(--color-grayscale-150);
+  --surface-foreground-lowest:   var(--color-grayscale-100);
+  --surface-foreground-low:      var(--color-grayscale-200);
+  --surface-foreground-default:  var(--color-grayscale-300);
+  --surface-foreground-high:     var(--color-grayscale-400);
+  --surface-foreground-highest:  var(--color-grayscale-500);
+  --text-headline:               var(--color-grayscale-850);
+  --text-body:                   var(--color-grayscale-750);
+  --text-headline-light:         var(--color-grayscale-50);
+  --text-body-light:             var(--color-grayscale-400);
+  --button-dark-color:           var(--color-grayscale-850);
+  --button-light-color:          var(--color-grayscale-50);
+  color-scheme: light;
+  /* re-establish color so descendants inherit the remapped --text-body,
+     not the value already computed at body level */
+  color: var(--text-body);
+}
+
+/* invert: remaps --surface-* to --dark-surface-* which flip with the page theme */
+[data-section="invert"] {
+  --surface-background-default:  var(--dark-surface-background-default);
+  --surface-background-bright:   var(--dark-surface-background-bright);
+  --surface-background-dim:      var(--dark-surface-background-dim);
+  --surface-foreground-lowest:   var(--dark-surface-foreground-lowest);
+  --surface-foreground-low:      var(--dark-surface-foreground-low);
+  --surface-foreground-default:  var(--dark-surface-foreground-default);
+  --surface-foreground-high:     var(--dark-surface-foreground-high);
+  --surface-foreground-highest:  var(--dark-surface-foreground-highest);
+  --text-headline:               var(--text-headline-light);
+  --text-body:                   var(--text-body-light);
+  /* re-establish color so descendants inherit the remapped --text-body,
+     not the value already computed at body level */
+  color: var(--text-body);
+}
+
+
+/* ── Logo theming ────────────────────────────────────────────────── */
+.logo-white { display: none; }
+[data-theme="dark"] .logo-white { display: block; }
+[data-theme="dark"] .logo-color { display: none; }

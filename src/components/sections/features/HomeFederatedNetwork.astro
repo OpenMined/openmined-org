@@ -1,0 +1,404 @@
+---
+/**
+ * HomeFederatedNetwork — "The Federated AI Network" section.
+ *
+ * Rebuilt from live #brxe-pkloyb.
+ *
+ * Live → token mapping:
+ *   section bg          transparent (inherits --surface-background-default)
+ *   card border         1px solid rgb(70,66,87) = #464257  → --color-grayscale-700
+ *   card radius         6px                                → --border-radius-S
+ *   row padding-block   48px                               → --spacing-5XL ✓
+ *   dark CTA padding    96px                               TODO(decision: no token maps)
+ *   row divider         1px solid --color-grayscale-700    ✓
+ *   inner content width ~1078px (from 12-col subgrid)      → max-width: 1080px
+ *   "Meet Syft" mt      32px                               → --spacing-3XL ✓
+ *   H2                  Rubik 47px / 1.2                   → font-family + --text-headline
+ *   header right mt     32px                               → --spacing-3XL ✓
+ *   right para gap      16px                               → --spacing-L ✓
+ *   "Subnets" label mb  32px                               → --spacing-3XL ✓
+ *   subnet card gap     32px                               → --spacing-3XL ✓
+ *   subnet card min-h   256px                              (raw px — no token)
+ *   subnet card int gap 24px                               → --spacing-2XL ✓
+ *   subnet h5           Inter 21px / 1.4                   → --text-headline
+ *   subnet h5 mb        16px                               → --spacing-L ✓
+ *   pillar gap          32px                               → --spacing-3XL ✓
+ *   pillar icon gap     16px                               → --spacing-L ✓
+ *   pillar h5           Inter 21px / 1.4                   → --text-headline
+ *   pillar h5 mb        16px                               → --spacing-L ✓
+ *   CTA h4              Rubik 27px / 1.2 / grayscale-50
+ *   CTA h4 mb           24px                               → --spacing-2XL ✓
+ *   CTA body mb         40px                               → --spacing-4XL ✓
+ *   CTA text max-width  880px
+ *   CTA bg              rgb(39,37,50) = #272532            → --color-grayscale-850
+ */
+import Button from '@ui/Button.astro';
+import Link from '@ui/Link.astro';
+import Text from '@ui/Text.astro';
+
+const subnets = [
+  {
+    title: 'Publishers',
+    body: "Control your distribution in the AI era. Make your assets AI-ready and queryable with guaranteed attribution, fair compensation, and tracking reader engagement — all without losing custody.",
+    linkLabel: 'Join the Beta',
+    href: '/for-publishers/',
+  },
+  {
+    title: 'Genomics',
+    body: "Run collaborative genomic research without ever centralizing raw data. BioVault is a free, open-source subnetwork where insights flow freely while sensitive files stay secure on participants' devices.",
+    linkLabel: 'Join the Beta',
+    href: '/for-biomedical-researchers/',
+  },
+  {
+    title: 'Creators',
+    body: "Turn everything you've created into a knowledge base your audience can explore. Know what they're curious about, engage them at scale, and unlock new revenue from content you already have.",
+    linkLabel: 'Get early access',
+    href: '/for-creators/',
+  },
+  {
+    title: 'AI Auditors',
+    body: "Enable third-party AI audits without exposing proprietary models or user data. Cryptographic infrastructure ensures auditors get verified answers… not copies of model weights, training data, or user logs.",
+    linkLabel: 'Learn More',
+    href: '/for-ai-auditors/',
+  },
+];
+
+const pillars = [
+  {
+    title: 'Open, Public Good Infrastructure',
+    body: "No vendor lock-in, no black boxes — just open protocols that ensure the network remains truly decentralized and free.",
+    /* Globe outline — live SVG path */
+    svgPath: `M29.3334 16.0001C29.3334 23.3639 23.3639 29.3334 16.0001 29.3334M29.3334 16.0001C29.3334 8.63628 23.3639 2.66675 16.0001 2.66675M29.3334 16.0001H2.66675M16.0001 29.3334C8.63628 29.3334 2.66675 23.3639 2.66675 16.0001M16.0001 29.3334C12.5764 25.7385 10.6667 20.9644 10.6667 16.0001C10.6667 11.0357 12.5764 6.26162 16.0001 2.66675M16.0001 29.3334C19.4238 25.7385 21.3334 20.9644 21.3334 16.0001C21.3334 11.0357 19.4238 6.26162 16.0001 2.66675M2.66675 16.0001C2.66675 8.63628 8.63628 2.66675 16.0001 2.66675`,
+    svgViewBox: '0 0 32 32',
+    svgStroke: true,
+  },
+  {
+    title: 'Flexible Federated Computation',
+    body: "Run exactly the computation you need — from simple analytics to complex model inference — all executed securely where the data lives.",
+    /* Code brackets in a box — live SVG path */
+    svgPath: `M13.3333 12.6667L10.6667 16L13.3333 19.3333M18.6667 12.6667L21.3333 16L18.6667 19.3333M6.66667 4H25.3333C26.8061 4 28 5.19391 28 6.66667V25.3333C28 26.8061 26.8061 28 25.3333 28H6.66667C5.19391 28 4 26.8061 4 25.3333V6.66667C4 5.19391 5.19391 4 6.66667 4Z`,
+    svgViewBox: '0 0 32 32',
+    svgStroke: true,
+  },
+  {
+    title: 'Full Control Over Your Data',
+    body: "Decide who can use your data, for what purpose, and the privacy, attribution, or pricing rules — and the network enforces them for you.",
+    /* Settings/gear — live SVG path */
+    svgPath: `M256 179.863c-41.502 0-75.294 33.792-75.294 75.294s33.792 75.294 75.294 75.294 75.294-33.792 75.294-75.294-33.792-75.294-75.294-75.294m0 120.47c-24.907 0-45.177-20.269-45.177-45.177s20.269-45.177 45.177-45.177 45.176 20.269 45.176 45.177-20.269 45.177-45.177 45.177zm254.193-15.842c1.115-9.668 1.807-19.426 1.807-29.334s-.692-19.667-1.807-29.334l-77.945-23.432c-3.584-12.107-8.373-23.702-14.276-34.605l38.52-71.589a260.8 260.8 0 0 0-41.563-41.563l-71.589 38.55c-10.933-5.903-22.528-10.661-34.635-14.276L285.333.963c-9.637-1.115-19.396-1.807-29.334-1.807s-19.697.692-29.334 1.807l-23.371 77.945c-12.137 3.584-23.763 8.373-34.636 14.306l-71.59-38.55a257 257 0 0 0-41.532 41.563l38.52 71.529c-5.903 10.903-10.662 22.528-14.276 34.636L1.805 225.823C.69 235.46-.002 245.219-.002 255.157s.693 19.697 1.807 29.335l77.945 23.372c3.614 12.137 8.373 23.763 14.276 34.666l-38.52 71.56a258.4 258.4 0 0 0 41.563 41.563l71.589-38.52c10.903 5.903 22.528 10.661 34.636 14.276l23.371 77.945c9.668 1.115 19.426 1.807 29.334 1.807s19.697-.692 29.334-1.807l23.372-77.945c12.108-3.614 23.733-8.373 34.635-14.276l71.56 38.52a259.8 259.8 0 0 0 41.563-41.592l-38.49-71.56c5.903-10.902 10.661-22.528 14.276-34.635l77.945-23.372zm-102.159-.813-4.638 15.601c-3.012 10.149-7.017 19.877-11.926 28.883l-7.71 14.306 7.68 14.306 28.672 53.308a220 220 0 0 1-9.216 9.216l-67.554-36.412-14.306 7.71c-9.065 4.909-18.793 8.885-28.913 11.926l-15.601 4.638-4.668 15.601-17.438 58.188q-3.252.09-6.415.091c-3.163.001-4.246-.03-6.415-.091l-17.438-58.188-4.668-15.601-15.601-4.638c-10.119-3.012-19.847-7.017-28.883-11.926l-14.306-7.71-67.614 36.352c-3.132-2.981-6.234-6.053-9.216-9.216l36.382-67.584-7.71-14.306c-4.879-9.036-8.885-18.764-11.927-28.913l-4.608-15.571-73.758-22.106c-.09-2.168-.12-4.307-.12-6.385 0-2.108.03-4.246.12-6.415l73.728-22.107 4.638-15.601c3.012-10.149 7.017-19.877 11.927-28.883l7.71-14.306-36.382-67.614a264 264 0 0 1 9.186-9.216l67.674 36.442 14.336-7.8c8.945-4.879 18.643-8.885 28.792-11.897l15.601-4.638 4.668-15.601 17.438-58.188c2.198-.03 4.337-.06 6.445-.06s4.247.03 6.415.09l17.438 58.188 4.668 15.601 15.601 4.638c10.089 3.012 19.848 7.017 28.913 11.926l14.306 7.68 67.584-36.382c3.132 2.981 6.235 6.053 9.216 9.216l-28.702 53.308-7.68 14.306 7.74 14.306c4.909 9.036 8.885 18.733 11.897 28.822l4.638 15.601 15.601 4.668 58.188 17.499c.03 2.168.06 4.307.06 6.415s-.03 4.247-.12 6.415l-73.728 22.106z`,
+    svgViewBox: '0 0 512 512',
+    svgStroke: false,
+  },
+];
+---
+
+<section class="home-fednet">
+  <div class="container">
+    <div class="home-fednet__card grid-12">
+
+      <!-- ── Row 1: heading + description ──────────────────────────── -->
+      <div class="home-fednet__row home-fednet__row--header">
+        <div class="home-fednet__inner">
+          <div class="home-fednet__header-grid">
+
+            <div class="home-fednet__header-left">
+              <Text as="p" class="home-fednet__label">Meet Syft:</Text>
+              <Text as="h2" class="home-fednet__heading">The Federated<br> AI Network</Text>
+            </div>
+
+            <div class="home-fednet__header-right">
+              <p>The network coordinates secure, governed computation across silos — without moving data — making it possible to study information that would otherwise remain private.</p>
+              <p>This is how collective intelligence becomes real: when people and communities across information silos connect — respecting their choices and values as they do so, for us to study at any scale, not just what a single group could achieve alone.</p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Row 2: supported subnets ──────────────────────────────── -->
+      <div class="home-fednet__row home-fednet__row--subnets">
+        <div class="home-fednet__inner">
+
+          <Text as="p" class="home-fednet__section-label">Supported Subnets</Text>
+
+          <div class="home-fednet__subnets">
+            {subnets.map((s) => (
+              <div class="home-fednet__subnet">
+                <div class="home-fednet__subnet-text">
+                  <Text as="h3" class="home-fednet__subnet-title">{s.title}</Text>
+                  <Text as="p" class="home-fednet__subnet-body">{s.body}</Text>
+                </div>
+                <Link href={s.href} variant="hover-line" class="home-fednet__subnet-link">
+                  {s.linkLabel} ->
+                </Link>
+              </div>
+            ))}
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── Row 3: feature pillars ─────────────────────────────────── -->
+      <div class="home-fednet__row home-fednet__row--pillars">
+        <div class="home-fednet__inner">
+          <div class="home-fednet__pillars">
+            {pillars.map((p) => (
+              <div class="home-fednet__pillar">
+                <div class="home-fednet__pillar-icon" aria-hidden="true">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox={p.svgViewBox}
+                    width="32"
+                    height="32"
+                    fill={p.svgStroke ? 'none' : 'currentColor'}
+                    stroke={p.svgStroke ? 'currentColor' : undefined}
+                    stroke-width={p.svgStroke ? '2' : undefined}
+                    stroke-linecap={p.svgStroke ? 'round' : undefined}
+                    stroke-linejoin={p.svgStroke ? 'round' : undefined}
+                  >
+                    <path d={p.svgPath} />
+                  </svg>
+                </div>
+                <div>
+                  <Text as="h3" class="home-fednet__pillar-title">{p.title}</Text>
+                  <Text as="p" class="home-fednet__pillar-body">{p.body}</Text>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Row 4: dark CTA ────────────────────────────────────────── -->
+      <div class="home-fednet__row home-fednet__row--cta">
+        <div class="home-fednet__inner">
+          <div class="home-fednet__cta">
+            <Text as="h4" class="home-fednet__cta-heading">Start your own federated sub-network</Text>
+            <div class="home-fednet__cta-body">
+              <p>Launch a privacy-preserving network for your domain — whether that be in climate, healthcare, finance, or beyond.</p>
+              <p>The federated AI network provides open-source infrastructure for secure, governed collaboration, where data stays distributed, and insights are derived without compromising ownership or control.</p>
+            </div>
+            <Button href="/launch-subnet/">Get started -></Button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<style>
+  /* ── Section shell ───────────────────────────────────────────────── */
+  .home-fednet {
+    position: relative;
+    z-index: 2; /* lifts above HomeHero stream (z-index: 1) */
+  }
+
+  /* Outlined card — .grid-12 sets the 12-column track; overflow:hidden clips the
+     dark CTA row's bg to the card's border-radius. */
+  .home-fednet__card {
+    border: var(--border-strong);
+    border-radius: var(--border-radius-S);
+    overflow: hidden;
+  }
+
+  /* Each row spans all 12 columns and uses subgrid so children can address the
+     same column tracks as the parent. */
+  .home-fednet__row {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    border-bottom: var(--border-strong);
+    padding-block: var(--spacing-5XL); /* live: 48px = --spacing-5XL ✓ */
+  }
+  .home-fednet__row:last-child {
+    border-bottom: 0;
+  }
+
+  /* Content spans columns 2–11 = 10 columns, leaving 1 column (90px + gap) of
+     visual breathing room on each side. */
+  .home-fednet__inner {
+    grid-column: 2 / 12;
+  }
+
+  /* ── Row 1: header ───────────────────────────────────────────────── */
+  .home-fednet__header-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 var(--spacing-3XL);
+    align-items: start;
+  }
+
+  .home-fednet__header-left {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .home-fednet__label {
+    margin-top: var(--spacing-3XL); /* live: 32px margin-top = --spacing-3XL ✓ */
+    margin-bottom: 0;
+  }
+
+  /* .home-fednet__heading on <h2> — all type from global h2 */
+
+  /* Paragraph spacing (live: 16px) comes from the global `p + p` rule — a flex
+     `gap` here would stack with it rather than compete. */
+  .home-fednet__header-right {
+    margin-top: var(--spacing-3XL); /* live: 32px = --spacing-3XL ✓ */
+  }
+
+  /* ── Row 2: subnets ──────────────────────────────────────────────── */
+  .home-fednet__section-label {
+    text-align: center;
+    margin-bottom: var(--spacing-3XL); /* live: 32px = --spacing-3XL ✓ */
+  }
+
+  .home-fednet__subnets {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-3XL); /* live: 32px = --spacing-3XL ✓ */
+    align-items: start;
+  }
+
+  .home-fednet__subnet {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--spacing-2XL); /* live: 24px = --spacing-2XL ✓ */
+    min-height: 256px; /* live min-height */
+  }
+
+  .home-fednet__subnet-title {
+    margin-bottom: var(--spacing-L); /* live: 16px = --spacing-L ✓ */
+    /* Semantic <h3> (outline order), but keeps the card-title treatment it had
+       as an <h5>: Inter, line-height 1.4, 18–21px. Size via --h3 tokens, never a
+       raw font-size, so the mobile floor is preserved. */
+    font-family: var(--font-primary);
+    line-height: 1.4;
+    --h3-min: 18px;
+    --h3-max: 21px;
+  }
+
+  /* .home-fednet__subnet-body on <p> — all type from body defaults */
+
+  .home-fednet__subnet-link {
+    /* `link-hover-line` owns the underline: none at rest, slides in on hover. */
+    align-self: flex-start;
+  }
+
+  /* ── Row 3: pillars ──────────────────────────────────────────────── */
+  .home-fednet__pillars {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-3XL); /* live: 32px = --spacing-3XL ✓ */
+    align-items: start;
+  }
+
+  .home-fednet__pillar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-L); /* live: 16px icon-to-content gap = --spacing-L ✓ */
+  }
+
+  .home-fednet__pillar-icon {
+    display: flex;
+    color: var(--text-body);
+    flex-shrink: 0;
+  }
+
+  .home-fednet__pillar-title {
+    margin-bottom: var(--spacing-L); /* live: 16px = --spacing-L ✓ */
+    /* Semantic <h3> (outline order), keeps its former <h5> card treatment:
+       Inter, line-height 1.4, 18–21px — sized via --h3 tokens, not raw px. */
+    font-family: var(--font-primary);
+    line-height: 1.4;
+    --h3-min: 18px;
+    --h3-max: 21px;
+  }
+
+  /* .home-fednet__pillar-body on <p> — all type from body defaults */
+
+  /* ── Row 4: inverse CTA ─────────────────────────────────────────── */
+  /* Uses --dark-surface-* tokens: dark on a light page, light on a dark page.
+     Text and button tokens mirror the inversion automatically. */
+  .home-fednet__row--cta {
+    background-color: var(--dark-surface-background-default);
+    /* TODO(decision: live padding-block 96px — no token maps) */
+    padding-block: 96px;
+  }
+
+  .home-fednet__cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 880px; /* live: 880px text width */
+    margin-inline: auto;
+  }
+
+  .home-fednet__cta-heading {
+    color: var(--text-headline-light); /* inverse surface — must override global --text-headline */
+    margin-bottom: var(--spacing-2XL); /* live: 24px = --spacing-2XL ✓ */
+  }
+
+  /* Paragraph spacing (live: 16px) comes from the global `p + p` rule — a flex
+     `gap` here would stack with it rather than compete. */
+  .home-fednet__cta-body {
+    color: var(--text-body-light); /* inverse surface — must override global --text-body */
+    margin-bottom: var(--spacing-4XL); /* live: 40px = --spacing-4XL ✓ */
+  }
+
+  /* Button inverts with the section: light bg + dark text in light mode,
+     dark bg + light text in dark mode — using the same semantic token pair. */
+  .home-fednet__row--cta :global(.btn) {
+    --button-dark-color:  var(--text-headline-light);
+    --button-light-color: var(--text-headline);
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+     MOBILE (≤ 991px)
+     ══════════════════════════════════════════════════════════════════ */
+  @media (max-width: 991px) {
+    /* Override the global .grid-12 collapse: keep 12 columns but tighten the gap
+       so the 1-col breathing room scales to mobile rather than disappearing. */
+    .home-fednet__card {
+      grid-template-columns: repeat(12, 1fr);
+      column-gap: var(--spacing-XS); /* 6px — columns ~24px, inset ~30px each side */
+    }
+
+    /* grid-column: 2 / 12 on .home-fednet__inner stays unchanged */
+
+    .home-fednet__row {
+      padding-block: var(--spacing-3XL);
+    }
+
+    .home-fednet__header-grid {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-2XL);
+    }
+
+    .home-fednet__label,
+    .home-fednet__header-right {
+      margin-top: 0;
+    }
+
+    .home-fednet__subnets {
+      grid-template-columns: 1fr;
+    }
+
+    .home-fednet__subnet {
+      min-height: 0;
+    }
+
+    .home-fednet__pillars {
+      grid-template-columns: 1fr;
+    }
+
+    .home-fednet__row--cta {
+      padding-block: var(--spacing-5XL);
+    }
+
+    .home-fednet__cta {
+      max-width: 100%;
+    }
+  }
+</style>

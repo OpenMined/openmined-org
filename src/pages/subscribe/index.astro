@@ -1,0 +1,153 @@
+---
+/**
+ * /subscribe/ — the email-preferences center (Group A one-off). A full-spectrum
+ * post-background band with two columns: left = the 11-checkbox email-preferences
+ * HubSpot form ("Subscribe to Emails"); right sidebar = "Follow on Social" (5
+ * dark link-buttons) + "Join the Community" (Slack). The 5 single-list children
+ * (/subscribe/newsletter/ etc.) deep-link back here. Copy + hrefs verbatim from
+ * the live page; formId from the prod probe.
+ */
+import Page from '@layouts/Page.astro';
+import FormEmbed from '@elements/FormEmbed.astro';
+import Icon from '@elements/Icon.astro';
+
+const socials = [
+  { label: 'Follow on Linkedin', href: 'https://www.linkedin.com/company/openmined', icon: 'logo-linkedin' },
+  { label: 'Follow on X', href: 'https://x.com/openminedorg', icon: 'logo-x' },
+  { label: 'Follow on Bluesky', href: 'https://bsky.app/profile/openmined.bsky.social', icon: 'logo-bluesky' },
+  { label: 'Star on GitHub', href: 'https://github.com/OpenMined', icon: 'logo-github' },
+  { label: 'Follow on YouTube', href: 'https://www.youtube.com/c/openminedorg', icon: 'logo-youtube' },
+];
+---
+
+<Page
+  title="Get Updates from OpenMined"
+  description="Manage your OpenMined email preferences — pick the updates you want, follow us on social, and join the Slack community."
+>
+  <section class="subs">
+    <h1 class="sr-only">Get Updates from OpenMined</h1>
+    <div class="container subs__grid">
+      <!-- Left: email preferences form -->
+      <div class="subs__card subs__form">
+        <h2 class="subs__title">Subscribe to Emails</h2>
+        <p class="subs__lede">Check the types of emails you would like to receive.</p>
+        <p class="subs__note">You can update your preferences anytime via the link at the bottom of our emails.</p>
+        <FormEmbed formId="e2a5f0e0-fd96-4e2a-9b02-e7886c6d1550" />
+      </div>
+
+      <!-- Right: social + community -->
+      <aside class="subs__side">
+        <div class="subs__card">
+          <h2 class="subs__title">Follow on Social</h2>
+          <div class="subs__links">
+            {socials.map((s) => (
+              <a class="subs__link" href={s.href} target="_blank" rel="noopener noreferrer">
+                <span>{s.label}</span>
+                <Icon name={s.icon} size={20} />
+              </a>
+            ))}
+          </div>
+        </div>
+
+        <div class="subs__card">
+          <h2 class="subs__title">Join the Community</h2>
+          <div class="subs__links">
+            <a class="subs__link" href="/slack/">
+              <span>Join us on Slack</span>
+              <img src="/images/slack-icon.svg" alt="" width="20" height="20" />
+            </a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+</Page>
+
+<style>
+  .subs {
+    /* Column heads match live's uniform h4 (27px, regular weight); pin flat via
+       the heading-scale tokens rather than font-size (keeps them as real h2s
+       under the sr-only h1, clean heading order). */
+    --h2-min: 27px;
+    --h2-max: 27px;
+    padding-block: var(--spacing-5XL) var(--spacing-max);
+    /* Full-spectrum decorative band — live stretches the raster to fill. */
+    background-image: url('/images/post-background-small.png');
+    background-position: center;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+  }
+
+  .subs__grid {
+    max-width: var(--col-8);
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    gap: var(--spacing-4XL);
+    align-items: start;
+  }
+
+  .subs__card {
+    background-color: var(--surface-foreground-low);
+    border-radius: var(--border-radius-L);
+    padding: var(--spacing-3XL);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .subs__side {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3XL);
+  }
+
+  .subs__title { text-align: center; font-weight: 400; } /* live heads are regular weight */
+  .subs__lede { text-align: center; margin-top: var(--spacing-M); }
+  .subs__note {
+    text-align: center;
+    margin-top: var(--spacing-M);
+    font-size: 14px;
+    color: var(--text-subtle);
+  }
+
+  .subs__links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-M);
+    margin-top: var(--spacing-XL);
+  }
+  /* Dark link-buttons (label left, icon right). Inside the always-light card
+     the button tokens resolve to dark-bg / light-text, matching live. */
+  .subs__link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-M);
+    padding: var(--spacing-M) var(--spacing-L);
+    border-radius: var(--border-radius-S);
+    background-color: var(--button-dark-color);
+    color: var(--button-light-color);
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity var(--transition-base);
+  }
+  .subs__link:hover { opacity: 0.9; }
+  .subs__link img { display: block; }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (max-width: 991px) {
+    .subs__grid {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-3XL);
+    }
+  }
+</style>

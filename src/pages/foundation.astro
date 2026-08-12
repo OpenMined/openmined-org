@@ -1,0 +1,47 @@
+---
+import Page from '@layouts/Page.astro';
+import SimpleHero from '@components/sections/hero/SimpleHero.astro';
+import HeroSwoop from '@components/graphics/HeroSwoop.astro';
+import Partnerships from '@components/sections/partnerships/Partnerships.astro';
+import TextSection from '@components/sections/text/TextSection.astro';
+import ButtonCta from '@components/sections/cta/ButtonCta.astro';
+import Button from '@ui/Button.astro';
+---
+
+<Page
+  title="About the OpenMined Foundation"
+  description="The OpenMined Foundation is a 501(c)(3) nonprofit building open-source network technology that enables access to insights from non-public data without needing a copy or direct access."
+>
+  <SimpleHero
+    heading="Building the public network for non-public information"
+    lede="The OpenMined Foundation is a 501(c)(3) non-profit creating open-source network technology that enables access to insights in non-public data without needing a copy or direct access."
+    padTop="spacious"
+  >
+    <Fragment slot="actions">
+      <Button data-donate-open>Donate</Button>
+      <Button variant="outline" href="/get-involved/">Get Involved</Button>
+    </Fragment>
+    <HeroSwoop slot="swoop" src="/images/om-flow-hero.png" width={1024} height={288} />
+  </SimpleHero>
+
+  <Partnerships heading="Mission & Pilot Partners:" />
+
+  <TextSection heading="Mission" width="col-6">
+    <p>Most of the world’s data—the stuff that really matters—isn’t online.</p>
+    <p>It’s locked away in hospitals, research labs, private notebooks, and local devices. This non-public information holds the potential to accelerate breakthroughs in medicine, climate, education, AI safety, and beyond. But it’s sensitive—confidential, personal, and proprietary—so it shouldn’t just be centralized for the sake of facilitating use.</p>
+    <p>At OpenMined, we believe the best possible future isn’t built on surrendering this data to centralised service providers. It’s built on a new kind of network—one where data stays where it lives, and privacy-enhancing technologies ensure only the right questions are answered, by the right people, for the right reasons.</p>
+    <p><strong>We’re building the public network for non-public information.</strong></p>
+    <p>And we’re inviting the world to build it with us.</p>
+  </TextSection>
+
+  <TextSection heading="Vision" width="col-6">
+    <p>The future intelligence network will leverage privacy-enhancing technologies (PETs) and open-source tools to access public and non-public data, creating a vastly larger and more useful queryable network than today’s AI and internet.</p>
+    <p>In this future:</p>
+    <p><strong>Everyone can hear the collective wisdom of the world, and everyone can speak as a part of that collective wisdom.</strong></p>
+    <p>We believe it is possible. Join us!</p>
+  </TextSection>
+
+  <ButtonCta heading="Get Involved" body="Find out how to support our mission.">
+    <Button href="/get-involved/">Get Started</Button>
+  </ButtonCta>
+</Page>

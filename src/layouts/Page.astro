@@ -1,0 +1,101 @@
+---
+/**
+ * Page — standard site shell: Base (html/head/theme) + site chrome.
+ *
+ * Mounts the default <Header> so it behaves like real site chrome rather than a
+ * /style-guide specimen. Pages that need a different header can override it via
+ * the named `header` slot:
+ *
+ *   <Page title="…">
+ *     <CustomHeader slot="header" />
+ *     …page content…
+ *   </Page>
+ *
+ * Footer is mounted via a named `footer` slot — override the same way:
+ *
+ *   <CustomFooter slot="footer" />
+ */
+import Base from './Base.astro';
+import Header from '@components/layout/Header.astro';
+import Footer from '@components/layout/Footer.astro';
+import { SITE_NAME } from '@data/site.mjs';
+
+// SEO props are forwarded verbatim to Base (which owns the head). See
+// Base.astro / @components/Seo.astro for the full prop set + defaults.
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  imageAlt?: string;
+  type?: 'website' | 'article';
+  noindex?: boolean;
+  publishedTime?: string;
+  modifiedTime?: string;
+  authors?: string[];
+  section?: string;
+  tags?: string[];
+  /** Opt in to the Ionicons CDN loader (default off). See Base.astro. */
+  ionicons?: boolean;
+  /**
+   * Whether this page's text belongs in the site-search index (Pagefind).
+   * Default true — every real page is findable. Set false for pages that exist
+   * but should never be a search destination: /404, /donate/thank-you/,
+   * /style-guide, and the archived event pages.
+   *
+   * Deliberately NOT derived from `noindex`, tempting as that coupling looks:
+   * `noindex` defaults TRUE as the pre-launch guard (see Base.astro), so keying
+   * off it would leave the index empty until cutover and then silently refill
+   * it. The two answer different questions — "should crawlers list this" vs
+   * "should our own search surface it".
+   */
+  searchable?: boolean;
+  /**
+   * Which kind of thing this route is, for the site-search index. `/search/`
+   * queries the two kinds separately and concatenates (pages, then posts) to
+   * reproduce live's pages-first ordering, so every indexed route must declare
+   * exactly one.
+   *
+   * This lives here — not on the individual routes — because BlogPost.astro
+   * renders THROUGH this layout. If the filter were hardcoded to `page` here, a
+   * blog post would carry both values and show up twice in one result list.
+   */
+  searchKind?: 'page' | 'post';
+}
+const { searchable = true, searchKind = 'page', ...rest } = Astro.props;
+
+// Label for a search-result row. A route's `title` is its SEO title, so several
+// carry a trailing " — OpenMined" that Seo.astro would otherwise append itself.
+// Inside openmined.org's own search that suffix is pure noise on every row, so
+// strip it — and only it; the rest of the title is left alone, since a
+// descriptive SEO title ("Careers at OpenMined") makes a better result label than
+// the bare CMS title live shows ("Careers").
+const searchTitle = Astro.props.title
+  ?.replace(new RegExp(`\\s*[—–|-]\\s*${SITE_NAME}\\s*$`), '')
+  .trim();
+---
+
+<Base {...rest}>
+  <slot name="header"><Header /></slot>
+  {/*
+    Pagefind seams, owned here so every route inherits them from one place (no
+    page route mounts Base directly, and BlogPost comes through here too):
+
+      data-pagefind-filter="type:…"  the kind, from `searchKind`. /search/ queries
+        the kinds separately, so this is what produces live's pages-first order.
+        It also drops the blog listing and taxonomy archives for free — they
+        render their own layout, carry NO kind filter, and so can never come back
+        from a filtered query. Their only text is card titles the posts cover.
+
+      data-pagefind-meta="title:…"   labels a result by the route's own title
+        rather than by whatever <h1> it happens to open with (live's search calls
+        the homepage "Homepage", not by its marketing headline).
+  */}
+  <main
+    data-pagefind-filter={searchable ? `type:${searchKind}` : undefined}
+    data-pagefind-meta={searchable && searchTitle ? `title:${searchTitle}` : undefined}
+    data-pagefind-ignore={searchable ? undefined : true}
+  >
+    <slot />
+  </main>
+  <slot name="footer"><Footer /></slot>
+</Base>

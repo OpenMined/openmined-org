@@ -1,0 +1,62 @@
+---
+/**
+ * TextSection — generic, reusable prose band: an optional heading + rule over a
+ * `.prose` body, capped to a readable column width. No page prefix = generic.
+ *
+ * The readable measure comes from the existing column-fraction scale (--col-*),
+ * selected per instance via the `width` prop — no separate prose-width scale.
+ *
+ * Rebuilt from live #brxe-dadmcc (foundation Mission + Vision; each block is one
+ * instance). Measured off the live page.
+ *
+ * Live → token mapping:
+ *   container width        ~642px                         → --col-6 (640) [default]
+ *   block gap / rhythm     93px between blocks            → --spacing-full (88) margin-block
+ *   h3                     Rubik 36px/1.2                 → global h3 (no override)
+ *   rule (divider)         1px line, margin 16px 0        → --border-color; --spacing-L
+ *   body paragraphs        16px/24, 16px gap, bold spans  → .prose (global)
+ */
+import Text from '@ui/Text.astro';
+interface Props {
+  heading?: string;
+  /** Readable column width — maps to the --col-* scale. */
+  width?: 'col-6' | 'col-8' | 'col-10' | 'full';
+  /** Raw readability measure (any length) — overrides `width` when set. */
+  measure?: string;
+  /** Show the horizontal rule under the heading. */
+  rule?: boolean;
+}
+const { heading, width = 'col-6', measure, rule = true } = Astro.props;
+// readable column width via the .measure system; 'full' = no cap
+const innerMeasure = measure ?? (width === 'full' ? undefined : `var(--${width})`);
+---
+
+<section class="text-section">
+  <div class="container">
+    <Text as="div" class="text-section__inner" measure={innerMeasure}>
+      {heading && <Text as="h3" class="text-section__heading">{heading}</Text>}
+      {rule && <div class="text-section__rule" role="presentation"></div>}
+      <div><slot /></div>
+    </Text>
+  </div>
+</section>
+
+<style>
+  .text-section {
+    margin-block: var(--spacing-full); /* live block rhythm 93px → 88 */
+  }
+
+  .text-section__inner {
+    margin-inline: auto;
+  }
+
+  /* .text-section__heading on <h3> — type from global h3; rule owns the gap */
+  .text-section__heading {
+    margin-bottom: 0;
+  }
+
+  .text-section__rule {
+    border-top: var(--border-strong);
+    margin-block: var(--spacing-L); /* live: 16px ✓ */
+  }
+</style>

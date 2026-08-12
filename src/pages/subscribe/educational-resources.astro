@@ -1,0 +1,25 @@
+---
+/**
+ * /subscribe/educational-resources/ — single-list email opt-in (P1 pattern).
+ * Copy verbatim from the live page. The
+ * live page's extra "Get more email updates" / "Slack invite" lines are fields
+ * inside the HubSpot form (fieldCount 6), so they render via the embed, not here.
+ */
+import Page from '@layouts/Page.astro';
+import OptInLanding from '@components/sections/forms/OptInLanding.astro';
+---
+
+<Page
+  title="Subscribe to Educational Resources"
+  description="Learn alongside us. Receive tutorials, blog posts, videos, and course updates covering the foundations and frontiers of privacy tech."
+>
+  <OptInLanding heading="Subscribe to Educational Resources" formId="436b2039-f154-46e0-9f19-f9e25a986b8a">
+    <Fragment slot="icon">📚</Fragment>
+    <p>Learn alongside us. Receive tutorials, blog posts, videos, and course updates covering the foundations and frontiers of privacy tech.</p>
+    <Fragment slot="fine">
+      <p>This will opt you in to the Educational Resources. Want to change that later? Just use the link at the bottom of any email.</p>
+      <p>We send other emails too! <a href="/subscribe/">Opt in to the ones you want.</a></p>
+      <p>This button also confirms you agree with our <a href="/privacy-policy/">privacy policy</a>.</p>
+    </Fragment>
+  </OptInLanding>
+</Page>

@@ -1,0 +1,132 @@
+---
+/**
+ * ComparisonTable — reusable N-column comparison. Each column is a header
+ * (eyebrow + subtitle) over a list of icon-prefixed rows. Columns auto-fit and
+ * stack on mobile, so it drops into various layouts. Thin divider lines come
+ * from a 1px grid gap over a tinted container (the connected-table look).
+ *
+ * Rebuilt from live #brxe-dae53f, which shoehorned this into a Bricks
+ * pricing-tables module — rebuilt here for its real use (Challenge vs Solution).
+ * Measured off the live page.
+ *
+ * Rows accept inline HTML (e.g. a <b> lead-in). Per-column `icon` applies to all
+ * that column's rows — typically a semantic mark (check / x-mark).
+ *
+ * Styling: a single rounded card on --surface-background-bright with a medium
+ * shadow. Interior grid lines (--border-subtle) divide both axes: vertical
+ * strokes between columns and horizontal strokes between rows (and below the
+ * header). On mobile columns stack, so the column divider becomes horizontal.
+ *
+ * Live → token mapping (measured off production):
+ *   column bg                grayscale-50 → --surface-background-default
+ *   shadow                   0 24px 48px -8px → --shadow-lg
+ *   radius                   6px → --border-radius-S
+ *   interior dividers        → 1px --border-subtle (inside only, both axes)
+ *   header padding           30px → --spacing-3XL (32)
+ *   subtitle                 22.4px / 700 → h5 size, semibold→bold
+ *   row padding              12px / 20px → --spacing-M / --spacing-XL (padded for row lines)
+ */
+import Icon from '@elements/Icon.astro';
+
+interface Column {
+  /** small eyebrow above the subtitle, e.g. "The Challenge:" */
+  title?: string;
+  subtitle: string;
+  /** icon name applied to every row in this column */
+  icon: string;
+  /** row text; may contain inline HTML */
+  rows: string[];
+}
+interface Props {
+  columns: Column[];
+}
+const { columns } = Astro.props;
+const maxRows = Math.max(...columns.map((c) => c.rows.length));
+---
+
+<div class="comparison" style={`--cols:${columns.length}; --rows:${maxRows}`}>
+  {columns.map((col) => (
+    <div class="comparison__col">
+      <div class="comparison__header">
+        {col.title && <p class="comparison__eyebrow">{col.title}</p>}
+        <h5 class="comparison__subtitle">{col.subtitle}</h5>
+      </div>
+      {col.rows.map((row) => (
+        <div class="comparison__row">
+          <Icon name={col.icon} size={36} class="comparison__icon" />
+          <span set:html={row} />
+        </div>
+      ))}
+    </div>
+  ))}
+</div>
+
+<style>
+  .comparison {
+    display: grid;
+    grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr));
+    /* explicit row tracks (header + N rows) so each column's subgrid aligns to
+       them — rows line up across columns, dividers run straight, bottoms match */
+    grid-template-rows: auto repeat(var(--rows, 1), auto);
+    background-color: var(--surface-background-default); /* live: grayscale-50 columns */
+    border-radius: var(--border-radius-S); /* live: 6px */
+    box-shadow: var(--shadow-lg); /* live: 0 24px 48px -8px */
+    overflow: hidden; /* clip columns to the rounded corners */
+  }
+
+  /* each column spans all row tracks and inherits them via subgrid, so row N of
+     every column shares one track height (equal-height items, aligned baselines) */
+  .comparison__col {
+    display: grid;
+    grid-template-rows: subgrid;
+    grid-row: 1 / -1;
+    padding-bottom: var(--spacing-3XL); /* breathing room past the last row */
+  }
+  /* vertical interior divider between columns (inside only, no outer border) */
+  .comparison__col:not(:first-child) {
+    border-left: var(--border-subtle);
+  }
+
+  @media (max-width: 991px) {
+    .comparison {
+      grid-template-columns: 1fr;
+      /* stack: each column flows on its own; subgrid rows no longer apply */
+      grid-template-rows: none;
+    }
+    .comparison__col {
+      grid-template-rows: none;
+      grid-row: auto;
+    }
+    .comparison__col:not(:first-child) {
+      border-left: none;
+      border-top: var(--border-subtle);
+    }
+  }
+
+  .comparison__header {
+    padding: var(--spacing-3XL); /* live: 30px → 32 */
+    text-align: center; /* centered heading cells */
+  }
+  .comparison__eyebrow {
+    margin: 0 0 var(--spacing-XS);
+    color: var(--text-subtle);
+  }
+  /* .comparison__subtitle on <h5> — type from global h5, bumped to bold
+     (live subtitle is 700) */
+  .comparison__subtitle { margin: 0; font-weight: 700; }
+
+  .comparison__row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-M);
+    /* extra vertical padding so rows breathe around the horizontal grid lines */
+    padding: var(--spacing-M) var(--spacing-XL);
+    color: var(--text-body);
+    /* horizontal grid line above each row — also separates header from row 1 */
+    border-top: var(--border-subtle);
+  }
+  .comparison__icon {
+    margin-top: 2px;
+    flex-shrink: 0; /* 36px icon keeps its size next to wrapping text */
+  }
+</style>

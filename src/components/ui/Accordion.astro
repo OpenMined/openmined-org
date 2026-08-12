@@ -1,0 +1,114 @@
+---
+/**
+ * Accordion — a single expand/collapse disclosure built on native
+ * <details>/<summary>: keyboard- and AT-accessible for free, works with no JS,
+ * and keeps the answer in the DOM (crawlable). Stack several for an FAQ. The
+ * summary shows the title + a circular chevron that rotates when open.
+ *
+ * Rebuilt from live pysyft FAQ #brxe-2d952f (.brxe-accordion-nested items).
+ * Measured off the live page.
+ *
+ * Live → token mapping:
+ *   item card      #ffffff                     → --surface-background-bright (themed)
+ *   radius         8px                         → --border-radius-M ✓
+ *   shadow         box-shadow-m                → --shadow-md ✓
+ *   padding        30/28/30/40                 → --spacing-3XL … --spacing-4XL (snap)
+ *   title↔icon gap 15px                        → --spacing-L (snap)
+ *   content pad-t  8px                         → --spacing-S ✓
+ *   open affordance arrow-circle.svg (rotates) → inline chevron-in-circle, 180° on open
+ *
+ * Title via prop; answer via the default slot (wrap rich answers in .prose
+ * naturally — bare elements are styled by the slotted content's own scope).
+ */
+interface Props {
+  title: string;
+  /** Render expanded on load. */
+  open?: boolean;
+  /** Heading level for the question (keeps a sensible document outline). */
+  as?: 'h3' | 'h4' | 'h5' | 'p';
+}
+const { title, open = false, as = 'p' } = Astro.props;
+const TitleTag = as;
+---
+
+<details class="accordion" open={open}>
+  <summary class="accordion__summary">
+    <TitleTag class="accordion__title">{title}</TitleTag>
+    <span class="accordion__icon" aria-hidden="true">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <circle class="accordion__ring" cx="16" cy="16" r="16" />
+        <path class="accordion__arrow" d="M11 14l5 5 5-5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+      </svg>
+    </span>
+  </summary>
+  <div class="accordion__content">
+    <slot />
+  </div>
+</details>
+
+<style>
+  .accordion {
+    background-color: var(--surface-background-bright);
+    border-radius: var(--border-radius-M); /* live: 8px ✓ */
+    box-shadow: var(--shadow-md);
+    padding: var(--spacing-3XL) var(--spacing-3XL) var(--spacing-3XL) var(--spacing-4XL); /* live: 30/28/30/40 */
+  }
+
+  /* summary row — strip the native disclosure triangle, lay out as
+     question (left) + circular chevron (right) */
+  .accordion__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-L); /* live: 15px → 16 */
+    cursor: pointer;
+    list-style: none;
+  }
+  .accordion__summary::-webkit-details-marker { display: none; }
+  .accordion__summary:focus-visible {
+    outline: 2px solid var(--text-headline);
+    outline-offset: 4px;
+    border-radius: var(--border-radius-XS);
+  }
+
+  /* question uses its element default type; only kill default margins so it
+     sits centered in the summary row */
+  .accordion__title { margin: 0; }
+
+  .accordion__icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    transition: transform 0.2s ease;
+  }
+  .accordion[open] .accordion__icon {
+    transform: rotate(180deg);
+  }
+
+  /* Ring (circle) — light gray closed, headline filled when open */
+  .accordion__ring {
+    fill: var(--surface-foreground-high);
+    transition: fill 0.2s ease;
+  }
+  .accordion[open] .accordion__ring {
+    fill: var(--text-headline);
+  }
+
+  /* Arrow (chevron) — headline color closed, ring color when open */
+  .accordion__arrow {
+    stroke: var(--text-headline);
+    transition: stroke 0.2s ease;
+  }
+  .accordion[open] .accordion__arrow {
+    stroke: var(--surface-foreground-high);
+  }
+
+  .accordion__content {
+    padding-top: var(--spacing-S); /* live content-wrapper pad-top: 8px ✓ */
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .accordion__icon,
+    .accordion__ring,
+    .accordion__arrow { transition: none; }
+  }
+</style>

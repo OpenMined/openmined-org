@@ -1,0 +1,106 @@
+---
+/**
+ * Partnerships — monochrome logo strip. Generic / reusable: other pages reuse
+ * it by passing a different `orgs` subset.
+ *
+ * Rebuilt from live #brxe-63c070.
+ *
+ * Live → token mapping:
+ *   section margin-block   72px (mobile 50px)        → --spacing-full (snap; mobile --spacing-5XL)
+ *   eyebrow "Partnerships" Inter 16px/24 rgb(53,50,67) → body defaults (no override)
+ *   eyebrow margin-bottom  51px                      → --spacing-5XL (48, snap)
+ *   logo block             flex wrap, centered        → flex/wrap/center
+ *   logo column-gap        58px (mobile ~35–46)       → --spacing-5XL (48) / mobile --spacing-3XL
+ *   logo row-gap           51px (mobile ~30–40)       → --spacing-5XL (48) / mobile --spacing-3XL
+ *   logo max size          145×120px (mobile 120/80)  → max-width 145px, max-height 48px (mobile 100px)
+ *   logo color             rgb(53,50,67), flips white → currentColor via --text-body (theme-adaptive)
+ *
+ * Every logo renders mono+theme-adaptive (OrgLogo `mono`) regardless of the
+ * org's `monochrome` flag — that's the strip's treatment, matching live.
+ */
+import OrgLogo from '@components/media/OrgLogo.astro';
+import Text from '@ui/Text.astro';
+import { getCollection } from 'astro:content';
+
+type OrgData = { id: string; name: string; logo: string; monochrome?: boolean; url?: string };
+
+interface Props {
+  heading?: string;
+  intro?: string;
+  orgs?: OrgData[];
+}
+
+const allOrgs = await getCollection('organizations');
+const defaultPartners = allOrgs
+  .filter(e => e.data.roles.includes('partner'))
+  .map(e => e.data);
+
+const { heading = 'Partnerships', intro, orgs = defaultPartners } = Astro.props;
+---
+
+<section class="partnerships">
+  <div class="container">
+    {heading && <Text as="p" class="partnerships__eyebrow">{heading}</Text>}
+    {intro && <Text as="p" class="partnerships__intro" measure="var(--col-6)">{intro}</Text>}
+
+    <div class="partnerships__logos">
+      {orgs.map((org) => (
+        <OrgLogo org={org} mono />
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .partnerships {
+    margin-block: var(--spacing-full); /* live: 72px → nearest token */
+  }
+
+  .partnerships__eyebrow {
+    text-align: center;
+    margin-bottom: var(--spacing-5XL); /* live: 51px → 48 */
+  }
+
+  /* width comes from .measure (measure="var(--col-6)" in markup) — no max-width here */
+  .partnerships__intro {
+    text-align: center;
+    margin-inline: auto;
+    margin-bottom: var(--spacing-5XL);
+  }
+
+  /* Centered logo wall. currentColor here drives every mono mark's tint and
+     flips with the page theme. */
+  .partnerships__logos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    column-gap: var(--spacing-5XL); /* live: 58px → 48 */
+    row-gap: var(--spacing-5XL);    /* live: 51px → 48 */
+    color: var(--text-body);
+  }
+
+  /* OrgLogo renders its own root (.org-logo) in a child scope, so reach the
+     inner mark via :global from the strip container (which keeps this section's
+     scope). Sizing the replaced svg/img directly scales it aspect-correctly. */
+  .partnerships__logos :global(.org-logo svg),
+  .partnerships__logos :global(.org-logo img) {
+    max-width: 145px;  /* live svg max-width */
+    max-height: 48px;  /* keep the strip's optical height even */
+  }
+
+  @media (max-width: 991px) {
+    .partnerships {
+      margin-block: var(--spacing-5XL); /* live: 50px → 48 */
+    }
+    .partnerships__logos {
+      column-gap: var(--spacing-3XL); /* live ~35–46px → 32 */
+      row-gap: var(--spacing-3XL);    /* live ~30–40px → 32 */
+    }
+    .partnerships__logos :global(.org-logo svg),
+    .partnerships__logos :global(.org-logo img) {
+      max-width: 100px; /* live mobile svg max-width 120→80 range */
+      max-height: 40px;
+    }
+  }
+</style>

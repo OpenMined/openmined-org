@@ -1,0 +1,1092 @@
+---
+/**
+ * BlogToolbar — the section header row above every PostCard grid: a 21px/500
+ * heading on the left, the Topic / Sort / Search controls pushed to the right
+ * (openmined.org/blog, verified 2026-07-01; controls re-probed 2026-07-27).
+ *
+ * The three controls are live's, rebuilt:
+ *
+ *   Topic   multi-select tag filter in a drop-up panel; the toggle turns into a
+ *           pill labelled with the first pick + a "+N more" badge. OR semantics
+ *           across picks (live: taxonomy IN), with a Reset.
+ *   Sort    radio pair, "Sort by date" — Oldest First / Newest First.
+ *   Search  toggle that swaps the heading block for a full-width input.
+ *
+ * Live drives all three through Bricks' AJAX query filters against WordPress.
+ * We're static, so the controller below fetches `/blog/cards/` — one document
+ * holding a real PostCard for every post — and filters, sorts and reorders
+ * those nodes into the page's `.blog-grid`. Search is Pagefind (full-text over
+ * the built site, ranked), falling back to the cards' `data-search` haystack
+ * when the index isn't reachable — which is always under `astro dev`, since
+ * Pagefind only runs as a postbuild step.
+ *
+ * `scope` is how the controller reproduces the server's post pool exactly: each
+ * listing route passes its own taxonomy constraint plus the slug of the post it
+ * hoisted into the featured slot (which the grid excludes). Without it the
+ * controller would happily filter an archive down to posts that archive doesn't
+ * contain.
+ *
+ * State lives in the URL (`?topic=a,b&sort=oldest&q=term`) so a filtered view is
+ * shareable and survives Back. With JS off the controls never appear — the
+ * server-rendered grid and BlogPagination's real `/page/N/` links are the whole
+ * experience, unchanged.
+ *
+ * It pins at the top of the scroll area (under the category nav where one is
+ * rendered) and drops its heading block while pinned, so only the controls ride
+ * along — live's `.js-sticky.sticking` behavior. The pinning itself is
+ * `global.css → .blog-sticky`; the script at the foot of this file publishes the
+ * pinned nav's height and flags the pinned state for the heading drop. Live also
+ * un-sticks its site header on these pages so the two layers don't compete —
+ * that's `@layouts/BlogListing.astro`.
+ */
+import Icon from '@elements/Icon.astro';
+import Button from '@ui/Button.astro';
+import Checkbox from '@ui/Checkbox.astro';
+import Radio from '@ui/Radio.astro';
+import { getCollection } from 'astro:content';
+
+interface Props {
+  heading?: string;
+  /**
+   * The archive's own post count, shown before the controls as "N articles"
+   * (live's taxonomy archives). Omit it on a listing that isn't a subset of
+   * anything — the main /blog listing — and the element still renders, hidden,
+   * for the controller to reveal once a control narrows the grid.
+   */
+  count?: number;
+  /**
+   * Optional 16px glyph before the heading. Live puts an archive-type icon here
+   * on every taxonomy archive (author → person, tag → pricetag); we currently
+   * pass one only on the author archive — see the note in `[author].astro`.
+   */
+  icon?: string;
+  /**
+   * Optional descriptive line under the heading — the author archive's byline
+   * (live `people.json → bio`, 16px/400 body text). Omitted when unset, which
+   * keeps every other archive's header identical to before this prop existed.
+   */
+  byline?: string;
+  /**
+   * This listing's post pool, as the server computed it. `exclude` is the
+   * featured post's slug where the listing hoists one out of the grid. Omit
+   * entirely on a listing that shows every post unfiltered.
+   */
+  scope?: {
+    cat?: string;
+    tag?: string;
+    author?: string;
+    location?: string;
+    exclude?: string;
+  };
+}
+const { heading = 'Recent', count, icon, byline, scope } = Astro.props;
+
+// Topic options — every tag, with its site-wide post count so terms nobody has
+// used render disabled (live does the same: cryptography / cost-of-intelligence
+// / network-sourced-ai). The controller additionally disables terms with no
+// match inside THIS listing's scope, once the cards are loaded.
+const [tags, allPosts] = await Promise.all([
+  getCollection('tags'),
+  getCollection('blog', ({ data }) => import.meta.env.DEV || !data.draft),
+]);
+const tagCounts = new Map<string, number>();
+for (const post of allPosts) {
+  for (const t of post.data.tags) tagCounts.set(t.id, (tagCounts.get(t.id) ?? 0) + 1);
+}
+// DIVERGENCE FROM LIVE: live lists the 35 terms in WordPress term_id order —
+// a CMS artifact, not a decision, and it reads as unsorted. tags.json is sorted
+// by id, which is no better once the list renders LABELS (Contributor Spotlight
+// would sit under F, for `featured-contributor`). Sort by what's on screen.
+const topics = tags
+  .map((t) => ({ id: t.id, label: t.data.label, count: tagCounts.get(t.id) ?? 0 }))
+  .sort((a, b) => a.label.localeCompare(b.label));
+---
+
+<div
+  class:list={['blog-toolbar', 'blog-sticky', 'blog-sticky--bar', byline && 'blog-toolbar--has-byline']}
+  data-blog-toolbar
+  data-scope-cat={scope?.cat}
+  data-scope-tag={scope?.tag}
+  data-scope-author={scope?.author}
+  data-scope-location={scope?.location}
+  data-scope-exclude={scope?.exclude}
+>
+  <div class="blog-toolbar__head">
+    <h6 class="blog-toolbar__heading">
+      {icon && <Icon name={icon} size={16} class="blog-toolbar__icon" />}
+      {heading}
+    </h6>
+
+    {/* Overlays the heading while search is open (live: `.search-articles`,
+        absolutely positioned over `.info-content`, the two cross-fading). */}
+    <div class="blog-toolbar__search" data-search-field hidden>
+      <span class="blog-toolbar__search-icon" aria-hidden="true"><Icon name="search" size={16} /></span>
+      <input
+        type="search"
+        class="blog-toolbar__search-input"
+        data-search-input
+        placeholder="press “return” to search"
+        aria-label="Search articles"
+        autocomplete="off"
+        spellcheck="false"
+      />
+    </div>
+  </div>
+
+  <div class="blog-toolbar__controls">
+    {/* An archive's count is a fact about the page, so it ships visible. The main
+        listing has nothing to count until a control narrows the grid, so the
+        element ships hidden and `setCount` reveals it — the same "N articles"
+        readout, now doing duty as feedback on an active filter. (A divergence:
+        live renders a count element on /blog too but never reveals it.) */}
+    <span class="blog-toolbar__count" data-count hidden={count === undefined}>
+      <span data-count-value>{count ?? 0}</span> article{count === 1 ? '' : 's'}
+    </span>
+
+    {/* Topic — the only control that becomes a pill, and only once it's open or
+        carrying a selection (live: `.js-dropdown.is-active` / `:has(.first-checked)`). */}
+    <div class="blog-toolbar__dropdown" data-dropdown="topic" hidden>
+      <button
+        type="button"
+        class="blog-toolbar__control blog-toolbar__toggle"
+        data-control="filter"
+        aria-expanded="false"
+        aria-haspopup="true"
+      >
+        <span class="blog-toolbar__toggle-text" data-toggle-text>Filter</span>
+        <span class="blog-toolbar__toggle-badge" data-toggle-badge hidden></span>
+        <Icon name="filter" size={16} />
+      </button>
+      <div class="blog-toolbar__panel" data-panel>
+        <p class="blog-toolbar__panel-title">Topic</p>
+        <div class="blog-toolbar__panel-scroll">
+          <ul class="blog-toolbar__options text-small">
+            {topics.map((t) => (
+              <li>
+                <Checkbox
+                  class="blog-toolbar__option"
+                  name="topic"
+                  value={t.id}
+                  label={t.label}
+                  disabled={t.count === 0}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+        <button type="button" class="blog-toolbar__reset text-small" data-reset>Reset</button>
+      </div>
+    </div>
+
+    <div class="blog-toolbar__dropdown blog-toolbar__dropdown--sort" data-dropdown="sort" hidden>
+      <button
+        type="button"
+        class="blog-toolbar__control blog-toolbar__toggle"
+        data-control="sort"
+        aria-expanded="false"
+        aria-haspopup="true"
+      >
+        <span>Sort</span>
+        <Icon name="sort" size={16} />
+      </button>
+      <div class="blog-toolbar__panel" data-panel>
+        <p class="blog-toolbar__panel-title">Sort by date</p>
+        <ul class="blog-toolbar__options text-small">
+          <li><Radio class="blog-toolbar__option" name="sort" value="oldest" label="Oldest First" /></li>
+          <li><Radio class="blog-toolbar__option" name="sort" value="newest" label="Newest First" checked /></li>
+        </ul>
+      </div>
+    </div>
+
+    <button type="button" class="blog-toolbar__control" data-control="search" aria-expanded="false" hidden>
+      <span>Search</span>
+      {/* Magnifier then close, stacked in one cell — see the swap rules below. */}
+      <span class="blog-toolbar__search-glyph">
+        <Icon name="search" size={16} />
+        <Icon name="close" size={16} />
+      </span>
+    </button>
+  </div>
+
+  {byline && <p class="blog-toolbar__byline measure">{byline}</p>}
+</div>
+
+{/* Cloned in after the grid on first use — the results footer the controller
+    owns while a control is active (BlogPagination's own scroll-load stands down
+    for the duration). Rendered here so the Button primitive and the empty-state
+    copy stay in Astro rather than being assembled from strings in the script. */}
+<template data-results-template>
+  <div class="blog-results" data-blog-results>
+    {/* Zero-height scroll trigger, same shape as `BlogPagination.astro →
+        .blog-pagination__sentinel`: the observer watches it so a filtered view
+        scroll-loads exactly like the unfiltered grid does. The button stays as
+        the manual affordance (and the whole path with no IntersectionObserver). */}
+    <div class="blog-results__sentinel" data-results-sentinel aria-hidden="true"></div>
+    <p class="blog-results__note" data-results-note hidden>No articles match these filters.</p>
+    <Button variant="outline" class="blog-results__more" data-results-more>Load more posts</Button>
+  </div>
+</template>
+
+<style>
+  .blog-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-L);
+    margin-bottom: var(--spacing-2XL);
+  }
+  /* Wrap + a 100% basis on the byline puts it on its own row under the heading
+     (live measures it at 846px ≈ --col-8; as a flex sibling of the controls it
+     gets squeezed to ~326px). Scoped to the byline case so the heading/controls
+     row — and its mobile behavior — is untouched on every other archive. */
+  .blog-toolbar--has-byline { flex-wrap: wrap; }
+
+  /* The search field overlays this box, so it has to be the growing side of the
+     row and its own positioning context. min-width:0 lets it actually shrink. */
+  .blog-toolbar__head {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .blog-toolbar__heading {
+    --h6-max: 21px;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-XS);
+    margin: 0;
+    font-weight: 500;
+    color: var(--text-headline);
+    transition: opacity var(--transition-base), transform var(--transition-base);
+  }
+
+  /* ── Pinned state ──────────────────────────────────────────────────────
+     Once the bar is stuck the heading block leaves and only the controls ride
+     along (live slides `.info-content` up by its own height and fades it out).
+     The head box stays in flow, so the search field keeps its row and the row
+     height — set by the 42px controls either way — doesn't move. */
+  .blog-toolbar.is-stuck .blog-toolbar__heading {
+    transform: translateY(-100%);
+    opacity: 0;
+    visibility: hidden;
+  }
+  /* A server count belongs to the header block live drops when pinned. A count the
+     controller is driving does not — it's live feedback on an active filter, and
+     the pinned bar is exactly where the reader wants to read it. */
+  .blog-toolbar.is-stuck:not(.is-filtered) .blog-toolbar__count { display: none; }
+  /* The byline belongs to that same header block, and live takes it out of flow
+     with it — so the pinned bar is a single row on the author archive too. */
+  .blog-toolbar.is-stuck .blog-toolbar__byline { display: none; }
+  /* Live tints the archive glyph one grayscale step lighter than the body text
+     (#b4b0bf = grayscale-500); --text-subtle (550) is the nearest semantic token. */
+  .blog-toolbar__icon { color: var(--text-subtle); }
+  .blog-toolbar__byline {
+    --measure: var(--col-8); /* live constrains the header block to 846px ≈ --col-8 */
+    flex-basis: 100%;
+    /* Negative offset cancels the row gap so the byline sits tight under the
+       heading (live: 16px/24px body text directly beneath the count). */
+    margin: calc(var(--spacing-2XS) - var(--spacing-L)) 0 0;
+    color: var(--text-body);
+  }
+  .blog-toolbar__controls {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3XL);
+  }
+  .blog-toolbar__count {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-body);
+    white-space: nowrap;
+  }
+  .blog-toolbar__control {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-XS);
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-body);
+    cursor: pointer;
+    transition: color var(--transition-base);
+  }
+  .blog-toolbar__control:hover { color: var(--color-interactive-hover); }
+
+  /* ── Dropdowns ─────────────────────────────────────────────────────────── */
+
+  .blog-toolbar__dropdown {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  /* Topic only: the toggle carries a pill while open or while it holds a
+     selection. Sort never does (live: `:not(.dropdown-filters-sort)`).
+
+     The button ALWAYS occupies the pill's box — padding and a transparent
+     border are permanent, and activation only colours the outline in. Live
+     instead grows the button from zero padding, which reflows the control row
+     and the grid every time the filter opens. */
+  .blog-toolbar__dropdown[data-dropdown='topic'] .blog-toolbar__toggle {
+    /* live 10px/22px, snapped — the 8px block value lands the pill on live's
+       measured 42px height exactly (8 + 24 line-height + 8 + 2 border). */
+    padding: var(--spacing-S) var(--spacing-2XL);
+    border: 1px solid transparent;
+    border-radius: var(--border-radius-full);
+    transition:
+      color var(--transition-base),
+      background-color var(--transition-base),
+      border-color var(--transition-base);
+  }
+  .blog-toolbar__dropdown[data-dropdown='topic'].is-open .blog-toolbar__toggle,
+  .blog-toolbar__dropdown[data-dropdown='topic'].has-selection .blog-toolbar__toggle {
+    /* Inverse-of-page surface for the outline, so the pill reads as an outline
+       in light mode and stays legible in dark — live pairs the same border with
+       a white fill it drops in dark theme. */
+    border-color: var(--dark-surface-background-default);
+    background-color: var(--surface-background-bright);
+  }
+  :global([data-theme='dark']) .blog-toolbar__dropdown[data-dropdown='topic'].is-open .blog-toolbar__toggle,
+  :global([data-theme='dark']) .blog-toolbar__dropdown[data-dropdown='topic'].has-selection .blog-toolbar__toggle {
+    background-color: transparent;
+  }
+
+  /* Truncate rather than let a long topic label stretch the row. */
+  .blog-toolbar__toggle-text {
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .blog-toolbar__panel {
+    position: absolute;
+    /* Drops UP by default, as live does; the controller flips this to `is-below`
+       when the toggle sits too near the top of the viewport for the panel to fit. */
+    bottom: calc(100% + var(--spacing-M));
+    left: 0;
+    /* Live's panel is 180px for 11px options; scaled for small body (14px) so
+       long labels ("Privacy-Preserving Machine Learning (PPML)") still land in
+       two lines rather than three. */
+    min-width: 240px;
+    padding: var(--spacing-L);
+    background-color: var(--surface-background-dim);
+    border-radius: var(--border-radius-S);
+    z-index: 20;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity var(--transition-base),
+      visibility var(--transition-base);
+  }
+  .blog-toolbar__dropdown.is-below .blog-toolbar__panel {
+    bottom: auto;
+    top: calc(100% + var(--spacing-M));
+  }
+  .blog-toolbar__dropdown.is-open .blog-toolbar__panel {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+  /* Sort sits last in the row, so anchor its panel to the right edge — anchored
+     left (live's rule for both) it would hang past the container. */
+  .blog-toolbar__dropdown--sort .blog-toolbar__panel {
+    left: auto;
+    right: 0;
+    min-width: 160px; /* two short labels; live's 140px, scaled the same way */
+  }
+
+  .blog-toolbar__panel-title {
+    margin: 0 0 var(--spacing-S);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-body);
+  }
+  .blog-toolbar__panel-scroll {
+    max-height: 304px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    margin-bottom: var(--spacing-2XL);
+  }
+  /* Live sets these 11px; we use small body (14px) instead — 11px is caption
+     size and these are readable, clickable labels. The panel title stays 12px:
+     a label above larger content, not a smaller heading. */
+  .blog-toolbar__options {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-weight: 500;
+    color: var(--text-body);
+  }
+  .blog-toolbar__options li + li { margin-top: var(--spacing-XS); }
+  .blog-toolbar__option { align-items: flex-start; }
+  /* The Checkbox/Radio primitives center their box against a single line; topic
+     labels wrap to two, so pin the box to the first line instead. */
+  .blog-toolbar__option :global(.checkbox-control),
+  .blog-toolbar__option :global(.radio-control) { margin-top: 2px; }
+  .blog-toolbar__option:has(:disabled) {
+    opacity: 0.5;
+    cursor: default;
+  }
+  .blog-toolbar__option:has(:disabled) :global(*) { cursor: default; }
+
+  .blog-toolbar__reset {
+    display: inline-block;
+    padding: 0;
+    background: none;
+    border: none;
+    font-weight: 500;
+    color: var(--text-body);
+    cursor: pointer;
+    transition: color var(--transition-base);
+  }
+  .blog-toolbar__reset:hover { color: var(--color-interactive-hover); }
+
+  /* ── Search ────────────────────────────────────────────────────────────── */
+
+  .blog-toolbar__search {
+    position: absolute;
+    /* Centred on the heading box, not hung from its top edge — the field is
+       taller than the heading it replaces, so top-aligning it pushed the field
+       below the row's centre line and past the toolbar's bottom edge. */
+    top: 50%;
+    right: 0;
+    left: 0;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-S);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+  }
+  .blog-toolbar.is-searching .blog-toolbar__search { opacity: 1; }
+  .blog-toolbar.is-searching .blog-toolbar__heading { opacity: 0; pointer-events: none; }
+  /* Live hides the count whenever the field is open, because there the field is an
+     overlay on the block the count sits in. Ours sits in the controls row, which
+     the field never covers — so it only steps aside while there is nothing to
+     report. A query that narrowed the grid keeps its count, same as a topic pick. */
+  .blog-toolbar.is-searching:not(.is-filtered) .blog-toolbar__count { display: none; }
+
+  .blog-toolbar__search-icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    color: var(--text-subtle);
+  }
+  .blog-toolbar__search-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: var(--spacing-S) var(--spacing-L);
+    /* Matches the heading it replaces (--h6-max above), so the row height and
+       the optical weight of the block don't jump when search opens. */
+    font-size: 21px;
+    color: var(--text-headline);
+    background-color: var(--surface-background-dim);
+    border: var(--border-medium);
+    border-radius: var(--border-radius-S);
+  }
+  .blog-toolbar__search-input::placeholder { color: var(--text-subtle); }
+  /* Chrome paints its own blue clear glyph inside type="search"; the toolbar's
+     own Search toggle already closes and clears, so drop the browser one rather
+     than have an unstyleable control sitting in the field. */
+  .blog-toolbar__search-input::-webkit-search-cancel-button { appearance: none; }
+  .blog-toolbar__search-input:focus-visible { outline: none; }
+  .blog-toolbar__search-input:focus-visible::placeholder { opacity: 0; }
+
+  /* Magnifier and close occupy the same cell; the active state swaps them.
+     `<Icon>` roots carry Icon's OWN scope id, not this component's, so a class
+     handed to <Icon> is unreachable from here — target the two `.icon` spans
+     through :global() anchored on the scoped wrapper instead. */
+  .blog-toolbar__search-glyph {
+    position: relative;
+    display: inline-flex;
+  }
+  .blog-toolbar__search-glyph :global(.icon) { transition: opacity var(--transition-base); }
+  .blog-toolbar__search-glyph :global(.icon:last-child) {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+  [data-control='search'][aria-expanded='true'] { color: var(--text-subtle); }
+  [data-control='search'][aria-expanded='true'] .blog-toolbar__search-glyph :global(.icon:first-child) { opacity: 0; }
+  [data-control='search'][aria-expanded='true'] .blog-toolbar__search-glyph :global(.icon:last-child) { opacity: 1; }
+
+  @media (max-width: 767px) {
+    .blog-toolbar {
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: var(--spacing-M);
+    }
+    .blog-toolbar__head { flex-basis: 100%; }
+    .blog-toolbar__controls { gap: var(--spacing-L); }
+    /* Three controls barely fit a 390px row — drop the count, as live does. That
+       covers the filtered count too: there is no room for it beside a Topic pill
+       carrying a label and a "+N more" badge. */
+    .blog-toolbar__count { display: none; }
+    /* The heading is its own row here, and it's shorter than the 43px field, so
+       an overlay would spill onto the controls. Take the heading's place in
+       flow instead — same effect, no overlap. */
+    /* Back into flow here (it takes the heading's own row), so the centring
+       offset above has to come off with the positioning. */
+    .blog-toolbar__search { position: static; transform: none; }
+    .blog-toolbar.is-searching .blog-toolbar__heading { display: none; }
+    /* Room is scarce below the toolbar on mobile too, but a drop-up would sit
+       over the featured panel; live flips to a drop-down here. */
+    .blog-toolbar__panel {
+      bottom: auto;
+      top: calc(100% + var(--spacing-M));
+    }
+
+    /* Sort anchors LEFT here, not right. Right-anchoring is a desktop fix — the
+       control sits at the container's right edge there, so a left-anchored panel
+       would hang past it. At mobile the control sits mid-row instead, and hanging
+       the 160px panel off its right edge puts the panel's left edge past the
+       viewport (measured -9px at 390px wide), where it's clipped and unreachable. */
+    .blog-toolbar__dropdown--sort .blog-toolbar__panel {
+      left: 0;
+      right: auto;
+    }
+
+    /* No pill at mobile. The permanent pill box indents "Filter" 25px (padding +
+       border) from the toggle's own left edge — invisible at desktop, where the
+       controls float mid-row, but here the row starts at the container edge and
+       the label lands out of alignment with the heading above it and with Sort /
+       Search beside it. Stripped to plain text + glyph like its siblings;
+       activation still reads in the label and the "+N more" badge. */
+    .blog-toolbar__dropdown[data-dropdown='topic'] .blog-toolbar__toggle {
+      padding: 0;
+      border: 0;
+    }
+    .blog-toolbar__dropdown[data-dropdown='topic'].is-open .blog-toolbar__toggle,
+    .blog-toolbar__dropdown[data-dropdown='topic'].has-selection .blog-toolbar__toggle {
+      background-color: transparent;
+    }
+  }
+</style>
+
+<script>
+  /**
+   * Pinned-bar bookkeeping. CSS owns the pinning itself (`global.css →
+   * .blog-sticky`); this only does the two things CSS can't:
+   *
+   *   1. publishes the pinned category nav's bottom edge as
+   *      `--blog-sticky-nav-h`, so the bar stacks exactly under it at any width
+   *      the nav wraps at (the CSS fallback assumes a single line);
+   *   2. flags `is-stuck` on EACH bar while it sits at its pinned offset. The
+   *      toolbar's own flag drops its heading block; both bars use it to hold
+   *      their background fill, which they only carry once pinned (`global.css →
+   *      .blog-sticky`). The nav is tracked here rather than in its own component
+   *      because this is already the one place that measures the pinned stack.
+   */
+  {
+    const bar = document.querySelector<HTMLElement>('.blog-sticky--bar');
+    const nav = document.querySelector<HTMLElement>('.blog-sticky--nav');
+    // Top-down, which is also pin order. Tag/locations archives render no nav.
+    const bars = [nav, bar].filter(Boolean) as HTMLElement[];
+
+    if (bars.length) {
+      // Per bar: its pinned offset, or null while it isn't sticky at this width
+      // (the toolbar goes static at mobile), so scrolling never flags a bar that
+      // never pins — and a bar that never pins never fills.
+      const stickTop = new Map<HTMLElement, number | null>();
+
+      function measure() {
+        if (nav && bar) {
+          const gap = parseFloat(getComputedStyle(nav).top) || 0;
+          bar.style.setProperty('--blog-sticky-nav-h', `${nav.offsetHeight + gap}px`);
+        }
+        for (const el of bars) {
+          const cs = getComputedStyle(el);
+          stickTop.set(el, cs.position === 'sticky' ? parseFloat(cs.top) || 0 : null);
+        }
+      }
+
+      function check() {
+        for (const el of bars) {
+          const top = stickTop.get(el);
+          if (top == null) {
+            el.classList.remove('is-stuck');
+            continue;
+          }
+          // 1px of slack — a pinned rect can land a subpixel under its own offset.
+          el.classList.toggle('is-stuck', el.getBoundingClientRect().top <= top + 1);
+        }
+      }
+
+      function remeasure() {
+        measure();
+        check();
+      }
+
+      remeasure();
+      window.addEventListener('scroll', check, { passive: true });
+      window.addEventListener('resize', remeasure);
+      // The nav's height is the offset everything else hangs off, and it changes
+      // whenever the row wraps — watch it rather than guessing at breakpoints.
+      if (nav) new ResizeObserver(remeasure).observe(nav);
+    }
+  }
+</script>
+
+<script>
+  /**
+   * Blog listing controls — Topic filter, date sort, and full-text search over
+   * the whole post set, from a static build.
+   *
+   * The page ships one server-rendered page of cards. On first use of any
+   * control we fetch `/blog/cards/` (every post's real PostCard, ~48KB gzipped)
+   * once, keep its nodes in memory, and from then on the grid's contents are
+   * ours: scope → topic → search → sort → chunked render. Resetting everything
+   * puts the original server-rendered cards back and hands the grid to
+   * BlogPagination again.
+   */
+  type Card = HTMLElement;
+
+  const CARDS_URL = '/blog/cards/';
+  const CHUNK = 12; // matches POSTS_PER_PAGE — the server's own page size
+  const MIN_QUERY = 3; // live's filterMinChars
+
+  const toolbar = document.querySelector<HTMLElement>('[data-blog-toolbar]');
+  const grid = document.querySelector<HTMLElement>('.blog-grid');
+  const template = document.querySelector<HTMLTemplateElement>('[data-results-template]');
+
+  if (toolbar && grid && template) {
+    const pagination = document.querySelector<HTMLElement>('[data-blog-pagination]');
+    const countValue = toolbar.querySelector<HTMLElement>('[data-count-value]');
+    const countWrap = toolbar.querySelector<HTMLElement>('[data-count]');
+    const topicDropdown = toolbar.querySelector<HTMLElement>('[data-dropdown="topic"]')!;
+    const sortDropdown = toolbar.querySelector<HTMLElement>('[data-dropdown="sort"]')!;
+    const toggleText = toolbar.querySelector<HTMLElement>('[data-toggle-text]')!;
+    const toggleBadge = toolbar.querySelector<HTMLElement>('[data-toggle-badge]')!;
+    const searchBtn = toolbar.querySelector<HTMLButtonElement>('[data-control="search"]')!;
+    const searchField = toolbar.querySelector<HTMLElement>('[data-search-field]')!;
+    const searchInput = toolbar.querySelector<HTMLInputElement>('[data-search-input]')!;
+    const topicInputs = [...toolbar.querySelectorAll<HTMLInputElement>('input[name="topic"]')];
+    const sortInputs = [...toolbar.querySelectorAll<HTMLInputElement>('input[name="sort"]')];
+
+    // The archive's own count, or null on a listing that renders none (the count
+    // element ships hidden there — see its markup note). Read before anything can
+    // overwrite it, since it's what Reset has to restore.
+    const serverCount = countWrap && !countWrap.hidden ? Number(countValue?.textContent) : null;
+
+    // This listing's pool, as the server computed it.
+    const scope = {
+      cat: toolbar.dataset.scopeCat,
+      tag: toolbar.dataset.scopeTag,
+      author: toolbar.dataset.scopeAuthor,
+      location: toolbar.dataset.scopeLocation,
+      exclude: toolbar.dataset.scopeExclude,
+    };
+
+    // The untouched server-rendered grid, so Reset is a restore and not a re-render.
+    const originalCards = [...grid.children] as Card[];
+
+    let allCards: Card[] | null = null; // every post's card, newest-first (cards.astro's order)
+    let loading: Promise<Card[]> | null = null;
+    let shown = 0;
+    let matches: Card[] = [];
+    let results: HTMLElement | null = null;
+
+    // ── State ────────────────────────────────────────────────────────────
+
+    // `sortPicked` distinguishes "newest because that's the default" from
+    // "newest because the reader asked for it" — a search with the default sort
+    // shows results in relevance order, but an explicit Newest First means dates.
+    const state = { topics: [] as string[], sort: 'newest', sortPicked: false, q: '' };
+    /** Anything the controller has to take the grid over for — a sort included. */
+    const isActive = () => state.topics.length > 0 || state.sort !== 'newest' || state.q.length >= MIN_QUERY;
+    /**
+     * Whether the shown set is a SUBSET of this listing's pool, which is the only
+     * thing the count reports. A sort reorders the same articles, so it is active
+     * without being narrowed and leaves the count alone.
+     */
+    const isNarrowed = () => state.topics.length > 0 || state.q.length >= MIN_QUERY;
+
+    function readUrl() {
+      const p = new URLSearchParams(location.search);
+      state.topics = (p.get('topic') ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+      state.sort = p.get('sort') === 'oldest' ? 'oldest' : 'newest';
+      state.sortPicked = p.has('sort');
+      state.q = p.get('q') ?? '';
+    }
+
+    function writeUrl(replace = false) {
+      const p = new URLSearchParams(location.search);
+      state.topics.length ? p.set('topic', state.topics.join(',')) : p.delete('topic');
+      state.sortPicked ? p.set('sort', state.sort) : p.delete('sort');
+      state.q.length >= MIN_QUERY ? p.set('q', state.q) : p.delete('q');
+      const url = p.toString() ? `${location.pathname}?${p}` : location.pathname;
+      history[replace ? 'replaceState' : 'pushState']({}, '', url);
+    }
+
+    /** Push `state` onto the controls (used on load and on Back/Forward). */
+    function syncControls() {
+      for (const i of topicInputs) i.checked = state.topics.includes(i.value);
+      for (const i of sortInputs) i.checked = i.value === state.sort;
+      searchInput.value = state.q;
+      if (state.q) openSearch(false);
+      paintTopicToggle();
+    }
+
+    function paintTopicToggle() {
+      const picked = topicInputs.filter((i) => i.checked);
+      topicDropdown.classList.toggle('has-selection', picked.length > 0);
+      if (picked.length === 0) {
+        toggleText.textContent = topicDropdown.classList.contains('is-open') ? 'Topic' : 'Filter';
+        toggleBadge.hidden = true;
+        return;
+      }
+      // Live labels the pill with the first pick and counts the rest.
+      toggleText.textContent = picked[0].closest('label')?.querySelector('.checkbox-label')?.textContent?.trim() ?? 'Topic';
+      // Only carry text while it's shown — a hidden "+0 more" still lands in the
+      // button's textContent, which is what assistive tech and tests read.
+      toggleBadge.hidden = picked.length < 2;
+      toggleBadge.textContent = picked.length < 2 ? '' : `+${picked.length - 1} more`;
+    }
+
+    // ── Card source ──────────────────────────────────────────────────────
+
+    function loadCards(): Promise<Card[]> {
+      if (allCards) return Promise.resolve(allCards);
+      if (loading) return loading;
+      loading = fetch(CARDS_URL)
+        .then((r) => {
+          if (!r.ok) throw new Error(String(r.status));
+          return r.text();
+        })
+        .then((html) => {
+          const doc = new DOMParser().parseFromString(html, 'text/html');
+          allCards = [...doc.querySelectorAll<HTMLElement>('.blog-grid > *')];
+          if (!allCards.length) throw new Error('no cards');
+          document.adoptNode(doc.querySelector('.blog-grid')!); // adopt once, not per append
+          disableEmptyTopics();
+          return allCards;
+        });
+      return loading;
+    }
+
+    /** In-scope card set, before the user's own filters. */
+    const inScope = (cards: Card[]) =>
+      cards.filter((c) => {
+        if (scope.exclude && c.dataset.slug === scope.exclude) return false;
+        const has = (attr: string, val: string) => (c.dataset[attr] ?? '').split(' ').includes(val);
+        if (scope.cat && !has('cats', scope.cat)) return false;
+        if (scope.tag && !has('tags', scope.tag)) return false;
+        if (scope.author && !has('authors', scope.author)) return false;
+        if (scope.location && !has('locations', scope.location)) return false;
+        return true;
+      });
+
+    /** Grey out topics with nothing behind them on THIS listing (live disables
+        terms with no posts in the current result set). */
+    function disableEmptyTopics() {
+      const pool = inScope(allCards!);
+      for (const input of topicInputs) {
+        if (input.disabled && !input.dataset.scopeDisabled) continue; // globally empty — leave alone
+        const hits = pool.some((c) => (c.dataset.tags ?? '').split(' ').includes(input.value));
+        input.disabled = !hits;
+        if (!hits) input.dataset.scopeDisabled = 'true';
+        else delete input.dataset.scopeDisabled;
+      }
+    }
+
+    // ── Search ───────────────────────────────────────────────────────────
+
+    let pagefind: any | undefined; // undefined = untried, null = unavailable
+
+    async function getPagefind() {
+      if (pagefind !== undefined) return pagefind;
+      try {
+        // Built by the postbuild indexer, so it only exists in a real build —
+        // `astro dev` always lands in the catch and uses the fallback below.
+        pagefind = await import(/* @vite-ignore */ `${location.origin}/pagefind/pagefind.js`);
+        await pagefind.init();
+      } catch {
+        pagefind = null;
+      }
+      return pagefind;
+    }
+
+    /** Set when a query matched more posts than PAGEFIND_CAP, so the footer can say so. */
+    let truncatedAt = 0;
+    // A Pagefind result only yields its URL once its per-page fragment is
+    // fetched, so the match set costs one small request per hit (~5KB each).
+    // 250 covers every realistic query against 371 posts — live's broadest,
+    // "federated", returns 150 — and anything past it is reported in the
+    // footer rather than silently dropped.
+    const PAGEFIND_CAP = 250;
+
+    /**
+     * Slugs matching `q`, best first — or null if search isn't ranked and the
+     * caller should keep the current sort order.
+     */
+    async function searchSlugs(q: string): Promise<string[] | null> {
+      const pf = await getPagefind();
+      if (!pf) return null;
+      try {
+        const search = await pf.search(q, { filters: { type: 'post' } });
+        truncatedAt = search.results.length > PAGEFIND_CAP ? search.results.length : 0;
+        const found = await Promise.all(
+          search.results.slice(0, PAGEFIND_CAP).map((r: any) => r.data()),
+        );
+        return found
+          .map((d: any) => d.url.replace(/^.*\/blog\//, '').replace(/\/$/, ''))
+          .filter(Boolean);
+      } catch {
+        return null;
+      }
+    }
+
+    // ── Render ───────────────────────────────────────────────────────────
+
+    function showMore() {
+      if (shown >= matches.length) return;
+      shown += CHUNK;
+      paint();
+    }
+
+    function ensureResults() {
+      if (results) return results;
+      results = template!.content.firstElementChild!.cloneNode(true) as HTMLElement;
+      grid!.after(results);
+      results.querySelector('[data-results-more]')!.addEventListener('click', showMore);
+
+      // Scroll-load, so a filtered or searched grid keeps filling on scroll like
+      // the unfiltered one does through BlogPagination — whose sentinel stands
+      // down for the duration, taking its scroll-load with it. Same 600px
+      // prefetch margin, so the two feel identical.
+      //
+      // A chunk that leaves the sentinel still inside the margin simply fires the
+      // observer again, which is what should happen: it fills until the sentinel
+      // is genuinely out of reach. `showMore` is the stop condition.
+      if ('IntersectionObserver' in window) {
+        const sentinel = results.querySelector<HTMLElement>('[data-results-sentinel]')!;
+        new IntersectionObserver(
+          (entries) => {
+            if (entries.some((e) => e.isIntersecting)) showMore();
+          },
+          { rootMargin: '600px 0px' },
+        ).observe(sentinel);
+      }
+      return results;
+    }
+
+    function paint() {
+      grid!.replaceChildren(...matches.slice(0, shown));
+      const footer = ensureResults();
+      const note = footer.querySelector<HTMLElement>('[data-results-note]')!;
+      const more = footer.querySelector<HTMLButtonElement>('[data-results-more]')!;
+      note.textContent = truncatedAt
+        ? `Showing the ${PAGEFIND_CAP} best matches of ${truncatedAt}.`
+        : 'No articles match these filters.';
+      note.hidden = matches.length > 0 && !truncatedAt;
+      more.hidden = shown >= matches.length;
+      footer.hidden = false;
+      if (isNarrowed()) setCount(matches.length);
+      else restoreCount();
+    }
+
+    /**
+     * The count reads `<span>N</span> article(s)` — update both halves, and
+     * reveal it: on the main listing the element ships hidden, since there is
+     * nothing to count until a control narrows the grid.
+     */
+    function setCount(n: number) {
+      if (!countWrap || !countValue) return;
+      countValue.textContent = String(n);
+      const label = countWrap.lastChild;
+      if (label && label.nodeType === Node.TEXT_NODE) label.textContent = n === 1 ? ' article' : ' articles';
+      countWrap.hidden = false;
+    }
+
+    /** Back to the count the server rendered — or to no count at all on a listing
+     *  that never had one. */
+    function restoreCount() {
+      if (serverCount !== null) setCount(serverCount);
+      else if (countWrap) countWrap.hidden = true;
+    }
+
+    async function apply({ push = true } = {}) {
+      if (!isActive()) return deactivate({ push });
+
+      truncatedAt = 0;
+      const cards = await loadCards().catch(() => null);
+      if (!cards) return; // network failure — leave the server grid alone
+
+      let pool = inScope(cards);
+      if (state.topics.length) {
+        pool = pool.filter((c) => {
+          const tags = (c.dataset.tags ?? '').split(' ');
+          return state.topics.some((t) => tags.includes(t)); // OR, as live does
+        });
+      }
+
+      let ranked: string[] | null = null;
+      if (state.q.length >= MIN_QUERY) {
+        ranked = await searchSlugs(state.q);
+        if (ranked) {
+          const rank = new Map(ranked.map((slug, i) => [slug, i]));
+          pool = pool.filter((c) => rank.has(c.dataset.slug ?? ''));
+          // Relevance order — unless the reader has asked for a date sort.
+          if (state.sort === 'newest') pool.sort((a, b) => rank.get(a.dataset.slug!)! - rank.get(b.dataset.slug!)!);
+        } else {
+          const q = state.q.toLowerCase();
+          pool = pool.filter((c) => (c.dataset.search ?? '').includes(q));
+        }
+      }
+
+      if (state.sort === 'oldest') {
+        pool.sort((a, b) => Date.parse(a.dataset.date!) - Date.parse(b.dataset.date!));
+      } else if (!ranked) {
+        pool.sort((a, b) => Date.parse(b.dataset.date!) - Date.parse(a.dataset.date!));
+      }
+
+      matches = pool;
+      shown = CHUNK;
+      if (pagination) pagination.hidden = true;
+      // Marks the grid as a narrowed subset: the count reads as live feedback
+      // from here on, so it survives the pinned bar's header drop.
+      toolbar!.classList.toggle('is-filtered', isNarrowed());
+      paint();
+      if (push) writeUrl();
+    }
+
+    /** Hand the grid back to the server's markup and BlogPagination. */
+    function deactivate({ push = true } = {}) {
+      grid!.replaceChildren(...originalCards);
+      if (results) results.hidden = true;
+      if (pagination) pagination.hidden = false;
+      toolbar!.classList.remove('is-filtered');
+      restoreCount();
+      if (push) writeUrl();
+    }
+
+    // ── Wiring ───────────────────────────────────────────────────────────
+
+    function closeDropdowns(except?: HTMLElement) {
+      for (const d of [topicDropdown, sortDropdown]) {
+        if (d === except) continue;
+        d.classList.remove('is-open');
+        d.querySelector('[aria-expanded]')?.setAttribute('aria-expanded', 'false');
+      }
+      paintTopicToggle();
+    }
+
+    /** Drop up unless the panel would run off the top of the viewport. */
+    function placePanel(dropdown: HTMLElement) {
+      const panel = dropdown.querySelector<HTMLElement>('[data-panel]')!;
+      const room = dropdown.getBoundingClientRect().top;
+      dropdown.classList.toggle('is-below', room < panel.offsetHeight + 24);
+    }
+
+    function toggleDropdown(dropdown: HTMLElement) {
+      const open = !dropdown.classList.contains('is-open');
+      closeDropdowns(dropdown);
+      dropdown.classList.toggle('is-open', open);
+      dropdown.querySelector('[aria-expanded]')?.setAttribute('aria-expanded', String(open));
+      if (open) placePanel(dropdown);
+      paintTopicToggle();
+    }
+
+    function openSearch(focus = true) {
+      searchField.hidden = false;
+      toolbar!.classList.add('is-searching');
+      searchBtn.setAttribute('aria-expanded', 'true');
+      if (focus) searchInput.focus();
+    }
+
+    function closeSearch() {
+      toolbar!.classList.remove('is-searching');
+      searchBtn.setAttribute('aria-expanded', 'false');
+      searchField.hidden = true;
+      if (state.q) {
+        state.q = '';
+        searchInput.value = '';
+        apply();
+      }
+    }
+
+    for (const d of [topicDropdown, sortDropdown]) {
+      d.querySelector('[data-control]')!.addEventListener('click', () => toggleDropdown(d));
+    }
+
+    for (const input of topicInputs) {
+      input.addEventListener('change', () => {
+        state.topics = topicInputs.filter((i) => i.checked).map((i) => i.value);
+        paintTopicToggle();
+        apply();
+      });
+    }
+
+    for (const input of sortInputs) {
+      input.addEventListener('change', () => {
+        state.sort = input.value;
+        apply();
+      });
+    }
+
+    toolbar.querySelector('[data-reset]')!.addEventListener('click', () => {
+      state.topics = [];
+      for (const i of topicInputs) i.checked = false;
+      paintTopicToggle();
+      closeDropdowns();
+      apply();
+    });
+
+    searchBtn.addEventListener('click', () => {
+      closeDropdowns();
+      toolbar.classList.contains('is-searching') ? closeSearch() : openSearch();
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const q = searchInput.value.trim();
+        // Below the minimum is a clear, not a no-op — otherwise deleting a query
+        // down to two characters would silently leave the old results up.
+        state.q = q.length >= MIN_QUERY ? q : '';
+        apply();
+      } else if (e.key === 'Escape') {
+        closeSearch();
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      const t = e.target as HTMLElement;
+      if (!t.closest('[data-dropdown]')) closeDropdowns();
+    });
+
+    // A panel left open while the reader scrolls has to re-decide its direction:
+    // the toolbar pins near the top of the viewport, so a drop-up that fitted
+    // when it opened stops fitting and would ride off the top of the screen.
+    window.addEventListener(
+      'scroll',
+      () => {
+        for (const d of [topicDropdown, sortDropdown]) {
+          if (d.classList.contains('is-open')) placePanel(d);
+        }
+      },
+      { passive: true },
+    );
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDropdowns();
+    });
+
+    window.addEventListener('popstate', () => {
+      readUrl();
+      syncControls();
+      apply({ push: false });
+    });
+
+    // Reveal the controls only once they're wired — a disabled-looking or dead
+    // control is worse than none, and with JS off the grid is complete as it is.
+    for (const el of toolbar.querySelectorAll<HTMLElement>('[data-dropdown], [data-control="search"]')) {
+      el.hidden = false;
+    }
+
+    readUrl();
+    syncControls();
+    if (isActive()) apply({ push: false });
+  }
+</script>

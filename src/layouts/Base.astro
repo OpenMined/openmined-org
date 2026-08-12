@@ -1,0 +1,388 @@
+---
+import { Font } from 'astro:assets';
+import Seo from '@components/Seo.astro';
+import DonateModal from '@components/layout/DonateModal.astro';
+import SearchModal from '@components/layout/SearchModal.astro';
+import '@styles/tokens.css';
+// global.css is a barrel — it imports every file under styles/global/,
+// typography.css included (last, as it was here). See its header.
+import '@styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Page-relative or absolute social-share image (OG/Twitter). */
+  image?: string;
+  imageAlt?: string;
+  type?: 'website' | 'article';
+  /**
+   * Keep the page out of search indexes. Defaults TRUE as a pre-launch guard.
+   * AT LAUNCH: flip this default to false to make the whole site indexable.
+   */
+  noindex?: boolean;
+  /** article:* metadata — used by BlogPost (type="article"). */
+  publishedTime?: string;
+  modifiedTime?: string;
+  authors?: string[];
+  section?: string;
+  tags?: string[];
+  /**
+   * Opt in to the Ionicons CDN web-component loader for this page. Off by
+   * default — all site chrome (header/footer/menu) and shared components
+   * (CodeBlock, PostToc) use local inlined SVGs via @elements/Icon, so no page
+   * needs the CDN. Set true only on a page that renders raw <ion-icon> for a
+   * genuinely novel one-off icon not worth adding to the local set (e.g.
+   * /style-guide). Keeps the third-party origin off every production page.
+   */
+  ionicons?: boolean;
+}
+
+const {
+  title,
+  description,
+  image,
+  imageAlt,
+  type,
+  noindex = true,
+  publishedTime,
+  modifiedTime,
+  authors,
+  section,
+  tags,
+  ionicons = false,
+} = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!--
+      IMPORTANT: Theme init runs BEFORE stylesheets to prevent flash of wrong theme.
+      Reads localStorage, falls back to system preference, defaults to light.
+    -->
+    <script is:inline>
+      // Mark JS available so CSS can pre-hide fade-in images (`.js img[data-fade]`).
+      // Set here, before stylesheets, so images that fade never flash unhidden.
+      document.documentElement.classList.add('js');
+
+      const stored = localStorage.getItem('theme');
+      const system = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.setAttribute('data-theme',
+        stored ?? (system ? 'dark' : 'light'));
+    </script>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    {/* All SEO + social head tags (title, description, canonical, robots, OG,
+        Twitter) live in one place — see @components/Seo.astro. */}
+    <Seo
+      title={title}
+      description={description}
+      image={image}
+      imageAlt={imageAlt}
+      type={type}
+      noindex={noindex}
+      publishedTime={publishedTime}
+      modifiedTime={modifiedTime}
+      authors={authors}
+      section={section}
+      tags={tags}
+    />
+
+    <link rel="icon" href="/logos/OpenMined-Icon.svg" type="image/svg+xml" />
+    <link rel="alternate" type="application/rss+xml" title="OpenMined Blog" href="/rss.xml" />
+    {/* Browser UI tint — raw hex is unavoidable (theme-color takes no CSS var);
+        values are --color-grayscale-50 / -800 (verified against tokens.css: 2026-07-15). */}
+    <meta name="theme-color" content="#fcfcfd" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#2e2b3b" media="(prefers-color-scheme: dark)" />
+
+    <!--
+      Self-hosted fonts (Astro Fonts API — config in astro.config.mjs → fonts).
+      Emits the @font-face + :root CSS var + preload links; no third-party CDN.
+      Both families are VARIABLE fonts from Google, so every weight of a given
+      style+subset collapses into one woff2 — we preload the render-critical
+      latin/normal file of each (Inter body+UI, Rubik hero headings), which covers
+      all their weights. Preload is filtered by style+subset only (NOT weight): a
+      variable file's preload candidate is keyed to its first weight, so a
+      per-weight filter would miss it. Italic + latin-ext self-host and load on
+      demand. Semantic aliases (--font-primary / --font-secondary) live in tokens.css.
+    -->
+    <Font
+      cssVariable="--font-inter"
+      preload={[{ style: 'normal', subset: 'latin' }]}
+    />
+    <Font
+      cssVariable="--font-rubik"
+      preload={[{ style: 'normal', subset: 'latin' }]}
+    />
+  </head>
+  <body>
+    <slot />
+
+    {/* Site-wide donation dialog — opened by any [data-donate-open] trigger
+        (header nav, hero/foundation buttons, footer). Rendered once here so it
+        exists on every page. See @components/layout/DonateModal.astro. */}
+    <DonateModal />
+
+    {/* Site-wide search dialog — opened by any [data-search-open] trigger (the
+        two header instances). Rendered once here for the same reason as the
+        donation dialog above. See @components/layout/SearchModal.astro. */}
+    <SearchModal />
+
+    <!-- Theme toggle handler — wires any .js-switch-theme button on the page -->
+    <script>
+      const syncSwitches = () => {
+        const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        document
+          .querySelectorAll('.js-switch-theme[role="switch"]')
+          .forEach((el) => el.setAttribute('aria-checked', String(dark)));
+      };
+
+      document.addEventListener('click', (e: MouseEvent) => {
+        const target = e.target as HTMLElement;
+        if (target.closest('.js-switch-theme')) {
+          const html = document.documentElement;
+          const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+          html.setAttribute('data-theme', next);
+          localStorage.setItem('theme', next);
+        }
+      });
+
+      // Reflect the page theme onto every switch's aria-checked — role="switch"
+      // requires it (WCAG 4.1.2). Observing data-theme covers ANY theme change
+      // (click here, or a future system / cross-tab sync) from one place, so no
+      // toggle can drift out of sync regardless of which ones are on the page.
+      new MutationObserver(syncSwitches).observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme'],
+      });
+      syncSwitches();
+    </script>
+
+    <script is:inline>
+      // Load-in fade — reveals each `[data-fade]` element once it's ready, then
+      // it fades in (paired with the `.js [data-fade]` rule in global.css). Two
+      // modes by tag:
+      //   • <img> → reveal when THAT file finishes loading, tracked per-file.
+      //   • other → reveal on page load (deferred to after first paint).
+      // Either way the reveal is deferred to a post-paint frame (double rAF) when
+      // the element is already ready, so the fade starts from a painted opacity:0
+      // and is actually seen — revealing during parse lets the 0.4s fade finish
+      // before first paint (which is blocked on the render-blocking font CSS), so
+      // it'd be invisible. `is:inline` so it runs on parse without the bundle.
+      (function () {
+        function reveal(el) { el.classList.add('is-loaded'); }
+        function revealNextPaint(el) {
+          requestAnimationFrame(function () { requestAnimationFrame(function () { reveal(el); }); });
+        }
+        function watch(el) {
+          if (el.__omFadeWatched || el.classList.contains('is-loaded')) return;
+          el.__omFadeWatched = true;
+          // Non-<img> (no load event) or an already-loaded img → fade on page load.
+          if (el.tagName !== 'IMG' || (el.complete && el.naturalWidth > 0)) {
+            revealNextPaint(el);
+            return;
+          }
+          var done = function () { reveal(el); }; // load fires after paint → already visible
+          el.addEventListener('load', done, { once: true });
+          el.addEventListener('error', done, { once: true }); // never leave a broken img invisible
+        }
+        function scan(root) {
+          root.querySelectorAll('[data-fade]').forEach(watch);
+        }
+        scan(document);
+        // Re-scan on Astro view transitions (harmless if never fired).
+        document.addEventListener('astro:page-load', function () { scan(document); });
+        // Catch elements injected after load — e.g. blog infinite-scroll appends
+        // cards (BlogPagination.astro) long after this initial scan.
+        if ('MutationObserver' in window) {
+          new MutationObserver(function (mutations) {
+            mutations.forEach(function (m) {
+              m.addedNodes.forEach(function (node) {
+                if (node.nodeType !== 1) return; // elements only
+                if (node.matches && node.matches('[data-fade]')) watch(node);
+                if (node.querySelectorAll) scan(node);
+              });
+            });
+          }).observe(document.body, { childList: true, subtree: true });
+        }
+      })();
+    </script>
+
+    {/* Ionicons web-component loader — opt-in per page (default off). Site chrome
+        and shared components use local inlined SVGs (@elements/Icon); this only
+        loads for a page that sets `ionicons` to render a novel one-off glyph. */}
+    {ionicons && (
+      <>
+        <script type="module" src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.esm.js"></script>
+        <script nomodule is:inline src="https://unpkg.com/ionicons@7.4.0/dist/ionicons/ionicons.js"></script>
+      </>
+    )}
+
+    <script>
+      // HubSpot form loader — populates any `.hs-form-embed[data-form-id]` markers
+      // anywhere on the page (emitted by @elements/FormEmbed, or hand-authored in
+      // blog posts). Lives in Base so every page gets it; loads v2.js once, only
+      // if a target exists.
+      function createHubSpotForms() {
+        const w = window as any;
+        if (!w.hbspt?.forms) return;
+        document.querySelectorAll<HTMLElement>('.hs-form-embed[data-form-id]:not([data-hs-ready])').forEach((el) => {
+          el.dataset.hsReady = 'true';
+          // Unique id per instance — the same form can appear twice on a page,
+          // and HubSpot targets by `#id`, so a shared id would only fill the first.
+          w.__hsN = (w.__hsN || 0) + 1;
+          el.id = `hs-form-${w.__hsN}`;
+          w.hbspt.forms.create({
+            region: el.dataset.region || 'na1',
+            portalId: el.dataset.portalId || '6487402',
+            formId: el.dataset.formId,
+            target: `#${el.id}`,
+          });
+        });
+      }
+      if (document.querySelector('.hs-form-embed[data-form-id]')) {
+        const w = window as any;
+        if (w.hbspt?.forms) {
+          createHubSpotForms();
+        } else if (!w.__hsFormsLoading) {
+          w.__hsFormsLoading = true;
+          const s = document.createElement('script');
+          s.src = 'https://js.hsforms.net/forms/embed/v2.js';
+          s.charset = 'utf-8';
+          s.addEventListener('load', createHubSpotForms);
+          document.head.appendChild(s);
+        }
+      }
+    </script>
+
+    <script>
+      // Tabs initializer — wires any `[data-tabs]` group anywhere on the page:
+      // the @elements/Tabs.astro component AND raw-HTML tabs hand-authored in
+      // blog `.md` bodies (WordPress easy-tabs). Lives in Base so both surfaces
+      // share one implementation (styling is global in global.css → `.tabs`).
+      // Progressive enhancement: panels render visible without JS; this hides
+      // inactive ones and adds ARIA tab semantics + arrow-key nav.
+      function initTabs(root: HTMLElement) {
+        const base = root.dataset.base || 'tabs';
+        const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+        const panelHost = root.querySelector<HTMLElement>('.tabs__panels');
+        if (!panelHost || tabs.length === 0) return;
+        const panels = Array.from(panelHost.children) as HTMLElement[];
+
+        panels.forEach((panel, i) => {
+          panel.id = `${base}-panel-${i}`;
+          panel.setAttribute('role', 'tabpanel');
+          panel.setAttribute('aria-labelledby', `${base}-tab-${i}`);
+          panel.setAttribute('tabindex', '0');
+        });
+
+        const select = (index: number, focus = false) => {
+          tabs.forEach((tab, i) => {
+            const active = i === index;
+            tab.setAttribute('aria-selected', active ? 'true' : 'false');
+            tab.tabIndex = active ? 0 : -1;
+            if (active && focus) tab.focus();
+          });
+          panels.forEach((panel, i) => { panel.hidden = i !== index; });
+        };
+
+        select(Number(root.dataset.initial) || 0);
+
+        tabs.forEach((tab, i) => {
+          tab.addEventListener('click', () => select(i, true));
+          tab.addEventListener('keydown', (e) => {
+            let next = -1;
+            if (e.key === 'ArrowRight') next = (i + 1) % tabs.length;
+            else if (e.key === 'ArrowLeft') next = (i - 1 + tabs.length) % tabs.length;
+            else if (e.key === 'Home') next = 0;
+            else if (e.key === 'End') next = tabs.length - 1;
+            if (next >= 0) { e.preventDefault(); select(next, true); }
+          });
+        });
+      }
+      document.querySelectorAll<HTMLElement>('[data-tabs]').forEach(initTabs);
+    </script>
+
+    <script>
+      // Card tilt — supplies the pointer-driven half of `.card-float` (global.css).
+      // The look lives entirely in CSS; this only writes two angles per frame.
+      //
+      // Delegated from the document ON PURPOSE, rather than initialising each card
+      // (the vanilla-tilt approach): the blog listing appends cards on scroll, so a
+      // per-element init would need a MutationObserver to catch them. One listener
+      // that resolves `.card-float` by closest() covers cards that don't exist yet.
+      const tiltOK =
+        window.matchMedia('(hover: hover) and (pointer: fine)').matches &&
+        !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (tiltOK) {
+        let active: HTMLElement | null = null;
+        let latest: PointerEvent | null = null;
+        let queued = false;
+
+        // Drop every property this script set, so the card falls back to the CSS
+        // defaults: 0deg tilt, and the slow ease-out settle for the release.
+        const release = (card: HTMLElement) => {
+          card.style.removeProperty('--card-tilt-x');
+          card.style.removeProperty('--card-tilt-y');
+          card.style.removeProperty('--card-tilt-transition');
+        };
+
+        const paint = () => {
+          queued = false;
+          const e = latest;
+          if (!e) return;
+          const card =
+            e.target instanceof Element ? e.target.closest<HTMLElement>('.card-float') : null;
+
+          if (card !== active) {
+            if (active) release(active);
+            active = card;
+          }
+          if (!card) return;
+
+          const r = card.getBoundingClientRect();
+          if (!r.width || !r.height) return;
+
+          // Pointer position within the card, -1 (left/top) … 1 (right/bottom).
+          const nx = ((e.clientX - r.left) / r.width) * 2 - 1;
+          const ny = ((e.clientY - r.top) / r.height) * 2 - 1;
+          const max = parseFloat(getComputedStyle(card).getPropertyValue('--card-tilt-max')) || 0;
+          if (!max) return; // --card-tilt-max: 0deg — lift only, tilt opted out
+
+          // Signs make the card press AWAY under the cursor: rotateY(+) sends the
+          // right edge back, rotateX(+) brings the bottom forward. Negate both to
+          // flip it to leaning toward the pointer instead.
+          card.style.setProperty('--card-tilt-y', `${(nx * max).toFixed(2)}deg`);
+          card.style.setProperty('--card-tilt-x', `${(-ny * max).toFixed(2)}deg`);
+          // Swap the transition to the fast track only while actually tracking.
+          card.style.setProperty('--card-tilt-transition', 'var(--card-tilt-track)');
+        };
+
+        // rAF-coalesced: pointermove fires far more often than the screen repaints,
+        // and each paint() does a layout read (getBoundingClientRect).
+        document.addEventListener(
+          'pointermove',
+          (e) => {
+            latest = e;
+            if (!queued) {
+              queued = true;
+              requestAnimationFrame(paint);
+            }
+          },
+          { passive: true },
+        );
+
+        // The pointer leaving the window fires no further move events, so clear the
+        // last card here. (Angles left on a card that is no longer hovered are inert
+        // — the transform is :hover-gated — but re-entering on the same card would
+        // show the stale lean for a frame before the first move lands.)
+        document.addEventListener('pointerleave', () => {
+          if (active) release(active);
+          active = null;
+        });
+      }
+    </script>
+  </body>
+</html>

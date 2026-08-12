@@ -1,0 +1,83 @@
+---
+/**
+ * /contact/ — the contact router hub. Centered title + two-column body: left =
+ * general-inquiry HubSpot form; right = "Looking for something more specific?"
+ * → the shared HelpWays cards (Donate / Grant / Partner). Structurally a twin of
+ * /get-involved/ (dim page surface, bright cards). Copy verbatim from
+ * the live page.
+ */
+import Page from '@layouts/Page.astro';
+import FormEmbed from '@elements/FormEmbed.astro';
+import HelpWays from '@elements/HelpWays.astro';
+---
+
+<Page
+  title="Contact the OpenMined Foundation"
+  description="Get in touch with the OpenMined Foundation — general inquiries, a Slack community invite, or specific routes for donations, grants, and pilot partnerships."
+>
+  <section class="contact">
+    <div class="container contact__head">
+      <h1>Contact the OpenMined Foundation</h1>
+    </div>
+
+    <div class="container contact__grid">
+      <!-- Left: general inquiry form -->
+      <div class="contact__col">
+        {/* NOTE(content): "inquirys" is verbatim from live (typo) — flag for Kyle. */}
+        <p class="contact__col-title">Complete this form for general inquirys:</p>
+        <FormEmbed formId="30271e23-c1cc-4043-b544-39b9610b46e5" />
+      </div>
+
+      <!-- Right: routes to donate / grant / partner -->
+      <div class="contact__col">
+        <p class="contact__col-title">Looking for something more specific?</p>
+        <HelpWays />
+      </div>
+    </div>
+  </section>
+</Page>
+
+<style is:global>
+  /* Dim page surface for this route only (footer stays always-dark). Matches
+     /get-involved/ — bright HelpWays cards read against it. `--header-bg`
+     inherits into the sticky header so its solid fill matches this page's
+     surface instead of banding the top (Header.astro → .site-header
+     background-color). */
+  body:has(.contact) {
+    background-color: var(--surface-background-dim);
+    --header-bg: var(--surface-background-dim);
+  }
+</style>
+
+<style>
+  .contact {
+    padding-block: var(--spacing-5XL) var(--spacing-max);
+  }
+
+  .contact__head,
+  .contact__grid {
+    max-width: var(--col-10);
+  }
+  .contact__head {
+    /* Title stays an <h1> (page heading) but renders at h3 size. */
+    --h1-min: var(--h3-min);
+    --h1-max: var(--h3-max);
+    text-align: center;
+    margin-bottom: var(--spacing-full);
+  }
+
+  .contact__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-full);
+    align-items: start;
+  }
+  .contact__col-title {
+    text-align: center;
+    margin-bottom: var(--spacing-3XL);
+  }
+
+  @media (max-width: 991px) {
+    .contact__grid { grid-template-columns: 1fr; gap: var(--spacing-5XL); }
+  }
+</style>

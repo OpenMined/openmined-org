@@ -1,0 +1,23 @@
+---
+/**
+ * /subscribe/product-protocol-news/ — single-list email opt-in (P1 pattern).
+ * Copy verbatim from the live page.
+ */
+import Page from '@layouts/Page.astro';
+import OptInLanding from '@components/sections/forms/OptInLanding.astro';
+---
+
+<Page
+  title="Subscribe to Product & Protocol News"
+  description="Get updates on Syft, PySyft, and other privacy-enhancing technologies — feature releases, improvements, and new deployments."
+>
+  <OptInLanding heading="Subscribe to Product & Protocol News" formId="ea8a4f2e-ed58-4e23-815e-fecf2fcce456">
+    <Fragment slot="icon">🚀</Fragment>
+    <p>Get updates on Syft, PySyft, and other privacy-enhancing technologies—feature releases, improvements, and new deployments.</p>
+    <Fragment slot="fine">
+      <p>This will opt you in to the Product & Protocol News. Want to change that later? Just use the link at the bottom of any email.</p>
+      <p>We send other emails too! <a href="/subscribe/">Opt in to the ones you want.</a></p>
+      <p>This button also confirms you agree with our <a href="/privacy-policy/">privacy policy</a>.</p>
+    </Fragment>
+  </OptInLanding>
+</Page>

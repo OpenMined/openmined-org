@@ -1,0 +1,102 @@
+---
+/**
+ * /blog/locations/[location] — location archive. URL parity with live
+ * (`/blog/locations/<slug>/`); the post hero meta row links a post's location
+ * here (see BlogPost.astro `.post__meta`). Sibling of the tag archive — same
+ * BlogToolbar + PostCard grid + pagination — but its term set is DERIVED from
+ * the posts' free-text `location` frontmatter (there is no location registry),
+ * so a page exists for exactly the locations that appear on a post.
+ */
+import BlogListing from '@layouts/BlogListing.astro';
+import PostCard from '@elements/PostCard.astro';
+import BlogToolbar from '@components/sections/blog/BlogToolbar.astro';
+import BlogPagination from '@elements/BlogPagination.astro';
+import { getCollection, getEntry } from 'astro:content';
+import { postSlug, postLocations, collectLocations, pageCount, pageSlice } from '@utils/posts';
+
+export async function getStaticPaths() {
+  const includeDrafts = import.meta.env.DEV;
+  const all = await getCollection('blog', ({ data }) => includeDrafts || !data.draft);
+  return collectLocations(all).map((loc) => ({
+    params: { location: loc.slug },
+    props: { label: loc.label },
+  }));
+}
+
+const { location } = Astro.params;
+const { label } = Astro.props;
+const includeDrafts = import.meta.env.DEV;
+
+const posts = (await getCollection('blog', ({ data }) => includeDrafts || !data.draft))
+  .filter((p) => postLocations(p).some((l) => l.slug === location))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+// Page 1 renders 12 cards; the rest stream from /blog/locations/<location>/page/N/.
+const total = posts.length;
+const totalPages = pageCount(total);
+const cards = await Promise.all(
+  pageSlice(posts, 1).map(async (p) => {
+    const cat = await getEntry(p.data.categories[0]);
+    return {
+      href: `/blog/${postSlug(p)}/`,
+      title: p.data.title,
+      date: p.data.date,
+      category: { slug: cat.id, label: cat.data.label },
+      cover: p.data.cover,
+      coverAlt: p.data.coverAlt,
+      cardText: p.data.cardText,
+      draft: p.data.draft,
+    };
+  })
+);
+---
+
+<BlogListing title={`${label} — Blog — OpenMined`} description={`OpenMined blog posts from ${label}.`}>
+  <section class="location-archive container content-top-rule">
+    <BlogToolbar heading={label} count={total} scope={{ location }} />
+
+    {total > 0 ? (
+      <div class="blog-grid">
+        {cards.map((c) => (
+          <PostCard
+            href={c.href}
+            title={c.title}
+            date={c.date}
+            category={c.category}
+            cover={c.cover}
+            coverAlt={c.coverAlt}
+            cardText={c.cardText}
+            draft={c.draft}
+          />
+        ))}
+      </div>
+    ) : (
+      <p class="location-archive__empty">No posts from “{label}” yet.</p>
+    )}
+
+    <BlogPagination base={`/blog/locations/${location}`} currentPage={1} totalPages={totalPages} />
+  </section>
+</BlogListing>
+
+<style>
+  .location-archive {
+    /* stroke from .content-top-rule; own top padding (decoupled from the rule) */
+    padding-top: var(--spacing-3XL);
+    padding-bottom: var(--spacing-full);
+  }
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: var(--spacing-XL);
+    row-gap: var(--spacing-2XL);
+  }
+  .location-archive__empty {
+    color: var(--text-subtle);
+  }
+  @media (max-width: 1099px) {
+    .blog-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 767px) {
+    .blog-grid { grid-template-columns: 1fr; }
+  }
+</style>

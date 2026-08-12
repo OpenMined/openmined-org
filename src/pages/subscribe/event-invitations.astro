@@ -1,0 +1,22 @@
+---
+/**
+ * /subscribe/event-invitations/ — single-list email opt-in (P1 pattern).
+ * Copy verbatim from the live page.
+ */
+import Page from '@layouts/Page.astro';
+import OptInLanding from '@components/sections/forms/OptInLanding.astro';
+---
+
+<Page
+  title="Get Event Invitations from OpenMined"
+  description="Get invitations to upcoming hackathons, livestreams, contributor calls, and virtual workshops across the OpenMined ecosystem."
+>
+  <OptInLanding heading="Get Event Invitations from OpenMined" formId="1231a41e-aa48-4930-bedb-267142253906">
+    <Fragment slot="icon">📅</Fragment>
+    <p>Get invitations to upcoming hackathons, livestreams, contributor calls, and virtual workshops across the OpenMined ecosystem.</p>
+    <Fragment slot="fine">
+      <p>This will opt you in to Event Invitation Emails. Want to change that later? Just use the link at the bottom of any email.</p>
+      <p>This button also confirms you agree with our <a href="/privacy-policy/">privacy policy</a>.</p>
+    </Fragment>
+  </OptInLanding>
+</Page>

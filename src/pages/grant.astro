@@ -1,0 +1,24 @@
+---
+/**
+ * /grant/ — grant-opportunity submission form (P2 pattern, green tone).
+ * Copy verbatim from the live page.
+ */
+import Page from '@layouts/Page.astro';
+import InquiryLanding from '@components/sections/forms/InquiryLanding.astro';
+---
+
+<Page
+  title="Have a Grant Opportunity?"
+  description="Have a grant opportunity that aligns with OpenMined's mission? Tell us about it and we'll assess how we can apply and put it to good use."
+>
+  <InquiryLanding
+    heading="Have a Grant Opportunity?"
+    tagline="Let’s Explore It Together."
+    tone="grant"
+    formId="af837c2c-3c7c-4446-8639-80725bcabec6"
+  >
+    <p>OpenMined is always looking for funding opportunities that align with our mission. If you have a grant in mind that we should apply for, let us know—we’d love to collaborate!</p>
+    <p>Grants help OpenMined build open-source tools, educate communities, and drive innovation. If you have a lead on a funding opportunity, tell us about it, and we’ll assess how it aligns with our mission.</p>
+    <p><strong>Submit the details here, and we’ll take it from there.</strong></p>
+  </InquiryLanding>
+</Page>

@@ -1,0 +1,296 @@
+---
+import Page from '@layouts/Page.astro';
+import SimpleHero from '@components/sections/hero/SimpleHero.astro';
+import ContentSection from '@components/sections/ContentSection.astro';
+import FeatureListGraphic from '@components/sections/features/FeatureListGraphic.astro';
+import ButtonCta from '@components/sections/cta/ButtonCta.astro';
+import CtaSection from '@components/sections/cta/CtaSection.astro';
+import FormEmbed from '@elements/FormEmbed.astro';
+import Tabs from '@elements/Tabs.astro';
+import Accordion from '@ui/Accordion.astro';
+import Button from '@ui/Button.astro';
+
+const pyFeatures = [
+  {
+    title: 'Collaborate on research projects',
+    body: 'with organizations around the world without ever needing to share raw data.',
+  },
+  {
+    title: 'Access valuable datasets',
+    body: 'and unlock insights that were previously inaccessible due to privacy concerns.',
+  },
+  {
+    title: 'Accelerate innovation',
+    body: 'and scientific discovery by leveraging the power of privacy-preserving AI.',
+  },
+];
+
+const researcherSteps = [
+  {
+    title: '1. Find a Datasite',
+    body: 'Browse available datasites or collaborate with a data owner to launch a new one.',
+    img: 'https://openmined.org/wp-content/uploads/2024/08/DS-Step-1@3x-1024x526.jpg',
+  },
+  {
+    title: '2. Submit a Proposal',
+    body: 'Send your research code to the datasite owner for review.',
+    img: 'https://openmined.org/wp-content/uploads/2024/08/DS-Step-2@3x-1024x526.jpg',
+  },
+  {
+    title: '3. Download Results',
+    body: 'Once approved by the datasite owner, download the results of your query.',
+    img: 'https://openmined.org/wp-content/uploads/2024/08/DS-Step-3@3x-1024x526.jpg',
+  },
+];
+
+const dataOwnerSteps = [
+  {
+    title: '1. Launch a Secure Datasite',
+    body: 'Use Syft’s documentation to set up a datasite and load in your data.',
+    img: 'https://openmined.org/wp-content/uploads/2024/08/DO-Step-1@3x-1024x526.jpg',
+  },
+  {
+    title: '2. Review Research Proposals',
+    body: 'Evaluate research proposals submitted to your datasite ensuring no sensitive data is compromised.',
+    img: 'https://openmined.org/wp-content/uploads/2024/08/DO-Step-2@3x-1024x526.jpg',
+  },
+  {
+    title: '3. Approve compliant projects',
+    body: 'Approve the project once it meets your safety standards, allowing the researcher to access the results.',
+    img: 'https://openmined.org/wp-content/uploads/2024/08/DO-Step-3@3x-1024x526.jpg',
+  },
+];
+---
+
+<Page
+  title="PySyft — Remote data access with privacy at the core"
+  description="Explore PySyft by OpenMined—an open-source platform enabling secure, privacy-preserving data science. Collaborate on sensitive datasets without exposing raw data, leveraging remote execution and privacy-enhancing technologies to accelerate innovation responsibly."
+>
+
+  <!-- § Hero -->
+  <SimpleHero
+    eyebrow="PySyft:"
+    heading="Remote data access with privacy at the core"
+    lede="PySyft is open-source technology that empowers data scientists to perform analyses on sensitive data without compromising confidentiality."
+    ledeMeasure="42em"
+  />
+
+  <hr class="psy-divider" />
+
+  <!-- § With PySyft, you can … (feature list + Syft icon graphic) -->
+  <!-- TODO(asset:) Syft-Icon.svg is served from WP CDN; download and move to public/logos/ -->
+  <FeatureListGraphic heading="With PySyft, you can:" features={pyFeatures} width="col-8">
+    <img
+      slot="graphic"
+      src="https://openmined.org/wp-content/uploads/2025/03/Syft-Icon.svg"
+      alt=""
+      width="240"
+      height="240"
+      loading="lazy"
+      data-fade
+    />
+  </FeatureListGraphic>
+
+  <hr class="psy-divider" />
+
+  <!-- § Remote Data Science body copy -->
+  <ContentSection width="col-8">
+    <p class="psy-rds-copy">PySyft is built on the principles of Remote Data Science, allowing you to send your code to where the data resides and receive only the results of your analysis. This ensures that sensitive information remains protected while still enabling valuable research and collaboration.</p>
+  </ContentSection>
+
+  <!-- § How it works (tabbed researcher / data-owner step panels) -->
+  <!-- Surface: --surface-background-dim (#f4f3f6), live padding 88px top / 147px bottom -->
+  <!-- TODO(decision:) live bottom-padding 147px has no --spacing token match; using --spacing-full (88px) for now -->
+  <section class="psy-how">
+    <div class="container">
+      <h4 class="psy-how__label">How it works</h4>
+      <Tabs tabs={["For Researchers", "For Data Owners"]} label="How it works" center id="psy-how">
+
+        <!-- Panel 0: For Researchers -->
+        <div class="psy-how__steps">
+          {researcherSteps.map((step) => (
+            <div class="psy-how__step">
+              <div class="psy-how__step-info">
+                <h4>{step.title}</h4>
+                <p>{step.body}</p>
+              </div>
+              <div class="psy-how__step-media">
+                <img src={step.img} alt="" loading="lazy" data-fade />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <!-- Panel 1: For Data Owners -->
+        <div class="psy-how__steps">
+          {dataOwnerSteps.map((step) => (
+            <div class="psy-how__step">
+              <div class="psy-how__step-info">
+                <h4>{step.title}</h4>
+                <p>{step.body}</p>
+              </div>
+              <div class="psy-how__step-media">
+                <img src={step.img} alt="" loading="lazy" data-fade />
+              </div>
+            </div>
+          ))}
+        </div>
+
+      </Tabs>
+    </div>
+  </section>
+
+  <!-- § FAQ — strong top rule, centered title; full verbatim answers from live /pysyft/ -->
+  <hr class="section-divider section-divider--strong" />
+  <ContentSection heading="FAQ" as="h4" width="col-8" align="center" surface="dim">
+    <div class="psy-faq">
+      <Accordion title="How does Syft ensure the analysis doesn’t reveal personal or protected information?">
+        <p>Syft preserves data privacy by enabling data scientists to study data without ever acquiring a copy. In traditional data science flows, researchers see raw private data during the process, which they can copy or remember. Syft avoids this problem, protecting the privacy of the data, through several groundbreaking features it supports:</p>
+        <ul>
+          <li><strong>Mock-Data-Based Prototyping:</strong> The first reason researchers have to look at data is that they need something to use to write their research code. Syft gets around this problem by giving researchers that “something” in a way that preserves privacy — a fake/mock version of the real dataset — identical in every way except the actual values of the data are randomized.</li>
+          <li><strong>Manual Code Review:</strong> The second reason researchers have to look at data is because they can run any computation on the data and look at the results. Research/data science is inherently iterative, and researchers really want to be able to iterate. Syft gets around the need for researchers to see the data while preserving their ability to iterate. The simplest way Syft does this is by empowering researchers to submit their code — prototyped against mock data — to the data owner’s staff for review and execution.</li>
+          <li><strong>Automation Using Privacy-Enhancing Technologies:</strong> While the first two features above can (in theory) support any type of researcher accessing any type of dataset without seeing it — it involves researchers waiting for code reviews and data owners spending time reviewing code. Syft overcomes this problem by introducing a variety of privacy-enhancing technologies — access control, federated learning, differential privacy, zero-knowledge proofs, etc. — which enable a data owner to automatically approve some requests, giving researchers instant results and allowing data owners to avoid manual review.</li>
+        </ul>
+      </Accordion>
+      <Accordion title="What security measures does Syft implement to ensure that personal or protected information isn’t compromised?">
+        <p>Syft creates solid, traditionally accepted barriers between external researchers and internal computers holding data. In its most secure setting, Syft puts an “air gap” between them, although it can also be configured for a similar “VPN-gapped” configuration.</p>
+        <p>In these configurations, an internal employee is responsible for moving assets across the “airgap.” Syft provides secure serialization support for objects moving across the “airgap” and convenient triaging to ensure this process is efficient and secure.</p>
+        <p>In its highest security setting, no research code runs on an organization’s private data without its employees observing every line.</p>
+        <p>While Syft includes tooling to increase efficiency and provide some automation around the process (approvals, pre-approvals, PETs, etc.), it can do so while upholding this principle.</p>
+      </Accordion>
+      <Accordion title="Where else is Syft deployed?">
+        <p>We have unlocked sensitive user data in places such as Microsoft and GDPR-protected data in areas such as Dailymotion through our partnership with the Christchurch Call Initiative on Algorithmic Outcomes, where external data scientists could perform research on production AI recommender models.</p>
+        <p>We also have active projects with the US Census Bureau, the Italian National Institute of Statistics (Istat), Statistics Canada (StatCan), and the United Nations Statistics Division (UNSD) to demonstrate how joint analysis across restricted statistical data can work internationally across national statistics offices.</p>
+        <p>Additionally, we have an active project with the xD team at the US Census Bureau to help make their Title-13 and Title-26 protected data available for research.</p>
+        <p>We are also the infrastructure of choice for Reddit’s external researcher program.</p>
+      </Accordion>
+      <p class="psy-faq__more">
+        <a class="psy-faq__more-link" href="/pysyft/faqs/">More frequently asked questions -></a>
+      </p>
+    </div>
+  </ContentSection>
+
+  <!-- § Get PySyft Updates (newsletter form) -->
+  <CtaSection
+    heading="Get PySyft Updates"
+    body="Sign up to get updates from OpenMined's Product &amp; Engineering teams."
+    variant="subtle"
+  >
+    <FormEmbed slot="form" formId="68f8a27e-e957-4a67-be16-4137622be95b" />
+    <Fragment slot="fineprint">
+      <p>Subscribing confirms you agree with our <a href="/privacy-policy/">privacy policy</a>.</p>
+    </Fragment>
+  </CtaSection>
+
+  <!-- § Ready to experience … (dark CTA) -->
+  <ButtonCta
+    heading="Ready to experience privacy-preserving collaboration?"
+    body="Visit the PySyft documentation to get started today!"
+    surface="dark"
+  >
+    <Button href="https://docs.openmined.org/">PySyft Documentation</Button>
+  </ButtonCta>
+
+</Page>
+
+<style>
+  /* ─── Section dividers ──────────────────────────────────── */
+  /* col-8 strong rule bracketing the hero + "With PySyft" section (matches
+     that section's col-8 measure). */
+  .psy-divider {
+    border: 0;
+    border-top: var(--border-strong);
+    width: 100%;
+    max-width: var(--col-8);
+    margin-inline: auto;
+  }
+
+  /* ─── Remote Data Science copy ──────────────────────────── */
+  .psy-rds-copy {
+    text-align: center;
+    max-width: var(--col-6);
+    margin-inline: auto;
+  }
+
+  /* ─── How it works ─────────────────────────────────────── */
+  .psy-how {
+    background-color: var(--surface-background-dim);
+    padding-block: var(--spacing-full);
+  }
+
+  /* Constrain the inner container to col-10 (matches live 1080px tab area) */
+  .psy-how .container {
+    max-width: var(--col-10);
+  }
+
+  .psy-how__label {
+    margin-bottom: var(--spacing-5XL); /* live: 53px → 48px snap */
+    text-align: center;
+  }
+
+  .psy-how__steps {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4XL); /* live: 36px → 40px snap */
+  }
+
+  .psy-how__step {
+    display: grid;
+    grid-template-columns: 25% 1fr; /* live: 270px / 756px on 1080px container */
+    gap: var(--spacing-5XL);        /* live: 54px → 48px snap */
+    align-items: start;
+  }
+
+  /* Reset inherited text-align: center from .tabs--center on the step panels */
+  .psy-how__step-info {
+    text-align: left;
+  }
+
+  .psy-how__step-info h4 {
+    margin-bottom: var(--spacing-L); /* live: 16px */
+  }
+
+  .psy-how__step-info p {
+    margin: 0;
+  }
+
+  .psy-how__step-media img {
+    display: block;
+    width: 100%;
+    border-radius: var(--border-radius-S); /* live: 6px */
+  }
+
+  @media (max-width: 767px) {
+    .psy-how__step {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ─── FAQ ──────────────────────────────────────────────── */
+  .psy-faq {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-XL); /* live: 20px between accordion items */
+  }
+
+  .psy-faq__more {
+    margin-top: var(--spacing-3XL); /* breathing room after accordions */
+    text-align: right;
+  }
+
+  /* Quiet "see more" link: no underline at rest, green animates in on hover.
+     Intentionally page-local — not a named primitive yet (single use case). */
+  .psy-faq__more-link {
+    color: var(--text-subtle);
+    text-decoration: none;
+    display: inline;
+    background-image: linear-gradient(transparent calc(100% - 1px), var(--color-green-600) 1px);
+    background-size: 0% 100%;
+    background-position: left bottom;
+    background-repeat: no-repeat;
+    padding-bottom: 2px;
+  }
+  .psy-faq__more-link:hover {
+    animation: underlineInGreen 0.4s ease forwards;
+  }
+</style>

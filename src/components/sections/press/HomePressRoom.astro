@@ -1,0 +1,137 @@
+---
+/**
+ * HomePressRoom — "Press Room" card grid of outbound press links + a
+ * "Keep Exploring" CTA. Page-specific (home content); drop the Home prefix if a
+ * second page reuses it.
+ *
+ * Rebuilt from live #brxe-e88833 (+ the live "Keep Exploring" mini-section
+ * #brxe-1254b5, folded in here). Measured off the live page.
+ *
+ * Press items are section-local content (not registry data): each references an
+ * org by `id` for the logo; href + headline are local. Hrefs are the live
+ * blog/article URLs — repoint here when real endpoints change.
+ *
+ * Cards are `always-light` (per design): logos always sit on a light surface,
+ * so each renders in its natural color (no theme flip) and dark text stays
+ * legible in both page themes.
+ *
+ * Live → token mapping:
+ *   section margin-block   154/60px (mobile 100/50) → --spacing-full (standardized rhythm)
+ *   heading "Press Room"   Rubik 27px               → h4 default
+ *   divider                1px line                 → --border-color; mt --spacing-S, mb --spacing-3XL
+ *   grid                   auto-fill minmax(310px)  → same; gap --spacing-XL (20px ✓)
+ *   card padding           48/24/18px               → 5XL / 2XL / L
+ *   card min-height        310px                    → raw (no token)
+ *   card radius            6px                      → --border-radius-S
+ *   card shadow            0 24 48 -8 …             → --shadow-lg (exact ✓)
+ *   card bg                #fff                     → --surface-background-default (always-light)
+ *   headline               Inter 14px/500/21        → 14px / 500 / 1.5
+ *   keep-exploring heading Rubik 27px, centered     → h4; mb --spacing-2XL
+ */
+import LogoCard from '@elements/LogoCard.astro';
+import Button from '@ui/Button.astro';
+import Text from '@ui/Text.astro';
+import { getCollection } from 'astro:content';
+
+interface PressItem {
+  orgId: string;
+  href: string;
+  title: string;
+}
+
+const press: PressItem[] = [
+  { orgId: 'anthropic', href: 'https://openmined.org/blog/secure-enclaves-for-ai-evaluation/', title: 'Secure Enclaves for AI Evaluation' },
+  { orgId: 'aisi', href: 'https://openmined.org/blog/uk-frontier-ai-taskforce-partners-with-openmined-to-advance-ai-safety-research/', title: 'Frontier AI Taskforce: second progress report' },
+  { orgId: 'royal-society', href: 'https://openmined.org/blog/from-privacy-to-partnership-the-royal-society-makes-the-case-for-pets-powered-collaboration/', title: 'From privacy to partnership: The role of PETs in data governance and collaborative analysis' },
+  { orgId: 'uk-dsit', href: 'https://openmined.org/blog/pysyft-featured-in-uk-dsit-portfolio-of-ai-assurance-techniques/', title: 'Privacy-preserving third-party audits on Unreleased Digital Assets with PySyft' },
+  { orgId: 'us-nist', href: 'https://openmined.org/blog/openmined-deepmined-announced-as-a-winner-in-the-uk-us-pets-prize-challenge/', title: 'Winners Announced in First Phase of UK-US PETs Prize Challenges' },
+  { orgId: 'us-white-house', href: 'https://openmined.org/blog/openmined-participates-in-white-house-event-on-opportunities-at-the-frontier-of-ai-research/', title: 'OSTP-NSF-PCAST Event on Opportunities at the AI Research Frontier' },
+  { orgId: 'us-senate', href: 'https://openmined.org/blog/openmineds-contributions-to-ai-transparency-and-explainability-in-u-s-senate-ai-policy-roadmap/', title: 'Driving US Innovation in AI: A Roadmap for AI Policy in the US Senate' },
+  { orgId: 'us-executive-office', href: 'https://openmined.org/blog/pysyft-recognized-in-the-us-national-strategy-to-advance-privacy-preserving-data-sharing-and-analytics/', title: 'National Strategy to Advance Privacy-Preserving Data Sharing and Analytics' },
+  { orgId: 'us-nsf', href: 'https://openmined.org/blog/openmined-joins-as-launch-partner-for-the-nairr-pilot-democratizing-access-to-ai-resources-in-the-us/', title: 'Democratizing the future of AI R&D: NSF to launch National AI Research Resource pilot' },
+  { orgId: 'us-census', href: 'https://openmined.org/blog/bridging-borders-protecting-privacy-how-pysyft-is-revolutionizing-international-statistical-collaboration/', title: 'A New Model for International, Privacy-Preserving Data Science' },
+  { orgId: 'us-ntia', href: 'https://www.ntia.gov/sites/default/files/publications/ntia-ai-report-final.pdf', title: 'AI Accountability Policy Report' },
+  { orgId: 'christchurch-call', href: 'https://openmined.org/blog/new-research-shows-promise-for-safe-secure-private-auditing-of-social-media-algorithms/', title: 'Christchurch Call Initiative on Algorithmic Outcomes' },
+  { orgId: 'microsoft', href: 'https://openmined.org/blog/openmined-partners-with-microsoft-to-advance-privacy-preserving-ai-research-for-the-christchurch-call/', title: 'Expanding our commitments to countering violent extremism online' },
+  { orgId: 'x', href: 'https://openmined.org/blog/announcing-our-partnership-with-twitter-to-advance-algorithmic-transparency/', title: 'Investing in privacy enhancing tech to advance transparency in ML' },
+  { orgId: 'reddit', href: 'https://openmined.org/blog/announcing-our-partnership-with-reddit-to-expand-privacy-preserving-researcher-access/', title: 'Introducing a New Subreddit for Researchers' },
+  { orgId: 'meta', href: 'https://openmined.org/blog/facebook-partners-with-openmined-to-advance-privacy-preserving-ai/', title: 'Privacy and Machine Learning Courses' },
+  { orgId: 'google', href: 'https://openmined.org/blog/announcing-pipelinedp-an-api-for-applying-differential-privacy-in-production/', title: 'Partnering with Google to make differential privacy more widely accessible' },
+  { orgId: 'pytorch', href: 'https://openmined.org/blog/openmined-and-pytorch-join-forces-to-advance-privacy-preserving-machine-learning/', title: 'OpenMined and PyTorch partner to launch fellowship funding for privacy-preserving ML community' },
+  { orgId: 'un-big-data', href: 'https://openmined.org/blog/syft-featured-in-guide-on-pets-in-official-statistics/', title: 'The PET Guide' },
+  { orgId: 'technologists-public-good', href: 'https://openmined.org/blog/facilitating-access-to-non-public-data-a-world-in-which-all-data-is-open/', title: 'Facilitating Access to Non-Public Data: A World in Which All Data is “Open”' },
+  { orgId: 'stanford-ssir', href: 'https://openmined.org/blog/openmined-recognized-in-stanford-social-innovation-review-for-advancing-ai-transparency/', title: 'Reimagining Our High-Tech World' },
+];
+
+const allOrgs = await getCollection('organizations');
+const orgById = Object.fromEntries(allOrgs.map(e => [e.id, e.data]));
+
+// Resolve each item's org; drop any that don't resolve (defensive).
+const cards = press
+  .map((item) => ({ ...item, org: orgById[item.orgId] }))
+  .filter((c) => c.org !== undefined);
+---
+
+<section class="press">
+  <div class="container">
+    <Text as="h4" class="press__heading">Press Room</Text>
+    <div class="press__divider" role="presentation"></div>
+
+    <div class="press__grid">
+      {cards.map((c) => (
+        <LogoCard org={c.org!} href={c.href} title={c.title} />
+      ))}
+    </div>
+
+    <div class="press__explore">
+      <Text as="h4" class="press__explore-heading">Keep Exploring</Text>
+      <Button href="/blog/">Read the latest updates</Button>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Live section margin is 154px top / 60px bottom — above the spacing scale
+     (max --spacing-full 88px). Standardized to --spacing-full for consistent
+     home-section vertical rhythm (approved). */
+  .press {
+    margin-block: var(--spacing-full);
+  }
+
+  .press__heading {
+    margin-bottom: 0;
+  }
+
+  .press__divider {
+    border-top: var(--border-strong);
+    margin-top: var(--spacing-S);     /* live: 8px ✓ */
+    margin-bottom: var(--spacing-3XL); /* live: 32px ✓ */
+  }
+
+  .press__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr));
+    gap: var(--spacing-XL); /* live: 20px ✓ — 290px track holds the live 4-up
+                               inside .container's padded width with margin to
+                               spare (300px sat exactly on the wrap threshold) */
+  }
+
+  /* Card anatomy lives in @elements/LogoCard (shared with for-ai-auditors). */
+
+  .press__explore {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-top: var(--spacing-full); /* live keep-exploring section gap */
+  }
+  .press__explore-heading {
+    margin-bottom: var(--spacing-2XL); /* live: 24px ✓ */
+  }
+
+  @media (max-width: 991px) {
+    .press {
+      margin-block: var(--spacing-5XL); /* live mobile: 50px → 48 */
+    }
+  }
+</style>

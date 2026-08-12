@@ -1,0 +1,26 @@
+---
+import Page from '@layouts/Page.astro';
+import HomeHero from '@components/sections/hero/HomeHero.astro';
+import HomeFederatedNetwork from '@components/sections/features/HomeFederatedNetwork.astro';
+import Partnerships from '@components/sections/partnerships/Partnerships.astro';
+import HomePressRoom from '@components/sections/press/HomePressRoom.astro';
+import CtaSection from '@components/sections/cta/CtaSection.astro';
+import FormEmbed from '@elements/FormEmbed.astro';
+---
+
+<Page title="OpenMined — The missing layer for collective intelligence">
+  <HomeHero />
+  <HomeFederatedNetwork />
+  <Partnerships />
+  <HomePressRoom />
+  <CtaSection
+    heading="Take Control of Your Data's Future"
+    body="Join the OpenMined community to stay informed, get involved, and shape how privacy and AI evolve together."
+  >
+    <FormEmbed slot="form" formId="b7a08fdc-0fb5-4938-99e8-4a09e7bbc09e" />
+    <Fragment slot="fineprint">
+      <p>Joining subscribes you to the <em>OpenMined Newsletter</em> and confirms you agree with our <a href="/privacy-policy/">privacy policy</a>.</p>
+      <p><a href="/get-involved/">Explore ways to get involved ↗</a></p>
+    </Fragment>
+  </CtaSection>
+</Page>

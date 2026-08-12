@@ -1,0 +1,24 @@
+---
+/**
+ * /contractor-form/ — contractor-interest opt-in (P1 variant: same shell, a large
+ * 23-field HubSpot form; all field complexity lives in HubSpot, not here).
+ * Copy verbatim from the live page.
+ */
+import Page from '@layouts/Page.astro';
+import OptInLanding from '@components/sections/forms/OptInLanding.astro';
+---
+
+<Page
+  title="Contractor Interest Form"
+  description="Express your interest in contributing your skills to OpenMined's mission as a contractor."
+>
+  <OptInLanding heading="Contractor Interest Form" formId="0fe6ee42-9e29-4e1b-9186-5ded47b79008">
+    <Fragment slot="icon">💼</Fragment>
+    <p>Please complete this form to express your interest in contributing your skills to OpenMined’s mission.</p>
+    <Fragment slot="fine">
+      <p>This will opt you in to Hiring &amp; Recruitment emails. Want to change that later? Just use the link at the bottom of any email.</p>
+      <p>We send other emails too! <a href="/subscribe/">Opt in to the ones you want.</a></p>
+      <p>This button also confirms you agree with our <a href="/privacy-policy/">privacy policy</a>.</p>
+    </Fragment>
+  </OptInLanding>
+</Page>

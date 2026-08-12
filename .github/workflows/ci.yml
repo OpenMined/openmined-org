@@ -1,0 +1,53 @@
+# CI — type-check, full build, and the deterministic regression guards.
+#
+# NOTE: this file is staged for the standalone repo. While this folder still
+# lives inside the migration repo, GitHub never reads it (workflows only run
+# from the repository root's .github/); it activates automatically when this
+# folder becomes the repo root.
+#
+# The Pagefind search index is built by an integration (integrations/pagefind.mjs),
+# not a chained npm script, so any build command produces it and a failed index
+# fails the build.
+#
+# Which guards run here, and why only these two: both are deterministic and need
+# no browser and no network, so they can never flake. The rest of the kit in
+# scripts/ is deliberately NOT wired in — audit:overflow needs a browser and a
+# running preview server, audit:currencies calls an external API, and smoke /
+# verify:donate need a live deployment. Run those locally or against a deploy.
+# See README for the full kit.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build
+
+      # Source guard: no image call may force a non-native aspect ratio.
+      - name: Audit image shapes
+        run: npm run audit:images
+
+      # Build-output guard: every local asset URL in the built HTML resolves.
+      # Catches the adapter's imageService default silently emitting /_image?…
+      # endpoint URLs, which broke most of the site while the build stayed green.
+      - name: Audit image URLs
+        run: npm run audit:image-urls
+
+      # public/ is served byte-for-byte — Astro never inspects it, so neither
+      # guard above can see an oversized payload there. Catches a raster
+      # embedded in an SVG far above its display size, and any file over the
+      # budget for its type.
+      - name: Audit public assets
+        run: npm run audit:assets

@@ -1,0 +1,145 @@
+---
+/**
+ * StepRows — a two-column numbered stepper. Each step is a full-width row: a
+ * "Step N" badge + step title on the left, and a detail card (one or more
+ * icon + text rows) on the right. Reads as "here's the step, here's what it
+ * involves". Distinct from StepList (single column: badge + title + body
+ * stacked) — reach for StepRows when each step carries a card of sub-points.
+ *
+ * Reusable "how it works" layout: for-publishers ("How it works", 3 steps) and
+ * for-creators ("How It Works", 5 steps).
+ *
+ * Rebuilt from live for-publishers #brxe-rebnnn. Reference:
+ * Measured off the live page.
+ *
+ * Live → token mapping:
+ *   row↔row gap        48px                     → --spacing-5XL ✓
+ *   2-col grid         516px 516px, gap 48px     → 1fr 1fr, --spacing-5XL ✓
+ *   badge "Step 1"     #fcfcfd on #272532, r2px  → --surface-* on --text-headline (auto-themes)
+ *   badge pad          8.64 / 23.04px            → --spacing-S / --spacing-2XL (snap)
+ *   badge↔title gap    (badge above title)       → --spacing-L
+ *   title              global h4 (27px)          → h4 (no type override)
+ *   detail card        #fcfcfd, r6px, pad 32px    → --surface-background-default, --border-radius-S, --spacing-3XL
+ *   card box-shadow    box-shadow-xs             → --shadow-sm
+ *   card row↔row gap   25.6px                    → --spacing-2XL (24, snap)
+ *   item icon↔text gap 16px                      → --spacing-L ✓
+ *   item icon          24px, currentColor         → Icon size 24 (theme-adaptive)
+ *
+ * Stacks to one column at the 991px breakpoint (badge+title above the card).
+ */
+import Icon from '@elements/Icon.astro';
+
+interface StepItem {
+  /** Optional leading Icon name (from @assets/icons). */
+  icon?: string;
+  /** Item text; may contain inline HTML. */
+  text: string;
+}
+interface Step {
+  /** Badge label; defaults to "Step {n}" from the running count. */
+  badge?: string;
+  title: string;
+  items: StepItem[];
+}
+interface Props {
+  steps: Step[];
+  /** First step number (default 1). */
+  start?: number;
+  /** Heading level for the step title (default h4). */
+  as?: 'h4' | 'h5';
+}
+const { steps, start = 1, as = 'h4' } = Astro.props;
+const TitleTag = as;
+---
+
+<ol class="step-rows">
+  {steps.map((step: Step, i: number) => (
+    <li class="step-rows__row">
+      <div class="step-rows__head">
+        <span class="step-rows__badge">{step.badge ?? `Step ${start + i}`}</span>
+        <TitleTag class="step-rows__title">{step.title}</TitleTag>
+      </div>
+      <div class="step-rows__card">
+        {step.items.map((it: StepItem) => (
+          <div class="step-rows__item">
+            {it.icon && <Icon name={it.icon} size={24} class="step-rows__item-icon" />}
+            <p class="step-rows__item-text" set:html={it.text}></p>
+          </div>
+        ))}
+      </div>
+    </li>
+  ))}
+</ol>
+
+<style>
+  .step-rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-5XL); /* live row↔row: 48px ✓ */
+  }
+
+  .step-rows__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* live: 516px 516px */
+    gap: var(--spacing-5XL);        /* live: 48px ✓ */
+    align-items: start;
+  }
+
+  /* left cell: badge above the step title */
+  .step-rows__head {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* small high-contrast pill — dark on light, light on dark (semantic tokens
+     flip it with the theme, matching StepList's number badge) */
+  .step-rows__badge {
+    display: inline-block;
+    margin-bottom: var(--spacing-L); /* badge → title gap */
+    padding: var(--spacing-S) var(--spacing-2XL); /* live: 8.64 / 23.04 */
+    border-radius: var(--border-radius-XS); /* live: 2px ✓ */
+    background-color: var(--text-headline);
+    color: var(--surface-background-bright);
+    font-size: 14px; /* badge glyph — matches StepList badge */
+    line-height: 1.5;
+  }
+
+  /* .step-rows__title on <h4> — type from global h4 */
+  .step-rows__title {
+    margin: 0;
+  }
+
+  /* right cell: detail card holding the icon+text rows */
+  .step-rows__card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2XL); /* live row↔row inside card: 25.6 → 24 */
+    padding: var(--spacing-3XL); /* live: 32px ✓ */
+    border-radius: var(--border-radius-S); /* live: 6px ✓ */
+    background-color: var(--surface-background-default); /* live: #fcfcfd */
+    box-shadow: var(--shadow-sm); /* live: box-shadow-xs */
+  }
+
+  .step-rows__item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-L); /* live icon↔text: 16px ✓ */
+  }
+  .step-rows__item-icon {
+    flex-shrink: 0;
+  }
+  .step-rows__item-text {
+    margin: 0;
+  }
+
+  @media (max-width: 991px) {
+    .step-rows__row {
+      grid-template-columns: 1fr; /* stack: badge+title above the card */
+      gap: var(--spacing-2XL);
+    }
+  }
+</style>

@@ -1,0 +1,32 @@
+---
+/**
+ * FormEmbed — renders a HubSpot form target. The actual v2.js loader lives in
+ * Base.astro (so plain `.md` posts can drop the same `<div class="hs-form-embed"
+ * …>` marker directly, without a component or an .mdx conversion). It scans for
+ * `.hs-form-embed[data-form-id]` and creates the form. All OpenMined forms share
+ * portal `6487402` / region `na1`; only `formId` differs. Renders inline as a
+ * real `<form class="hs-form">`, skinned in global.css.
+ *
+ * `fullWidth` (default true) adds live's `form-button-fullwidth` modifier — every
+ * section/CTA embed on the live site is full-width. Set it false for in-body
+ * content forms (which live renders auto-width; raw `.md` markers get neither the
+ * component nor the class, so they're auto-width by default already). `class`
+ * passes through the other live authoring modifiers (`form-button-center`,
+ * `form-no-shadow`, `form-surface-background-bright|dim`).
+ */
+interface Props {
+  formId: string;
+  portalId?: string;
+  region?: string;
+  fullWidth?: boolean;
+  class?: string;
+}
+const { formId, portalId = '6487402', region = 'na1', fullWidth = true, class: extra } = Astro.props;
+const classes = ['hs-form-embed', fullWidth && 'form-button-fullwidth', extra].filter(Boolean).join(' ');
+---
+<div
+  class={classes}
+  data-form-id={formId}
+  data-portal-id={portalId}
+  data-region={region}
+></div>

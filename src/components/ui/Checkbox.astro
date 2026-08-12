@@ -1,0 +1,88 @@
+---
+interface Props {
+  label?: string;
+  checked?: boolean;
+  disabled?: boolean;
+  id?: string;
+  name?: string;
+  value?: string;
+  class?: string;
+}
+
+const {
+  label = 'Checkbox label',
+  checked = false,
+  disabled = false,
+  id,
+  name,
+  value,
+  class: className = '',
+} = Astro.props;
+---
+
+<label class={['checkbox-wrap', className].filter(Boolean).join(' ')}>
+  <span class="checkbox-control">
+    <input
+      type="checkbox"
+      checked={checked}
+      disabled={disabled}
+      id={id}
+      name={name}
+      value={value}
+      class="checkbox-input"
+    />
+    <span class="checkbox-custom"></span>
+  </span>
+  <span class="checkbox-label">{label}</span>
+</label>
+
+<style>
+  .checkbox-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-S);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .checkbox-control {
+    position: relative;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  .checkbox-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .checkbox-custom {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border: 1px solid var(--dark-surface-background-default);
+    border-radius: 2px;
+    background-color: var(--surface-background-default);
+    position: relative;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .checkbox-input:checked + .checkbox-custom::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: var(--dark-surface-background-default);
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M2 5l2.5 2.5L8 3' stroke='%23353243' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+  }
+
+  .checkbox-label {
+    padding-left: 5px;
+    margin-bottom: 0;
+    cursor: pointer;
+  }
+</style>

@@ -1,0 +1,305 @@
+/* ══════════════════════════════════════════════════════════════════
+   COMPONENTS — shared class skins that cannot be scoped
+   These live in global for one shared reason: each is used by BOTH an .astro
+   component and raw markup (markdown bodies, `set:html`, script-cloned
+   templates), so a component `<style>` block could never reach every
+   instance. Card hover, the link family, and the tabs control.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Absolute cover link ─────────────────────────────────────────── */
+.absolute-link {
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+  z-index: var(--z-card);
+}
+
+
+/* ── Card float (the shared card hover) ───────────────────────────────
+   One hover language for every whole-card link: the card rises and swells
+   slightly while its shadow grows one step up the scale — a physical card
+   lifting off the surface, coming nearer the eye and casting a larger, more
+   diffuse shadow as the gap opens.
+
+   The card also tilts in 3D toward the pointer — it leans away under the cursor,
+   as if pressed. That part needs the pointer position, so it is driven by the
+   delegated listener in Base.astro (search `--card-tilt-x`), which sets
+   --card-tilt-x/-y per frame while a card is hovered. CSS owns the whole look;
+   the script only supplies two angles.
+
+   Custom properties are the entire API. Set them on the card:
+
+     --card-float-shadow        resting   (default: none — the card lies flat)
+     --card-float-shadow-hover  raised    (default: --shadow-md)
+     --card-float-lift          travel    (default: -2px)
+     --card-float-scale         swell     (default: 1.005; set to 1 to disable)
+     --card-tilt-max            tilt      (default: 3deg; set to 0deg to disable)
+     --card-tilt-perspective    depth     (default: 1000px — lower = stronger)
+     --card-tilt-track          tracking  (default: 90ms linear)
+
+   The rule is one step up the shadow scale, so both card families read as the
+   same gesture at different starting heights:
+     flat card  (blog)   none        → --shadow-md
+     raised card (press) --shadow-md → --shadow-lg
+
+   IMPORTANT: own the RESTING shadow through `--card-float-shadow`, never a
+   scoped `box-shadow` on the card itself. Astro scopes component styles to
+   (0,2,0), which outweighs this (0,1,0) utility — a component that declares its
+   own resting shadow silently pins it and the hover step never paints.
+
+   Applies to whole-card LINKS only. A card that isn't itself a click target
+   (IconCard, the various section cards) must not lift — the gesture is the
+   affordance. */
+/* Deliberately NO z-index here. An earlier pass lifted the hovered card onto
+   `--z-content` so a swollen card would paint over its grid neighbours — but
+   `z-index` is not animatable, so it snapped on at hover-in and, worse, snapped
+   off at hover-out while the card was still shrinking, which read as a flicker
+   at both ends. The swell is small enough that boxes never overlap (a 420px card
+   grows ~1px per side into a 20px gutter), so the layer bought nothing. If the
+   scale is ever raised far enough to overlap, DON'T just re-add `z-index` on
+   `:hover` — hold it across the settle (`transition: z-index 0s linear <dur>`)
+   or the flicker comes back with it.
+
+   The tilt keeps that headroom: at 3deg and 1000px perspective a 420px card's
+   near edge projects ~2px wider per side, still inside the 20px gutter. Raising
+   --card-tilt-max or dropping --card-tilt-perspective far enough to overlap runs
+   into the same non-animatable z-index trap above. */
+.card-float {
+  /* Tilt knobs. Declared (not fallback-only) because the tilt script READS
+     --card-tilt-max off the computed style — a value that lives only in a
+     var() fallback is invisible to getComputedStyle. Set --card-tilt-max: 0deg
+     on a card or a page to keep the lift but opt out of the tilt. */
+  --card-tilt-max: 3deg;
+  --card-tilt-track: 90ms linear;
+
+  box-shadow: var(--card-float-shadow, none);
+  /* Two speeds, one property. While the pointer is inside a card the script sets
+     --card-tilt-transition to the fast linear track so the tilt follows the
+     cursor; on leave it removes it, so the card settles back on the designed
+     ease-out. Unset (keyboard focus, touch, reduced motion) = the original rise. */
+  transition: transform var(--card-tilt-transition, var(--transition-lift)),
+              box-shadow var(--transition-lift);
+}
+.card-float:hover,
+.card-float:focus-visible {
+  /* perspective() must come first to apply to the rotations that follow, and the
+     lift is placed BEFORE them so it stays a clean vertical rise rather than
+     angling along the tilted plane. The tilt vars sit at 0deg unless the script
+     is driving them, so every non-pointer path keeps exactly the lift + swell +
+     shadow this had before the tilt landed. */
+  transform: perspective(var(--card-tilt-perspective, 1000px))
+             translateY(var(--card-float-lift, -2px))
+             rotateX(var(--card-tilt-x, 0deg))
+             rotateY(var(--card-tilt-y, 0deg))
+             scale(var(--card-float-scale, 1.005));
+  box-shadow: var(--card-float-shadow-hover, var(--shadow-md));
+  /* Scoped to the hovered card only, so this hints one element at a time. */
+  will-change: transform;
+}
+/* Reduced motion drops the travel, the swell and the tween; the shadow still
+   steps up, so the hover keeps an affordance without anything moving. */
+@media (prefers-reduced-motion: reduce) {
+  .card-float { transition: none; }
+  .card-float:hover,
+  .card-float:focus-visible { transform: none; }
+}
+
+
+/* ── Animated line link ──────────────────────────────────────────── */
+.animated-line,
+.animated-in-out,
+.link-inline {
+  background-image: linear-gradient(transparent calc(100% - 1px), currentColor 1px);
+  padding-bottom: 2px;
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+  background-position: left bottom;
+  text-decoration: none;
+  display: inline;
+  color: var(--text-body);
+  animation: underlineIn 0.4s ease forwards;
+}
+
+.animated-line:hover,
+.animated-in-out:hover,
+.link-inline:hover {
+  animation: underlineOut 0.4s ease forwards,
+             underlineInGreen 0.4s ease forwards 0.4s;
+}
+
+/* Nav link — composes with .animated-line for the underline */
+.link-nav {
+  display: inline-block;
+  text-decoration: none;
+  color: var(--text-body);
+  position: relative;
+}
+
+/* Subtle link — muted, fades on hover */
+.link-subtle {
+  color: var(--text-subtle);
+  text-decoration: none;
+  transition: opacity var(--transition-base);
+}
+.link-subtle:hover { opacity: 0.7; }
+
+/* Hover-line link — no underline at rest; a 1px currentColor line slides
+   in from the left on hover. Transition-based (not keyframed) so nothing
+   animates on load, unlike .animated-line which draws its line in by default.
+
+   The single home for the label-to-underline gap. Two seams, both set to a
+   spacing token (never a raw px):
+
+   - `--link-hover-line-gap` — distance from text to line. Every hover
+     underline on the site sits this far under its label; overriding it is
+     rare and deliberate.
+   - `--link-hover-line-pad` — the link's own bottom padding, for a row that
+     needs a tap target taller than the gap (nav submenu rows, footer nav
+     columns). The line rides ABOVE that padding rather than sitting on its
+     edge, so the gap holds however tall the row gets. Anchoring the line on
+     the padding edge instead is the bug this seam exists to prevent — it
+     pushes the line the full padding away from the label.
+
+   A consumer that wants symmetric rows sets its own `padding-top`; this owns
+   the bottom only, because some consumers (the header's flex nav row) must
+   not gain top padding.
+
+   Used by: `Header.astro → .site-nav__link / .site-nav__sublink /
+   .site-header__exit`, `Footer.astro → .site-footer__nav-link`,
+   `search.astro → .search-result__more`, `HomeHero.astro → HWH links`,
+   `@ui/Link variant="hover-line"`. */
+.link-hover-line {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-size: 0% 1px;
+  background-position: left 0 bottom
+    calc(var(--link-hover-line-pad, 2px) - var(--link-hover-line-gap, 2px));
+  padding-bottom: var(--link-hover-line-pad, 2px);
+  text-decoration: none;
+  display: inline;
+  color: var(--text-body);
+  transition: background-size var(--transition-base);
+}
+.link-hover-line:hover { background-size: 100% 1px; }
+
+/* Current-page indicator — the same line, held open at rest. Keyed off
+   `aria-current="page"` rather than an `is-active` class so the semantics and
+   the styling are one thing: mark the link correctly for assistive tech and it
+   is styled correctly for free, with nothing to keep in sync.
+   Set by `Header.astro → isCurrent()` (exact path match, matching live). */
+.link-hover-line[aria-current='page'] { background-size: 100% 1px; }
+
+/* Group-driven variant — the same line, revealed when an ANCESTOR marked
+   `.hover-group` is hovered, instead of the link itself.
+
+   For a composite that is ONE click target (a whole card, a search-result row):
+   the pointer is almost never over the link when the row is what's being pointed
+   at, so a self-hover trigger reads as dead. Add `.hover-group` to the row and
+   `.link-hover-line` to the one element that should answer.
+
+   `:focus-within` keeps keyboard parity — the row's real focusable anchor is
+   usually a different element from the one carrying the line.
+   Used by: `search.astro → .search-result` ("Read More"). */
+.hover-group:hover .link-hover-line,
+.hover-group:focus-within .link-hover-line { background-size: 100% 1px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .link-hover-line { transition: none; }
+}
+
+
+/* ── Tabs (segmented control) ─────────────────────────────────────────
+   Shared by the `@elements/Tabs.astro` component AND raw-HTML `[data-tabs]`
+   blocks in `.md` bodies (e.g. WordPress easy-tabs). Lives in global (not
+   scoped in the component) precisely because both surfaces use it. Behavior is
+   wired once by the global `[data-tabs]` initializer in `Base.astro`. Live →
+   token mapping documented in Tabs.astro. */
+.tabs__list {
+  display: inline-flex;
+  margin: 0 auto var(--spacing-5XL);
+  padding: var(--spacing-2XS);
+  border-radius: var(--border-radius-S); /* live: 6px */
+  background-color: var(--surface-background-bright);
+  box-shadow: var(--shadow-md);
+}
+.tabs--center { text-align: center; }
+.tabs--center .tabs__list { display: inline-flex; }
+
+.tabs__tab {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--spacing-M) var(--spacing-2XL);
+  border-radius: var(--border-radius-S);
+  background-color: transparent;
+  color: var(--text-headline);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.5;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.tabs__tab[aria-selected='true'] {
+  /* dark fill + inverse text — flips with the theme via semantic tokens */
+  background-color: var(--text-headline);
+  color: var(--surface-background-bright);
+}
+.tabs__tab:focus-visible {
+  outline: 2px solid var(--text-headline);
+  outline-offset: 2px;
+}
+
+.tabs__panels > :focus { outline: none; }
+/* !important beats any display value set on the panel (e.g. display: flex). */
+.tabs__panels > [hidden] { display: none !important; }
+
+/* `.tabs--center` centers the segmented control (a text-align on the container);
+   that must NOT cascade into the panels' flowing content — panel text is prose,
+   always left-aligned. */
+.tabs--center .tabs__panels { text-align: left; }
+
+/* Card variant — the whole group (selector + active panel) reads as one raised
+   card, not just the segmented control floating above bare content. The card
+   supplies the elevation + surface, so the inner control drops its own shadow
+   and sits on a subtle track; card padding + a gap under the selector give the
+   whitespace. Both surfaces are semantic tokens, so the card themes correctly. */
+.tabs--card {
+  padding: var(--spacing-2XL);
+  border-radius: var(--border-radius-L);
+  background-color: var(--surface-background-bright);
+  box-shadow: var(--shadow-md);
+}
+.tabs--card .tabs__list {
+  margin-bottom: var(--spacing-2XL);
+  background-color: var(--surface-background-default);
+  box-shadow: none;
+}
+/* Drop the trailing margin on the active panel's last block so the card's
+   bottom padding stays even. */
+.tabs--card .tabs__panels > * > :last-child { margin-bottom: 0; }
+
+/* Bordered "folder-tab" variant — live RAG tutorial. Square outlined buttons,
+   left-aligned on a full-width baseline; the active tab fills solid (base
+   `[aria-selected]` rule) and overlaps the baseline so it reads as attached.
+   All colors are `--text-headline` / `--surface-background-bright`, so it themes.
+   Live: buttons 2px #000 border, 1rem padding, active #000/#fff. */
+.tabs--bordered .tabs__list {
+  display: flex;
+  gap: var(--spacing-2XS);
+  margin: 0 0 var(--spacing-2XL);        /* left-aligned; whitespace to content */
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  border-bottom: 1px solid var(--text-headline);   /* the baseline */
+}
+.tabs--bordered .tabs__tab {
+  border: 2px solid var(--text-headline);
+  border-radius: 0;
+  margin-bottom: -1px;                   /* overlap the baseline → tab sits on the line */
+  padding: var(--spacing-M) var(--spacing-L);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tabs__tab { transition: none; }
+}

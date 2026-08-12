@@ -1,0 +1,288 @@
+/* ══════════════════════════════════════════════════════════════════
+   BASE — reset, bare-element defaults, page-level plumbing
+   The test for this file is mechanical: does the selector carry a CLASS?
+   If no, it belongs here. Resets, bare-element skins (form controls, code,
+   blockquote), the flowing-text rhythm every bare paragraph gets, plus the
+   machinery that applies page-wide (keyframes, the load-in fade, the theme
+   cross-fade, scroll anchoring).
+
+   Base body/heading TYPE (family, size, weight, leading) lives in
+   global/typography.css — imported last, so it wins ties against this.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── CSS Reset ───────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; padding: 0; }
+img, picture, video, canvas, svg { display: block; max-width: 100%; }
+input, button, textarea, select { font: inherit; }
+p, h1, h2, h3, h4, h5, h6 { overflow-wrap: break-word; }
+#root, #__next { isolation: isolate; }
+/* Base anchor color: inherit the surrounding text color so no link ever
+   falls back to the browser-default blue. Richer treatments layer on top —
+   content links get the animated underline (see "Content links" below),
+   component links (.button, .link-nav, …) carry their own class and color.
+   Covers links that sit outside prose/<p>/headings and links injected via
+   `set:html` (which scoped component CSS can't reach). */
+a { color: inherit; }
+/* `hidden` is how progressive enhancement hides its own markup (controls that
+   aren't wired yet, a results footer with nothing to show). A component's own
+   `display: flex/inline-flex` outranks the UA's `[hidden] { display: none }`,
+   so restate it with the weight to win — otherwise every such component has to
+   remember its own override. */
+[hidden] { display: none !important; }
+
+
+/* ── ion-icon space reservation ──────────────────────────────────────
+   Only pages that opt into the Ionicons CDN loader (Base.astro `ionicons`
+   prop — currently just /style-guide) render <ion-icon>; all site chrome and
+   shared components use local inlined SVGs (@elements/Icon). On those opt-in
+   pages <ion-icon> is an unknown, 0×0 element until the CDN module upgrades it,
+   so it'd paint late AND reserve no space. Reserve the same box ionicons
+   applies post-upgrade (inline-block, 1em square) so there's zero layout shift
+   and the glyph just fades into place. `1em` tracks each icon's own font-size. */
+ion-icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  flex: none;
+}
+
+
+/* Body and heading base type (font-family, size, weight, line-height,
+   color) live in typography.css — this file owns resets, non-type base
+   styles, and section theming. */
+
+
+/* ── Scroll margin for sticky nav ────────────────────────────────── */
+[id] {
+  scroll-margin-top: 128px;
+}
+
+@media (max-width: 991px) {
+  [id] { scroll-margin-top: 88px; }
+}
+
+
+/* ── Global keyframe animations ──────────────────────────────────── */
+@keyframes underlineIn {
+  0%  { background-size: 0% 100%;   background-position: left bottom }
+  to  { background-size: 100% 100%; background-position: left bottom }
+}
+
+@keyframes underlineOut {
+  0%  { background-size: 100% 100%; background-position: right bottom }
+  to  { background-size: 0% 100%;   background-position: right bottom }
+}
+
+@keyframes underlineInGreen {
+  0% {
+    background-image: linear-gradient(transparent calc(100% - 1px), var(--color-green-600) 1px);
+    background-size: 0% 100%;
+    background-position: left bottom;
+  }
+  to {
+    background-image: linear-gradient(transparent calc(100% - 1px), var(--color-green-600) 1px);
+    background-size: 100% 100%;
+    background-position: left bottom;
+  }
+}
+
+@keyframes fade-in {
+  0%  { opacity: 0 }
+  to  { opacity: 1 }
+}
+
+
+/* ── Load-in fade ─────────────────────────────────────────────────────
+   Opt-in via `data-fade` on any element. The fade script in Base.astro hides
+   it (opacity:0) until it's ready, then adds `.is-loaded` to fade it in. Two
+   modes, chosen by tag:
+     • <img> (incl. Astro <Image>) → fades in when THAT file finishes loading,
+       tracked per-file — so lazy/off-screen and infinite-scroll images fade
+       as they arrive. For card/panel covers, the tile's own background-color
+       (e.g. --surface-background-dim) shows through during the fade.
+     • any other element → fades in on page load (after first paint). Use for
+       content with no load event of its own, e.g. the homepage WebGL swoop.
+   Gated on `.js` so no-JS users see everything immediately (never stuck at
+   opacity 0); reduced-motion reveals instantly without a fade.
+
+   The reveal uses `animation` (the fade-in keyframe) rather than a `transition`
+   so it never clashes with an element's own `transition` (e.g. PostCard's hover
+   zoom on transform) — the two properties are independent. */
+.js [data-fade] { opacity: 0; }
+.js [data-fade].is-loaded {
+  opacity: 1;
+  /* --transition-base already carries the timing function (0.4s ease), so it
+     fills both the duration and timing-function slots — do NOT append another
+     one (an extra `ease` here makes the whole animation shorthand invalid). */
+  animation: fade-in var(--transition-base);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js [data-fade] { opacity: 1; animation: none; }
+}
+
+
+/* Bare content links (a classless <a> inside a paragraph or a `.prose`
+   region) get the animated content-link underline — see “Prose / long-form
+   content”. Component links always carry a class and are left untouched;
+   for an inline underline link outside a paragraph, use <Link variant="inline">. */
+
+
+/* ── Theme transition ────────────────────────────────────────────── */
+body,
+header,
+footer,
+section,
+main,
+nav {
+  transition: background-color var(--transition-theme), color var(--transition-theme);
+}
+
+
+/* ── Form base styles ────────────────────────────────────────────── */
+input,
+textarea,
+select {
+  height: 48px;
+  padding: 0 15px;
+  font-size: 16px;
+  font-family: inherit;
+  background-color: var(--surface-background-default);
+  color: var(--text-body);
+  border: none;
+  border-radius: var(--border-radius-S);
+  box-shadow: var(--shadow-md);
+  width: 100%;
+}
+
+textarea {
+  height: auto;
+  padding: 15px;
+  resize: vertical;
+}
+
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23868394' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  padding-right: 40px;
+}
+
+::placeholder { color: var(--text-subtle); }
+
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+  background-color: var(--surface-background-dim);
+}
+
+/* No `font-size` here on purpose. It used to restate the 16px body size, which
+   changed nothing on its own but BLOCKED inheritance — a label inside a
+   small-text container (`.text-small`, a 14px dropdown panel) stayed 16px, and
+   the container's size looked like it was being ignored. Labels now inherit,
+   so wrapping a group of form controls in `.text-small` sizes their labels too.
+   Anywhere that genuinely needs a fixed label size sets it (see `.hs-form`). */
+label {
+  display: block;
+  font-family: var(--font-primary);
+  font-weight: 400;
+  color: var(--text-body);
+  padding-left: 5px;
+  margin-bottom: 8px;
+}
+
+
+/* ── Code blocks ─────────────────────────────────────────────────── */
+code {
+  background: var(--surface-foreground-default);
+  border-radius: 3px;
+  padding: 0.2em 0.3em;
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  font-size: 1em;
+  line-height: 1.5;
+}
+
+pre {
+  background-color: var(--color-grayscale-950);
+  border-radius: var(--border-radius-S);
+  padding: 1em 1.25em;
+  overflow-x: auto;
+}
+
+pre code {
+  background: none;
+  border-radius: 0;
+  padding: 0;
+  color: var(--color-grayscale-50);
+}
+
+/* Shiki (Astro markdown highlighter) paints its theme's own background inline
+   on `pre.astro-code`; override it back to our brand code surface so highlighted
+   blocks match the `pre` rule above. Theme token colors are kept. */
+pre.astro-code { background-color: var(--color-grayscale-950) !important; }
+
+
+/* ── Blockquote ──────────────────────────────────────────────────── */
+blockquote {
+  font-family: var(--font-primary);
+  font-size: 16px;
+  border-left: 1px solid var(--text-headline);
+  padding-left: var(--spacing-L);
+  margin-block: var(--spacing-L) var(--spacing-3XL);
+}
+
+
+/* ── Flowing text rhythm (base) ───────────────────────────────────────
+   The reset zeroes every margin, so bare paragraphs have no rhythm of their
+   own — which is why non-article text regions kept reaching for `.prose` just
+   to get paragraph spacing back. This gives any run of flowing text (section
+   copy, card bodies, form intros) the gap it needs WITHOUT the long-form
+   treatment: no 1.75 leading, no article heading rhythm.
+
+   Same adjacent-sibling mechanism `.prose` uses, so the two layers differ only
+   in value — one rule owns each gap, nothing depends on margin collapsing, and
+   the result is identical in block flow, flex, and grid.
+
+   `1em` rather than a spacing token so the gap tracks its own type size: a
+   14px `.text-small` block gets 14px, a 16px body block gets 16px.
+
+   Components that style their own paragraphs are immune without opting out —
+   Astro scoped CSS compiles to `.foo p + p[data-astro-cid-…]`, which always
+   out-specifies a bare-element rule. Only a parent's flex/grid `row-gap` can
+   stack with this (a gap adds to a margin rather than competing), so a
+   container that sets both is the one case to watch.
+
+   Lists take `:not([class])` but paragraphs do not, and the asymmetry is
+   deliberate. A classed `<p>` is still body copy, and a component styling it
+   sets `margin-top` too — the same property, so one wins. A classed `<ul>` is
+   almost always a LAYOUT list (nav, social row, card grid) whose spacing comes
+   from its parent, and nothing there competes for `margin-top`, so a flow
+   margin just lands on top of it. Empirically the signal is strong: exactly one
+   classless `<ul>` exists outside `.prose` site-wide. */
+p + p {
+  margin-top: 1em;
+}
+p + :is(ul, ol):not([class]),
+:is(ul, ol):not([class]) + p {
+  margin-top: 1em;
+}
+
+/* Authored headings inside those regions. Same `:not([class])` convention as
+   the content-link and diamond-list rules: a bare heading is authored content
+   and gets rhythm; a heading carrying a class belongs to a component, which
+   owns its own spacing (and always wins — scoped CSS out-specifies this).
+
+   Declared as the heading's own `margin-bottom`, NOT as `margin-top` on the
+   next element, and that choice is load-bearing: 24 of the 27 already-spaced
+   bare headings on the site set `margin-bottom` themselves, so this competes
+   with them (one wins) instead of stacking on top (both apply). Space BEFORE a
+   heading is deliberately left to the page — a global rule there would stack
+   with a parent's flex `gap`.
+
+   `:not(.prose *)` is required, not decorative: markdown headings are classless
+   too, so without it this rule also lands inside `.prose` and STACKS with the
+   prose owl's margin-top (16+16=32, 24+24=48 across every blog post). */
+:is(h2, h3, h4, h5, h6):not([class]):not(.prose *) { margin-bottom: var(--spacing-L); }
+h2:not([class]):not(.prose *) { margin-bottom: var(--spacing-2XL); }

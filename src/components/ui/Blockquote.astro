@@ -1,0 +1,19 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<blockquote class={['bq', className].filter(Boolean).join(' ')}>
+  <slot />
+</blockquote>
+
+<style>
+  .bq {
+    border-left: var(--border-strong);
+    padding-left: var(--spacing-L);
+    margin-block: var(--spacing-L) var(--spacing-3XL);
+  }
+</style>

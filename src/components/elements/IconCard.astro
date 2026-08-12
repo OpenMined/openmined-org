@@ -1,0 +1,81 @@
+---
+/**
+ * IconCard — reusable card: a line icon beside a title + body. One anatomy,
+ * a few variants, used across product pages (Real-World Applications, Core
+ * Capabilities, Deployment, syftbox benefits/personas/features, …).
+ *
+ * Rebuilt from live #brxe-366d49 (white, bold-label title) and #brxe-bngvtq
+ * (dim surface, h5 title). Measured off the live page.
+ *
+ * Variants:
+ *   surface  'default' (off-white) | 'bright' (lightest) | 'dim' (subtle grey)
+ *            — all themed (flip in dark)
+ *   titleAs  'h5' (21px heading) | 'strong' (16px bold label) | 'body' (16px
+ *            regular body copy — a plain <p>, not header type)
+ *   layout   'row' (icon beside content, default) | 'stacked' (icon above,
+ *            left-aligned column)
+ *
+ * Live → token mapping:
+ *   layout       flex row, align-items start, col-gap 24px → --spacing-2XL
+ *   padding      24px                                       → --spacing-2XL ✓
+ *   radius       6px                                        → --border-radius-S
+ *   icon         32px, currentColor (theme-adaptive)        → Icon size 32
+ *   bg           #fcfcfd / #f4f3f6                           → --surface-background-default / -dim
+ */
+import Icon from '@elements/Icon.astro';
+
+interface Props {
+  /** Icon name; omit for an icon-less card (e.g. persona cards). */
+  icon?: string;
+  iconSize?: number;
+  title: string;
+  titleAs?: 'h5' | 'strong' | 'body';
+  surface?: 'default' | 'bright' | 'dim';
+  layout?: 'row' | 'stacked';
+}
+const { icon, iconSize = 32, title, titleAs = 'h5', surface = 'default', layout = 'row' } = Astro.props;
+const Title = titleAs === 'h5' ? 'h5' : 'p';
+---
+
+<div class:list={['icon-card', `icon-card--${surface}`, `icon-card--${layout}`]}>
+  {icon && <Icon name={icon} size={iconSize} class="icon-card__icon" />}
+  <div class="icon-card__content">
+    <Title class:list={['icon-card__title', { 'icon-card__title--strong': titleAs === 'strong' }]}>{title}</Title>
+    <div class="icon-card__body"><slot /></div>
+  </div>
+</div>
+
+<style>
+  .icon-card {
+    display: flex;
+    align-items: flex-start;
+    column-gap: var(--spacing-2XL); /* live: 24px ✓ */
+    padding: var(--spacing-2XL);    /* live: 24px ✓ */
+    border-radius: var(--border-radius-S);
+    color: var(--text-body); /* drives currentColor for monochrome icons */
+  }
+  .icon-card--default { background-color: var(--surface-background-default); }
+  .icon-card--bright { background-color: var(--surface-background-bright); }
+  .icon-card--dim { background-color: var(--surface-background-dim); }
+
+  /* stacked: icon above content, left-aligned column. column-gap (cross axis)
+     is ignored in column flow, so set the vertical icon→content gap here. */
+  .icon-card--stacked {
+    flex-direction: column;
+    row-gap: var(--spacing-L);
+  }
+
+  .icon-card__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-M); /* live row-gap: 12px */
+  }
+
+  /* h5 title uses global h5; strong title is a 16px bold label */
+  .icon-card__title { margin: 0; }
+  .icon-card__title--strong {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-headline);
+  }
+</style>

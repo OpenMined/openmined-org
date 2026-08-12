@@ -1,0 +1,43 @@
+---
+interface Props {
+  placeholder?: string;
+  disabled?: boolean;
+  id?: string;
+  name?: string;
+  label?: string;
+  rows?: number;
+  required?: boolean;
+  class?: string;
+}
+
+const {
+  placeholder = '',
+  disabled = false,
+  id,
+  name,
+  label,
+  rows = 4,
+  required = false,
+  class: className = '',
+} = Astro.props;
+---
+
+<div class="field-wrap">
+  {label && <label for={id}>{label}</label>}
+  <textarea
+    placeholder={placeholder}
+    disabled={disabled}
+    id={id}
+    name={name}
+    rows={rows}
+    required={required}
+    class={className || undefined}
+  ></textarea>
+</div>
+
+<style>
+  .field-wrap {
+    display: flex;
+    flex-direction: column;
+  }
+</style>

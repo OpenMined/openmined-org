@@ -1,0 +1,225 @@
+---
+/**
+ * /for-publishers/ — one of the four "Supported Subnets" pages linked from the
+ * home Federated-Network section. Marketing/product page for Attribution-Based
+ * Control aimed at publishers.
+ *
+ * Section-band archetype (hero → problem → how-it-works → ecosystem → statement
+ * → CTA). Content is verbatim from the live page.
+ */
+import Page from '@layouts/Page.astro';
+import SimpleHero from '@components/sections/hero/SimpleHero.astro';
+import ContentSection from '@components/sections/ContentSection.astro';
+import CardGrid from '@elements/CardGrid.astro';
+import IconCard from '@elements/IconCard.astro';
+import StepRows from '@elements/StepRows.astro';
+import Icon from '@elements/Icon.astro';
+import CtaSection from '@components/sections/cta/CtaSection.astro';
+import FormEmbed from '@elements/FormEmbed.astro';
+import Button from '@ui/Button.astro';
+
+// Row 5 — "Infrastructure for the Whole Ecosystem". Icons are the real live
+// inline-SVG (Lucide) marks fetched from production.
+const ecosystem = [
+  { icon: 'newspaper', title: 'Publishers & Rights Holders', body: 'Control AI access, attribution, and analytics – and price it fairly.<br><br>End the opaque “black box” era. Set your own price per query. See exactly which bots are using your work. Negotiate with enforcement and collaborate for collective leverage, not just a legal promise.' },
+  { icon: 'users', title: 'Small Newsrooms, Presses & Local Media', body: 'Collective power, zero tech burden.<br><br>A drop-in protocol that gives small publishers the ability to act as a collective, with simple monetisation and zero technical burden. You become discoverable and compensable.' },
+  { icon: 'library', title: 'Libraries & Archives', body: 'Protect provenance. Preserve custody.<br><br>Attribution-Based Control lets AI consult your collections without being consumptive. You share knowledge for answers, but maintain attribution and the chain of custody. Usage auditable by funders and the public.' },
+  { icon: 'scale', title: 'Associations & Governance Bodies', body: 'Keep control of knowledge in public hands.<br><br>Access to the world’s knowledge shouldn’t be decided by private boardrooms. ABC gives you a neutral, open mechanism to coordinate the ecosystem and enforce standards across the board.' },
+];
+
+// Row 7 — "We're developing protocols that champion" (centered icon columns).
+const champions = [
+  { icon: 'globe', title: 'Open Standards', body: 'No single company controls the pipe.' },
+  { icon: 'enforcement', title: 'Technical Enforcement', body: 'Code, not just contracts.' },
+  { icon: 'lock', title: 'Data Ownership', body: 'Your content never leaves your control. Revoke access instantly. Works on your servers.' },
+];
+---
+
+<Page
+  title="AI Content Control for Publishers | Attribution-Based Control"
+  description="AI isn’t the threat — losing control of distribution is. Attribution-Based Control lets publishers keep custody of their content while making it AI-queryable, with guaranteed attribution and fair compensation."
+>
+  <SimpleHero
+    eyebrow="for Publishers"
+    eyebrowItalic
+    heading="AI isn't the threat."
+    subhead="Losing control of distribution is."
+  />
+
+  <!-- The web was built for humans -->
+  <ContentSection surface="dim" measure="44.5em" align="left" as="h4" headGap="tight" heading="The web was built for humans">
+    <div class="pub-prose">
+      <p>For decades, publishers owned the distribution and readers chose which sources to trust.</p>
+      <p>AI has disrupted how knowledge flows, yet the web has stayed the same. Without a better protocol for access, the industry defaulted to “scraping”, pooling publishers’ content without their preferences.</p>
+      <p>The danger isn’t AI itself, but losing control of distribution and the ability to capture its value. This is not a fight against AI, but a gap to be filled.</p>
+    </div>
+    <div class="pub-actions"><Button href="#cta">Join the Beta</Button></div>
+  </ContentSection>
+
+  <!-- Why "scraping economy" does not work -->
+  <ContentSection
+    as="h4"
+    width="col-10"
+    align="left"
+    heading="Why “scraping economy” does not work"
+    intro="When an AI model “trains” on your data, it doesn’t just read it. It absorbs it into statistical weights and creates the following structural failures:"
+    introMeasure="44em"
+    headWidth="col-8"
+  >
+    <CardGrid cols={3} gap="var(--spacing-XL)">
+      <IconCard icon="ban" surface="dim" layout="stacked" title="Irreversible">
+        <p>Once trained, your content cannot be untangled from the rest of the training data and model.</p>
+      </IconCard>
+      <IconCard icon="eye-off" surface="dim" layout="stacked" title="Invisible">
+        <p>Provenance is broken. Inside the “black box,” you cannot track usage or attribute value.</p>
+      </IconCard>
+      <IconCard icon="shield-alert" surface="dim" layout="stacked" title="Unenforceable">
+        <p>You cannot enforce pricing or any terms given no traceability.</p>
+      </IconCard>
+    </CardGrid>
+    <div class="pub-aftergrid measure" style="--measure: 44em;">
+      <p>Existing solutions, such as robots.txt or bot blockers, force publishers to choose between non-participation (becoming invisible) or extraction (becoming still… invisible).</p>
+      <p><strong>There’s a third option.</strong></p>
+    </div>
+  </ContentSection>
+
+  <!-- Attribution-Based Control + How it works -->
+  <ContentSection surface="dim" width="col-10">
+    <div class="pub-abc-head">
+      <h4>Attribution-Based Control:</h4>
+      <h5 class="pub-abc-sub">Inference-First Access</h5>
+      <p class="pub-abc-intro measure" style="--measure: var(--col-6);">Instead of scraping your content for training, AI systems that implement ABC query your content live when they need to answer a user’s question, on the terms you set.</p>
+    </div>
+
+    <h4 class="pub-hiw-heading">How it works</h4>
+    {/* Step-card icons: item[0] of step 1 is a live inline SVG (database); the
+        rest render on live from font-icon libraries we don't load (Themify
+        `ti-*` / Ionicons `ion-*`) — flagged below, using the nearest real SVG. */}
+    <StepRows steps={[
+      {
+        title: 'Computation moves to your data',
+        items: [
+          { icon: 'database', text: 'Setup a datasite – zero technical setup (&lt;30 mins)' },
+          { icon: 'network-discovery', text: 'Link your content from folders or your CMS' }, // FONT: ion-ios-link (no SVG on live) → placeholder
+        ],
+      },
+      {
+        title: 'Define your policies based on AI’s identity and intent',
+        items: [
+          { icon: 'eye', text: 'Allow Readers Bots? Free access.' },        // FONT: ti-eye → eye (faithful substitute)
+          { icon: 'trending-up', text: 'Allow Trading Bots? 0.05¢ per query.' }, // FONT: ti-stats-up → trending-up
+        ],
+      },
+      {
+        title: 'The network enforces your policies',
+        items: [
+          { icon: 'network-discovery', text: 'The network protocol manages the exchange, ensuring policies are respected when AI queries your content' }, // FONT: ion-ios-git-compare → placeholder
+          { icon: 'dollar-sign', text: '100% of the proceeds go to you, no intermediaries' }, // FONT: ti-money → dollar-sign
+        ],
+      },
+    ]} />
+
+    <div class="pub-callout" data-section="always-dark">
+      {/* FONT: live callout uses Ionicons `ion-ios-code` (not loaded) → `code` SVG substitute */}
+      <Icon name="code" size={24} class="pub-callout__icon" />
+      <p>This is not just a proposal. We provide a mature, open-source reference implementation that you can run today.</p>
+    </div>
+  </ContentSection>
+
+  <!-- Infrastructure for the Whole Ecosystem -->
+  <ContentSection as="h4" width="col-10" heading="Infrastructure for the Whole Ecosystem">
+    <CardGrid cols={2} gap="var(--spacing-XL)">
+      {ecosystem.map((c) => (
+        <IconCard icon={c.icon} surface="dim" layout="stacked" title={c.title}>
+          <p set:html={c.body}></p>
+        </IconCard>
+      ))}
+    </CardGrid>
+  </ContentSection>
+
+  <!-- This is bigger than revenue (dark statement band) -->
+  <ContentSection surface="dark" width="col-8">
+    <div class="pub-statement">
+      <h3>This is bigger than revenue.</h3>
+      <h5 class="pub-statement__sub">This is about the future of knowledge.</h5>
+      <div class="pub-statement__body">
+        <p>In every era, the first movers decide the future. The web is open because HTTP arrived early. Mobile and social are closed because open protocols came too late.</p>
+        <p>AI is the next revolution. The architecture we build now will determine whether information flows through open, interoperable systems – or through centralized pipelines where creators become invisible.</p>
+        <p>This isn’t about any particular company. It’s about whether the infrastructure itself preserves sovereignty for those who create knowledge.</p>
+      </div>
+    </div>
+  </ContentSection>
+
+  <!-- We're developing protocols that champion -->
+  <ContentSection as="h4" width="col-10" heading="We're developing protocols that champion:">
+    <CardGrid cols={3} gap="var(--spacing-XL)">
+      {champions.map((c) => (
+        <div class="pub-champion">
+          <Icon name={c.icon} size={32} class="pub-champion__icon" />
+          <h5>{c.title}</h5>
+          <p>{c.body}</p>
+        </div>
+      ))}
+    </CardGrid>
+  </ContentSection>
+
+  <!-- CTA -->
+  <div id="cta">
+    <CtaSection variant="gradient" icon={false} heading="Join the Beta" body="No risk. Come see how to regain control over your distribution.">
+      <FormEmbed slot="form" formId="d6c703a1-0d6f-4d4b-9375-4192d9a4a478" />
+      <Fragment slot="fineprint">
+        <p>By joining you confirm you agree with our <a href="/privacy-policy/">privacy policy</a>.</p>
+      </Fragment>
+    </CtaSection>
+  </div>
+</Page>
+
+<style>
+  /* section 2 — body + action */
+  .pub-prose { margin-bottom: var(--spacing-3XL); }
+  .pub-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px var(--spacing-XL); /* shared multi-CTA row spacing */
+  }
+
+  /* section 3 — trailing copy under the card grid (left-aligned with the head) */
+  .pub-aftergrid {
+    margin-top: var(--spacing-3XL);
+    text-align: left;
+  }
+  .pub-aftergrid p { margin: 0 0 var(--spacing-M); }
+  .pub-aftergrid p:last-child { margin-bottom: 0; }
+
+  /* section 4 — ABC header above the stepper */
+  .pub-abc-head { text-align: center; margin-bottom: var(--spacing-5XL); }
+  .pub-abc-sub { margin: 0 0 var(--spacing-2XL); color: var(--text-subtle); }
+  .pub-abc-intro { margin-inline: auto; }
+  .pub-hiw-heading { text-align: center; margin-bottom: var(--spacing-4XL); }
+
+  /* section 4 — dark reference-implementation callout below the steps */
+  .pub-callout {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-L); /* live: 16px ✓ */
+    margin-top: var(--spacing-5XL);
+    padding: var(--spacing-4XL); /* live: 40px ✓ */
+    border-radius: var(--border-radius-L); /* live: 16px ✓ */
+    background-color: var(--surface-background-default); /* always-dark → dark fill */
+    max-width: var(--col-6);
+    margin-inline: auto;
+  }
+  .pub-callout__icon { flex-shrink: 0; }
+  .pub-callout p { margin: 0; }
+
+  /* section 6 — dark statement band: title + subtitle centered, body left */
+  .pub-statement { text-align: center; }
+  .pub-statement__sub { margin: var(--spacing-S) 0 var(--spacing-3XL); }
+  .pub-statement__body { text-align: left; }
+
+  /* section 7 — centered icon columns */
+  .pub-champion { text-align: center; }
+  .pub-champion__icon { margin-bottom: var(--spacing-L); }
+  .pub-champion h5 { margin-bottom: var(--spacing-S); }
+  .pub-champion p { margin: 0; }
+</style>

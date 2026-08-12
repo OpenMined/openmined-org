@@ -1,0 +1,187 @@
+---
+/**
+ * CtaSection — generic / reusable call-to-action band. Always renders a form
+ * (injected via the required `form` slot, so each page passes its own).
+ *
+ * Rebuilt from live #brxe-d781e4 (home "Take Control of Your Data's Future").
+ * Measured off the live page.
+ *
+ * Variants (bg treatment behind the centered card):
+ *   gradient — full-spectrum brand gradient (home). Card follows the page theme.
+ *   subtle   — subtle post-background texture (syftbox). Card locked always-light
+ *              (live has no dark mode; the card must stay legible-light).
+ *   dark     — always-dark band (reuses the inverted-surface pattern).
+ *   invert   — dark-surface band that flips with the page theme.
+ *
+ * Live → token mapping:
+ *   section min-height   500px                     → raw (no token)
+ *   section padding-x    20px                      → --spacing-XL ✓
+ *   section bg           rainbow PNG               → live post-background PNG (no brand gradient token)
+ *   card                 flex col, centered         → same
+ *   card padding         40px                      → --spacing-4XL ✓
+ *   card margin-block    88px                      → --spacing-full ✓
+ *   card max-width       510px                     → raw (no token)
+ *   card radius          16px                      → --border-radius-L ✓
+ *   card bg              #F1F0F4                   → --surface-foreground-low (themed ✓)
+ *   card gap             24px                      → --spacing-2XL ✓
+ *   icon                 50px OpenMined icon        → 50px
+ *   heading h3           36px, centered, headline   → h3 default
+ *   body                 16px, centered, body       → defaults
+ *   fineprint            14px, --text-subtle        → 14px / --text-subtle
+ */
+import Text from '@ui/Text.astro';
+interface Props {
+  heading: string;
+  body?: string;
+  variant?: 'gradient' | 'subtle' | 'dark' | 'invert';
+  /** Show the brand icon above the heading (the brand CTA signature). */
+  icon?: boolean;
+  /** Override the icon asset (defaults to the OpenMined icon). */
+  iconSrc?: string;
+  /** Emoji shown above the heading instead of the brand icon (e.g. "🧠"). */
+  emoji?: string;
+  /** Small kicker label above the heading (e.g. "Content Creators:"). */
+  eyebrow?: string;
+}
+const { heading, body, variant = 'gradient', icon = true, iconSrc = '/logos/OpenMined-Icon.svg', emoji, eyebrow } = Astro.props;
+const hasFineprint = Astro.slots.has('fineprint');
+// Optional small subtitle rendered BETWEEN the body and the form (quiet, like
+// fineprint but above the fields) — the live "Accepted partners…" note.
+const hasSubtitle = Astro.slots.has('subtitle');
+// Body accepts a single-paragraph `body` prop OR a `body` slot for rich /
+// multi-paragraph copy (e.g. the un-isi CTA's two lead paras). Slot wins.
+const hasBodySlot = Astro.slots.has('body');
+const hasBody = hasBodySlot || body !== undefined;
+
+// dark/invert cards ride an inverted surface; subtle locks always-light; gradient
+// follows the theme.
+/* `subtle` deliberately has NO context of its own: it differs from `gradient`
+   only in the section's background raster, and live's card themes in both
+   (grayscale-200 → 850). It used to lock `always-light`, which pinned the card
+   light in dark mode on pysyft / syftbox / syfthub. */
+const cardSection =
+  variant === 'dark' ? 'always-dark'
+  : variant === 'invert' ? 'invert'
+  : undefined;
+---
+
+<section class:list={['cta', `cta--${variant}`]}>
+  <div class="cta__card" data-section={cardSection}>
+    {emoji ? (
+      <div class="cta__emoji" aria-hidden="true">{emoji}</div>
+    ) : icon && (
+      <img class="cta__icon" src={iconSrc} alt="" width="50" height="50" />
+    )}
+    {eyebrow && <Text as="p" class="cta__eyebrow">{eyebrow}</Text>}
+    <Text as="h3" class="cta__heading">{heading}</Text>
+    {hasBody && (hasBodySlot
+      ? <div class="cta__body"><slot name="body" /></div>
+      : <Text as="p" class="cta__body">{body}</Text>)}
+
+    {hasSubtitle && (
+      <div class="cta__subtitle"><slot name="subtitle" /></div>
+    )}
+
+    <div class="cta__form">
+      <slot name="form" />
+    </div>
+
+    {hasFineprint && (
+      <div class="cta__fineprint">
+        <slot name="fineprint" />
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+  .cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 500px; /* live min-height */
+    padding-inline: var(--spacing-XL); /* live: 20px ✓ */
+  }
+
+  /* Full-spectrum background — the live raster (post-background-small.png),
+     stretched to fill as on production. The brand has no full-spectrum gradient
+     token (only 7 segments), so this asset is the source of truth here. */
+  .cta--gradient {
+    background-image: url('/images/cta-gradient-bg.png');
+    background-position: center;
+    background-size: 100% 100%; /* live: stretch the 310×310 source to fill */
+    background-repeat: no-repeat;
+  }
+  /* Subtle post-background texture (syftbox CTA) — the live decorative raster. */
+  .cta--subtle {
+    background-image: url('/images/post-background-small.png');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+  }
+  .cta--dark { background-color: var(--dark-surface-background-default); }
+  .cta--invert { background-color: var(--dark-surface-background-default); }
+
+  .cta__card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--spacing-2XL); /* live: 24px ✓ */
+    width: 100%;
+    max-width: 510px; /* live card width */
+    margin-block: var(--spacing-full); /* live: 88px ✓ */
+    padding: var(--spacing-4XL); /* live: 40px ✓ */
+    border-radius: var(--border-radius-L); /* live: 16px ✓ */
+    background-color: var(--surface-foreground-low);
+  }
+
+  .cta__icon {
+    width: 50px;
+    height: 50px;
+  }
+
+  /* emoji stand-in for the brand icon (e.g. 🧠), sized to match the 50px icon */
+  .cta__emoji {
+    font-size: 44px;
+    line-height: 1;
+  }
+
+  /* small kicker above the heading */
+  .cta__eyebrow {
+    margin: 0;
+    color: var(--text-subtle);
+  }
+
+  /* .cta__heading on <h3> — type from global h3 default */
+
+  .cta__body {
+    margin: 0;
+  }
+  /* multi-paragraph body (via the `body` slot): zero the paragraph margins and
+     space consecutive paras with the card's rhythm. */
+  .cta__body :global(p) { margin: 0; }
+  .cta__body :global(p + p) { margin-top: var(--spacing-L); }
+
+  /* subtitle: quiet note between body and form. Live paints grayscale-550 at
+     14px in both modes (= --text-subtle) while the card's body copy themes —
+     verified on /federated-learning/co-design/, its only consumer, 2026-08-05. */
+  .cta__subtitle {
+    margin-top: calc(-1 * var(--spacing-M)); /* tighten toward the body above */
+    color: var(--text-subtle);
+    font-size: 14px;
+  }
+  .cta__subtitle :global(p) { margin: 0; }
+
+  .cta__form { width: 100%; }
+
+  .cta__fineprint {
+    /* Live paints grayscale-550 here in both modes (= --text-subtle), while the
+       card's body copy themes. Known contrast gap carried to match live — see
+       the token comment in tokens.css. */
+    color: var(--text-subtle);
+    font-size: 14px;
+  }
+  .cta__fineprint :global(p) { margin: 0; }
+  .cta__fineprint :global(p + p) { margin-top: var(--spacing-M); }
+</style>

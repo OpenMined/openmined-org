@@ -1,0 +1,72 @@
+---
+import Page from '@layouts/Page.astro';
+import SimpleHero from '@components/sections/hero/SimpleHero.astro';
+import ContentSection from '@components/sections/ContentSection.astro';
+
+/**
+ * /community-guidelines/ — the Slack community rules. Rebuilt verbatim from live
+ * #brxe-ahajuk (https://openmined.org/community-guidelines/), captured to
+ * the live page.
+ *
+ * Layout matches live: centered h1 + welcome lede (no hero graphic) over a col-6
+ * `.prose` column; the 8 guidelines are separated by a strong headline-color
+ * hairline. Headings are h2 for semantic order, rendered at the live h4 size via
+ * `.prose.downsize-2`. Each guideline keeps its live leading emoji.
+ */
+
+// Guidelines in live document order — emoji + title + body, verbatim.
+const guidelines = [
+  { title: '🤝 Be Respectful', body: 'Treat everyone with kindness and professionalism. Disagreements are natural—just keep it constructive and assume good intent.' },
+  { title: '🧵 Keep Channels on Topic', body: 'We use channels to organize discussions. Please post in the right place to help others follow along. Not sure where to post? Just ask!' },
+  { title: '🚫 No Spam or Self-Promotion', body: 'We’re here to share and collaborate, not sell. If you’d like to share a project, opportunity, or event, check if there’s a dedicated channel or ask a moderator first.' },
+  { title: '🛑 Zero Tolerance for Harassment', body: 'Any form of harassment, discrimination, or hateful behavior will not be tolerated. If you see something concerning, please let us know right away.' },
+  { title: '🔐 Respect Privacy', body: 'Don’t share screenshots or copy content from this Slack without permission. This is a shared space—let’s keep it safe and private.' },
+  { title: '✅ Use Your Real Name', body: 'If possible, use your real name (or a recognizable username) and add a profile photo. It helps build trust and makes conversations more human.' },
+  { title: '🙋 Ask Questions. Help Others.', body: 'No question is too small. If you’re wondering about something, someone else probably is too. Likewise, if you can help, jump in!' },
+  { title: '💬 Direct Messages', body: 'Feel free to DM someone for a one-on-one convo, but be thoughtful. If it’s a general question, others may benefit from it being public.' },
+];
+---
+
+<Page
+  title="Community Guidelines — OpenMined"
+  description="Simple guidelines that keep the OpenMined community — our Slack and beyond — supportive, productive, and safe for everyone."
+>
+  <!-- § Hero — title only. No swoop (live is a plain centered header).
+       The welcome intro now leads the body (below), not the hero. -->
+  <SimpleHero heading="Community Guidelines" padTop="spacious" />
+
+  <!-- § Guidelines body — verbatim, col-6 column, rules between guidelines.
+       Opens with the welcome intro, then a rule into the first guideline.
+       flushTop: article-style page, so the hero's padding-bottom owns the gap. -->
+  <ContentSection width="col-6" flushTop>
+    <div class="prose downsize-2 legal-body">
+      <p>Welcome to our community! We’re glad you’re here. This is a space to connect, collaborate, and learn together. To keep things supportive and productive, we ask everyone to follow these simple guidelines.</p>
+
+      <hr class="legal-rule" />
+      {guidelines.map((g, i) => (
+        <>
+          {i > 0 && <hr class="legal-rule" />}
+          <h2>{g.title}</h2>
+          <p>{g.body}</p>
+        </>
+      ))}
+
+      <hr class="legal-rule" />
+      <p>Thanks for helping make this community a great place to be.</p>
+      <p>If you ever have a question or concern, reach out to a moderator or email us at <a href="mailto:info@openmined.org">info@openmined.org</a>.</p>
+    </div>
+  </ContentSection>
+</Page>
+
+<style>
+  /* Strong section rule (matches /privacy-policy/). Scoped so it beats the
+     global `.prose hr` (subtle) treatment; spans the full col-6 column. */
+  .legal-body .legal-rule {
+    width: 100%;
+    max-width: none;
+    border: 0;
+    border-top: 1px solid var(--text-headline);
+    margin-block: var(--spacing-3XL);
+    opacity: 0.6;
+  }
+</style>

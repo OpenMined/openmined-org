@@ -1,0 +1,117 @@
+---
+/**
+ * /blog/author/[author] — author archive. URL parity with live
+ * (`/blog/author/<slug>/`, 122 indexed archives); post-foot bylines link here.
+ *
+ * Structurally the tag archive plus two header elements live shows on an author
+ * archive and nowhere else: a person glyph before the name, and the author's
+ * byline line under the count (`people.json → bio`, harvested off live by
+ * `scripts/probe-author-bylines.mjs` — 70 of 122 authors have one). Both ride on
+ * BlogToolbar's optional `icon`/`byline` props, so every other archive's header
+ * is untouched.
+ *
+ * NOTE: live renders the category nav on EVERY archive type (verified 2026-07-27
+ * on tag/category/locations/author) and a type glyph before every archive
+ * heading. Our tag + locations archives currently render neither — a pre-existing
+ * parity gap tracked in `remaining-pages-triage.md`, deliberately not fixed here
+ * (those pages are signed off; changing them needs its own review).
+ */
+import BlogListing from '@layouts/BlogListing.astro';
+import PostCard from '@elements/PostCard.astro';
+import BlogCategoryNav from '@elements/BlogCategoryNav.astro';
+import BlogToolbar from '@components/sections/blog/BlogToolbar.astro';
+import BlogPagination from '@elements/BlogPagination.astro';
+import { getCollection, getEntry } from 'astro:content';
+import { postSlug, pageCount, pageSlice, collectAuthors } from '@utils/posts';
+
+export async function getStaticPaths() {
+  const includeDrafts = import.meta.env.DEV;
+  const posts = await getCollection('blog', ({ data }) => includeDrafts || !data.draft);
+  return collectAuthors(posts).map(({ id }) => ({ params: { author: id } }));
+}
+
+const { author } = Astro.params;
+const includeDrafts = import.meta.env.DEV;
+
+const person = await getEntry('people', author!);
+const name = person?.data.name ?? author;
+const byline = person?.data.bio;
+
+// Category nav — the same 7-item nav as /blog; no category is active here.
+const NAV_ORDER = ['news', 'product', 'research', 'policy', 'stories', 'community', 'foundation'];
+const allCats = await getCollection('categories');
+const navCats = NAV_ORDER
+  .map((id) => allCats.find((c) => c.id === id))
+  .filter((c) => c !== undefined)
+  .map((c) => ({ id: c.id, label: c.data.label }));
+
+const posts = (await getCollection('blog', ({ data }) =>
+  (includeDrafts || !data.draft) && data.authors.some((a) => a.id === author)))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+// Page 1 renders 12 cards; the rest stream from /blog/author/<author>/page/N/.
+const total = posts.length;
+const totalPages = pageCount(total);
+const cards = await Promise.all(
+  pageSlice(posts, 1).map(async (p) => {
+    const cat = await getEntry(p.data.categories[0]);
+    return {
+      href: `/blog/${postSlug(p)}/`,
+      title: p.data.title,
+      date: p.data.date,
+      category: { slug: cat.id, label: cat.data.label },
+      cover: p.data.cover,
+      coverAlt: p.data.coverAlt,
+      cardText: p.data.cardText,
+      draft: p.data.draft,
+    };
+  })
+);
+---
+
+<BlogListing title={`${name} — Blog — OpenMined`} description={`Posts by ${name} on the OpenMined blog.`}>
+  <section class="author-archive container content-top-rule">
+    <BlogCategoryNav categories={navCats} />
+
+    <BlogToolbar heading={name} count={total} icon="circle-user" byline={byline} scope={{ author }} />
+
+    <div class="blog-grid">
+      {cards.map((c) => (
+        <PostCard
+          href={c.href}
+          title={c.title}
+          date={c.date}
+          category={c.category}
+          cover={c.cover}
+          coverAlt={c.coverAlt}
+          cardText={c.cardText}
+          draft={c.draft}
+        />
+      ))}
+    </div>
+
+    <BlogPagination base={`/blog/author/${author}`} currentPage={1} totalPages={totalPages} />
+  </section>
+</BlogListing>
+
+<style>
+  .author-archive {
+    /* stroke from .content-top-rule; own top padding (decoupled from the rule) */
+    padding-top: var(--spacing-3XL);
+    padding-bottom: var(--spacing-full);
+  }
+  /* Nav → toolbar gap matches the category archive's nav → header gap. */
+  .author-archive :global(.category-nav) { margin-bottom: var(--spacing-3XL); }
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: var(--spacing-XL);
+    row-gap: var(--spacing-2XL);
+  }
+  @media (max-width: 1099px) {
+    .blog-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 767px) {
+    .blog-grid { grid-template-columns: 1fr; }
+  }
+</style>

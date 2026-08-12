@@ -1,0 +1,38 @@
+---
+/**
+ * /subscribe/from-andrew/ — personal email opt-in from Andrew Trask (P1 variant:
+ * headshot in place of the emoji icon, no fine print on live).
+ * Copy verbatim from the live page.
+ */
+import Page from '@layouts/Page.astro';
+import OptInLanding from '@components/sections/forms/OptInLanding.astro';
+---
+
+<Page
+  title="Subscribe to emails from Andrew Trask"
+  description="Get an email from OpenMined's Executive Director Andrew Trask whenever he finishes a new blog post."
+>
+  <OptInLanding heading="i'll email you." formId="75d09e7c-7742-4d3d-a2e5-f2731548e4f2">
+    <img
+      slot="icon"
+      class="andrew"
+      src="/images/andrew-trask-headshot.jpg"
+      alt="Andrew Trask"
+      width="96"
+      height="96"
+    />
+    <p>i’ll email you when i finish a blogpost at <a href="https://iamtrask.github.io/">https://iamtrask.github.io/</a></p>
+    <p>i used to use twitter for this but the algorithm skews towards more standard AI hype stuff these days — so just sticking with email for now</p>
+  </OptInLanding>
+</Page>
+
+<style>
+  /* Round avatar in the icon slot (authored here, so this scope reaches it). */
+  .andrew {
+    width: 96px;
+    height: 96px;
+    border-radius: var(--border-radius-full);
+    object-fit: cover;
+    margin-inline: auto;
+  }
+</style>

@@ -1,0 +1,171 @@
+---
+/**
+ * /blog — the listing landing page, reproducing the live layout
+ * (openmined.org/blog, verified 2026-07-01):
+ *
+ *   [category nav — lowercase text links: all + 7 nav categories]
+ *   [featured area — grid: BlogFeatured (1fr) | PopularTopics (391px)]
+ *   [BlogToolbar — "Recent" + Filter/Sort/Search]
+ *   [card grid — 3 × ~423px overlaid-text squares, col-gap 20 / row-gap 24]
+ *
+ * The `featured: true` post drives BlogFeatured and is excluded from the grid.
+ * The category nav and the toolbar both pin as they reach the top of the scroll
+ * area (`global.css → .blog-sticky`), which is why the page shell is
+ * `BlogListing` — it un-sticks the site header so the two don't collide.
+ * Category items are real nav links to the archive pages, not a client-side grid
+ * filter; that's the toolbar's Topic control.
+ *
+ * Drafts show in dev (flagged) so seeded posts preview; production excludes them.
+ */
+import BlogListing from '@layouts/BlogListing.astro';
+import PostCard from '@elements/PostCard.astro';
+import BlogCategoryNav from '@elements/BlogCategoryNav.astro';
+import PopularTopics from '@elements/PopularTopics.astro';
+import BlogFeatured from '@components/sections/blog/BlogFeatured.astro';
+import BlogToolbar from '@components/sections/blog/BlogToolbar.astro';
+import BlogPagination from '@elements/BlogPagination.astro';
+import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
+import { postSlug, resolveFeatured, pageCount, pageSlice } from '@utils/posts';
+import blogConfig from '@data/blog.json';
+
+const includeDrafts = import.meta.env.DEV;
+
+const allPosts = (await getCollection('blog', ({ data }) => includeDrafts || !data.draft))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+// Featured is a property of THIS listing, set in blog.json (blog config), not on
+// the post — resolveFeatured resolves its slug against the newest-first pool and
+// falls back to the newest post when unset/unresolved.
+const featuredEntry = resolveFeatured(allPosts, blogConfig.featured, 'the main blog');
+const posts = featuredEntry ? allPosts.filter((p) => p.id !== featuredEntry.id) : allPosts;
+
+const resolveCard = async (p: CollectionEntry<'blog'>) => {
+  const cat = (await getEntry(p.data.categories[0]))!;
+  return {
+    href: `/blog/${postSlug(p)}/`,
+    title: p.data.title,
+    date: p.data.date,
+    category: { slug: cat.id, label: cat.data.label },
+    cover: p.data.cover,
+    coverAlt: p.data.coverAlt,
+    cardText: p.data.cardText,
+    draft: p.data.draft,
+  };
+};
+
+const featured = featuredEntry ? await resolveCard(featuredEntry) : null;
+
+// Only page 1's cards render here; the rest stream in from /blog/page/N/ via
+// BlogPagination (scroll-load), or are reachable as real pages with JS off.
+const totalPages = pageCount(posts.length);
+const cards = await Promise.all(pageSlice(posts, 1).map(resolveCard));
+
+// Category nav — all 7 nav categories, always shown (they link to archives).
+const NAV_ORDER = ['news', 'product', 'research', 'policy', 'stories', 'community', 'foundation'];
+const cats = await getCollection('categories');
+const navCats = NAV_ORDER
+  .map((id) => cats.find((c) => c.id === id))
+  .filter((c) => c !== undefined)
+  .map((c) => ({ id: c.id, label: c.data.label }));
+
+// Popular Topics — curated editorial order lives in blog.json (blog config);
+// labels resolved from the `tags` collection so they stay canonical
+// (fallback-humanized if a tag is not yet seeded).
+const tags = await getCollection('tags');
+const tagLabel = (id: string) =>
+  tags.find((t) => t.id === id)?.data.label ??
+  id.replace(/-/g, ' ').replace(/\b\w/g, (m) => m.toUpperCase());
+const popularTopics = blogConfig.popularTopics.map((id) => ({ id, label: tagLabel(id) }));
+---
+
+<BlogListing title="Blog — OpenMined" description="Research, product, policy, and community writing from OpenMined.">
+  <section class="blog-index container content-top-rule">
+    <h1 class="visually-hidden">Blog</h1>
+
+    <BlogCategoryNav categories={navCats} active="all" />
+
+    {featured && (
+      <div class="blog-index__featured">
+        <BlogFeatured
+          href={featured.href}
+          title={featured.title}
+          date={featured.date}
+          category={featured.category}
+          cover={featured.cover}
+          coverAlt={featured.coverAlt}
+          cardText={featured.cardText}
+        />
+        <PopularTopics topics={popularTopics} />
+      </div>
+    )}
+
+    {/* No article count here. Live emits one in the markup but never reveals it
+        (its wrapper stays `bricks-lazy-hidden`, measuring 0×0) — verified on
+        prod 2026-07-28. The taxonomy archives, which DO show a visible count,
+        pass one. */}
+    <BlogToolbar heading="Recent" scope={{ exclude: featuredEntry && postSlug(featuredEntry) }} />
+
+    <div class="blog-grid">
+      {cards.map((c) => (
+        <PostCard
+          href={c.href}
+          title={c.title}
+          date={c.date}
+          category={c.category}
+          cover={c.cover}
+          coverAlt={c.coverAlt}
+          cardText={c.cardText}
+          draft={c.draft}
+        />
+      ))}
+    </div>
+
+    <BlogPagination base="/blog" currentPage={1} totalPages={totalPages} />
+  </section>
+</BlogListing>
+
+<style>
+  .blog-index {
+    /* stroke from .content-top-rule; own top padding (decoupled from the rule) */
+    padding-top: var(--spacing-5XL);
+    padding-bottom: var(--spacing-full);
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* Featured area: featured panel | Popular Topics (live: 1fr | 391px, 54px gap → 5XL). */
+  .blog-index__featured {
+    display: grid;
+    grid-template-columns: 1fr 391px;
+    gap: var(--spacing-5XL);
+    align-items: start;
+    margin-block: var(--spacing-5XL);
+  }
+
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: var(--spacing-XL);
+    row-gap: var(--spacing-2XL);
+  }
+
+  @media (max-width: 991px) {
+    .blog-index__featured { grid-template-columns: 1fr; gap: var(--spacing-3XL); }
+  }
+  @media (max-width: 1099px) {
+    .blog-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 767px) {
+    .blog-grid { grid-template-columns: 1fr; }
+  }
+</style>

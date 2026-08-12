@@ -1,0 +1,152 @@
+---
+/**
+ * /careers/ — hiring page. Content verbatim from the live page.
+ *
+ * Section band archetype: hero → Why Join (2-col: heading+diamond | 4 items) →
+ * Our Values (intro + 7-item 2-col grid) → Open Positions (dim band, dynamic
+ * Workable listing via @elements/JobBoard) → "Get notified" form CTA → dark
+ * "More ways to get involved" band → footer.
+ *
+ * Measure ladder (live): hero centered col-8; Why Join + Our Values are a
+ * centered col-8 block, left-aligned internally; both value/why grids are 2-up.
+ */
+import Page from '@layouts/Page.astro';
+import SimpleHero from '@components/sections/hero/SimpleHero.astro';
+import ContentSection from '@components/sections/ContentSection.astro';
+import CtaSection from '@components/sections/cta/CtaSection.astro';
+import ButtonCta from '@components/sections/cta/ButtonCta.astro';
+import JobBoard from '@elements/JobBoard.astro';
+import FormEmbed from '@elements/FormEmbed.astro';
+import Button from '@ui/Button.astro';
+
+const whyJoin = [
+  { title: 'Make a real-world impact', body: 'Contribute to cutting-edge technology that addresses one of the biggest challenges in AI – accessing data responsibly.' },
+  { title: 'Be part of a passionate community', body: 'Collaborate with talented engineers, researchers, and advocates from around the world who are shaping the future of privacy-preserving AI.' },
+  { title: 'Grow and learn', body: 'Engage in challenging projects, learn from experienced mentors, and contribute to open-source software used by leading organizations worldwide.' },
+  { title: 'Thrive in a supportive environment', body: 'We offer a flexible and collaborative work environment that values continuous learning and personal growth' },
+];
+
+const values = [
+  { title: 'Mission-Driven', body: 'We are steadfastly committed to our mission, aligning our strategies and actions to achieve our overarching goals. This principle ensures that our purpose is clear and present in every task we undertake.' },
+  { title: 'Never Give Up', body: 'Persistence is at the heart of our approach. We embrace challenges and are relentless in our pursuit of solutions, demonstrating resilience and determination to overcome obstacles.' },
+  { title: 'Teamwork', body: 'We believe in the power of collaboration. Effective teamwork underpins our success, fostering a supportive environment where diverse perspectives are valued and collective goals are pursued.' },
+  { title: 'Ingenuity', body: 'We value creative problem-solving and innovation. Our commitment to ingenuity means we are always looking for smarter, more effective ways to meet challenges and improve our culture, products, and services.' },
+  { title: 'Candor', body: 'Transparency and honesty are fundamental to our interactions. We communicate openly and constructively, valuing truth over comfort to ensure trust and integrity in all our dealings.' },
+  { title: 'Pragmatism', body: 'Practicality guides our decision-making process. We focus on solutions that are realistic and results-oriented, ensuring our actions are efficient and grounded in real-world applicability.' },
+  { title: 'Humility', body: 'We maintain a humble approach, recognizing that there is always more to learn. We listen, we reflect, and we respect others, knowing that everyone has something valuable to contribute.' },
+];
+---
+
+<Page
+  title="Careers at OpenMined"
+  description="Do you dream of a future where AI benefits humanity while respecting individual privacy? Join OpenMined — a non-profit building the public network for non-public information."
+>
+  <SimpleHero heading="Careers at OpenMined">
+    <p>Do you dream of a future where artificial intelligence benefits humanity while respecting individual privacy? At OpenMined, we’re building the tools to make that dream a reality.</p>
+    <p>As a non-profit foundation, we’re dedicated to building the public network for non-public information, by creating and evangelizing open-source technology that empowers data owners to share their data without compromising privacy, security, or intellectual property.</p>
+    <Button href="#open-positions" slot="actions">View open positions</Button>
+  </SimpleHero>
+
+  <!-- Why Join? — heading + diamond in the left column, 4 items on the right -->
+  <section class="why">
+    <div class="container why__container">
+      <div class="why__grid">
+        <div class="why__aside">
+          <h3>Why Join?</h3>
+          <img class="why__mark" src="/logos/OpenMined-Icon.svg" alt="" width="280" height="280" data-fade />
+        </div>
+        <div class="why__items">
+          {whyJoin.map((i) => (
+            <div class="why__item">
+              <h5>{i.title}</h5>
+              <p>{i.body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Our Values -->
+  <ContentSection
+    heading="Our Values"
+    as="h3"
+    align="left"
+    width="col-8"
+    headGap="tight"
+    intro="Our organization operates with a set of core values that define our identity and guide our conduct. These values are central to how we interact with each other, our partners, and our broader community."
+  >
+    <div class="values">
+      {values.map((v) => (
+        <div class="values__item">
+          <h5>{v.title}</h5>
+          <p>{v.body}</p>
+        </div>
+      ))}
+    </div>
+  </ContentSection>
+
+  <!-- Open Positions — dynamic Workable listing on a dim band -->
+  <ContentSection surface="dim" heading="Open Positions" as="h3" align="left" width="col-8">
+    <JobBoard />
+  </ContentSection>
+
+  <!-- Get notified when there's a new position -->
+  <CtaSection
+    variant="gradient"
+    heading="Get notified when there's a new position"
+    body="Subscribe to get the latest on fellowships, internships, contributor roles, and full-time positions at OpenMined."
+  >
+    <FormEmbed slot="form" formId="7d2f1f37-20b1-4ead-9996-f1e6b401b533" />
+    <Fragment slot="fineprint">
+      <p>Subscribing will opt you in to Hiring &amp; Recruitment Emails. Want to change that later? Just use the link at the bottom of any email.</p>
+      <p>Subscribing also confirms you agree with our <a href="/privacy-policy/">privacy policy</a>.</p>
+    </Fragment>
+  </CtaSection>
+
+  <!-- More ways to get involved -->
+  <ButtonCta surface="dark" heading="More ways to get involved">
+    <Button href="/get-involved/">Learn more</Button>
+  </ButtonCta>
+</Page>
+
+<style>
+  /* ── Why Join? ─────────────────────────────────────────────────── */
+  .why { margin-block: var(--spacing-full); }
+  .why__container { max-width: var(--col-8); }
+  .why__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--spacing-4XL);
+    align-items: center;
+  }
+  .why__mark {
+    display: block;
+    width: 100%;
+    max-width: 280px;
+    height: auto;
+    margin-top: var(--spacing-2XL);
+  }
+  .why__items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3XL);
+  }
+  .why__item h5 { margin-bottom: var(--spacing-S); }
+  .why__item p { margin: 0; }
+
+  /* ── Our Values grid ───────────────────────────────────────────── */
+  .values {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacing-4XL) var(--spacing-3XL);
+  }
+  .values__item h5 { margin-bottom: var(--spacing-S); }
+  .values__item p { margin: 0; }
+
+  @media (max-width: 767px) {
+    .why__grid { grid-template-columns: 1fr; gap: var(--spacing-3XL); }
+    .why__mark { max-width: 200px; margin-inline: auto; }
+    .values { grid-template-columns: 1fr; gap: var(--spacing-3XL); }
+  }
+</style>

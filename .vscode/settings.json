@@ -1,0 +1,12 @@
+{
+  // Type-check with the TypeScript from package.json → devDependencies, not the
+  // copy bundled inside VS Code, so the editor and `npm run check` can never
+  // disagree about what is an error.
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+
+  // tsconfig.json sets `verbatimModuleSyntax` (via astro/tsconfigs/strict), which
+  // requires type-only imports to be written `import type { … }`. Without this,
+  // auto-import inserts a plain `import` and the file errors the moment it lands.
+  "typescript.preferences.preferTypeOnlyAutoImports": true
+}

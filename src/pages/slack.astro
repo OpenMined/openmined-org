@@ -1,0 +1,29 @@
+---
+/**
+ * /slack/ — Slack-invite request form (P1 variant: Slack icon + a "Launch it"
+ * link to the live workspace). Copy verbatim from the live page.
+ */
+import Page from '@layouts/Page.astro';
+import OptInLanding from '@components/sections/forms/OptInLanding.astro';
+---
+
+<Page
+  title="Join Us on Slack"
+  description="Request an invite to the OpenMined Slack community — connect with data scientists, data owners, and industry pros working on data access problems."
+>
+  <OptInLanding heading="Join Us on Slack" formId="9872332a-370e-4006-b794-c6a5043ffe64">
+    <img slot="icon" class="slack-mark" src="/images/slack-icon.svg" alt="" width="64" height="64" />
+    <p>Complete this form to be sent an invite link.</p>
+    <Fragment slot="fine">
+      <p>Already a part of the workspace? <a href="https://openmined.slack.com" target="_blank" rel="noopener noreferrer">Launch it <span aria-hidden="true">-></span></a></p>
+      <p>By requesting this invite you agree to our <a href="/privacy-policy/">privacy policy</a>.</p>
+    </Fragment>
+  </OptInLanding>
+</Page>
+
+<style>
+  .slack-mark {
+    width: 64px;
+    height: auto;
+  }
+</style>

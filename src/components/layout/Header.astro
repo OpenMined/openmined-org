@@ -1,0 +1,784 @@
+---
+/**
+ * Header — primary site chrome.
+ *
+ * Rebuilt from the live production header (#brx-header).
+ *
+ * Live → token mapping (measured off production):
+ *   header height        128px desktop / 88px mobile   (confirmed by global.css
+ *                        scroll-margin-top + breakpoint 991px)
+ *   section padding      40px 20px / 20px              → --spacing-4XL / --spacing-XL
+ *   background           #fcfcfd (grayscale-50)        → --surface-background-default
+ *   container            1300px, centered              → .container (--container-full)
+ *   nav gap              34px                          → mapped to --spacing-3XL (32px)
+ *   social-icon gap      18px                          → mapped to --spacing-L (16px)
+ *   CTA button           dark bg, white, r6, 11/19 pad → <Button> primitive (matches)
+ *   sticky               position: sticky; top: 0      → --z-sticky
+ *
+ * Clean-ups vs. live (intentional, per migration approach):
+ *   - The live tiny absolute corner theme-switch is replaced by our <ThemeToggle>
+ *     primitive, placed inline in the actions cluster.
+ *   - Solutions dropdown reveals on hover/focus (desktop) and renders expanded
+ *     inside the mobile drawer — no per-item JS.
+ */
+import Logo from './Logo.astro';
+import Button from '@ui/Button.astro';
+import ThemeToggle from '@ui/ThemeToggle.astro';
+import MiniToggle from '@ui/MiniToggle.astro';
+import Icon from '@elements/Icon.astro';
+
+interface Props {
+  /** Set false to stop the header from reappearing on scroll-up — it still
+   * hides on scroll-down and still shows within the top buffer, it just
+   * doesn't pop back mid-scroll. Used on TOC posts (`BlogPost.astro`): the
+   * header's default reveal-on-scroll-up would otherwise cover the sticky
+   * TOC bar, which also lives at `top: 0` (see `PostToc.astro`). */
+  revealOnScrollUp?: boolean;
+  /** Set false to stop the header pinning at all: it sits at the top of the page
+   * and scrolls away with the content, never returning. Used on the blog listings
+   * (`@layouts/BlogListing.astro`), which pin their own category nav + toolbar at
+   * the top of the scroll area — live un-sticks its header on those pages for the
+   * same reason (it computes `position: relative` there and `sticky` everywhere
+   * else). It keeps its place in the stacking order either way, so its nav submenu
+   * still opens over page chrome — see `.site-header--unpinned`. Distinct from
+   * `revealOnScrollUp`, which keeps the header pinned and only changes when it
+   * comes back. */
+  sticky?: boolean;
+  /** Header chrome variant. Each variant is a distinct chrome treatment over the
+   *  same shell (sticky, scroll-reveal, theme are shared, variant-agnostic). To
+   *  add one: extend this union, add a branch in the markup, and a
+   *  `.site-header--<name>` block below — nothing else needs to change.
+   *  - `default` — full inline nav on desktop, slide-in drawer on mobile.
+   *  - `simple`  — the live `header--secondary` treatment: a stripped bar of
+   *    logo + burger at ALL widths; the burger reveals the full nav *in place*
+   *    on desktop and via the same drawer on mobile (burger ⇄ X). Used on the
+   *    focused /get-involved/ conversion page. Reuses the drawer script as-is.
+   *  - `minimal` — a conversion-funnel landing bar: a single right-aligned exit
+   *    link, NO logo / nav / burger / social / drawer (that apparatus isn't
+   *    rendered). Matches the live campaign-landing chrome
+   *    (/federated-learning/co-design/, /talk-to-the-world/). The exit link is
+   *    configurable via `ctaHref`/`ctaLabel` so any future landing page can
+   *    retarget it. (These campaign pages also pair it with the minimal Footer
+   *    variant + a centered iconmark over the hero — a per-page convention.) */
+  variant?: 'default' | 'simple' | 'minimal';
+  /** `minimal` variant only — the single exit link. Defaults to the live
+   *  campaign treatment: back to the site home, labelled "Visit OpenMined.org ->"
+   *  (the "->" is the Inter `calt` arrow ligature, per the arrow-glyph rule). */
+  ctaHref?: string;
+  ctaLabel?: string;
+}
+
+const {
+  revealOnScrollUp = true,
+  sticky = true,
+  variant = 'default',
+  ctaHref = '/',
+  ctaLabel = 'Visit OpenMined.org ->',
+} = Astro.props;
+// `minimal` renders a distinct, nav-less bar — branch the whole apparatus out
+// rather than CSS-hiding it, so the stripped variant carries no dead markup.
+const isMinimal = variant === 'minimal';
+
+interface NavItem {
+  label: string;
+  href?: string;
+  children?: { label: string; href: string }[];
+  /** Opens the site-wide donation dialog instead of navigating. */
+  donate?: boolean;
+}
+
+// Nav model — verbatim from the live header link set (inspect JSON).
+const navItems: NavItem[] = [
+  { label: 'Home', href: '/' },
+  { label: 'Foundation', href: '/foundation/' },
+  { label: 'Blog', href: '/blog/' },
+  { label: 'Careers', href: '/careers/' },
+  {
+    label: 'Solutions',
+    children: [
+      { label: 'Syft Space | SyftHub', href: '/syfthub/' },
+      { label: 'syft-flwr', href: '/syft-flwr/' },
+      { label: 'SyftBox Beta', href: '/syftbox/' },
+      { label: 'PySyft', href: '/pysyft/' },
+      { label: 'Attribution-Based Control', href: '/attribution-based-control/' },
+    ],
+  },
+  // Opens the site-wide Secure Donation dialog (@components/layout/DonateModal).
+  { label: 'Donate', donate: true },
+];
+
+/* Current-page indicator. Every page prerenders, so `Astro.url.pathname` is that
+   page's own path at build time — no client JS, and the marker is in the HTML
+   for screen readers and for the no-JS case alike.
+
+   EXACT match only, matching live: a blog POST shows no indicator at all (live
+   does not light up "Blog" from `/blog/<slug>/`), and on `/syftbox/` live marks
+   the submenu child, never the "Solutions" parent. Prefix matching would also
+   make "Home" (`/`) match every page on the site.
+
+   Paths are normalized to a leading+trailing slash on both sides so the compare
+   can't be broken by a trailing-slash mismatch between `navItems` and the
+   resolved route. External hrefs never match.
+
+   `aria-current="page"` is the whole mechanism: it carries the semantics AND is
+   the styling hook (`global.css` → `.link-hover-line[aria-current='page']`),
+   so there is no parallel `is-active` class to keep in sync. */
+const normalizePath = (path: string) => {
+  const trimmed = path.replace(/^\/+|\/+$/g, '');
+  return trimmed ? `/${trimmed}/` : '/';
+};
+const here = normalizePath(Astro.url.pathname);
+const isCurrent = (href?: string) =>
+  !!href && !/^[a-z]+:|^\/\//i.test(href) && normalizePath(href) === here;
+
+// Icons are local inlined SVGs (src/assets/icons/) via <Icon> — they paint with
+// the HTML, no CDN round-trip / pop-in. Brand logos are prefixed `logo-`
+// (`logo-x` is the real X mark).
+const socials = [
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/company/openmined', icon: 'logo-linkedin' },
+  { label: 'X', href: 'https://x.com/openminedorg', icon: 'logo-x' },
+  { label: 'GitHub', href: 'https://github.com/OpenMined', icon: 'logo-github' },
+];
+---
+
+<header
+  class:list={[
+    'site-header',
+    {
+      'site-header--simple': variant === 'simple',
+      'site-header--minimal': isMinimal,
+      'site-header--unpinned': !sticky,
+    },
+  ]}
+  data-header
+  data-pagefind-ignore
+  data-reveal-on-scroll-up={revealOnScrollUp}
+  data-sticky={sticky}
+>
+  <div class="site-header__inner container">
+    {!isMinimal && (
+      <a class="site-header__logo" href="/" aria-label="OpenMined — home">
+        <Logo />
+      </a>
+    )}
+
+    {isMinimal ? (
+      <a class="site-header__exit link-hover-line" href={ctaHref}>{ctaLabel}</a>
+    ) : (
+    <Fragment>
+    <!-- Search trigger, MOBILE instance — sits in the bar beside the burger, so
+         search is one tap and always on screen. (Live buries its only trigger in
+         the drawer; this is a deliberate improvement.) The desktop instance is
+         inside the nav below, because it has to land BETWEEN the nav list and the
+         social list and nothing outside `.site-header__nav` can. Two
+         media-query-toggled instances is the pattern <ThemeToggle> already uses
+         here (`__theme-corner` / `__theme-drawer`); both carry
+         `data-search-open`, and one delegated listener in SearchModal.astro
+         drives whichever is visible. -->
+    <button
+      type="button"
+      class="site-header__search site-header__search--bar"
+      data-search-open
+      aria-label="Search this site"
+    >
+      <Icon name="search" size={20} />
+    </button>
+
+    <button
+      type="button"
+      class="site-header__burger js-nav-toggle"
+      aria-label="Open menu"
+      aria-controls="site-nav"
+      aria-expanded="false"
+    >
+      <!-- Native wrappers carry the toggle classes: Astro scopes Header's styles
+           by cid, and that cid lands on these spans (not on the child <Icon>
+           root), so the show/hide rules below actually match. -->
+      <span class="site-header__burger-icon site-header__burger-icon--open"><Icon name="menu" size={28} /></span>
+      <span class="site-header__burger-icon site-header__burger-icon--close"><Icon name="close" size={28} /></span>
+    </button>
+
+    <!-- Live's signature: a small theme switch tucked in the top-right corner
+         (desktop). On mobile it moves into the drawer (below). The wrapper span
+         owns show/hide so it doesn't fight the primitive's own display rule. -->
+    <span class="site-header__theme-corner"><MiniToggle /></span>
+
+    <nav class="site-header__nav" id="site-nav" aria-label="Primary">
+      <ul class="site-nav">
+        {navItems.map((item) => (
+          item.children ? (
+            <li class="site-nav__item site-nav__item--has-children">
+              <button type="button" class="site-nav__link link-hover-line site-nav__disclosure" aria-expanded="false">
+                {item.label}
+                <span class="site-nav__caret"><Icon name="chevron-down" size={14} /></span>
+              </button>
+              <ul class="site-nav__submenu">
+                {item.children.map((child) => (
+                  <li>
+                    <a class="site-nav__sublink link-hover-line" href={child.href} aria-current={isCurrent(child.href) ? 'page' : undefined}>{child.label}</a>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ) : item.donate ? (
+            <li class="site-nav__item">
+              <button type="button" class="site-nav__link link-hover-line" data-donate-open>{item.label}</button>
+            </li>
+          ) : (
+            <li class="site-nav__item">
+              <a class="site-nav__link link-hover-line" href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a>
+            </li>
+          )
+        ))}
+      </ul>
+
+      <!-- Search trigger, DESKTOP instance — between the nav and the social
+           icons, which is Kyle's placement and live's too. Hidden at mobile,
+           where the drawer swallows it and the bar instance takes over. -->
+      <button
+        type="button"
+        class="site-header__search site-header__search--nav"
+        data-search-open
+        aria-label="Search this site"
+      >
+        <Icon name="search" size={20} />
+      </button>
+
+      <ul class="site-header__social" aria-label="OpenMined on social media">
+        {socials.map((s) => (
+          <li>
+            <a class="site-header__social-link" href={s.href} target="_blank" rel="noopener" aria-label={s.label}>
+              <Icon name={s.icon} size={20} />
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <div class="site-header__actions">
+        <Button href="/get-involved/" class="site-header__cta">Get Involved</Button>
+        <span class="site-header__theme-drawer"><ThemeToggle /></span>
+      </div>
+    </nav>
+    </Fragment>
+    )}
+  </div>
+</header>
+
+<style>
+  .site-header {
+    --header-h: 128px;
+    --header-pad-y: var(--spacing-4XL); /* 40px */
+    /* Desktop nav gap — fluid, and read by BOTH nav gaps below (the row is
+       gap-inside-gap: three cluster gaps on `.site-header__nav`, five item gaps
+       on `.site-nav`, so tightening one alone doesn't buy enough room).
+       Interpolates 12px at 992 → the design's 32px at 1200, both ends tokens.
+       The mobile drawer sets its own two gaps and ignores this.
+
+       Why it has to be fluid: the full inline nav is shown from 992px up, but at
+       32px gaps the row's intrinsic width is 851px and it needs a 1102px viewport
+       (logo 189 + 20 + nav 851 + 40 gutters). So every width from the mobile
+       breakpoint to ~1100 ran off the right edge — worst at the 992 boundary,
+       still 30px over on a 1024 laptop. (The row was already being flex-shrunk
+       there, to 825px; it had just hit min-content and stopped.)
+
+       Compressing beats moving the breakpoint: live keeps its full nav across
+       this whole band and shrinks to fit — 686px at 992, growing to 901 by 1200
+       (verified on prod 2026-08-06) — and dropping a 1024-wide laptop to a
+       burger to dodge 30px would be the bigger regression.
+
+       And fluid beats a media-query step because a step has to put its boundary
+       *somewhere*: the first cut of this fix returned to 32px gaps at 1100px and
+       landed exactly on the knife edge, fitting with 0px to spare. A clamp has no
+       boundary to get wrong — one more nav item reads as slightly tighter gaps
+       rather than a sideways scrollbar at one specific width. */
+    --nav-gap: clamp(
+      var(--spacing-M),
+      calc(var(--spacing-M) + (100vw - 992px) * 20 / 208),
+      var(--spacing-3XL)
+    );
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+    /* Solid fill on every variant — the bar is sticky, so content must never be
+       visible behind it. `--header-bg` is the override seam for a page that
+       repaints the body surface: set it to that page's surface token so the bar
+       matches instead of cutting a seam across it (see get-involved.astro). */
+    background-color: var(--header-bg, var(--surface-background-default));
+    transition: box-shadow var(--transition-base), background-color var(--transition-theme),
+                transform 0.3s ease;
+  }
+
+  /* Subtle separation once the page scrolls under the sticky header. */
+  .site-header[data-scrolled] {
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Slide the header up out of frame when scrolling down. */
+  .site-header[data-hidden] {
+    transform: translateY(-100%);
+  }
+
+  /* `sticky={false}` — the header scrolls away with the content instead of pinning,
+     so a page that pins its own chrome at the top of the scroll area owns that space
+     uncontested (see the prop doc). The scroll script stands down with it, so no
+     hide/reveal state is ever set here.
+
+     `relative`, not `static`, and deliberately: `z-index` is inert on a static box,
+     which drops the header out of the stacking order and leaves its nav submenu
+     (`.site-nav__submenu`, z-index auto) painting UNDER any page chrome that carries
+     one. Relative with no offsets lays out identically to static while keeping
+     `--z-sticky` in force — which is also what live computes on these pages. */
+  .site-header--unpinned {
+    position: relative;
+    box-shadow: none;
+  }
+
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-XL);
+    min-height: var(--header-h);
+    padding-block: var(--header-pad-y);
+  }
+
+  .site-header__logo {
+    --logo-height: 48px; /* matches live measured height */
+    display: inline-flex;
+    flex: 0 0 auto;
+  }
+
+  /* Theme switch tucked into the top-right corner, à la live. */
+  .site-header__theme-corner {
+    position: absolute;
+    top: var(--spacing-S);
+    right: var(--spacing-XL);
+    line-height: 0;
+  }
+  /* The in-drawer toggle only exists on mobile. */
+  .site-header__theme-drawer { display: none; }
+
+  /* ── Nav (desktop) ───────────────────────────────────────────────── */
+  .site-header__nav {
+    display: flex;
+    align-items: center;
+    gap: var(--nav-gap);
+  }
+
+  .site-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--nav-gap); /* live 34px → 32px token at full width */
+    list-style: none;
+  }
+
+  .site-nav__item { position: relative; }
+
+  /* The underline itself is `.link-hover-line` (global.css) — composed in the
+     markup, so the label-to-line gap has one home. Only the button reset and
+     the caret row live here. */
+  .site-nav__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2XS);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    background-color: transparent;
+    border: 0;
+    cursor: pointer;
+  }
+
+  /* Self-hover is the utility's job. These are header-specific triggers: the
+     disclosure label stays underlined while the pointer is anywhere on the item
+     (submenu included), and while anything inside it holds focus.
+
+     The focus reveal is deliberately scoped to disclosures and to real links
+     (`a`) — NOT to every `.site-nav__link`. The Donate item is a <button> that
+     opens a dialog, and a native <dialog> returns focus to its trigger on close;
+     an unscoped `:focus-within` therefore left Donate underlined after the modal
+     closed, with no pointer near it, reading as a current-page marker on an item
+     that is not a page. Donate still underlines on hover (the utility's own
+     `:hover`), and keyboard users still get the focus ring. */
+  .site-nav__item--has-children:hover > .site-nav__link,
+  .site-nav__item--has-children:focus-within > .site-nav__link,
+  .site-nav__item:focus-within > a.site-nav__link {
+    background-size: 100% 1px;
+  }
+
+  /* Wrapper span around the caret <Icon> — size is the Icon's prop; this owns
+     layout + the hover-rotate. */
+  .site-nav__caret {
+    display: inline-flex;
+    transition: transform var(--transition-base);
+  }
+  .site-nav__item--has-children:hover .site-nav__caret,
+  .site-nav__item:focus-within .site-nav__caret {
+    transform: rotate(180deg);
+  }
+
+  /* ── Dropdown submenu (desktop: hover/focus reveal) ──────────────── */
+  .site-nav__submenu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 220px;
+    margin-top: var(--spacing-S);
+    padding: var(--spacing-S) var(--spacing-M);
+    list-style: none;
+    background-color: var(--surface-background-bright);
+    border-radius: var(--border-radius-S);
+    box-shadow: var(--shadow-md);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(4px);
+    transition: opacity var(--transition-base), transform var(--transition-base), visibility var(--transition-base);
+  }
+  .site-nav__item--has-children:hover .site-nav__submenu,
+  .site-nav__item--has-children:focus-within .site-nav__submenu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  /* Rows are padded for their tap target; `--link-hover-line-pad` keeps the
+     underline at the shared gap instead of the padding edge. */
+  .site-nav__sublink {
+    --link-hover-line-pad: var(--spacing-S);
+    display: inline-block;
+    padding-top: var(--link-hover-line-pad);
+    font-size: 15px;
+    white-space: nowrap;
+  }
+
+  /* ── Search trigger ──────────────────────────────────────────────────
+     Two instances, one visible per breakpoint (see the markup note). Live's
+     glyph measures 17.3px; snapped to the 20px the adjacent social icons already
+     use, so the cluster reads as one icon set rather than three sizes. Colour and
+     hover deliberately match .site-header__social-link for the same reason.
+
+     Note the `simple` variant keeps only its nav instance, which means no visible
+     trigger until the burger is opened — consistent with that variant stripping
+     the bar to logo + burger and putting nav, social and CTA behind the toggle. */
+  .site-header__search {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: none;
+    border: 0;
+    color: var(--text-body);
+    cursor: pointer;
+    transition: color var(--transition-base);
+  }
+  .site-header__search:hover { color: var(--color-interactive-hover); }
+  /* Bar instance is mobile-only (the media query below turns it on). */
+  .site-header__search--bar { display: none; }
+
+  /* ── Social icons ────────────────────────────────────────────────── */
+  .site-header__social {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-L); /* live 18px → 16px token */
+    list-style: none;
+  }
+  /* Each <li> is a flex container, not the default block. Otherwise its child
+     link is inline-level and sits on the text baseline, so the line box has to
+     fit the 24px strut plus the descender below it — the row measured 26px tall
+     around a 20px icon, leaving the glyph visibly high in its box. */
+  .site-header__social > li {
+    display: flex;
+  }
+  .site-header__social-link {
+    display: flex;
+    color: var(--text-body);
+    transition: color var(--transition-base);
+  }
+  .site-header__social-link:hover { color: var(--color-interactive-hover); }
+
+  /* ── Actions cluster ─────────────────────────────────────────────── */
+  .site-header__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-L);
+  }
+  /* CTA in the bar is compact — override the primitive's 48px min-height. */
+  .site-header__cta {
+    min-height: 0;
+    padding: var(--spacing-S) var(--spacing-L);
+    font-size: 15px;
+  }
+
+  /* ── Burger (hidden on desktop) ──────────────────────────────────── */
+  .site-header__burger {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin: -8px -8px -8px 0; /* keep a 44px hit target without growing the bar */
+    background: none;
+    border: 0;
+    color: var(--text-body);
+    font-size: 28px;
+    cursor: pointer;
+  }
+  /* Wrapper spans around the burger <Icon>s — carry Header's scope + the toggle. */
+  .site-header__burger-icon { display: inline-flex; }
+  .site-header__burger-icon--close { display: none; }
+
+  /* ── Simple variant (live `header--secondary`) ───────────────────────
+     A stripped bar — logo + burger only — at ALL widths. The nav is hidden
+     until the burger is toggled, then it reveals *in place* on desktop (and
+     as the usual drawer on mobile, handled by the media query below). The
+     drawer <script> keys only off [data-header]/.js-nav-toggle/data-nav-open,
+     so it drives this variant unchanged.
+
+     The bar blends into the page surface à la the live static secondary header,
+     but it does that by *matching* that surface, not by going transparent —
+     it keeps the shared solid fill (see `--header-bg` above), so nothing shows
+     through it while scrolling. That leaves no style of its own to declare
+     beyond the responsive layout in the media query below. */
+
+  /* ── Minimal variant (campaign-landing chrome) ───────────────────────
+     No logo — a single exit link, right-aligned (flex-end, since it's the
+     inner's only child). No nav/burger/social apparatus is rendered, so
+     nothing to hide. Keeps the shared surface fill + sticky scroll behavior
+     so content never bleeds under it. Identical at all widths — no
+     breakpoint branch needed. */
+  .site-header--minimal .site-header__inner { justify-content: flex-end; }
+  /* Underline reveal comes from `.link-hover-line` in the markup, same as the
+     nav links. */
+  .site-header__exit {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  @media (min-width: 992px) {
+    /* Logo stays far left; margin-right:auto absorbs the free space so the
+       right cluster — revealed menu, colormode toggle, burger — is aligned to
+       the right in the available space. */
+    .site-header--simple .site-header__logo { order: 1; margin-right: auto; }
+    /* Nav collapsed by default; reappears inline (in place, right-aligned) when open. */
+    .site-header--simple .site-header__nav { display: none; order: 2; }
+    .site-header--simple[data-nav-open] .site-header__nav { display: flex; }
+    /* Colormode toggle stays in its normal absolute top-right corner spot (base
+       .site-header__theme-corner) — out of the flex flow, so it doesn't sit in
+       the menu cluster. No override needed here beyond the burger placement. */
+    .site-header--simple .site-header__burger {
+      display: inline-flex;
+      order: 4; /* burger / X sits at the far right of the flex row */
+    }
+    /* Open state swaps burger → X (mirrors the mobile rule). */
+    .site-header--simple[data-nav-open] .site-header__burger-icon--open { display: none; }
+    .site-header--simple[data-nav-open] .site-header__burger-icon--close { display: inline-flex; }
+  }
+
+  /* ════════════════════════════════════════════════════════════════════
+     MOBILE  (≤ 991px — matches the global scroll-margin breakpoint)
+     ════════════════════════════════════════════════════════════════════ */
+  @media (max-width: 991px) {
+    .site-header {
+      --header-h: 88px;
+      --header-pad-y: var(--spacing-XL); /* 20px */
+    }
+
+    /* Tighter than the desktop --spacing-XL: the only gap this row still spends is
+       between the search glyph and the burger (the logo is pushed off by the search
+       button's `margin-left: auto`), and those two read as one icon pair. */
+    .site-header__inner { gap: var(--spacing-S); }
+
+    .site-header__burger { display: inline-flex; }
+
+    /* The nav instance is inside the drawer here, so it swaps out for the bar
+       instance — search stays one tap and stays on screen. */
+    .site-header__search--nav { display: none; }
+    .site-header__search--bar {
+      display: inline-flex;
+      /* Pushes itself AND the burger that follows it to the right edge, so the
+         two glyphs sit together as a pair instead of being spread apart by the
+         inner row's space-between. */
+      margin-left: auto;
+      /* 44px hit target without growing the 88px bar — the burger's own trick. */
+      width: 44px;
+      height: 44px;
+      margin-block: -8px;
+    }
+
+    /* Corner switch gives way to the in-drawer toggle on mobile, so it never
+       collides with the burger. */
+    .site-header__theme-corner { display: none; }
+    .site-header__theme-drawer { display: inline-flex; }
+
+    /* The bar cluster has to out-rank the drawer, which is a full-viewport
+       same-context background painting right over it. Without this the burger's X
+       is rendered (28px, display:flex) but buried — and, worse, the drawer
+       swallows the tap, so an open menu cannot be closed at all except by
+       following a link. The drawer's own top padding (below) already reserves
+       room for this bar, which is the giveaway that it was meant to stay visible.
+       `--z-content` is exactly this case: "lifted above a same-context
+       background". `position: relative` is required — z-index is inert on a static
+       box (the same trap documented on `.site-header--unpinned`). */
+    .site-header__logo,
+    .site-header__search--bar,
+    .site-header__burger {
+      position: relative;
+      z-index: var(--z-content);
+    }
+
+    /* Drawer: full-screen overlay, revealed from the right edge.
+       No z-index: it doesn't need one. The whole header is a stacking context at
+       `--z-sticky`, so anything inside it already paints above every page layer;
+       a positioned child also paints above the header's own background by DOM
+       order. It previously claimed `--z-dropdown` (1000), which bought nothing
+       against the page and only beat the bar controls beside it.
+
+       The closed state is a CLIP, not an off-screen `translateX(100%)`. That
+       matters for more than taste: the translated box made every page scrollable
+       to exactly double its width, and only *after* a scroll — which is what made
+       it invisible for so long. A `fixed` box contributes nothing to the
+       document's scroll area, but the header's scroll-hide `transform`
+       (`[data-hidden]` below) makes the header the containing block for its own
+       fixed child; the drawer then stops being viewport-fixed (measurably: its
+       900px height becomes the header's 156px) and its 100%-to-the-right offset
+       starts counting as page width. Clipping keeps the box on its containing
+       block in every state, so it cannot come back that way — with a transformed
+       ancestor or without one.
+
+       `visibility` still does the non-visual half of "closed": it keeps the
+       drawer's links out of the tab order and out of the a11y tree, which a clip
+       alone would not. (A focus trap for the OPEN state is still missing — see
+       BACKLOG.) */
+    .site-header__nav {
+      position: fixed;
+      inset: 0;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      gap: var(--spacing-2XL);
+      padding: calc(var(--header-h) + var(--spacing-XL)) var(--spacing-XL) var(--spacing-5XL);
+      background-color: var(--surface-background-default);
+      overflow-y: auto;
+      /* Zero-width sliver at the right edge, opening leftward — same direction of
+         travel the translate had, but the panel is uncovered in place rather than
+         moved into frame. */
+      clip-path: inset(0 0 0 100%);
+      visibility: hidden;
+      transition: clip-path var(--transition-base), visibility var(--transition-base);
+    }
+
+    .site-header[data-nav-open] .site-header__nav {
+      clip-path: inset(0);
+      visibility: visible;
+    }
+    .site-header[data-nav-open] .site-header__burger-icon--open { display: none; }
+    .site-header[data-nav-open] .site-header__burger-icon--close { display: inline-flex; }
+
+    .site-nav {
+      flex-direction: column;
+      align-items: stretch;
+      gap: var(--spacing-L);
+    }
+    .site-nav__link { font-size: 18px; }
+
+    /* In the drawer the submenu is always expanded (no hover) and indented. */
+    .site-nav__submenu {
+      position: static;
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+      min-width: 0;
+      margin-top: var(--spacing-S);
+      padding: 0 0 0 var(--spacing-L);
+      background: none;
+      box-shadow: none;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-2XS);
+    }
+    .site-nav__caret { display: none; }
+
+    .site-header__social { gap: var(--spacing-XL); }
+    .site-header__actions {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--spacing-L);
+    }
+  }
+</style>
+
+<script>
+  // Mobile drawer toggle + sticky scroll state. One header per page.
+  (() => {
+    const header = document.querySelector<HTMLElement>('[data-header]');
+    if (!header) return;
+
+    const burger = header.querySelector<HTMLButtonElement>('.js-nav-toggle');
+
+    /** Single owner of drawer state — every path in and out goes through here, so
+     *  the attribute, both ARIA properties and the scroll lock can't drift apart
+     *  (the link-click path used to reset `aria-expanded` but not `aria-label`). */
+    const setNav = (open: boolean) => {
+      header.toggleAttribute('data-nav-open', open);
+      burger?.setAttribute('aria-expanded', String(open));
+      burger?.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      document.body.style.overflow = open ? 'hidden' : '';
+    };
+
+    burger?.addEventListener('click', () => setNav(!header.hasAttribute('data-nav-open')));
+
+    // Close the drawer when a link inside it is followed.
+    header.querySelector('.site-header__nav')?.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).closest('a') && header.hasAttribute('data-nav-open')) setNav(false);
+    });
+
+    // Esc closes the drawer. It's a full-screen overlay, so dismissing it from the
+    // keyboard is table stakes — the search dialog gets this free from <dialog>,
+    // but this drawer is hand-rolled and had no key handler at all.
+    //
+    // The `dialog[open]` guard keeps the layers honest: with the search modal open
+    // over the drawer, Esc belongs to the top layer only, and the dialog's own
+    // native handler is already taking it. Without the guard one keypress would
+    // dismiss both. A second Esc then closes the drawer.
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      if (!header.hasAttribute('data-nav-open')) return;
+      if (document.querySelector('dialog[open]')) return;
+      setNav(false);
+      burger?.focus(); // return focus to the control that opened it
+    });
+
+    // A non-sticky header scrolls away with the content — there is no pinned bar
+    // to shed or reveal, so the whole scroll apparatus stands down (`sticky` prop).
+    if (header.dataset.sticky === 'false') return;
+
+    const BUFFER = 20; // px from top where header is always visible
+    const revealOnScrollUp = header.dataset.revealOnScrollUp !== 'false';
+    let lastY = window.scrollY;
+
+    const onScroll = () => {
+      const y = window.scrollY;
+      header.toggleAttribute('data-scrolled', y > 4);
+
+      if (y <= BUFFER) {
+        // Within the top buffer: always show.
+        header.removeAttribute('data-hidden');
+      } else if (y > lastY) {
+        // Scrolling down — hide, but not while the mobile drawer is open.
+        if (!header.hasAttribute('data-nav-open')) {
+          header.setAttribute('data-hidden', '');
+        }
+      } else if (revealOnScrollUp) {
+        // Scrolling up — show, unless disabled (e.g. TOC posts — see the
+        // `revealOnScrollUp` prop doc — where it should stay out of the way
+        // until the reader is back within the top buffer above).
+        header.removeAttribute('data-hidden');
+      }
+
+      lastY = y;
+    };
+
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+  })();
+</script>

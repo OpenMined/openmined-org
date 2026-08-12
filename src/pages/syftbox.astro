@@ -1,0 +1,126 @@
+---
+import Page from '@layouts/Page.astro';
+import SimpleHero from '@components/sections/hero/SimpleHero.astro';
+import ContentSection from '@components/sections/ContentSection.astro';
+import FeatureListGraphic from '@components/sections/features/FeatureListGraphic.astro';
+import ButtonCta from '@components/sections/cta/ButtonCta.astro';
+import CtaSection from '@components/sections/cta/CtaSection.astro';
+import FormEmbed from '@elements/FormEmbed.astro';
+import CardGrid from '@elements/CardGrid.astro';
+import IconCard from '@elements/IconCard.astro';
+import Button from '@ui/Button.astro';
+
+const benefits = [
+  { title: 'Simplified Development', body: 'Build and deploy privacy-preserving applications with ease, regardless of your programming language or environment.' },
+  { title: 'Increased Collaboration', body: 'Securely share data and collaborate with partners, researchers, and even competitors while upholding privacy.' },
+  { title: 'Improved Trust', body: 'Foster trust and transparency with a secure and auditable framework for responsible data handling.' },
+  { title: 'Privacy by Design', body: 'Keep full control of your data within the decentralized network—secure, untouched, and only accessed with your consent.' },
+];
+
+const whatYouCanDo = [
+  { title: 'Build Privacy-Preserving AI Models Across Distributed Data', body: 'Train machine learning models on sensitive datasets without moving or exposing the data—enabling secure AI innovation across multiple organizations.' },
+  { title: 'Run Secure Analytics Without Accessing Raw Data', body: 'Perform analysis on private datasets held by different parties, extracting insights while data remains at the source and kept confidential.' },
+  { title: 'Collaborate Across Organizations Without Trust Assumptions', body: 'Work with partners, competitors, or researchers on shared computations without ever relinquishing data control.' },
+  { title: 'Enable Individuals to Contribute Data Without Sacrificing Privacy', body: 'Power a decentralized ecosystem where users can securely contribute their data to research and applications while retaining full ownership and consent.' },
+  { title: 'Access Orders of Magnitude More Data Without Centralization', body: 'Leverage a growing network of privacy-preserving data collaborations, making it easier to work with more data sources while maintaining security and compliance.' },
+];
+
+const personas = [
+  { title: 'Data Engineers', body: 'seeking to build privacy-preserving applications without specialized expertise.' },
+  { title: 'Researchers', body: 'who need to analyze sensitive data or train AI models without direct data access.' },
+  { title: 'Businesses', body: 'looking to collaborate on data-driven projects while protecting confidential information.' },
+];
+
+const steps = [
+  { title: '1: Install', body: 'Download and install the SyftBox client to connect to the decentralized network.' },
+  { title: '2: Browse', body: 'Explore the network to find datasets and privacy-preserving applications and APIs offered by various data owners.' },
+  { title: '3: Request', body: 'Ask a data owner to run any API—yours or others—on their data. Optionally, connect and make your data discoverable.' },
+  { title: '4: Analyze', body: 'Once approved, utilize the API to perform computations and extract insights from the data without compromising its privacy.' },
+];
+
+const keyFeatures = [
+  { icon: 'globe', title: 'Network-First Architecture', body: 'Enables seamless collaboration and data sharing across multiple parties with strong privacy boundaries.' },
+  { icon: 'network-discovery', title: 'Language & Environment Agnostic', body: 'Supports a wide range of programming languages and development environments for maximum flexibility.' },
+  { icon: 'logo-flower', title: 'Modular & Extensible', body: 'Easily adapt and extend the platform to meet your specific needs.' },
+  { icon: 'lock', title: 'Secure Data Storage & Management', body: 'Provides secure and efficient mechanisms for storing and managing sensitive data.' },
+];
+---
+
+<Page
+  title="SyftBox — Privacy-preserving collaboration protocol"
+  description="SyftBox [Beta] is an open-source protocol that enables developers and organizations to build, deploy, and federate privacy-preserving computations seamlessly across a network. Unlock the ability to run computations on distributed datasets without centralizing data—preserving security while gaining valuable insights."
+>
+  <SimpleHero
+    heading="Empowering Privacy-Preserving Collaboration"
+    lede="SyftBox [Beta] is an open-source protocol that enables developers and organizations to build, deploy, and federate privacy-preserving computations seamlessly across a network. Unlock the ability to run computations on distributed datasets without centralizing data—preserving security while gaining valuable insights."
+    ledeMeasure='55em'
+    contentWidth="col-10"
+  >
+    <img slot="eyebrow" src="/logos/SyftBox-Logo.svg" alt="SyftBox" width="168" height="36" />
+    <Button slot="actions" href="https://syftbox.net/">Deploy today at SyftBox.net ↗</Button>
+  </SimpleHero>
+
+  <hr class="section-divider section-divider--strong" />
+
+  <FeatureListGraphic heading="Here’s how SyftBox can benefit you:" headingMeasure="10em" features={benefits} headingAboveGraphic width="col-8">
+    <img slot="graphic" src="/images/om-cube.svg" alt="" width="311" height="360" data-fade />
+  </FeatureListGraphic>
+
+  <ContentSection
+    surface="dim"
+    width="col-8"
+    band="/images/om-flow-hero.png"
+    heading="What Can You Do with SyftBox?"
+    intro="SyftBox has been used to:"
+  >
+    <CardGrid cols={2} gap="var(--spacing-XL)">
+      {whatYouCanDo.map((c) => (
+        <IconCard icon="circle-check" titleAs="strong" title={c.title} surface="default">
+          <p>{c.body}</p>
+        </IconCard>
+      ))}
+    </CardGrid>
+  </ContentSection>
+
+  <ContentSection heading="SyftBox is ideal for:" width="col-10">
+    <CardGrid cols={3} gap="var(--spacing-XL)">
+      {personas.map((c) => (
+        <IconCard title={c.title}>
+          <p>{c.body}</p>
+        </IconCard>
+      ))}
+    </CardGrid>
+    <hr class="section-divider section-divider--group" />
+  </ContentSection>
+
+  <ContentSection heading="How it Works" width="col-6" band="/images/om-flow-hero.png">
+    <CardGrid cols={1} gap="var(--spacing-XL)">
+      {steps.map((c) => (
+        <IconCard title={c.title} surface="dim">
+          <p>{c.body}</p>
+        </IconCard>
+      ))}
+    </CardGrid>
+  </ContentSection>
+
+  <ContentSection as="h4" width="col-10" heading="Key Features:" align="left">
+    <CardGrid cols={2} gap="var(--spacing-XL)">
+      {keyFeatures.map((c) => (
+        <IconCard icon={c.icon} surface="dim" title={c.title}>
+          <p>{c.body}</p>
+        </IconCard>
+      ))}
+    </CardGrid>
+  </ContentSection>
+
+  <ButtonCta heading="Ready to experience privacy-preserving collaboration?" surface="dark">
+    <Button href="https://syftbox.net/">Deploy today at SyftBox.net ↗</Button>
+  </ButtonCta>
+
+  <CtaSection variant="subtle" heading="Get SyftBox Updates & Early Access">
+    <FormEmbed slot="form" formId="2c3dcdb7-8c7b-41ce-8a93-dca555fabd34" />
+    <Fragment slot="fineprint">
+      <p>Sign up for updates and early access to SyftBox. We respect your <a href="/privacy-policy/">privacy</a>.</p>
+    </Fragment>
+  </CtaSection>
+</Page>

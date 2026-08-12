@@ -1,0 +1,104 @@
+---
+/**
+ * OrgLogo — renders a single org mark from the registry.
+ *
+ * Two modes (the logo-theming split found on live, unified into one atom):
+ *   • mono  → inline the SVG and force every concrete fill/stroke to
+ *             `currentColor`, so the mark inherits the theme text color and
+ *             flips dark↔white with the page theme. This mirrors the live
+ *             Partnerships strip, where Bricks' `.fill` class recolors the same
+ *             brand SVGs to a single tone. `none` fills and `<mask>`/`<clipPath>`
+ *             blocks are preserved so hollow/masked shapes still render.
+ *   • color → render the natural asset as <img> (brand colors intact).
+ *
+ * Mono requires an inlinable .svg; a non-svg asset (e.g. a .png) falls back to
+ * <img> even when mono is requested (it can't be recolored via currentColor).
+ *
+ * Size is owned by the consumer — set max-width/height on the element via the
+ * `class` prop; the mark scales within it preserving aspect ratio.
+ */
+/**
+ * Logo SVG sources are read through the bundler (Vite `?raw`), not `node:fs`.
+ * This inlines every `public/logos/**` SVG as a string at build time, so mono
+ * inlining works under any adapter runtime — including Cloudflare's workerd,
+ * which has no filesystem (a `node:fs` read fails there during prerender).
+ * Keyed by the file's path relative to this component; `srcKey()` maps a
+ * public-root logo path (e.g. `/logos/orgs/x.svg`) to that key.
+ */
+const LOGO_SVGS = import.meta.glob('../../../public/logos/**/*.svg', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+}) as Record<string, string>;
+const srcKey = (logo: string) => `../../../public${logo}`;
+
+interface OrgData {
+  id: string;
+  name: string;
+  logo: string;
+  monochrome?: boolean;
+  url?: string;
+}
+
+interface Props {
+  org: OrgData;
+  /** Force theme-adaptive single-tone rendering (currentColor). */
+  mono?: boolean;
+  class?: string;
+}
+const { org, mono = false, class: className } = Astro.props;
+
+let inlineSvg: string | null = null;
+let raw = mono && org.logo.endsWith('.svg') ? LOGO_SVGS[srcKey(org.logo)] : undefined;
+if (raw) {
+
+  // 1. Protect <mask>/<clipPath> blocks — their (often white, luminance) fills
+  //    define visibility, not paint, so recoloring them would hide the mark.
+  const blocks: string[] = [];
+  raw = raw.replace(/<(mask|clipPath)\b[\s\S]*?<\/\1>/g, (m) => {
+    blocks.push(m);
+    return '___OMPROTECT' + (blocks.length - 1) + '___';
+  });
+
+  // 2. Drop full-bleed white background rects (invisible on light, a white box
+  //    on a dark surface).
+  raw = raw.replace(/<rect\b[^>]*\bfill="(?:white|#[fF]{3,8})"[^>]*\/?>/g, '');
+
+  // 3. Concrete fill/stroke colors → currentColor. `none` and pure white are
+  //    left alone (white = knockout / negative space, not paint).
+  raw = raw
+    .replace(/fill="(?!none"|white"|#[fF]{3,8}")[^"]*"/g, 'fill="currentColor"')
+    .replace(/stroke="(?!none"|white"|#[fF]{3,8}")[^"]*"/g, 'stroke="currentColor"')
+    .replace(/fill:\s*(?!none|white|#[fF]{3,8})[^;"')]+/g, 'fill:currentColor')
+    .replace(/stroke:\s*(?!none|white|#[fF]{3,8})[^;"')]+/g, 'stroke:currentColor');
+
+  // 4. Restore protected blocks.
+  inlineSvg = raw.replace(/___OMPROTECT(\d+)___/g, (_, i) => blocks[+i]);
+}
+---
+{inlineSvg ? (
+  <span class:list={['org-logo', 'org-logo--mono', className]} role="img" aria-label={org.name} set:html={inlineSvg} />
+) : (
+  <img class:list={['org-logo', className]} src={org.logo} alt={org.name} loading="lazy" decoding="async" data-fade />
+)}
+
+<style>
+  .org-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /* The inlined <svg> / <img> scales to fill the box the consumer sizes (via
+     max-width/height on the root), preserving aspect ratio. The root itself
+     carries no max-width, so the consumer's sizing wins. */
+  .org-logo :global(svg),
+  .org-logo img {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+  }
+  /* Mono marks default to the body text color; consumers may override. */
+  .org-logo--mono { color: var(--text-body); }
+</style>

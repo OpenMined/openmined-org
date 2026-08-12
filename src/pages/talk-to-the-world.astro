@@ -1,0 +1,368 @@
+---
+import Page from '@layouts/Page.astro';
+import Header from '@components/layout/Header.astro';
+import Footer from '@components/layout/Footer.astro';
+import SimpleHero from '@components/sections/hero/SimpleHero.astro';
+import HeroSwoop from '@components/graphics/HeroSwoop.astro';
+import ContentSection from '@components/sections/ContentSection.astro';
+import CardGrid from '@elements/CardGrid.astro';
+import IconCard from '@elements/IconCard.astro';
+import FormEmbed from '@elements/FormEmbed.astro';
+import Accordion from '@ui/Accordion.astro';
+
+/**
+ * /talk-to-the-world/ — publisher beta recruitment (AI knowledge marketplace).
+ * Rebuilt verbatim from live https://openmined.org/talk-to-the-world/
+ * (migrated verbatim). Campaign funnel → minimal
+ * header. Section layouts mirror live (see each section comment).
+ *
+ * TODO(content): §6 "Partners we're working with in this program" — live shows a
+ * MANNING / NAB / O'Reilly / THE CITY logo strip (third-party marks, not yet
+ * localized). The label is kept; the logo row awaits Kyle's call on localizing
+ * external logos.
+ */
+---
+
+<Page
+  title="Talk to the World — OpenMined"
+  description="Make your content accessible to AI on your own terms. Join OpenMined's free publisher beta — a dashboard, a ChatGPT plugin with attribution, and built-in monetization."
+>
+  <Header variant="minimal" slot="header" />
+  <Footer variant="minimal" slot="footer" />
+
+  <!-- § Hero — icon + eyebrow lockup, big statement h1, centered intro, swoop -->
+  <SimpleHero heading="Your data, your terms." headingMax={72} ledeMeasure="46em" padTop="minimal" padBottom="var(--spacing-full)">
+    <Fragment slot="eyebrow">
+      {/* icon stacked ABOVE the eyebrow text (à la the co-design hero) */}
+      <span class="ttw-hero-lockup">
+        <img class="ttw-hero-icon" src="/logos/OpenMined-Icon-large.svg" alt="" width="50" height="50" data-fade />
+        <span class="ttw-hero-eyebrow">Talk to the World ⬩ by OpenMined</span>
+      </span>
+    </Fragment>
+    <p>AI is using the world’s information — but publishers are losing revenue, control, and trust. Meanwhile, AI users are running out of usable, high-quality data.</p>
+    <p><strong>The marketplace for AI knowledge is broken.</strong><br />We believe the solution is attribution-based control — built around openness, transparency, and choice.</p>
+    <p>We’re building a future where data owners decide how their work powers AI, and AI users choose trusted data sources — creating a healthier ecosystem for everyone.</p>
+    <HeroSwoop slot="swoop" src="/images/om-flow-hero.png" width={1024} height={288} anchor="center" />
+  </SimpleHero>
+
+  <!-- § What is the Beta Program? — image LEFT, copy RIGHT — dim band -->
+  <section class="ttw-media ttw-media--dim">
+    <div class="container">
+      <div class="ttw-media__grid ttw-media__grid--img-left">
+        <div class="ttw-media__img">
+          <img src="/images/ttw-program.png" alt="Deploy with OpenMined, then your data is made available through AI chat frontends while you track use and revenue" width={859} height={1024} data-fade />
+        </div>
+        <div class="ttw-media__text">
+          <div>
+            <h2>What is the Talk To The World Beta Program?</h2>
+            <p>The Talk to the World Beta is designed for news organizations and publishers who want to make their content accessible to AI — on their own terms.</p>
+            <p>If you run a digital publication on WordPress or another CMS, we’ll set up a one-click deployment at no cost to you. All it takes is a short onboarding call.</p>
+            <p>Once you’re live, you’ll get access to a powerful suite of tools:</p>
+            <ul>
+              <li>A dashboard to monitor how your content is being used</li>
+              <li>A ChatGPT plugin that makes your data accessible to AI users, with attribution</li>
+              <li>Built-in monetization so you’re paid when your content powers AI answers</li>
+            </ul>
+            <p>You’ll join a growing network of publishers reclaiming control, building collective leverage, and turning AI into a revenue opportunity — not a risk.</p>
+            <p>Book a call using the form below to learn more and get started.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- § Why You Should Join Us — centered -->
+  <ContentSection as="h2" align="center" width="col-8" heading="Why You Should Join Us">
+    <div class="ttw-centered">
+      <p>AI is becoming a major gateway to information — and your journalism deserves to be part of it on your terms.</p>
+      <p>We’re offering a simple, one-click deployment that makes your content usable in AI responses, while keeping you in control. You decide how it’s accessed, you set the terms, and you get credited and paid when your work is used.</p>
+      <p>This is a free beta program, built in collaboration with trusted partners across the industry. As a nonprofit, our focus is on fair attribution, sustainable revenue, and making sure publishers are recognized and protected in the emerging AI ecosystem.</p>
+      <p>You should shape how your content shows up in AI. We’re here to help you do it.</p>
+    </div>
+  </ContentSection>
+
+  <!-- § By joining, you'll get — bold lead-in over a 2×2 card grid on a flow
+       band, then 2 lines. The lead-in is bold body text, not a heading. -->
+  <ContentSection width="col-10" band="/images/om-flow-hero.png">
+    <p class="ttw-join-label">By joining, you’ll get:</p>
+    <CardGrid cols={2} gap="var(--spacing-XL)">
+      <IconCard icon="circle-check" titleAs="body" surface="dim" title="Early access to our tools and infrastructure." />
+      <IconCard icon="circle-check" titleAs="body" surface="dim" title="The chance to help shape the future of how news content powers AI." />
+      <IconCard icon="circle-check" titleAs="body" surface="dim" title="A seat at the table for building a fair and open AI marketplace" />
+      <IconCard icon="circle-check" titleAs="body" surface="dim" title="Opportunities to collaborate with a community of leading publishers" />
+    </CardGrid>
+    <div class="ttw-join-notes">
+      <p>We’re independent, nonprofit, and dedicated to building for the long-term.</p>
+      <p>Your feedback will directly shape what we create.</p>
+    </div>
+  </ContentSection>
+
+  <!-- § Why We're Different — copy LEFT, diagram RIGHT -->
+  <section class="ttw-media">
+    <div class="container">
+      <div class="ttw-media__grid">
+        <div class="ttw-media__text">
+          <div>
+            <h2>Why We’re Different</h2>
+            <p>While others — like ProRata.ai — are also building AI marketplaces, their business model takes up to 50% of the revenue from publishers. When private companies control such marketplaces, it becomes dangerous for the industry. Pricing power is centralized, product availability becomes unpredictable, and control is lost in a black-box model.</p>
+            <p>We believe the future of AI data should be open and decentralized.</p>
+            <p>That’s why we’re building a network-driven marketplace — not a single company gatekeeping access to your data. Think of it as the Apache server for the AI world: open, community-driven, and accessible for everyone.</p>
+            <p>And it doesn’t have to be an “either-or” decision. We invite you to try us out alongside your current solution. Test out our tools, experience the transparency and control we provide, and decide for yourself how we can help you unlock the full value of your content.</p>
+          </div>
+        </div>
+        <div class="ttw-media__img">
+          <img src="/images/ttw-different.png" alt="Diagram contrasting a centralized marketplace with an open, network-driven one" width={868} height={551} data-fade />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- § Join Our Beta Program — always-light card on the brand-gradient band:
+       copy + 4 partner logos (left), intro-call form (right). Copy + logos
+       verbatim from live (logos localized → public/images/ttw-partner-{1..4}.svg). -->
+  <section class="ttw-beta">
+    <div class="container">
+      {/* The panel themes (grayscale-50 → 800, matching live). always-light lives on
+          the logo box below instead, which must stay light in both modes. */}
+      <div class="ttw-beta__panel">
+        <div class="ttw-beta__copy">
+          <div>
+            <h3>Join Our Beta Program</h3>
+            <p>We’re launching our beta program — and we want you to be part of it.</p>
+            <p>As a beta partner, you will:</p>
+            <ul>
+              <li>Get early access to our MVP (Minimum Viable Product).</li>
+              <li>Try out the MVP with your CMS and give feedback.</li>
+              <li>Help shape the future of how news content powers AI.</li>
+              <li>Be part of building a free, fair, and open AI marketplace.</li>
+              <li>Take occasional short feedback calls (30 minutes or less).</li>
+            </ul>
+            <p>We are an independent, nonprofit team — here to build with you, not for profit.</p>
+          </div>
+          <p class="ttw-beta__partners-label">Partners we’re working with in this program</p>
+          {/* always-light: the partner logos are dark-ink artwork, so this box holds a
+              light surface in both modes. In light mode it matches the panel exactly,
+              so the box reads as seamless; in dark mode it stays a light panel. */}
+          <div class="ttw-beta__partners" data-section="always-light">
+            <img src="/images/ttw-partner-1.svg" alt="Program partner" width="392" height="83" />
+            <img src="/images/ttw-partner-2.svg" alt="Program partner" width="391" height="141" />
+            <img src="/images/ttw-partner-3.svg" alt="Program partner" width="392" height="74" />
+            <img src="/images/ttw-partner-4.svg" alt="Program partner" width="392" height="125" />
+          </div>
+        </div>
+        <div class="ttw-beta__form">
+          <p class="ttw-beta__form-sub"><em>Complete this form and we’ll schedule a quick intro call with you:</em></p>
+          <FormEmbed formId="48bae8f4-9dcd-4b9e-a380-866fb018a2e5" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- § About OpenMined — ONE inverted band covering icon + heading + copy + the
+       FAQ below. The band surface is the inverse of the page (dark in light mode,
+       light in dark mode). The About content carries data-section="invert" so its
+       text reads light-on-dark; the FAQ card (below) stays on the page-normal
+       tokens, so it's the inverse-of-the-inverse — i.e. the main-site colorway. -->
+  <section class="ttw-about">
+    <div class="container">
+      <div class="ttw-about__grid" data-section="invert">
+        <div class="ttw-about__logo">
+          <img src="/logos/OpenMined-Icon.svg" alt="OpenMined" width="120" height="120" />
+        </div>
+        <div class="ttw-about__text">
+          <div>
+            <h3>About OpenMined</h3>
+            <p>OpenMined is an independent, nonprofit initiative dedicated to building open, transparent infrastructure for AI and data.</p>
+            <p>We believe the future of AI should empower everyone — not just a few.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="ttw-about__story">
+        <Accordion title="Detailed Story: The Industry Landscape and Why We’re Doing This">
+          <div>
+            <p>In the current landscape, AI data marketplaces are dominated by private players who control access to information. These companies often take a significant cut — up to 50% of the revenue generated from publishers’ content. This leads to several risks for the industry:</p>
+            <ul>
+              <li><strong>Centralized Power:</strong> A single company controlling the marketplace has undue influence over pricing and product availability, creating a monopoly that ultimately hurts the broader ecosystem.</li>
+              <li><strong>Lack of Transparency:</strong> In private, closed marketplaces, there’s often little to no transparency in how pricing is set or how data is distributed. Publishers and AI users are left in the dark about how their content is being used or how much they should be paid.</li>
+              <li><strong>Industry Instability:</strong> The future of AI data depends heavily on which companies own the infrastructure and dictate the rules of access. If one or a few private companies dominate, they’ll set the terms — creating an unpredictable and unfair marketplace that could damage the integrity of the entire industry.</li>
+            </ul>
+            <p>At OpenMined, we believe the future of AI data should be open, transparent, and decentralized. While others, like ProRata.ai, are building AI marketplaces, their business models often take up to 50% of the revenue from publishers. This centralized control creates risks for the industry, such as:</p>
+            <ul>
+              <li><strong>Pricing Power:</strong> When a single private company controls the marketplace, they can dictate prices and control product availability, undermining the fairness of the ecosystem.</li>
+              <li><strong>Lack of Transparency:</strong> Private companies often operate behind closed doors, offering little transparency about how data is used, distributed, or compensated. Publishers and AI users are left in the dark about key decisions.</li>
+              <li><strong>Industry Instability:</strong> As AI infrastructure becomes more concentrated in the hands of a few private players, the future of AI data access becomes unpredictable and inequitable.</li>
+            </ul>
+            <p>In contrast, we are building a network-driven marketplace where data owners have full attribution-based control over how their content is used, and AI users can choose from trusted data sources, free from the constraints of centralized power.</p>
+            <p>Think of us as the Apache server for the AI world: an open, community-driven platform where no single party controls all the access. Instead, the marketplace is decentralized — anyone can contribute and access data on fair terms. We’re creating a platform where the network of contributors runs the show, not a single entity.</p>
+            <p>In this model:</p>
+            <ul>
+              <li>Publishers retain control over their data, determining how it’s shared and how they’re compensated.</li>
+              <li>AI users have the freedom to choose reliable, verified data sources without worrying about paywalls or pricing manipulation.</li>
+              <li>Transparency is baked into the system, so everyone knows how their data is being used and how prices are set, eliminating the secrecy often found in traditional models.</li>
+            </ul>
+            <p>By decentralizing the control, we ensure that power remains with the people who generate the data — the publishers. The marketplace is driven by the community, with each contributor helping to shape the future of AI data. This decentralized approach is healthier, more stable, and more sustainable than relying on one or two companies that control everything.</p>
+          </div>
+        </Accordion>
+      </div>
+    </div>
+  </section>
+</Page>
+
+<style>
+  /* hero lockup: OM icon stacked ABOVE the eyebrow text (à la co-design).
+     The 2-class icon selector beats SimpleHero's `.simple-hero__eyebrow img`
+     height rule so the mark shows at 50px, not the eyebrow default 32px. */
+  .ttw-hero-lockup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-M);
+  }
+  .ttw-hero-lockup .ttw-hero-icon { height: 50px; width: auto; }
+
+  /* ── media + text rows (§2 image-left, §5 text-left) ───────────────── */
+  .ttw-media { margin-block: var(--spacing-full); }
+  /* §2 dim band: full-bleed tinted surface — trade outer margin for inner
+     padding so it reads as a band (like ContentSection surface="dim"). */
+  .ttw-media--dim {
+    margin-block: 0;
+    padding-block: var(--spacing-full);
+    background-color: var(--surface-background-dim);
+  }
+  .ttw-media__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-5XL);
+    align-items: center;
+    max-width: var(--col-10);
+    margin-inline: auto;
+  }
+  .ttw-media__img img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--border-radius-L);
+  }
+  @media (max-width: 991px) {
+    .ttw-media__grid { grid-template-columns: 1fr; gap: var(--spacing-2XL); }
+    /* image below the copy on mobile (both orders) */
+    .ttw-media__img { order: 2; }
+  }
+
+  /* ── centered prose (§ Why You Should Join Us) ─────────────────────── */
+  .ttw-centered { text-align: center; }
+  .ttw-centered :global(p) { margin-inline: auto; }
+
+  /* bold lead-in over the § "By joining" grid — body text, not a heading */
+  .ttw-join-label {
+    margin: 0 0 var(--spacing-5XL);
+    text-align: center;
+    font-weight: 700;
+    color: var(--text-headline);
+  }
+
+  /* ── join notes (2 centered lines under the § "By joining" grid) ───── */
+  .ttw-join-notes {
+    margin-top: var(--spacing-3XL);
+    text-align: center;
+    color: var(--text-body);
+  }
+  .ttw-join-notes p { margin: 0; }
+  .ttw-join-notes p + p { margin-top: var(--spacing-S); }
+
+  /* ── Join Our Beta Program — always-light card on the brand-gradient band ── */
+  .ttw-beta {
+    padding-block: var(--spacing-full);
+    /* same full-spectrum raster the FormCTA gradient variant uses */
+    background-image: url('/images/cta-gradient-bg.png');
+    background-position: center;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+  }
+  .ttw-beta__panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-5XL);
+    max-width: var(--col-10);
+    margin-inline: auto;
+    padding: var(--spacing-4XL);
+    border-radius: var(--border-radius-L);
+    /* Themes with the page: grayscale-50 in light, 800 in dark — live's measured
+       values (2026-08-05). Deliberately the SAME token the logo box uses, so in
+       light mode the box is seamless against the panel rather than a lighter
+       rectangle sitting on it (it was --surface-background-bright before). */
+    background-color: var(--surface-background-default);
+  }
+  /* partners label: non-bold, italic */
+  .ttw-beta__partners-label {
+    margin-top: var(--spacing-2XL);
+    font-weight: 400;
+    font-style: italic;
+    color: var(--text-subtle);
+  }
+  /* 4 partner logos — a 2×2 grid on a light rounded box. The box's surface comes
+     from always-light on the element (see markup), so it holds a light background
+     for the dark-ink marks in both color modes.
+
+     Each mark fills 100% of its cell WIDTH and is centred on both axes, rather
+     than being pinned to a fixed height as live does (34px). All four sources are
+     authored at the same 392px width with differing heights, so sizing by width
+     scales the set consistently and lets each keep its own proportion — and it
+     removes the wrap problem a fixed height had: at any height large enough to
+     read, the two widest marks plus a gap overflowed the panel's 476px column and
+     broke to one-per-row. A fixed 2-column grid can't wrap, so the marks simply
+     scale with the column at every viewport.
+
+     Vertical gap is double the horizontal, per the same token scale. */
+  .ttw-beta__partners {
+    margin-top: var(--spacing-L);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    place-items: center;
+    column-gap: var(--spacing-2XL);  /* 24 */
+    row-gap: var(--spacing-5XL);     /* 48 — 2× the column gap */
+    max-width: 590px; /* live exact — inert while the column is narrower */
+    padding: var(--spacing-2XL);     /* live --spacing-XL */
+    border-radius: var(--border-radius-M);
+    background-color: var(--surface-background-default);
+  }
+  .ttw-beta__partners img { display: block; width: 100%; height: auto; }
+  /* form intro: centered */
+  .ttw-beta__form-sub { margin: 0 0 var(--spacing-L); text-align: center; color: var(--text-body); }
+  @media (max-width: 991px) {
+    .ttw-beta__panel { grid-template-columns: 1fr; gap: var(--spacing-2XL); padding: var(--spacing-2XL); }
+  }
+
+  /* ── About OpenMined — ONE inverted band (icon + copy + FAQ) ─────────
+     The band fill is --dark-surface-background-default: dark in light mode,
+     light in dark mode (the inverse of the page, flipping with the theme).
+     The About content carries data-section="invert" for light-on-dark text;
+     the FAQ card below keeps page-normal tokens, so it's the inverse-of-the-
+     inverse — the main-site colorway (light card in light mode / dark in dark). */
+  .ttw-about {
+    background-color: var(--dark-surface-background-default);
+    padding-block: var(--spacing-full);
+  }
+  /* About block: 2-col (icon | heading+text), centered in a col-8 column. */
+  .ttw-about__grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: var(--spacing-5XL);
+    max-width: var(--col-8);
+    margin-inline: auto;
+  }
+  .ttw-about__logo img { display: block; width: 120px; height: 120px; }
+  /* FAQ sits in the same inverted band, but on page-normal tokens (no
+     data-section), so the Accordion renders in the main-site colorway. */
+  .ttw-about__story {
+    max-width: var(--col-8);
+    margin: var(--spacing-5XL) auto 0;
+  }
+  @media (max-width: 767px) {
+    .ttw-about__grid { grid-template-columns: 1fr; gap: var(--spacing-2XL); text-align: center; }
+    .ttw-about__logo img { margin-inline: auto; }
+  }
+</style>

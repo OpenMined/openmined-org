@@ -1,0 +1,36 @@
+[
+  {
+    "id": "product",
+    "label": "Product",
+    "featured": "tutorial-turn-any-llm-into-an-expert-assistant-with-federated-rag-part-1",
+    "rail": [
+      { "type": "tags", "title": "Solutions & Resources", "tags": ["pysyft", "tutorials", "release-update"] }
+    ]
+  },
+  {
+    "id": "policy",
+    "label": "Policy",
+    "description": "OpenMined's policy team works to ensure that the <i>public network for non-public information</i> is stewarded in the public interest, avoiding key failure modes.",
+    "people": ["lacey-strahm", "dave-buckley"],
+    "headerLeft": "team"
+  },
+  {
+    "id": "news",
+    "label": "News",
+    "featured": "visit-us-india-ai-impact-summit-2026",
+    "rail": [
+      { "type": "tags", "title": "Filter By", "tags": ["announcements"] }
+    ]
+  },
+  { "id": "research", "label": "Research" },
+  { "id": "stories", "label": "Stories", "featured": "secure-enclaves-for-ai-evaluation" },
+  {
+    "id": "community",
+    "label": "Community",
+    "rail": [
+      { "type": "tags", "title": "Popular Tags", "tags": ["featured-contributor", "announcements"] }
+    ]
+  },
+  { "id": "foundation", "label": "Foundation" },
+  { "id": "uncategorized", "label": "Uncategorized" }
+]

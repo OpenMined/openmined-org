@@ -1,0 +1,67 @@
+---
+/**
+ * /partner/ — pilot-partnership inquiry form (P2 pattern, blue tone). The mission
+ * & pilot partners logo grid sits in the left copy column (left-aligned, 3-up),
+ * sourced from @data/organizations (role "partner").
+ * Copy verbatim from the live page.
+ *
+ * NOTE(content): the logo set is the registry's "partner" role. It differs
+ * slightly from the live page's set (registry adds Anthropic + Common Crawl) —
+ * confirm the intended set at sign-off.
+ */
+import Page from '@layouts/Page.astro';
+import InquiryLanding from '@components/sections/forms/InquiryLanding.astro';
+import OrgLogo from '@components/media/OrgLogo.astro';
+import { getCollection } from 'astro:content';
+
+const partners = (await getCollection('organizations'))
+  .filter((e) => e.data.roles.includes('partner'))
+  .map((e) => e.data);
+---
+
+<Page
+  title="Interested in Partnering on a Pilot?"
+  description="Partner with OpenMined to pilot privacy-preserving technology in real-world applications. Tell us about your data access problem and we'll follow up."
+>
+  <InquiryLanding
+    heading="Interested in Partnering on a Pilot?"
+    tagline="Let’s Connect."
+    tone="partner"
+    formId="e5b533c5-05bd-4ce2-b619-b30dca110db1"
+  >
+    <p>We collaborate with organizations to pilot privacy-preserving technology in real-world applications. If you’re interested in working with OpenMined as a pilot partner, let us know!</p>
+    <p>OpenMined partners with organizations looking to explore secure, privacy-enhancing solutions. Whether you’re a research institution, company, or nonprofit, we’d love to discuss how we can collaborate on a pilot that aligns with your needs.</p>
+    <p><strong>Fill out this form, and we’ll follow up to explore the next steps.</strong></p>
+
+    <div class="partner-logos">
+      <p class="partner-logos__label">Some of our mission &amp; pilot partners:</p>
+      <div class="partner-logos__grid">
+        {partners.map((org) => <OrgLogo org={org} mono />)}
+      </div>
+    </div>
+  </InquiryLanding>
+</Page>
+
+<style>
+  .partner-logos {
+    margin-top: var(--spacing-3XL);
+  }
+  .partner-logos__label {
+    margin-bottom: var(--spacing-2XL);
+    color: var(--text-subtle);
+  }
+  /* Left-aligned mono logo grid; currentColor drives the mark tint (flips theme). */
+  .partner-logos__grid {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: var(--spacing-3XL);
+    row-gap: var(--spacing-2XL);
+    color: var(--text-body);
+  }
+  .partner-logos__grid :global(.org-logo svg),
+  .partner-logos__grid :global(.org-logo img) {
+    max-width: 120px;
+    max-height: 38px;
+  }
+</style>

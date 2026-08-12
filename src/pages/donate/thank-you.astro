@@ -1,0 +1,66 @@
+---
+/**
+ * /donate/thank-you/ — the Stripe Checkout `success_url` landing page.
+ *
+ * Static page; Stripe appends `?session_id=…` on redirect back from a completed
+ * donation. We don't verify the session here (Stripe emails the receipt and the
+ * confirmation of payment) — this is purely the friendly "you're done" surface.
+ * noindex: it's a post-conversion page, never a search entry point.
+ */
+import Page from '@layouts/Page.astro';
+import Button from '@ui/Button.astro';
+---
+
+<Page
+  title="Thank you for your support"
+  description="Thank you for supporting OpenMined — building the public network for non-public information."
+  noindex={true}
+  searchable={false}
+>
+  <section class="ty">
+    <div class="container ty__inner">
+      <img class="ty__mark" src="/logos/OpenMined-Icon.svg" alt="" width="96" height="96" data-fade />
+      <h1 class="ty__heading">Thank you for your support</h1>
+      <p class="ty__lede">
+        Your donation helps OpenMined build the public network for non-public
+        information — unlocking the world’s insights while keeping privacy
+        accessible to everyone. A receipt is on its way to your inbox.
+      </p>
+      <div class="ty__actions">
+        <Button href="/">Back to OpenMined</Button>
+        <Button variant="outline" href="/foundation/">About the Foundation</Button>
+      </div>
+    </div>
+  </section>
+</Page>
+
+<style>
+  .ty {
+    padding-block: var(--spacing-max);
+    text-align: center;
+  }
+  .ty__inner {
+    max-width: var(--col-6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .ty__mark {
+    width: 96px;
+    height: auto;
+    margin-bottom: var(--spacing-2XL);
+  }
+  .ty__heading { --h1-max: 48px; }
+  .ty__lede {
+    margin-top: var(--spacing-XL);
+    color: var(--text-body);
+  }
+  /* Shared multi-CTA row pattern (see SimpleHero__actions). */
+  .ty__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px var(--spacing-XL);
+    margin-top: var(--spacing-3XL);
+  }
+</style>

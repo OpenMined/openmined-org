@@ -1,0 +1,70 @@
+---
+/**
+ * /events/india-ai-impact-summit-2026/register/ — Genomics session registration
+ * for the India AI Impact Summit 2026 (Mon 16 Feb 2026). PAST EVENT: kept as an
+ * archival + reusable registration template. Explicitly noindex and excluded
+ * from the sitemap (astro.config.mjs sitemap filter); not linked from nav.
+ * Copy verbatim from the live page.
+ */
+import Page from '@layouts/Page.astro';
+import EventRegLanding from '@components/sections/forms/EventRegLanding.astro';
+import SpeakerRoster from '@elements/SpeakerRoster.astro';
+
+const speakers = [
+  { name: 'Dawn Chen', role: 'PhD Student', org: 'Harvard University', avatar: '/images/summit-2026/speaker-dawn-chen.png' },
+  { name: 'Binay Panda', role: 'Professor of Biotechnology', org: 'Jawaharlal Nehru University', avatar: '/images/summit-2026/speaker-binay-panda.webp' },
+  { name: 'Madhava Jay', role: 'Software Engineer', org: 'OpenMined Foundation', avatar: '/images/summit-2026/speaker-madhava-jay.png' },
+  { name: 'Andrew Soltan', role: 'Junior Research Fellow', org: 'University of Oxford', avatar: '/images/summit-2026/speaker-andrew-soltan.jpg' },
+  { name: 'Francis P. Crawley', role: 'Chair', org: 'CODATA International Data Policy Committee', avatar: '/images/summit-2026/speaker-francis-crawley.jpg' },
+  { name: 'Rana Dajani', role: 'Professor of Biology and Biotechnology', org: 'Hashemite University', avatar: '/images/summit-2026/speaker-rana-dajani.jpg' },
+  { name: 'Weibin Liu', role: 'Co-Organizer', org: 'Human Genome Project II', avatar: '/images/summit-2026/speaker-weibin-liu.png' },
+  { name: 'Suchita Ninawe', role: 'Senior Adviser', org: 'Department of Biotechnology, Government of India', avatar: '/images/summit-2026/speaker-suchita-ninawe.jpg' },
+];
+
+const details = [
+  { icon: 'calendar', html: 'Monday 16 February 2026, 2:30–3:25 PM IST' },
+  { icon: 'map-pin', bold: true, html: '<a href="https://maps.app.goo.gl/gJWhue7TpiGPvdJp7">Bharat Mandapam</a>, Room 15, New Delhi, India' },
+  { icon: 'triangle-alert', html: 'Session registration is separate from summit registration. Please ensure you have <a href="https://impact.indiaai.gov.in/registration">registered</a> for the full India AI Impact Summit to attend.' },
+];
+---
+
+<Page
+  title="Data Visitation for Genomics | India AI Summit 2026"
+  description="Join OpenMined and the Human Genome Project II at the India AI Impact Summit 2026 to discuss data visitation in genomics and health, with early previews of BioVault."
+  noindex={true}
+  searchable={false}
+>
+  <EventRegLanding
+    eyebrow="Join us:"
+    title="Genomics, AI, and the Future of Health: Data Visitation to Empower the Global South"
+    details={details}
+    formId="9648f17e-95d0-48b3-86a2-97567764b2bc"
+  >
+    <img
+      slot="graphic"
+      src="/images/summit-2026/india-ai-impact-summit-banner.png"
+      alt="India AI Impact Summit 2026"
+      width="305"
+      height="211"
+    />
+
+    <div class="evt-stack">
+      <div>
+        <h4>Session info:</h4>
+        <p>AI and genomics are transforming public health, but the benefits remain unevenly distributed. Data sovereignty requirements and cross-border restrictions prevent genomic datasets from being used collectively for research. This slows progress and reinforces global health inequities.</p>
+        <p>Data visitation flips the model: instead of centralizing sensitive data, the algorithms travel securely to where the data is held. Countries and institutions stay in control. New research happens.</p>
+        <p>Join OpenMined and the <a href="https://www.hgp2.org/">Human Genome Project II</a> (HGP2) to discuss data visitation in genomics and health. You’ll see early previews of <a href="https://biovault.net/">BioVault</a>, a production-ready data visitation platform, and hear from researchers running real-world cross-border genomic analyses in Jordan and the Caribbean. The session will highlight practical implementation, emerging governance models, and pathways for equitable, AI-enabled health systems, with a focus on empowering the Global South through public-sector innovation.</p>
+      </div>
+
+      <SpeakerRoster heading="Speakers:" speakers={speakers} />
+    </div>
+  </EventRegLanding>
+</Page>
+
+<style>
+  .evt-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4XL);
+  }
+</style>

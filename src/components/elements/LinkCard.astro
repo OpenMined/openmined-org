@@ -1,0 +1,114 @@
+---
+/**
+ * LinkCard — a whole-card link: leading icon + (bold title / subtitle) on the
+ * left, a low-opacity trailing arrow on the right that slides on hover. A
+ * compact "go here" affordance used in rows (docs entry points, quick links,
+ * nav shortcuts). Reusable in various contexts.
+ *
+ * Rebuilt from live syfthub #brxe-fb2f5d (Quickstart / Installation / Core
+ * Concepts). Measured off the live page.
+ *
+ * Live → token mapping:
+ *   card           flex row, space-between, align stretch
+ *   padding        32px                       → --spacing-3XL ✓
+ *   radius         6px                        → --border-radius-S ✓
+ *   surface        #f4f3f6                    → --surface-background-dim
+ *   icon           40×32, currentColor        → Icon size 32 (theme-adaptive)
+ *   icon↔text gap  16px                       → --spacing-L ✓
+ *   title          Inter 16/700               → bold label, --text-headline
+ *   subtitle       Inter 16/400               → --text-body
+ *   trailing arrow themify 24px, opacity 0.3  → inline SVG, opacity .3 → 1 hover
+ *
+ * Variants:
+ *   surface  'dim' (default) | 'default' | 'bright' — all themed
+ */
+import Icon from '@elements/Icon.astro';
+
+interface Props {
+  href: string;
+  /** Leading Icon name (from @assets/icons). Omit for a text-only link card. */
+  icon?: string;
+  iconSize?: number;
+  title: string;
+  /** Optional second line under the title. */
+  subtitle?: string;
+  surface?: 'dim' | 'default' | 'bright';
+}
+const { href, icon, iconSize = 32, title, subtitle, surface = 'dim' } = Astro.props;
+const external = /^https?:\/\//.test(href);
+---
+
+<a
+  class:list={['link-card', `link-card--${surface}`, 'card-float']}
+  href={href}
+  {...external ? { target: '_blank', rel: 'noopener noreferrer' } : {}}
+>
+  <span class="link-card__lead">
+    {icon && <Icon name={icon} size={iconSize} class="link-card__icon" />}
+    <span class="link-card__content">
+      <strong class="link-card__title">{title}</strong>
+      {subtitle && <span class="link-card__subtitle">{subtitle}</span>}
+    </span>
+  </span>
+  <svg class="link-card__arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+  </svg>
+</a>
+
+<style>
+  .link-card {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: var(--spacing-L);
+    padding: var(--spacing-3XL); /* live: 32px ✓ */
+    border-radius: var(--border-radius-S); /* live: 6px ✓ */
+    color: var(--text-body); /* drives currentColor on icon + arrow */
+    text-decoration: none;
+    /* Flat card — the lift + shadow come from `.card-float` (global.css). The
+       arrow below is a directional cue on top of that, not a second card hover. */
+  }
+  .link-card--dim { background-color: var(--surface-background-dim); }
+  .link-card--default { background-color: var(--surface-background-default); }
+  .link-card--bright { background-color: var(--surface-background-bright); }
+
+  .link-card__lead {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-L); /* live icon↔text gap: 16px ✓ */
+  }
+  .link-card__icon { flex-shrink: 0; }
+
+  .link-card__content {
+    display: flex;
+    flex-direction: column;
+  }
+  .link-card__title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-headline);
+  }
+  .link-card__subtitle {
+    /* inherits body Inter 16/400; muted slightly */
+    color: var(--text-body);
+  }
+
+  /* low-opacity trailing arrow that slides right on hover/focus */
+  .link-card__arrow {
+    flex-shrink: 0;
+    align-self: center;
+    opacity: 0.3;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .link-card:hover .link-card__arrow,
+  .link-card:focus-visible .link-card__arrow {
+    opacity: 1;
+    transform: translateX(4px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .link-card,
+    .link-card__arrow { transition: none; }
+    .link-card:hover .link-card__arrow,
+    .link-card:focus-visible .link-card__arrow { transform: none; }
+  }
+</style>

@@ -1,0 +1,58 @@
+# _redirects — host-level (Cloudflare) 301s that do NOT belong in redirects.mjs.
+#
+# The @astrojs/cloudflare adapter reads this file at build and APPENDS the
+# redirects.mjs-derived 301s after it (see the adapter's `astro:build:done`), so
+# this stays the single _redirects source — redirects.mjs is not a separate list,
+# it's merged in. Cloudflare matches top-to-bottom, first match wins.
+#
+# Works on BOTH Cloudflare Pages and Workers Static Assets (this build is Workers
+# — @astrojs/cloudflare v14 is Workers-only). On Workers, _redirects is a
+# first-class feature: evaluated at the asset layer BEFORE the Worker runs, so
+# these fire ahead of the on-demand /api/* routes with no conflict. Limits are
+# 2,000 static + 100 dynamic (we use a handful). Query-string matching is NOT
+# supported on either platform — that's why /?p= shortlinks can't live here.
+#   ⚠ MIGRATION FOOTGUN: this depends on the assets-first default. Do NOT set
+#   `assets.run_worker_first: true` in wrangler — that routes all traffic through
+#   the Worker first and BYPASSES _redirects entirely (redirects would then have
+#   to move into the Worker/Astro middleware layer).
+#
+# This file is the home for the two redirect classes redirects.mjs can't/shouldn't
+# express:
+#   1. Wildcards / splats — no static meta-refresh page can be generated per
+#      unknown path.
+#   2. Machine resource endpoints (feeds, sitemaps) — consumers follow the HTTP
+#      301 but ignore the HTML meta-refresh fallback that redirects.mjs entries
+#      emit, so a meta-refresh `.xml` file would be useless/broken for them.
+# Human-navigable PAGE redirects stay in redirects.mjs (and also get the portable
+# static fallback). Keep this list small and structural.
+#
+# Intentionally NOT redirected (left to 404 — correct behavior):
+#   /wp-admin/*, /wp-json/*  — WP app/API surface; we are not a WordPress site.
+#   /wp-content/uploads/*    — asset URLs; blog media was localized, and
+#                              redirecting an <img> src to an HTML page is wrong.
+#   /?p=<id> /?page_id=<id>  — WP shortlinks; WP already 301'd these to the pretty
+#                              permalink, so they're rarely the canonical inbound
+#                              link. Generatable later from each post's legacyId
+#                              frontmatter (the WP post ID) if analytics show real
+#                              hits. (Cloudflare query matching is also
+#                              unreliable.)
+
+# --- WordPress feed endpoints → the single Astro RSS feed (/rss.xml) ---
+# Live serves these 200 today; feed readers follow the 301 and update their URL.
+# Per-taxonomy feeds (/blog/category/<c>/feed/, /blog/tag/<t>/feed/) are lower
+# value and left uncovered for now — add if needed.
+/feed/            /rss.xml            301
+/blog/feed/       /rss.xml            301
+/comments/feed/   /rss.xml            301
+
+# --- WordPress / Yoast sitemap URLs → the @astrojs/sitemap index ---
+# Filename differs: WP used `/sitemap_index.xml` (underscore) — what search
+# engines have on file — while @astrojs/sitemap emits `/sitemap-index.xml`
+# (hyphen). Redirect both indexed WP URLs so they don't 404 after cutover.
+/wp-sitemap.xml     /sitemap-index.xml   301
+/sitemap_index.xml  /sitemap-index.xml   301
+
+# --- Retired bare WordPress author base ---
+# 404s on live today; the real author archives live at /blog/author/<slug>/
+# (which the rebuild will serve as pages — do NOT redirect that prefix here).
+/author/*         /blog/              301

@@ -1,0 +1,133 @@
+---
+/**
+ * FeatureListGraphic — two-column section: a brand graphic beside a heading +
+ * a vertical list of labelled features (h5 title + description). Generic /
+ * reusable: syft-flwr "Why Choose", syftbox "how SyftBox can benefit you" (both
+ * pair the cube graphic with a feature list).
+ *
+ * Rebuilt from live #brxe-gqpjah / #brxe-qwpzaz.
+ *
+ * Content:
+ *   heading   (prop)   — section heading (h4); headingMeasure caps its width
+ *   features  (prop)   — [{ title, body }]; body may contain inline HTML
+ *   graphic   (slot)   — the media (e.g. the cube <img>)
+ *   reverse   (prop)   — graphic on the right instead of the left
+ */
+import Text from '@ui/Text.astro';
+interface Feature {
+  title: string;
+  body: string;
+}
+interface Props {
+  heading: string;
+  features: Feature[];
+  reverse?: boolean;
+  /** Move the heading into the graphic (left) column, above the graphic, so the
+   *  right column holds only the feature list. Default keeps it over the list. */
+  headingAboveGraphic?: boolean;
+  /** Section measure: 'full' (default) | 'col-8' (narrower, centered). */
+  width?: 'full' | 'col-8';
+  /** Optional readability max-width for the heading (any length, e.g. '10em'),
+   *  via @ui/Text's .measure. Independent of section `width`. */
+  headingMeasure?: string;
+}
+const { heading, features, reverse = false, headingAboveGraphic = false, width = 'full', headingMeasure } = Astro.props;
+---
+
+<section class="feature-graphic">
+  <div class="container">
+    <div
+      class:list={[
+        'feature-graphic__inner',
+        { 'feature-graphic__inner--reverse': reverse, 'feature-graphic__inner--narrow': width === 'col-8' },
+      ]}
+    >
+      <div class="feature-graphic__media">
+        {headingAboveGraphic && <Text as="h4" class="feature-graphic__heading feature-graphic__heading--above" measure={headingMeasure}>{heading}</Text>}
+        <slot name="graphic" />
+      </div>
+
+      <div class="feature-graphic__content">
+        {!headingAboveGraphic && <Text as="h4" class="feature-graphic__heading" measure={headingMeasure}>{heading}</Text>}
+        <ul class="feature-graphic__list">
+          {features.map((f) => (
+            <li class="feature-graphic__item">
+              <Text as="h5" class="feature-graphic__item-title">{f.title}</Text>
+              <p class="feature-graphic__item-body" set:html={f.body}></p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .feature-graphic {
+    margin-block: var(--spacing-full);
+  }
+
+  .feature-graphic__inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: var(--spacing-5XL);
+  }
+  /* narrower section measure (centered), columns top-aligned */
+  .feature-graphic__inner--narrow {
+    max-width: var(--col-8);
+    margin-inline: auto;
+    align-items: start;
+  }
+  .feature-graphic__inner--reverse .feature-graphic__media {
+    order: 2;
+  }
+
+  .feature-graphic__media {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  /* heading sits above the graphic in the left column */
+  .feature-graphic__heading--above {
+    align-self: stretch;
+    margin-bottom: var(--spacing-3XL);
+  }
+  .feature-graphic__media :global(img) {
+    width: 100%;
+    max-width: 360px;
+    height: auto;
+  }
+
+  .feature-graphic__heading {
+    margin-bottom: var(--spacing-3XL);
+  }
+
+  .feature-graphic__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2XL);
+  }
+  .feature-graphic__item-title {
+    margin-bottom: var(--spacing-XS);
+  }
+  .feature-graphic__item-body {
+    margin: 0;
+    /* leading comes from the body default (1.5) — matches live. */
+  }
+
+  @media (max-width: 991px) {
+    .feature-graphic__inner {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-4XL);
+    }
+    /* graphic always leads on mobile, regardless of desktop order */
+    .feature-graphic__inner--reverse .feature-graphic__media {
+      order: 0;
+    }
+  }
+</style>

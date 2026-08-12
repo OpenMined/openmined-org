@@ -1,0 +1,201 @@
+---
+import Page from '@layouts/Page.astro';
+import Header from '@components/layout/Header.astro';
+import Footer from '@components/layout/Footer.astro';
+import HeroSwoop from '@components/graphics/HeroSwoop.astro';
+import ContentSection from '@components/sections/ContentSection.astro';
+import ComparisonTable from '@elements/ComparisonTable.astro';
+import CardGrid from '@elements/CardGrid.astro';
+import IconCard from '@elements/IconCard.astro';
+import CtaSection from '@components/sections/cta/CtaSection.astro';
+import FormEmbed from '@elements/FormEmbed.astro';
+import Button from '@ui/Button.astro';
+
+/**
+ * /federated-learning/co-design/ — syft_flwr Co-Design Program recruitment.
+ * Rebuilt verbatim from live https://openmined.org/federated-learning/co-design/
+ * (migrated verbatim). Campaign funnel → minimal header.
+ *
+ * Layout matches live:
+ *  - hero: OpenMined icon, a two-tier headline (small line 1 / big line 2), a
+ *    measure-capped intro, a swoop band. Bespoke (SimpleHero has a single-size h1).
+ *  - "The Hard Part Isn't the Model": 2-col (heading+lede left, ComparisonTable
+ *    right) — same pattern as /syft-flwr/.
+ *  - "Introducing syft_flwr": dim band, two feature cards, a strong rule, then
+ *    "Already Using Flower?".
+ *  - Apply CTA: standard CtaSection with the "Accepted partners…" subtitle.
+ *
+ * NOTE: /federated-learning/ + /federated-learning/weekly-support-meetup/ 301
+ * to / and here (see @data/redirects.mjs).
+ */
+---
+
+<Page
+  title="Federated Learning Co-Design Program — OpenMined"
+  description="Stop wrestling with federated-learning infrastructure. Partner with OpenMined on syft_flwr — the deployment engine for FL — and accelerate your project."
+>
+  <Header variant="minimal" slot="header" />
+  <Footer variant="minimal" slot="footer" />
+
+  <!-- § Hero — icon + two-tier headline + intro + swoop -->
+  <section class="cd-hero">
+    <div class="container">
+      <div class="cd-hero__inner">
+        <img class="cd-hero__icon" src="/logos/OpenMined-Icon.svg" alt="" width="50" height="50" data-fade />
+        <h1 class="cd-hero__title">
+          <span class="cd-hero__line1">Stop Wrestling with Infrastructure.</span>
+          <span class="cd-hero__line2">Start Your Federated Learning Project.</span>
+        </h1>
+        <div class="cd-hero__lede measure" style="--measure: 44em">
+          <p>The code to train your model is ready, but training it across multiple organizations means navigating a complex maze of deployment, networking, and security. Stop wasting weeks on DevOps and start training your model.</p>
+          <p>We are building <a href="https://github.com/OpenMined/syft-flwr">syft_flwr</a>, the deployment engine for federated learning, and we are inviting a select group of teams to partner with us to accelerate their projects.</p>
+        </div>
+        <div class="cd-hero__actions">
+          <Button href="#cta">Apply for the Co-Design Program</Button>
+        </div>
+      </div>
+    </div>
+    <HeroSwoop src="/images/om-flow-hero.png" width={1024} height={288} anchor="center" />
+  </section>
+
+  <!-- § The Hard Part Isn't the Model — 2-col (intro left, comparison right) -->
+  <section class="hardpart">
+    <div class="container">
+      <div class="hardpart__grid">
+        <div class="hardpart__intro">
+          <h4 class="hardpart__heading">The Hard Part Isn’t the Model.</h4>
+          <p class="hardpart__lede">Setting up a real-world federated learning project often means…</p>
+        </div>
+        <div class="hardpart__compare">
+          <ComparisonTable
+            columns={[
+              {
+                title: 'The Challenge:',
+                subtitle: 'Manual Deployment',
+                icon: 'x-solid',
+                rows: [
+                  'Weeks coordinating VPNs &amp; firewalls',
+                  'Building custom authentication systems',
+                  'Manual tracking of data governance',
+                  'Complex, brittle infrastructure',
+                ],
+              },
+              {
+                title: 'The Solution:',
+                subtitle: 'The SyftBox Way',
+                icon: 'check-solid',
+                rows: [
+                  'Zero-config networking',
+                  'Built-in identity &amp; access control',
+                  'Automated privacy &amp; compliance tools',
+                  'A simple, robust deployment engine',
+                ],
+              },
+            ]}
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- § Introducing syft_flwr — dim band, feature cards, strong rule, Flower note -->
+  <ContentSection
+    as="h3"
+    align="left"
+    width="col-8"
+    surface="dim"
+    heading="Introducing syft_flwr: Your FL Deployment Engine."
+    intro="<a href='https://github.com/OpenMined/syft-flwr'>syft_flwr</a> is an open-source framework that handles the complex networking and orchestration layer of federated learning, letting you focus on what matters: your models and your data. It combines the flexibility of Flower to train federated models with the privacy and networking power of SyftBox."
+    introMeasure="52em"
+  >
+    <CardGrid cols={2} gap="var(--spacing-XL)">
+      <IconCard icon="circle-check" titleAs="strong" surface="default" title="Production-Ready Infrastructure, Out of the Box">
+        <p>Our flexible setup works with your existing data structures and compute environments. Eliminate the technical barriers to collaboration and get your project running on a robust, scalable foundation.</p>
+      </IconCard>
+      <IconCard icon="circle-check" titleAs="strong" surface="default" title="Find and Connect with New Partners">
+        <p>The built-in network allows you to securely discover and connect with other organizations who have complementary datasets for your research or industry project, turning a major challenge into a simple discovery process.</p>
+      </IconCard>
+    </CardGrid>
+
+    <hr class="section-divider section-divider--strong cd-rule" />
+
+    <div class="cd-flower">
+      <h4>Already Using Flower?</h4>
+      <p>Great! Keep your existing implementation. <a href="https://github.com/OpenMined/syft-flwr">syft_flwr</a> is fully compatible, allowing you to gain our powerful networking and access control features without rewriting your models.</p>
+    </div>
+  </ContentSection>
+
+  <!-- § Apply CTA (hero "Apply…" button anchors here) -->
+  <div id="cta">
+    <CtaSection
+      heading="Ready to Accelerate Your Project?"
+      body="We are selecting a limited number of teams with active projects to become our first co-design partners. If you are ready to leave the infrastructure headaches behind, apply today."
+    >
+      <Fragment slot="subtitle">
+        <p>Accepted partners will get dedicated support to implement syft_flwr for their active projects</p>
+      </Fragment>
+      <FormEmbed slot="form" formId="2e631783-d831-43bd-8fed-756f1447bb3e" />
+    </CtaSection>
+  </div>
+</Page>
+
+<style>
+  /* ── Hero ──────────────────────────────────────────────────────────── */
+  .cd-hero {
+    position: relative;
+    overflow-x: clip; /* contain the swoop's horizontal bleed */
+    padding-top: var(--spacing-L); /* ~1em — minimal-header pages start right below the bar */
+    padding-bottom: var(--spacing-4XL); /* tight hero→next gap (live is close) */
+  }
+  .cd-hero__inner {
+    position: relative;
+    z-index: var(--z-content); /* above the swoop */
+    max-width: var(--col-8);
+    margin-inline: auto;
+    text-align: center;
+  }
+  .cd-hero__icon {
+    display: block;
+    width: 50px;
+    height: 50px;
+    margin: 0 auto var(--spacing-XL);
+  }
+  /* two-tier headline: small line 1 over the big line 2 (live 24 / 52px) */
+  .cd-hero__title {
+    --h1-max: 52px;
+    margin-bottom: var(--spacing-2XL);
+  }
+  .cd-hero__line1 {
+    display: block;
+    font-size: clamp(18px, 2.2vw, 24px);
+    margin-bottom: var(--spacing-3XL);
+  }
+  .cd-hero__line2 { display: block; } /* inherits the h1 size (→52px) */
+  .cd-hero__lede {
+    margin-inline: auto;
+    margin-bottom: var(--spacing-5XL);
+  }
+  .cd-hero__lede p { margin: 0; }
+  .cd-hero__lede p + p { margin-top: var(--spacing-L); }
+  .cd-hero__actions { display: flex; justify-content: center; }
+
+  /* ── The Hard Part (2-col, à la syft-flwr) ─────────────────────────── */
+  .hardpart { margin-block: var(--spacing-full); }
+  .hardpart__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) 3fr;
+    gap: var(--spacing-5XL);
+    align-items: start; /* top-align the intro against the comparison table */
+    max-width: var(--col-8); /* all content between hero and CTA caps at ~860 */
+    margin-inline: auto;
+  }
+  .hardpart__heading { margin-bottom: var(--spacing-L); }
+  .hardpart__lede { margin: 0; color: var(--text-body); }
+  @media (max-width: 991px) {
+    .hardpart__grid { grid-template-columns: 1fr; gap: var(--spacing-2XL); }
+  }
+
+  /* ── Introducing ───────────────────────────────────────────────────── */
+  .cd-rule { margin-block: var(--spacing-5XL); }
+  .cd-flower { max-width: var(--col-8); }
+</style>

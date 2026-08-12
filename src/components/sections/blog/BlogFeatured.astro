@@ -1,0 +1,122 @@
+---
+/**
+ * BlogFeatured — the large featured-post panel in the /blog featured area. Works
+ * like a big grid card (PostCard): the cover fills the whole panel as the
+ * background (object-fit: cover) with the meta row (`Featured ◆ date ◆ category`)
+ * pinned top-left and the h6 title (21px/500) bottom-left, overlaid directly on
+ * the image — no scrim. Because the background is the cover image (not the page
+ * surface), `cardText` ('light'|'dark', default 'light') sets the text contrast,
+ * same mechanism as the grid cards. Cover-less posts fall back to the shared
+ * default-thumbnail. One link. Radius snapped to --border-radius-S.
+ *
+ * A flat card, so it takes `.card-float`'s defaults on hover (no shadow →
+ * --shadow-md) exactly like the grid cards it heads (`global.css → .card-float`).
+ */
+import { Image } from 'astro:assets';
+
+interface Props {
+  href: string;
+  title: string;
+  date: Date;
+  category?: { slug: string; label: string };
+  cover?: ImageMetadata;
+  coverAlt?: string;
+  cardText?: 'light' | 'dark';
+  label?: string;
+}
+const { href, title, date, category, cover, coverAlt = '', cardText = 'light', label = 'Featured' } = Astro.props;
+const dateLabel = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+---
+
+<a class="blog-featured card-float" href={href} data-text={cardText}>
+  <div class="blog-featured__cover">
+    {/* Desktop panel (865/358 ≈ 2.42) is WIDER than the 16:9 cover, so cover is
+        width-bound: the 865px slot describes the painted width correctly, no crop
+        inflation. Mobile flips to 4:3 (1.33, narrower than 1.78) → height-bound,
+        so mobile sizes is inflated (100vw → 133vw). Same crop rule as PostCard;
+        see blog-media-strategy.md. */}
+    {cover
+      ? <Image src={cover} alt={coverAlt} widths={[480, 720, 960, 1730, 2048]} sizes="(max-width: 767px) 133vw, 865px" quality={90} data-fade />
+      : <img src="/blog/default-thumbnail.png" alt="" loading="lazy" width="856" height="482" data-fade />}
+  </div>
+  <div class="blog-featured__content">
+    <ul class="blog-featured__meta">
+      <li>{label}</li>
+      <li><time datetime={date.toISOString()}>{dateLabel}</time></li>
+      {category && <li>{category.label}</li>}
+    </ul>
+    <h6 class="blog-featured__title">{title}</h6>
+  </div>
+</a>
+
+<style>
+  .blog-featured {
+    --h6-max: 21px; /* featured title is 21px (live), larger than the 16px grid cards */
+    position: relative;
+    display: block;
+    aspect-ratio: 865 / 358;
+    border-radius: var(--border-radius-S);
+    overflow: hidden;
+    text-decoration: none;
+    /* Placeholder behind the cover while it fades in; override
+       --cover-placeholder inline for a per-post dominant color. */
+    background-color: var(--cover-placeholder, var(--surface-background-dim));
+    /* Overlay text sits on the cover image, so its color is theme-independent:
+       both cases pin to a fixed grayscale value that never flips with the page
+       theme. Default (dark) → near-black; light → near-white. */
+    color: var(--color-grayscale-850);
+  }
+  .blog-featured[data-text='light'] { color: var(--color-grayscale-50); }
+
+  /* Cover fills the whole panel as the background; text overlays it (like the
+     grid cards). */
+  .blog-featured__cover { position: absolute; inset: 0; z-index: 0; }
+  .blog-featured__cover :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .blog-featured__content {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: var(--spacing-2XL) var(--spacing-3XL);
+  }
+
+  .blog-featured__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 12px;
+    color: inherit;
+  }
+  .blog-featured__meta li { display: inline-flex; align-items: center; }
+  .blog-featured__meta li:first-child { font-weight: 600; }
+  .blog-featured__meta li + li::before {
+    content: '◆';
+    font-size: 7px;
+    padding-inline: var(--spacing-S);
+    opacity: 0.7;
+  }
+
+  .blog-featured__title {
+    margin: 0;
+    max-width: 65%; /* keep the title off the right edge; cover fills behind */
+    font-weight: 500;
+    color: inherit;
+  }
+
+  @media (max-width: 767px) {
+    .blog-featured { aspect-ratio: 4 / 3; }
+    .blog-featured__title { max-width: 100%; }
+  }
+</style>

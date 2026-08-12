@@ -1,0 +1,45 @@
+---
+/**
+ * Icon — inlines a named SVG from the site icon set (src/assets/icons/).
+ * Icons are extracted from the live site; monochrome line icons use currentColor
+ * (so they adapt to the surface/theme), while semantic marks (check, x-mark)
+ * keep their own color.
+ *
+ * Usage: <Icon name="circle-check" size={28} />
+ */
+const icons = import.meta.glob('../../assets/icons/*.svg', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+});
+
+interface Props {
+  name: string;
+  /** Box size in px (number) or any CSS length (string). */
+  size?: number | string;
+  class?: string;
+}
+const { name, size = 24, class: className = '' } = Astro.props;
+
+const svg = icons[`../../assets/icons/${name}.svg`] as string | undefined;
+if (!svg) {
+  throw new Error(`Icon "${name}" not found in src/assets/icons/`);
+}
+const dim = typeof size === 'number' ? `${size}px` : size;
+---
+
+<span class:list={['icon', className]} style={`--icon-size:${dim}`} set:html={svg} />
+
+<style>
+  .icon {
+    display: inline-flex;
+    flex: none;
+    width: var(--icon-size);
+    height: var(--icon-size);
+  }
+  .icon :global(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+</style>

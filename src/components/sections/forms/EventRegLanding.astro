@@ -1,0 +1,176 @@
+---
+/**
+ * EventRegLanding — the two-column event/session registration landing used by
+ * the India AI Impact Summit 2026 pages (/events/india-ai-impact-summit-2026/
+ * register/ + /meetup-registration/). Left rail = event content (eyebrow →
+ * `graphic` slot → title → a details icon-list → default-slot body: prose +
+ * optional SpeakerRoster); right rail = a "Register Now" HubSpot form on an
+ * always-light card, with a soft green radial blob bleeding off the right edge.
+ *
+ * Shares its layout DNA with InquiryLanding (two columns, always-light form
+ * card, decorative blob → brand gradient per the 2026-07-20 project decision,
+ * stack at 991px), but is tailored to events rather than the tone-based inquiry
+ * forms. Copy verbatim from the live pages.
+ *
+ * `details` renders the icon rows (calendar/venue/note); each `html` may carry
+ * inline links (e.g. the venue map link). Icons come from @elements/Icon.
+ */
+import Icon from '@elements/Icon.astro';
+import FormEmbed from '@elements/FormEmbed.astro';
+
+interface Detail {
+  icon: string;
+  html: string;
+  /** Render this row bold (e.g. the venue/location line). */
+  bold?: boolean;
+}
+interface Props {
+  eyebrow?: string;
+  title: string;
+  details?: Detail[];
+  formId: string;
+  formHeading?: string;
+}
+const { eyebrow, title, details = [], formId, formHeading = 'Register Now' } = Astro.props;
+---
+
+<section class="evt">
+  <div class="container evt__grid">
+    <div class="evt__content">
+      {eyebrow && <p class="evt__eyebrow">{eyebrow}</p>}
+      {Astro.slots.has('graphic') && <div class="evt__graphic"><slot name="graphic" /></div>}
+      <h1 class="evt__title">{title}</h1>
+      {details.length > 0 && (
+        <ul class="evt__details" role="list">
+          {details.map((d) => (
+            <li class:list={['evt__detail', d.bold && 'evt__detail--bold']}>
+              <Icon name={d.icon} size={20} class="evt__detail-icon" />
+              <span set:html={d.html} />
+            </li>
+          ))}
+        </ul>
+      )}
+      <div class="evt__body"><slot /></div>
+    </div>
+
+    {/* No data-section: the card themes off --surface-foreground-low, matching live. */}
+    <div class="evt__form">
+      <h5 class="evt__form-heading">{formHeading}</h5>
+      <FormEmbed formId={formId} />
+    </div>
+  </div>
+</section>
+
+<style>
+  .evt {
+    /* Live h1 is 44px on desktop (smaller than the default h1 max). */
+    --h1-max: 44px;
+    position: relative;
+    padding-block: var(--spacing-5XL) var(--spacing-max);
+    overflow: clip; /* contain the blob's right-edge bleed (no h-scroll) */
+  }
+
+  .evt__grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, var(--col-5));
+    column-gap: var(--spacing-max);
+    align-items: start;
+  }
+
+  .evt__eyebrow {
+    margin: 0 0 var(--spacing-L);
+    color: var(--text-body);
+  }
+
+  .evt__graphic {
+    margin-bottom: var(--spacing-XL);
+  }
+  .evt__graphic :global(img) {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .evt__title {
+    margin: 0 0 var(--spacing-2XL);
+  }
+
+  .evt__details {
+    list-style: none;
+    margin: 0 0 var(--spacing-3XL);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-M);
+    color: var(--text-body);
+  }
+  .evt__detail {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-M);
+  }
+  .evt__detail--bold {
+    font-weight: 700;
+  }
+  .evt__detail-icon {
+    margin-top: 2px; /* optical align with the first text line */
+    color: var(--text-subtle);
+  }
+  /* Links in the detail rows read as body text (underlined), not accent links.
+     :global() because the detail HTML is injected via `set:html` — scoped
+     component selectors don't attach to it. (Base `a { color: inherit }` in
+     global.css already keeps them out of browser-blue; this adds the underline
+     and pins the color regardless of row weight.) */
+  .evt__details :global(a) {
+    color: var(--text-body);
+    text-decoration: underline;
+  }
+
+  .evt__body :last-child {
+    margin-bottom: 0;
+  }
+
+  .evt__form {
+    position: relative; /* stacking + positioning context for the breakout blob */
+    background-color: var(--surface-foreground-low);
+    border-radius: var(--border-radius-L);
+    padding: var(--spacing-4XL);
+  }
+  .evt__form-heading {
+    margin: 0 0 var(--spacing-XL);
+  }
+
+  /* Breakout green blob (live's ellipse-green.png → brand gradient, per the
+     2026-07-20 InquiryLanding decision). Pseudo-element so the form card's
+     children keep their flush edge margins. z-index -1 shows only the halo
+     spilling past the card. */
+  .evt__form::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: -54px;
+    left: -201px;
+    width: 1089px;
+    height: 1089px;
+    max-width: initial;
+    border-radius: var(--border-radius-full);
+    background: radial-gradient(circle, var(--color-green-500) 0%, transparent 70%);
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  @media (max-width: 991px) {
+    .evt__grid {
+      grid-template-columns: 1fr;
+      row-gap: var(--spacing-5XL);
+    }
+    .evt__form::before {
+      width: 700px;
+      height: 700px;
+      top: -60px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+</style>

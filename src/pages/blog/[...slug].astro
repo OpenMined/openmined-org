@@ -1,0 +1,89 @@
+---
+/**
+ * /blog/[...slug] — individual blog post route.
+ *
+ * Resolves the post's category + author references, computes read time from the
+ * raw body (~200 wpm), renders the MDX/MD body inside BlogPost's `.prose` shell,
+ * and passes a same-category "Continue reading" set to the layout.
+ *
+ * Drafts are routed in dev (so seeded posts are previewable) but excluded from
+ * production builds.
+ */
+import { getCollection, getEntry, getEntries, render } from 'astro:content';
+import BlogPost from '@layouts/BlogPost.astro';
+import { postSlug, postLocations } from '@utils/posts';
+
+const includeDrafts = import.meta.env.DEV;
+
+export async function getStaticPaths() {
+  const drafts = import.meta.env.DEV;
+  const posts = await getCollection('blog', ({ data }) => drafts || !data.draft);
+  return posts.map((entry) => ({
+    // URL = explicit `slug` frontmatter, else path-derived (see @utils/posts).
+    params: { slug: postSlug(entry) },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content, headings } = await render(entry);
+
+const categories = await getEntries(entry.data.categories);
+const authors = await getEntries(entry.data.authors);
+const tags = await getEntries(entry.data.tags);
+
+// Read time — build-time, ~200 wpm from the raw body (spec §10, decision 8).
+const words = entry.body?.trim().split(/\s+/).filter(Boolean).length ?? 0;
+const readingMinutes = Math.max(1, Math.round(words / 200));
+
+// "Continue reading" — posts that share ANY category, newest first, up to 3,
+// excluding self. Card shows the related post's primary (first) category.
+const myCatIds = new Set(entry.data.categories.map((c) => c.id));
+const pool = await getCollection('blog', ({ data }) => includeDrafts || !data.draft);
+const relatedEntries = pool
+  .filter((p) => p.id !== entry.id && p.data.categories.some((c) => myCatIds.has(c.id)))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 2); // "Continued Reading" is a 2-up row — cap at 2 so it never orphans a 3rd
+const related = await Promise.all(
+  relatedEntries.map(async (p) => {
+    const cat = await getEntry(p.data.categories[0]);
+    return {
+      href: `/blog/${postSlug(p)}/`,
+      title: p.data.title,
+      date: p.data.date,
+      category: { slug: cat.id, label: cat.data.label },
+      cover: p.data.cover,
+      coverAlt: p.data.coverAlt,
+      cardText: p.data.cardText,
+    };
+  })
+);
+---
+
+<BlogPost
+  title={entry.data.title}
+  seoTitle={entry.data.seo?.title}
+  subtitle={entry.data.subtitle}
+  titleMax={entry.data.titleMax}
+  date={entry.data.date}
+  updated={entry.data.updated}
+  categories={categories.map((c) => ({ slug: c.id, label: c.data.label }))}
+  topics={tags.map((t) => ({ slug: t.id, label: t.data.label }))}
+  locations={postLocations(entry)}
+  hideDefaultForm={entry.data.hideDefaultForm}
+  headerDownsize={entry.data.headerDownsize}
+  sectionSpacing={entry.data.sectionSpacing}
+  authors={authors.map((a) => ({ id: a.id, name: a.data.name, role: a.data.role, bio: a.data.bio, avatar: a.data.avatar }))}
+  cover={entry.data.cover}
+  coverAlt={entry.data.coverAlt}
+  hideCover={entry.data.hideCover}
+  readingMinutes={readingMinutes}
+  seoDescription={entry.data.seo?.description ?? entry.data.excerpt}
+  related={related}
+  toc={entry.data.toc}
+  headings={headings}
+  tocMinDepth={entry.data.tocMinDepth}
+  tocMaxDepth={entry.data.tocMaxDepth}
+>
+  <Content />
+</BlogPost>

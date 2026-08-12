@@ -1,0 +1,132 @@
+---
+/**
+ * HelpWays — the three "ways to help" cards (Donate / Grant / Partner), a
+ * vertical stack. Shared by /get-involved/ ("More ways to get involved") and
+ * /contact/ ("Looking for something more specific?"); the section heading stays
+ * in the page since it differs. Copy verbatim from live (identical on both).
+ *
+ * Donate opens the site-wide Secure Donation dialog (see @components/layout/
+ * DonateModal); Grant/Partner link to their pages. The one place icons carry
+ * brand-accent color (mapped from live stroke hex).
+ *
+ * Each card is ONE click target — the card element itself is the `<a>` (grant,
+ * partner) or `<button>` (donate), not a link buried in its body. That makes it
+ * a whole-card link, so it takes the shared hover (`global.css → .card-float`,
+ * --shadow-sm → --shadow-md) and drives its own CTA arrow from the card's hover
+ * rather than the arrow's.
+ *
+ * Because the donate card is a `<button>`, whose content model is phrasing
+ * content, the body is spans made block — a `<p>` in there would be invalid and
+ * browsers would hoist it out of the button.
+ */
+import Icon from '@elements/Icon.astro';
+
+const ways = [
+  {
+    icon: 'hand-heart',
+    tone: 'donate',
+    body: 'OpenMined builds open-source, privacy-preserving tools to network public and private data for the public good.',
+    label: 'Donate',
+    donate: true,
+  },
+  {
+    icon: 'hand-coins',
+    tone: 'grant',
+    body: 'Offering a grant? Let’s explore how we can apply and put it to good use.',
+    label: 'Grant',
+    href: '/grant/',
+  },
+  {
+    icon: 'handshake',
+    tone: 'partner',
+    body: 'We partner on mission-aligned projects. Solving a data access problem? Inquire here.',
+    label: 'Partner',
+    href: '/partner/',
+  },
+];
+---
+
+<div class="ways">
+  {ways.map((w) => {
+    const Tag = w.donate ? 'button' : 'a';
+    const attrs = w.donate
+      ? { type: 'button' as const, 'data-donate-open': true }
+      : { href: w.href };
+    return (
+      <Tag class="ways-card card-float" {...attrs}>
+        {/* Native span carries the parent scope + brand-accent color; Astro does
+            not propagate a scoped-style id onto <Icon>'s root, and the icon's
+            stroke="currentColor" inherits this span's color. */}
+        <span class={`ways-card__icon ways-card__icon--${w.tone}`}><Icon name={w.icon} size={42} /></span>
+        <span class="ways-card__body">
+          <span class="ways-card__text">{w.body}</span>
+          <span class="ways-card__link">{w.label} <span class="ways-card__arrow" aria-hidden="true">-></span></span>
+        </span>
+      </Tag>
+    );
+  })}
+</div>
+
+<style>
+  .ways {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-XL);
+  }
+  /* The card IS the control — <a> for grant/partner, <button> for donate — so
+     reset the button chrome and let both read as one surface. A raised card:
+     the resting shadow goes through `.card-float`'s var, never `box-shadow`
+     (a scoped declaration would outrank the utility and pin it flat). */
+  .ways-card {
+    --card-float-shadow: var(--shadow-sm);
+    --card-float-shadow-hover: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2XL);
+    width: 100%;
+    padding: var(--spacing-3XL);
+    border: 0;
+    border-radius: var(--border-radius-S);
+    background-color: var(--surface-background-bright);
+    color: var(--text-body);
+    font: inherit;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .ways-card__icon { flex-shrink: 0; display: inline-flex; }
+  .ways-card__icon--donate  { color: var(--color-red-500); }
+  .ways-card__icon--grant   { color: var(--color-green-500); }
+  .ways-card__icon--partner { color: var(--color-blue-500); }
+
+  /* Spans made block: the donate card is a <button>, so the body can hold only
+     phrasing content (see the component note). */
+  .ways-card__body { display: block; }
+  .ways-card__text { display: block; margin-bottom: var(--spacing-S); }
+
+  .ways-card__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2XS);
+    font-weight: 700;
+    color: var(--text-headline);
+  }
+  /* Driven by the CARD's hover, not the CTA's: the card is one click target, so
+     the pointer is almost never over the CTA itself when the card is what's
+     being pointed at — a self-hover trigger would read as dead. Same reasoning
+     as `global.css → .hover-group`, which does this for underlines; the arrow is
+     this component's own affordance, so it stays scoped here.
+     :focus-visible keeps keyboard parity — the card is the focusable element. */
+  .ways-card__arrow {
+    display: inline-block;
+    transition: transform var(--transition-base);
+  }
+  .ways-card:hover .ways-card__arrow,
+  .ways-card:focus-visible .ways-card__arrow { transform: translateX(4px); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ways-card__arrow { transition: none; }
+    .ways-card:hover .ways-card__arrow,
+    .ways-card:focus-visible .ways-card__arrow { transform: none; }
+  }
+</style>

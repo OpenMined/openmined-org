@@ -1,0 +1,252 @@
+---
+/**
+ * SearchModal — the site-wide full-screen search dialog.
+ *
+ * Faithful rebuild of the live Bricks search overlay (`.bricks-search-overlay`,
+ * probed off prod 2026-07-29): a full-viewport scrim with a single centered
+ * field, a magnifier inside the field's leading edge, and a large close glyph
+ * pinned to the top-right corner of the viewport. Live renders a "Search site"
+ * title above the field but sets it `display: none`, so there is deliberately
+ * **no heading** here either.
+ *
+ * Rendered ONCE, globally, from Base.astro — so it exists on every page. Opened
+ * by any `[data-search-open]` trigger (the two header instances today) through
+ * one delegated listener, exactly as DonateModal does with `[data-donate-open]`.
+ *
+ * Shell is a native <dialog> + showModal(), for the same reasons as DonateModal:
+ * it renders in the browser's TOP LAYER, so it paints over the sticky header
+ * without entering the z-index scale at all (live needs `z-index: 999` plus a
+ * `body.search-open` class to stop its header sliding away; we need neither).
+ * Esc and backdrop-click close come with the element.
+ *
+ * Submitting is a plain GET form to /search — Enter navigates with no JS
+ * handler. The script only (a) blocks an all-whitespace query and (b) clears the
+ * field on open, which live achieves with a MutationObserver watching its own
+ * overlay's class list.
+ *
+ * Live → token mapping (measured; each snapped to the nearest token per the
+ * AGENTS.md rule, deltas noted inline):
+ *   overlay padding      2em / 32px            → --spacing-3XL
+ *   scrim                --surface-foreground-lowest @ .9  (live's own token)
+ *   field max-width      600px                 → --col-6 (640px; +40px)
+ *   field height         60px                   (the field's own box)
+ *   field radius         6px                   → --border-radius-S
+ *   field background     --surface-background-default (live's own token)
+ *   close inset          80px                  → --spacing-full (88px)
+ *   transition           .4s                   → --transition-base
+ * Live's 800px inner wrapper is not carried over: the 600px field is its only
+ * child, so the box is invisible, and 800px maps to no token.
+ */
+import Icon from '@elements/Icon.astro';
+---
+
+<dialog class="site-search" aria-label="Search this site" data-search-modal data-pagefind-ignore>
+  <button type="button" class="site-search__close" data-search-close aria-label="Close search">
+    <Icon name="close" size={36} />
+  </button>
+
+  <div class="site-search__inner">
+    <form class="site-search__form" action="/search" method="get" role="search" data-search-form>
+      <label class="site-search__label" for="site-search-input">Search</label>
+      <span class="site-search__glyph" aria-hidden="true"><Icon name="search" size={20} /></span>
+      <input
+        type="search"
+        id="site-search-input"
+        class="site-search__input"
+        name="q"
+        placeholder="Search OpenMined.org..."
+        autocomplete="off"
+        spellcheck="false"
+      />
+    </form>
+  </div>
+</dialog>
+
+<style>
+  /* ── Dialog shell / scrim ─────────────────────────────────────────────
+     A modal <dialog> is fixed and centered by the UA, but the global
+     `* { margin: 0 }` reset kills the `margin: auto` that centers it — so this
+     restores the full-viewport box explicitly (same fix as DonateModal). */
+  .site-search {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    padding: var(--spacing-3XL);
+    border: 0;
+    /* Live's overlay box is transparent and paints its scrim through an ::after
+       at 0.9 opacity. A <dialog> has a real ::backdrop for exactly this, so the
+       scrim goes there instead and the element keeps no background of its own. */
+    background: transparent;
+    color: var(--text-body);
+  }
+  /* ⚠ The centering `display` MUST be scoped to [open], and cannot live on
+     `.site-search` above.
+     A closed dialog is hidden by the UA rule `dialog:not([open]) { display: none }`,
+     whose specificity is (0,1,1) — but Astro compiles a scoped `.site-search` to
+     `.site-search.astro-<hash>`, which is (0,2,0) and therefore BEATS it. So an
+     unconditional `display: flex` here silently un-hides the closed dialog and the
+     search field renders on top of every page on load. (DonateModal never hit this
+     because it sets no `display` at all and centers with `margin: auto`.) */
+  .site-search[open] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /* Live's scrim is its own token at 0.9 opacity. Safe to read a THEME-dependent
+     token here even though older engines resolve `::backdrop` custom properties
+     against the root rather than the originating element: `data-theme` sits on
+     <html> and tokens.css redefines the surface set under `[data-theme="dark"]`,
+     so the root's own computed value is already the right one for the theme. */
+  .site-search::backdrop {
+    background: color-mix(in srgb, var(--surface-foreground-lowest) 90%, transparent);
+  }
+
+  /* ── Entrance ─────────────────────────────────────────────────────────
+     Live cross-fades the overlay over .4s. Same here, with the field rising a
+     few px so the dialog reads as arriving rather than blinking on. */
+  @keyframes siteSearchBackdropIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes siteSearchFieldIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: none; }
+  }
+  .site-search[open]::backdrop { animation: siteSearchBackdropIn var(--transition-base) both; }
+  .site-search[open] .site-search__inner { animation: siteSearchFieldIn 0.28s ease-out both; }
+
+  /* ── Close ────────────────────────────────────────────────────────────
+     Pinned to the viewport corner, not to the field — live fixes it at 80px.
+     Absolute (not fixed) is enough: the dialog itself is the full viewport. */
+  .site-search__close {
+    position: absolute;
+    top: var(--spacing-full);
+    right: var(--spacing-full);
+    display: inline-flex;
+    padding: 0;
+    background: none;
+    border: 0;
+    color: var(--text-headline);
+    cursor: pointer;
+    transition: color var(--transition-base);
+  }
+  .site-search__close:hover { color: var(--color-interactive-hover); }
+
+  /* ── Field ────────────────────────────────────────────────────────────── */
+  .site-search__inner {
+    width: 100%;
+    max-width: var(--col-6); /* live 600px → 640px, nearest column step */
+  }
+
+  .site-search__form {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  /* The field is the whole affordance; its label is for assistive tech only. */
+  .site-search__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* Live paints the magnifier as a ::before background-image on the form. Real
+     markup instead, so it inherits currentColor and needs no hosted asset. */
+  .site-search__glyph {
+    position: absolute;
+    left: var(--spacing-XL);
+    display: inline-flex;
+    color: var(--text-subtle);
+    pointer-events: none;
+  }
+
+  .site-search__input {
+    width: 100%;
+    height: 60px;
+    /* Leading pad clears the 20px glyph at its 20px inset. */
+    padding: 0 var(--spacing-XL) 0 var(--spacing-5XL);
+    font-size: 18px;
+    color: var(--text-headline);
+    background-color: var(--surface-background-default);
+    border: 0;
+    border-radius: var(--border-radius-S);
+    box-shadow: var(--shadow-md);
+  }
+  .site-search__input::placeholder { color: var(--text-subtle); }
+  .site-search__input:focus-visible {
+    outline: 2px solid var(--color-interactive-focus);
+    outline-offset: 2px;
+  }
+  /* Chrome's own blue clear glyph inside type="search" isn't styleable, and the
+     close button already clears and dismisses — same call as BlogToolbar's field. */
+  .site-search__input::-webkit-search-cancel-button { appearance: none; }
+
+  @media (max-width: 767px) {
+    .site-search { padding: var(--spacing-XL); }
+    /* 88px would put the close glyph a quarter of the way down a 390px screen.
+       Pull it to the same inset the dialog already uses. */
+    .site-search__close {
+      top: var(--spacing-XL);
+      right: var(--spacing-XL);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-search[open]::backdrop,
+    .site-search[open] .site-search__inner { animation: none; }
+    .site-search__close { transition: none; }
+  }
+</style>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('[data-search-modal]');
+  if (dialog) {
+    const form = dialog.querySelector<HTMLFormElement>('[data-search-form]')!;
+    const input = form.querySelector<HTMLInputElement>('input[name="q"]')!;
+
+    const open = () => {
+      if (dialog.open) return;
+      // Live clears the field every time the overlay opens; a stale query left in
+      // a dialog that reopens empty-looking is worse than starting fresh.
+      input.value = '';
+      dialog.showModal();
+      // showModal() autofocuses the first focusable child, which is the close
+      // button — put the caret in the field instead, since typing is the point.
+      input.focus();
+    };
+
+    // One delegated listener for every trigger anywhere on the page (the two
+    // header instances today), same shape as DonateModal's [data-donate-open].
+    document.addEventListener('click', (e) => {
+      const trigger = (e.target as HTMLElement).closest('[data-search-open]');
+      if (!trigger) return;
+      e.preventDefault();
+      open();
+    });
+
+    dialog.querySelector('[data-search-close]')!.addEventListener('click', () => dialog.close());
+    // Click on the scrim — i.e. the dialog box itself, outside the field block.
+    dialog.addEventListener('click', (e) => {
+      if (!(e.target as HTMLElement).closest('.site-search__inner')) dialog.close();
+    });
+
+    // Enter submits the form natively (GET /search?q=…). The only thing worth
+    // intercepting is a blank query, which would land on a results page with
+    // nothing to search for.
+    form.addEventListener('submit', (e) => {
+      if (!input.value.trim()) {
+        e.preventDefault();
+        input.focus();
+      }
+    });
+  }
+</script>

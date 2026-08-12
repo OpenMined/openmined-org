@@ -1,0 +1,377 @@
+---
+/**
+ * Footer — primary site chrome.
+ *
+ * Rebuilt from the live production footer (#brx-footer).
+ *
+ * Live → token mapping:
+ *   main bg       rgb(39,37,50) = #272532          → --color-grayscale-850
+ *   bar bg        rgb(23,22,29) = #17161d           → --color-grayscale-950
+ *   headline text rgb(252,252,253)                  → --color-grayscale-50
+ *   muted text    rgb(207,205,214)                  → --color-grayscale-400
+ *   divider                                         → --color-grayscale-700
+ *   social icon size    24px                        → <Icon size={24}>
+ *   social gap          18px                        → --spacing-L (16px)  [same rounding as header]
+ *   nav column gap      32px                        → --spacing-3XL
+ *   col heading margin  12px                        → --spacing-M
+ *   button radius       6px                         → --border-radius-S (via Button primitive)
+ *   container           1300px                      → .container
+ *   bar container       ~full-width (1400px)        → full-bleed, no .container
+ *
+ * Unmappable values (flagged inline):
+ *   social-row bottom pad 27px, body pad 75px / 109px, h3 margin 22px,
+ *   body copy margin 51px, CTA gap 22px, bar vert pad 18px
+ *
+ * Always-dark: footer never responds to [data-theme]. All color values are
+ * fixed palette tokens, not semantic surface tokens.
+ *
+ * Variant: `minimal` renders ONLY the bottom bar (logomark + Privacy +
+ * copyright) — the stripped chrome for campaign-funnel pages that also use
+ * `Header variant="minimal"` (see the `variant` prop).
+ *
+ * Icons are local inlined SVGs (src/assets/icons/) via <Icon> — no CDN, they
+ * paint with the document (no pop-in) and take fill from the link's currentColor.
+ */
+import Button from '@ui/Button.astro';
+import Icon from '@elements/Icon.astro';
+
+interface Props {
+  /** Footer treatment. `default` = the full footer (social row + nav columns +
+   *  Mission CTA + bottom bar). `minimal` = the bottom bar ONLY (logomark +
+   *  Privacy Policy + copyright) — the stripped chrome campaign-funnel pages
+   *  pair with `Header variant="minimal"`. */
+  variant?: 'default' | 'minimal';
+}
+const { variant = 'default' } = Astro.props;
+const isMinimal = variant === 'minimal';
+
+const navColumns = [
+  {
+    heading: 'Learn More',
+    links: [
+      { label: 'Foundation', href: '/foundation/' },
+      { label: 'Blog', href: '/blog/' },
+      { label: 'Careers', href: '/careers/' },
+    ],
+  },
+  {
+    heading: 'Solutions',
+    links: [
+      { label: 'Syft Space | SyftHub', href: '/syfthub/' },
+      { label: 'syft-flwr', href: '/syft-flwr/' },
+      { label: 'SyftBox [Beta]', href: '/syftbox/' },
+      { label: 'PySyft', href: '/pysyft/' },
+      { label: 'Attribution-Based Control', href: '/attribution-based-control/' },
+    ],
+  },
+  {
+    heading: 'Programs',
+    links: [
+      { label: 'NAIRR Pilot Partnership', href: '/programs/nairr/' },
+      { label: 'FL Project Co-Design', href: '/federated-learning/co-design/' },
+    ],
+  },
+];
+
+const socials: Array<{ label: string; href: string; icon: string }> = [
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/company/openmined', icon: 'logo-linkedin' },
+  { label: 'X', href: 'https://x.com/openminedorg', icon: 'logo-x' },
+  { label: 'GitHub', href: 'https://github.com/OpenMined', icon: 'logo-github' },
+  { label: 'YouTube', href: 'https://www.youtube.com/c/openminedorg', icon: 'logo-youtube' },
+  { label: 'Bluesky', href: 'https://bsky.app/profile/openmined.bsky.social', icon: 'logo-bluesky' },
+];
+---
+
+<footer class="site-footer" data-pagefind-ignore>
+
+  <!-- ── Main body (always dark: --color-grayscale-850) — omitted in the
+       minimal variant, which renders the bottom bar only ─────────────── -->
+  {!isMinimal && (
+  <div class="site-footer__main">
+    <div class="container">
+
+      <!-- Follow us + social icons -->
+      <div class="site-footer__social-row">
+        <p class="site-footer__social-label">Follow us</p>
+        <ul class="site-footer__social" aria-label="OpenMined on social media">
+          {socials.map((s) => (
+            <li>
+              <a
+                class="site-footer__social-link"
+                href={s.href}
+                target="_blank"
+                rel="noopener"
+                aria-label={s.label}
+              >
+                <Icon name={s.icon} size={24} />
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Horizontal divider -->
+      <hr class="site-footer__divider" />
+
+      <!-- Nav columns + Mission CTA -->
+      <div class="site-footer__body">
+
+        <nav class="site-footer__nav" aria-label="Footer navigation">
+          {navColumns.map((col) => (
+            <div class="site-footer__nav-col">
+              <p class="site-footer__nav-heading">{col.heading}</p>
+              <ul class="site-footer__nav-list">
+                {col.links.map((link) => (
+                  <li>
+                    <a class="site-footer__nav-link link-hover-line" href={link.href}>{link.label}</a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </nav>
+
+        <div class="site-footer__mission">
+          <h3 class="site-footer__mission-heading">Support the Mission</h3>
+          <p class="site-footer__mission-body">
+            Our vision for the future is ambitious. Here is how you can help:
+          </p>
+          <div class="site-footer__mission-ctas">
+            <Button href="/get-involved/">Get Involved</Button>
+            <Button variant="outline" data-donate-open>Donate</Button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  )}
+
+  <!-- ── Bottom bar (always dark: --color-grayscale-950) ───────────── -->
+  <div class="site-footer__bar">
+    <div class="container-xfull site-footer__bar-inner">
+      <a href="/" aria-label="OpenMined — home" class="site-footer__bar-logo">
+        <img src="/logos/OpenMined-Icon.svg" alt="" width="32" height="32" />
+      </a>
+      <div class="site-footer__bar-meta">
+        <a class="site-footer__bar-link" href="/privacy-policy/">Privacy Policy</a>
+        <span class="site-footer__bar-sep" aria-hidden="true"></span>
+        <p class="site-footer__bar-copy">© 2026 OpenMined Foundation</p>
+      </div>
+    </div>
+  </div>
+
+</footer>
+
+<style>
+  /* All colors use fixed palette tokens — footer is always dark, never themes. */
+  .site-footer {
+    color: var(--color-grayscale-50);
+  }
+
+  /* ── Main body ─────────────────────────────────────────────────────── */
+  .site-footer__main {
+    background-color: var(--color-grayscale-850);
+  }
+
+  /* Follow us row */
+  .site-footer__social-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px var(--spacing-4XL);
+    padding-top: var(--spacing-4XL);
+    /* TODO(decision: bottom pad is 27px on live — no exact token; using --spacing-2XL 24px) */
+    padding-bottom: var(--spacing-2XL);
+  }
+
+  .site-footer__social-label {
+    color: var(--color-grayscale-50);
+    font-weight: 500; /* medium — non-default; body is 400 */
+  }
+
+  .site-footer__social {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-L); /* live 18px → --spacing-L 16px; matches header */
+    list-style: none;
+  }
+
+  /* Flex, not the default block: an inline-level child sits on the text
+     baseline, so the line box adds the descender below it — the row measured
+     30px tall around a 24px icon. Same fix as the header's social row. */
+  .site-footer__social > li {
+    display: flex;
+  }
+
+  .site-footer__social-link {
+    display: flex;
+    align-items: center;
+    color: var(--color-grayscale-50);
+    font-size: 24px;
+    line-height: 1;
+    transition: color var(--transition-base);
+  }
+  .site-footer__social-link:hover { color: var(--color-interactive-hover); }
+
+  /* Divider below follow-us row */
+  .site-footer__divider {
+    border: 0;
+    border-top: 1px solid var(--color-grayscale-700);
+    margin: 0;
+  }
+
+  /* Nav + Mission two-column grid */
+  .site-footer__body {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    gap: var(--spacing-XL);
+    /* TODO(decision: live desktop padding is 75px top / 109px bottom — no tokens map) */
+    padding-top: 75px;
+    padding-bottom: 109px;
+  }
+
+  /* Three-column nav grid */
+  .site-footer__nav {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-3XL); /* live 32px = --spacing-3XL ✓ */
+    align-content: start;
+  }
+
+  .site-footer__nav-heading {
+    color: var(--color-grayscale-50);
+    font-weight: 500; /* medium — non-default; body is 400 */
+    margin-bottom: var(--spacing-M); /* live 12px = --spacing-M ✓ */
+  }
+
+  .site-footer__nav-list {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+  }
+
+  /* Underline is `.link-hover-line` (global.css). Rows are padded for their tap
+     target, so `--link-hover-line-pad` keeps the line at the shared
+     label-to-line gap rather than the padding edge. */
+  .site-footer__nav-link {
+    --link-hover-line-pad: var(--spacing-2XS);
+    display: inline-block;
+    color: var(--color-grayscale-400);
+    padding-top: var(--link-hover-line-pad);
+    transition: background-size var(--transition-base), color var(--transition-base);
+  }
+  .site-footer__nav-link:hover {
+    color: var(--color-grayscale-50);
+    background-size: 100% 1px;
+  }
+
+  /* Support the Mission block */
+  .site-footer__mission {
+    max-width: 375px; /* live max-width constraint on the right column */
+  }
+
+  .site-footer__mission-heading {
+    color: var(--color-grayscale-50); /* always-dark — can't use --text-headline */
+    /* TODO(decision: live margin-bottom is 22px — between --spacing-XL 20px and --spacing-2XL 24px) */
+    margin-bottom: var(--spacing-XL);
+  }
+
+  .site-footer__mission-body {
+    color: var(--color-grayscale-400); /* always-dark */
+    /* TODO(decision: live margin-bottom is 51px — no token maps) */
+    margin-bottom: 51px;
+  }
+
+  .site-footer__mission-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    /* TODO(decision: live gap is 22px — between --spacing-XL 20px and --spacing-2XL 24px) */
+    gap: var(--spacing-XL);
+  }
+
+  /* Override button tokens: footer is always-dark so buttons must invert.
+     Primary → white bg / dark text. Outline → white border / white text. */
+  .site-footer__mission-ctas :global(.btn) {
+    --button-dark-color: var(--color-grayscale-50);
+    --button-light-color: var(--color-grayscale-850);
+  }
+
+  /* ── Bottom bar ──────────────────────────────────────────────────── */
+  .site-footer__bar {
+    background-color: var(--color-grayscale-950);
+    /* TODO(decision: live vert pad is 18px — between --spacing-L 16px and --spacing-XL 20px) */
+    padding-block: var(--spacing-L);
+  }
+
+  .site-footer__bar-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-inline-end: var(--spacing-M); /* live: 12px additional right pad = --spacing-M ✓ */
+  }
+
+  .site-footer__bar-logo img {
+    display: block;
+    width: 32px;
+    height: 32px;
+  }
+
+  .site-footer__bar-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2XL); /* live 24px = --spacing-2XL ✓ */
+  }
+
+  .site-footer__bar-link {
+    color: var(--color-grayscale-400);
+    text-decoration: none;
+    transition: color var(--transition-base);
+  }
+  .site-footer__bar-link:hover { color: var(--color-grayscale-50); }
+
+  /* Vertical rule between Privacy Policy and copyright */
+  .site-footer__bar-sep {
+    display: block;
+    width: 2px;
+    height: 14px;
+    background-color: var(--color-grayscale-600);
+  }
+
+  .site-footer__bar-copy {
+    color: var(--color-grayscale-400);
+  }
+
+
+  /* ═══════════════════════════════════════════════════════════════════
+     MOBILE (≤ 991px — matches global scroll-margin breakpoint)
+     ═══════════════════════════════════════════════════════════════════ */
+  @media (max-width: 991px) {
+    .site-footer__social-row {
+      padding-block: var(--spacing-2XL); /* live mobile: 24px ≈ --spacing-2XL ✓ */
+    }
+
+    .site-footer__body {
+      grid-template-columns: 1fr;
+      padding-block: var(--spacing-2XL); /* live mobile: 24px each side */
+    }
+
+    /* Divider above Mission block appears on mobile, hidden on desktop */
+    .site-footer__mission {
+      max-width: 100%;
+    }
+    .site-footer__mission::before {
+      content: '';
+      display: block;
+      height: 1px;
+      background-color: var(--color-grayscale-700);
+      margin-bottom: var(--spacing-2XL);
+    }
+
+    .site-footer__nav {
+      grid-template-columns: 1fr; /* columns stack on mobile */
+      gap: var(--spacing-XL); /* live mobile gap: 20px = --spacing-XL ✓ */
+    }
+  }
+</style>

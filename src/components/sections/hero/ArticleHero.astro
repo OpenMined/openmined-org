@@ -1,0 +1,75 @@
+---
+/**
+ * ArticleHero — centered hero for long-form prose pages (attribution-based-control,
+ * future whitepapers / letters). A small brand icon, an h1 title, and an optional
+ * subtitle, centred in a col-8 column. Distinct from SimpleHero (product hero with
+ * eyebrow logo, CTA row, and the decorative swoop) — this one is text-only and
+ * pairs with a `.prose` body below.
+ *
+ * Rebuilt from live #brxe-cdbaa2 (ABC intro). Reference:
+ * Measured off the live page.
+ *
+ * Live → token mapping:
+ *   content column   ~860px centred                 → --col-8
+ *   icon             colourful ABC mesh circle ~52px → 52px (raw; brand icon asset)
+ *   h1               Rubik, responsive               → global h1 (no override)
+ *   subtitle         ~20px, centred, body colour     → 20px lede
+ */
+import Text from '@ui/Text.astro';
+
+interface Props {
+  heading: string;
+  subtitle?: string;
+  /** Optional brand icon shown above the title. */
+  icon?: string;
+  iconAlt?: string;
+}
+const { heading, subtitle, icon, iconAlt = '' } = Astro.props;
+---
+
+<section class="article-hero">
+  <div class="container">
+    <div class="article-hero__inner">
+      {icon && (
+        <img class="article-hero__icon" src={icon} alt={iconAlt} width="52" height="52" />
+      )}
+      <Text as="h1" class="article-hero__heading">{heading}</Text>
+      {subtitle && <Text as="p" class="article-hero__subtitle">{subtitle}</Text>}
+    </div>
+  </div>
+</section>
+
+<style>
+  .article-hero {
+    padding-top: var(--spacing-full);    /* live container margin-top ~97px → 88 */
+    padding-bottom: var(--spacing-4XL);  /* gap down to the prose body */
+    --h1-max: 53px;                      /* live ABC title 53px (long-title override) */
+  }
+
+  .article-hero__inner {
+    max-width: var(--col-8);
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .article-hero__icon {
+    display: block;
+    width: 52px;
+    height: 52px;
+    margin: 0 auto var(--spacing-2XL);
+  }
+
+  /* .article-hero__heading on <h1> — type from global h1 */
+  .article-hero__heading {
+    margin-bottom: var(--spacing-2XL);
+  }
+
+  /* Subtitle: normal-weight body text, centred under the title, full column. */
+  .article-hero__subtitle {
+    color: var(--text-body);
+  }
+
+  @media (max-width: 991px) {
+    .article-hero__inner { max-width: 100%; }
+  }
+</style>

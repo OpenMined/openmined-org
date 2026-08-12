@@ -1,0 +1,267 @@
+---
+import Page from '@layouts/Page.astro';
+import SimpleHero from '@components/sections/hero/SimpleHero.astro';
+import HeroSwoop from '@components/graphics/HeroSwoop.astro';
+import ContentSection from '@components/sections/ContentSection.astro';
+import Accordion from '@ui/Accordion.astro';
+
+/**
+ * /pysyft/faqs/ — the full PySyft FAQ. Rebuilt verbatim from live
+ * #brxe-riofmv (https://openmined.org/pysyft/faqs/). The sibling /pysyft/
+ * page shows a 3-question preview that deep-links here.
+ *
+ * Content note — the live source carries a few defects, reproduced faithfully
+ * in *words* while their formatting intent is honored here:
+ * TODO(content): live answers use unrendered markdown (`**bold**`, `[text](url)`)
+ *   in the "What are PETs", "output verification", and "input verification"
+ *   answers — Bricks printed the literal syntax. Rendered as real bold/links here
+ *   (words unchanged); confirm against the intended source.
+ * TODO(content): two live placeholders are reproduced as-is — a "Structured
+ *   Transparency" link points at `#`, and the mock-data answer ends with a
+ *   literal "<link>". Awaiting real targets.
+ * TODO(content): several answers are live-abbreviated cross-references ("See
+ *   previous section." / "See the section above.") that assumed the /pysyft/
+ *   page context; they read oddly standalone but are verbatim. Confirm copy.
+ *
+ * Live → token mapping:
+ *   section padding      50px top / 100px bottom → SimpleHero + section rhythm
+ *   h1 "PySyft FAQs"     Rubik 61px, centered    → SimpleHero (global h1)
+ *   FAQ column           ~90% (no hard cap)      → col-8 (readable, matches /pysyft/)
+ *   category label       Rubik 20px/500, flips   → --text-headline (see .faq__cat)
+ *   item gap             --spacing-XL            → .faq__list gap
+ */
+
+// Repeated verbatim answers — the live page cross-lists these questions under
+// more than one category, so the same answer appears twice. Defined once.
+const A_JOINS = `<p>You can perform joins using Syft on a secure enclave. To do this, you&rsquo;ll download mock datasets from multiple organizations, design code that uses both, and then submit that code to a secure enclave for execution. To facilitate your project, Syft will orchestrate the various approvals necessary from the organizations to allow your computation &mdash; notifying you when your computation is complete.</p>`;
+
+const A_QUALITY = `<p>We get this question all the time, and our response is this: anything you can do with data that is too big to read &mdash; you can do with data that is too private to read. But what does this mean in practice &mdash; especially when you have dirty data?</p>
+<p>As a first line of defense, before you submit queries to the real data, you first design those queries against the mock data. We encourage data owners to ensure their mock data mirrors data quality issues present in their real data &mdash; so that you (when you design your queries) can keep those defects in mind. In practice, this helps a lot.</p>
+<p>As a primary line of defense against dirty data, you can submit any query to run on the real data. If you&rsquo;re suspicious there might be some quality issues, use the same queries you&rsquo;d use if the data was too big to read. Perform descriptive statistics and ask to see a handful of samples your algorithm finds highly suspect.</p>
+<p>All the tools of Python are at your disposal &mdash; the only thing that&rsquo;s different between using Syft and having a copy of the data yourself is that there&rsquo;s a person (or their privacy configurations) sitting between you and the real data &mdash; but you can still query just as much.</p>
+<p>As a path of last resort, if you need to ask for too many samples of the data to help debug issues with it &mdash; you&rsquo;ll find yourself partnering with the data manager working for the data owner on the debugging process. While this isn&rsquo;t the ideal case, it turns out this is the right answer. The data owner also doesn&rsquo;t want dirty data (they&rsquo;re usually offering it for research for a reason!) In practice, they&rsquo;ll be grateful that you found an issue and interested in working with you to rectify it.</p>`;
+
+const A_EXPLORATORY = `<p>Anything you can do when you have a copy of the data, you can do with Syft. The only difference is &mdash; in the worst case &mdash; you have to wait for someone to approve your code before you see the results.</p>
+<p>Consider the following analogy: You have a plethora of big-data tools you use to explore data that is too big for you to read, and those tools will also transfer when you need to analyze data that is too private to read. You can run summary statistics, you can ask for samples of the data, you can train covariate models &mdash; and all the other common practices you might be interested in doing when exploring the data. Syft is built to help you explore data and get the answers you&rsquo;re looking for &mdash; in data you normally couldn&rsquo;t access.</p>`;
+
+const A_COMPUTE = `<p>If you are working with a data owner deployed in the cloud, you should be able to use Syft to get contact details for your data owner &mdash; and request a specific pool of resources spun up for your research. If the data owner does not have that capacity, OpenMined may be able to help &mdash; contact us for more information.</p>`;
+
+// FAQ groups, in live document order. `label: null` = the ungrouped block that
+// opens the page (no category heading on live).
+const groups = [
+  {
+    label: null,
+    items: [
+      {
+        q: 'How can I possibly do data science without getting a copy of the data?',
+        a: `<p>Start using the tutorials and you&rsquo;ll see. But at a high level, you already work with data that is too big for you to read. The same techniques cross-over pretty well to when data is too private for you to read.</p>`,
+      },
+      {
+        q: 'I emailed an organization who has data and they told me “No” — what do I do now?',
+        a: `<p>Email us and tell us about it&nbsp;&mdash; perhaps we can help: <a href="mailto:support@openmined.org">support@openmined.org</a></p>`,
+      },
+      {
+        q: 'Does Syft work with GPUs?',
+        a: `<p>[Medium term] Yes.</p>`,
+      },
+      {
+        q: 'Does Syft cost money?',
+        a: `<p>No, Syft is free and open source, as built by the OpenMined Foundation.</p>`,
+      },
+      {
+        q: 'Who pays for the computation?',
+        a: `<p>Since data scientists run their analysis on a server owned by the data owner, the data owner pays for computation by default. If computation is a blocker for your integration, OpenMined may be able to help &ndash; contact us for more information.</p>`,
+      },
+    ],
+  },
+  {
+    label: 'Data Science Capabilities',
+    items: [
+      {
+        q: 'What type of data analysis can I perform?',
+        a: `<p>See previous section.</p>`,
+      },
+      {
+        q: 'How can I conduct an analysis that requires data joins between private datasets owned by multiple organizations?',
+        a: A_JOINS,
+      },
+      {
+        q: 'Since Syft sends my code to the data owners, how can I study someone’s data if I need to keep my research code/data secret from the data owner?',
+        a: `<p>You can keep your research code/data/model secret using Syft and a secure enclave. To do this, you would use Syft to select a cloud-hosted secure enclave, and then, instead of submitting your code to the data owner directly, you would submit it to this enclave. Syft would then handle the approvals necessary for the data owner to upload their assets to the enclave to run on your code. Because of the special properties of the enclave, your code (and their datasets) can remain secret from each other (and from the cloud-enclave provider!) Altogether, you can keep your results secret with Syft.</p>`,
+      },
+      {
+        q: 'Do I need PETs expertise to use it?',
+        a: `<p>No, you only need knowledge of Python and data science. In some cases, a data owner will use PETs to automate their processes, but they will provide clear instructions for you when they offer this kind of API.</p>`,
+      },
+      {
+        q: 'How can I conduct an analysis that requires data joins between private datasets owned by multiple organizations?',
+        a: A_JOINS,
+      },
+      {
+        q: 'What are PETs, and how do they work?',
+        a: `<p>PETs are a variety of algorithms that seek to amplify privacy protection, and we (and the internet) offer many resources to learn about them. However, it&rsquo;s worth mentioning that PETs are often described poorly &mdash; as &ldquo;end all be all&rdquo; solutions to solving privacy. In our opinion, PETs are actually about making privacy protection more <strong>scalable.</strong> That is to say; any data-owning organization can protect its privacy by hand-reviewing all code that&rsquo;s run on its servers and all results that are sent out to external researchers.</p>
+<p>However, this is <strong><em>intractably expensive to do in many cases</em></strong> &mdash; and as a result, privacy is difficult to protect. With a few exceptions, privacy enhancing technologies are actually about <strong>scaling</strong> privacy protection, more so than providing it outright. For more on our philosophy of privacy-enhancing technologies, see <a href="https://arxiv.org/abs/2012.08347">this academic paper</a> or <a href="https://courses.openmined.org/courses/our-privacy-opportunity">this free course</a>. If you want to learn more about PETs on your own, google search for terms like the following:</p>
+<p><em>Differential privacy, Federated Learning, Secure Enclaves, Zero-knowledge proofs, Secure Multi-party Computation, Homomorphic Encryption</em></p>`,
+      },
+      {
+        q: 'How can I be sure that the analysis output is accurate?',
+        a: `<p>To use the language of structured transparency, you&rsquo;re asking about &ldquo;<a href="https://arxiv.org/abs/2012.08347">output verification</a>.&rdquo; If you&rsquo;re worried about how to write good data science code, we recommend tutorials. However, if you&rsquo;re asking, &ldquo;how do I know if the code I submit is actually run on the real data&rdquo; &mdash; Syft has you covered. From a computational perspective, you write the code that gets run on the real data.</p>
+<p>When using Syft, you prototype your code on an exact replica of the real data so that &mdash; after you submitted it to a data owner for execution &mdash; that data owner can run your code unaltered.</p>
+<p>If you&rsquo;re worried about the data owner changing your code in some way, you can use Syft with zero-knowledge proofs (experimental) to prevent this. We&rsquo;re also working on functionality that would make it nearly impossible for a data owner to swap out your code for something else (using secure enclaves with code attestation).</p>
+<p>Since this is a nuanced topic, please reach out via OpenMined&rsquo;s Slack if you&rsquo;d like to discuss it with our team.</p>`,
+      },
+      {
+        q: 'How can I ensure my analysis was done on the right assets?',
+        a: `<p>Great question! To use the language of structured transparency, you&rsquo;re asking about &ldquo;<a href="https://arxiv.org/abs/2012.08347">input verification</a>.&rdquo;</p>
+<p>If you&rsquo;re asking whether a data owner might <strong>accidentally</strong> run your code on the wrong assets &mdash; Syft has you covered. When you submit your code for execution, it comes with an identifier that links it to the real data you specify (the real version of the mock data you prototyped with). With this infrastructure in place, we&rsquo;re optimistic that accidental swapping of datasets is unlikely to go undetected.</p>
+<p>However, if you&rsquo;re instead worried about a malicious data owner <strong>intentionally</strong> running your computation on the wrong assets, we recommend using Syft with a zero-knowledge proof library (experimental).</p>
+<p>Furthermore, we&rsquo;re working on some extensions of Syft that would make it possible for your code to receive cryptographic evidence that your results came from your code + the right asset. It is, however, a nuanced topic &mdash; so please reach out to our team via OpenMined&rsquo;s Slack if you&rsquo;d like to talk more about it.</p>`,
+      },
+      {
+        q: 'How do I deal with data quality issues when I can’t see the data?',
+        a: A_QUALITY,
+      },
+      {
+        q: 'Data science can often be very exploratory. How can this work in Syft if I cannot see or access the data?',
+        a: A_EXPLORATORY,
+      },
+      {
+        q: 'What should I do if the data owner doesn’t have enough computational power to support my study?',
+        a: A_COMPUTE,
+      },
+    ],
+  },
+  {
+    label: 'Privacy',
+    items: [
+      {
+        q: 'How does Syft ensure the analysis doesn’t reveal personal or protected information?',
+        a: `<p>See the section above. Syft follows the paradigm of <a href="#">Structured Transparency</a>, which allows the use of various PETs before, during, and after computation to facilitate data privacy and security throughout its lifecycle.</p>`,
+      },
+      {
+        q: 'Do I need PETs expertise to use it?',
+        a: `<p>No! Syft only assumes that you know Python and data science, which is all that is required for low-scale use cases (see the first two bullets above). You only need more advanced PETs expertise for adding automation to the system, and only for PETs you elect to use.</p>`,
+      },
+      {
+        q: 'Is Syft compliant with GDPR/CCPA?',
+        a: `<p>Syft has unlocked sensitive GDPR and CCPA-protected user data in places like Microsoft, Reddit, and Dailymotion.</p>`,
+      },
+      {
+        q: 'Is Syft compliant with HIPAA?',
+        a: `<p>Syft can be part of your HIPAA-compliant system, particularly when using manual code review-based approaches and, in some cases, PETs.</p>`,
+      },
+      {
+        q: 'Does mock data leak private data?',
+        a: `<p>No, while the mock dataset is as identical as possible to real data (same/similar column types, same/similar number of rows, etc.) &mdash; the values of the mock dataset are randomly generated.</p>`,
+      },
+      {
+        q: 'How do I generate mock data? Does Syft include tools for doing this?',
+        a: `<p>There is a robust ecosystem of Python tools for this. Here&rsquo;s how to use them &lt;link&gt;.</p>`,
+      },
+      {
+        q: 'What type of datasets does Syft support?',
+        a: `<p>Syft supports any dataset that can be represented as a Python object (e.g., PyTorch/Tensorflow/NumPy tensor, Pandas dataframe, etc.) Syft natively supports common data science objects, and you can add more (for details on how to add new types &mdash; see Syft&rsquo;s documentation for adding types to our secure serialization process).</p>`,
+      },
+      {
+        q: 'Can I use Spark in Syft? How can I work with very large amounts of data?',
+        a: `<p>You cannot use Spark, but Syft has a similar system for running long-running jobs across a (Kubernetes) cluster of machines.</p>`,
+      },
+      {
+        q: 'How do I deal with data quality issues when I can’t see the data?',
+        a: A_QUALITY,
+      },
+      {
+        q: 'Data science can often be very exploratory. How can this work in Syft if I cannot see or access the data?',
+        a: A_EXPLORATORY,
+      },
+      {
+        q: 'What should I do if the data owner doesn’t have enough computational power to support my study?',
+        a: A_COMPUTE,
+      },
+    ],
+  },
+  {
+    label: 'Security',
+    items: [
+      {
+        q: 'What security measures does Syft implement to ensure that personal or protected information isn’t compromised?',
+        a: `<p>See previous section.</p>`,
+      },
+    ],
+  },
+  {
+    label: 'Credibility',
+    items: [
+      {
+        q: 'Where else is Syft deployed?',
+        a: `<p>We have unlocked sensitive user data in places such as Microsoft and GDPR-protected data in areas such as Dailymotion through our partnership with the Christchurch Call Initiative on Algorithmic Outcomes, where external data scientists could perform research on production AI recommender models.</p>
+<p>We also have active projects with the US Census Bureau, the Italian National Institute of Statistics (Istat), Statistics Canada (StatCan), and the United Nations Statistics Division (UNSD) to demonstrate how joint analysis across restricted statistical data can work internationally across national statistics offices.</p>
+<p>Additionally, we have an active project with the xD team at the US Census Bureau to help make their Title-13 and Title-26 protected data available for research.</p>
+<p>We are also the infrastructure of choice for Reddit&rsquo;s external researcher program.</p>`,
+      },
+    ],
+  },
+];
+---
+
+<Page
+  title="PySyft FAQs — OpenMined"
+  description="Answers to common questions about PySyft — how remote data science works without copying data, what analyses you can run, and how Syft protects privacy, security, and compliance."
+>
+  <!-- § Hero — page title only (centered); bottom padding matched to the tight
+       top (--spacing-2XL) so the title sits close to the FAQ list. Carries the
+       site-wide flow swoop (as on the foundation / syft-flwr heroes). NOTE: the
+       explicit padBottom overrides SimpleHero's default --has-swoop room
+       (--spacing-max), so the band tucks tight under the title and bleeds behind
+       the first FAQ cards. -->
+  <SimpleHero heading="PySyft FAQs" padBottom="var(--spacing-2XL)">
+    <HeroSwoop slot="swoop" src="/images/om-flow-hero.png" width={1024} height={288} anchor="top" />
+  </SimpleHero>
+
+  <!-- § FAQ body — grouped accordions, verbatim from live /pysyft/faqs/ -->
+  <ContentSection width="col-8">
+    <div class="faq">
+      {groups.map((group) => (
+        <div class="faq__group">
+          {group.label && <h2 class="faq__cat">{group.label}</h2>}
+          <div class="faq__list">
+            {group.items.map((item) => (
+              <Accordion title={item.q}>
+                <Fragment set:html={item.a} />
+              </Accordion>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </ContentSection>
+</Page>
+
+<style>
+  .faq {
+    display: flex;
+    flex-direction: column;
+    /* Section break between category groups: more space above a category label
+       than the --spacing-XL below it, so each label reads as a new section.
+       --spacing-5XL is the site's head→content separation (see ContentSection). */
+    gap: var(--spacing-5XL);
+  }
+
+  .faq__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-XL); /* live: 20px between accordion items */
+  }
+
+  /* Category label — live: Rubik 20px/500, color flips dark→light with theme
+     (--dark-surface-background-dim in light, --grayscale-50 in dark) → the
+     semantic --text-headline gives that same flip. Fixed small label, so a
+     direct font-size is intentional (no fluid scale needed). Rubik comes from
+     the h2 element default; only size/weight/color deviate. */
+  .faq__cat {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--text-headline);
+    margin-bottom: var(--spacing-XL); /* live: --spacing-XL ✓ */
+  }
+</style>

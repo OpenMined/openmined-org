@@ -1,0 +1,67 @@
+---
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<button
+  type="button"
+  role="switch"
+  aria-checked="false"
+  aria-label="Toggle dark mode"
+  class:list={['mini-toggle', 'js-switch-theme', className]}
+>
+  <span class="mini-toggle__track">
+    <span class="mini-toggle__knob"></span>
+  </span>
+</button>
+
+<style>
+  .mini-toggle {
+    --mt-w:     20px;
+    --mt-h:     11px;
+    --mt-pad:   2px;
+    --mt-knob:  7px;
+    --mt-color: var(--text-body);
+    /* slide distance = inner width − knob − 2×pad; inner width = mt-w − 2px border */
+    --mt-slide: calc(var(--mt-w) - var(--mt-knob) - 2 * var(--mt-pad) - 2px);
+    display: inline-flex;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    line-height: 0;
+  }
+
+  .mini-toggle__track {
+    display: flex;
+    align-items: center;
+    padding: 0 var(--mt-pad);
+    width: var(--mt-w);
+    height: var(--mt-h);
+    border-radius: var(--border-radius-full);
+    background: transparent;
+    border: 1px solid var(--mt-color);
+    transition: border-color var(--transition-base);
+  }
+
+  .mini-toggle__knob {
+    width: var(--mt-knob);
+    height: var(--mt-knob);
+    flex-shrink: 0;
+    border-radius: var(--border-radius-full);
+    background: var(--mt-color);
+    margin-left: 0;
+    transition: margin-left var(--transition-base), background var(--transition-base);
+  }
+
+  :global([data-theme='dark']) .mini-toggle__knob {
+    margin-left: var(--mt-slide);
+  }
+
+  .mini-toggle:focus-visible .mini-toggle__track {
+    outline: 2px solid var(--color-interactive-focus);
+    outline-offset: 2px;
+  }
+</style>

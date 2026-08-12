@@ -1,0 +1,35 @@
+---
+/**
+ * BlogListing — the page shell every blog listing route uses: /blog, its
+ * /page/N pages, and the category / author / tag / locations archives.
+ *
+ * It is `Page` with one difference: the site header is taken out of the sticky
+ * layer (`Header sticky={false}`). These listings pin their own chrome at the
+ * top of the scroll area — the category nav and the toolbar controls, stacked
+ * (`global.css → .blog-sticky`) — and a sticky site header that reappears on
+ * scroll-up would sit straight on top of it. Live does exactly this: its header
+ * computes `position: relative` on the blog listings and `sticky` everywhere
+ * else (verified on prod 2026-07-28).
+ *
+ * It exists so that fact has one home rather than a `sticky={false}` repeated
+ * across eleven route files, where a new archive route would quietly miss it.
+ * Props are `Page`'s, forwarded verbatim. The header and footer slots are not
+ * re-exposed — a listing that needs custom chrome should use `Page` directly and
+ * carry its own header, since the whole point of this shell is that one header.
+ *
+ * It also holds the second fact that would otherwise be repeated eleven times:
+ * these routes are `searchable={false}`. A listing's own text is nothing but the
+ * card titles of the posts it links to, and every one of those posts is indexed
+ * in its own right — so indexing the listings adds no findable content, only
+ * duplicate rows that bury the real article. (This is the index-hygiene concern
+ * raised while building global search; blog search was never affected, since it
+ * only ever queried `type:post`.)
+ */
+import Page from './Page.astro';
+import Header from '@components/layout/Header.astro';
+---
+
+<Page {...Astro.props} searchable={false}>
+  <Header slot="header" sticky={false} />
+  <slot />
+</Page>

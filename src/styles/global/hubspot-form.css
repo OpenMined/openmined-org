@@ -1,0 +1,397 @@
+/* ══════════════════════════════════════════════════════════════════
+   HUBSPOT FORM SKIN — vendor markup
+   Ported 1:1 from live's `.hbspt-form` SCSS. Kept apart from the base form
+   controls in base.css because this is defensive CSS against markup and
+   injected `<style>` blocks we do not own — hence the `!important` density.
+
+   MUST stay imported before prose.css — see the note in global.css.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── HubSpot form skin ───────────────────────────────────────────── */
+/* Ported 1:1 from live's `.hbspt-form` SCSS (values mapped to our tokens
+   where an exact or near-exact match exists; unmappable values flagged
+   inline). Brand skin for HubSpot forms embedded via @elements/FormEmbed
+   (v2.js renders a real inline `<form class="hs-form">`).
+
+   Live's `.dark-theme` overrides ARE ported, via the seam below. An earlier
+   pass skipped them on the grounds that our `--surface-*` tokens already flip
+   with `data-theme`/`data-section` — but live switches which token SLOT a
+   field paints on (default → dim), not just that slot's value, and no amount
+   of token flipping expresses that. */
+
+
+/* ── Color-mode seam ──────────────────────────────────────────────────
+   Every value in this skin that differs between color modes reads a `--hs-*`
+   var declared here. To tweak dark mode, add a var + a line in the dark
+   block — never a second copy of a rule (the field selector list below is
+   13 selectors long and already appears four times).
+
+   In dark contexts a field moves AWAY from the surface it sits on, because a
+   shadow is invisible there and the recess is what makes the field read as a
+   field. In light contexts it stays at `default` (near-white) and --shadow-md
+   does the work. Matches live.
+
+   DECLARED ON THE COLOR CONTEXT, NOT ON `.hs-form` — deliberately. The var has
+   to be *inheritable* so a page or region can override it, and a value declared
+   on the element itself always beats an inherited one. Putting these on
+   `.hs-form` made the seam look overridable while silently ignoring every
+   ancestor (found on /get-involved/, below).
+
+   OVERRIDE SEAM — a region that changes its own surface must say so, because
+   "away from the surface" can't be derived in CSS. Set `--hs-field-bg` on that
+   region and the nearest declaration wins:
+
+     body:has(.gi) { --hs-field-bg: var(--surface-background-default); }
+
+   /get-involved/ is the live case: the page itself is the card, painted
+   `--surface-background-dim`, so a field recessing to `dim` in dark mode would
+   be the same colour as the page. It sits at `default` instead — one step the
+   other way. Same shape as the `--header-bg` hook that page already sets. */
+:root {
+  --hs-field-bg: var(--surface-background-default);
+}
+
+/* Dark contexts — the page theme, or a section locked dark. */
+[data-theme="dark"],
+[data-section="always-dark"] {
+  --hs-field-bg: var(--surface-background-dim);
+}
+
+/* `always-light` is locked light in BOTH page themes, so it has to undo the
+   dark rule above — most forms on the site live in one (every blog post's
+   BlogPostCta card, CtaSection variant="subtle", the landing-page sections).
+   A `data-section` element is always nearer the form than `<html>` or a page
+   wrapper, so it wins on proximity rather than on source order. */
+[data-section="always-light"] {
+  --hs-field-bg: var(--surface-background-default);
+}
+
+/* `invert` is the opposite of the page: a dark band in light mode, a light one
+   in dark mode. So it takes the dark treatment when the page is light and the
+   light one when the page is dark — the reverse of both rules above, which is
+   why it can't be folded into either. Both declare on the same element, so the
+   compound selector's (0,3,0) is what wins on a dark page. */
+[data-section="invert"] {
+  --hs-field-bg: var(--surface-background-dim);
+}
+[data-theme="dark"] [data-section="invert"] {
+  --hs-field-bg: var(--surface-background-default);
+}
+
+.hs-form-embed { margin-block: var(--spacing-2XL); }
+/* Trim the edge margins when the form is the first/last thing in its container:
+   the container's own padding already spaces it (e.g. a form alone in a padded
+   card). When intro text precedes the form (e.g. OptInLanding's lede), the embed
+   isn't :first-child, so the separating top margin is retained. */
+.hs-form-embed:first-child { margin-top: 0; }
+.hs-form-embed:last-child { margin-bottom: 0; }
+
+/* Gray card — live's treatment for forms embedded in blog content
+   (`.prose`): wrap the intro copy + `.hs-form-embed` marker together in
+   `<div class="hs-form-card">` in the post body. Forms placed elsewhere (a
+   section with its own background, or a bare `.hs-form-embed` with no card)
+   stay unwrapped/plain — that's the "white bg" variant.
+
+   The card themes: --surface-foreground-low is grayscale-200 in light and 850 in
+   dark, matching live's measured values. */
+.prose .hs-form-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-S);
+  background-color: var(--surface-foreground-low);
+  padding: var(--spacing-5XL);
+  border-radius: var(--border-radius-S);
+}
+.hs-form-card .hs-form-embed { margin-block: 0; }
+/* The card's own flex `gap` owns its internal spacing — zero the flow-rhythm
+   margins so they can't stack on top of it (a gap ADDS to a margin). */
+.hs-form-card > * + * { margin-top: 0; }
+
+.hs-form ::placeholder { color: var(--text-subtle); }
+/* live wraps a separate `<form>` inside a `.hbspt-form` div; v2.js renders
+   the `<form>` itself as `.hs-form`, so the flex layout applies here directly. */
+.hs-form {
+  display: flex;
+  flex-direction: column;
+  row-gap: var(--spacing-2XL);
+  text-align: left; /* don't inherit a centered ambient section (hero/CTA forms) */
+}
+.hs-form fieldset { max-width: 100% !important; }
+
+.hs-form :is(label, .hs-field-desc) {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--text-body);
+  margin-bottom: var(--spacing-S);
+  padding-left: var(--spacing-XS); /* live: 5px, snapped */
+}
+.hs-form :is(label, .hs-field-desc):has(span:empty) { margin-bottom: 0; }
+
+/* !important: v2.js injects a per-instance rule setting `.input { margin: 0 8px 0 0 }`
+   (an 8px gutter) at higher specificity — it both bloats the form-columns-2 column
+   gap past the 24px grid gap and shortens single-column inputs by 8px. Zero it so
+   the grid gap governs horizontal spacing (= the 24px vertical fieldset gap). */
+.hs-form .input { border: 0; line-height: initial; padding: initial; margin: 0 !important; color: initial; }
+.hs-form input { color: var(--text-body); }
+
+.hs-form :is(
+  input[type="color"], input[type="date"], input[type="datetime-local"], input[type="datetime"],
+  input[type="email"], input[type="month"], input[type="number"], input[type="password"],
+  input[type="search"], input[type="tel"], input[type="text"], input[type="time"],
+  input[type="url"], input[type="week"], select, textarea
+) {
+  font-size: 16px;
+  padding: 0 var(--spacing-L); /* live: 0 15px, snapped */
+  border-radius: var(--border-radius-S);
+  background-color: var(--hs-field-bg);
+  color: var(--text-body);
+  border: 0;
+  outline: 0;
+  width: 100% !important;
+  height: 48px;
+  box-shadow: var(--shadow-md);
+}
+/* `.hs-input` raises specificity to (0,2,1) to tie the shared input rule above and
+   win on source order — otherwise its attribute selectors override these, leaving the
+   textarea with only horizontal padding and a fixed 48px height. Live: 15px all sides,
+   90px min-height, auto height. */
+.hs-form textarea.hs-input {
+  padding: var(--spacing-L); /* live: 15px, snapped */
+  height: auto;
+  min-height: 90px; /* live */
+}
+/* File uploads must not inherit the text-field skin (bg/shadow/fixed height/
+   radius from the base `input, textarea, select` rule) — only the
+   ::file-selector-button below is styled. */
+.hs-form input[type="file"] {
+  border: 0;
+  padding: 0;
+  height: auto;
+  background-color: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+.hs-form input[type="file"]::file-selector-button {
+  font-size: 16px;
+  line-height: 1.33;
+  padding: 11px 19px;
+  outline: 0;
+  margin-right: var(--spacing-L);
+  border-radius: var(--border-radius-S);
+  background-color: transparent;
+  color: var(--button-dark-color);
+  border: 1px solid var(--button-dark-color);
+  transition: background-color var(--transition-base), color var(--transition-base), border-color var(--transition-base);
+}
+.hs-form input[type="file"]::file-selector-button:hover {
+  background-color: transparent;
+  color: var(--color-green-700);
+  border-color: var(--color-interactive-hover);
+}
+.hs-form input[type="file"]::file-selector-button:focus {
+  color: var(--color-interactive-focus);
+  border-color: var(--color-teal-400);
+  background-color: var(--color-grayscale-50);
+}
+.hs-form input[type="file"]::file-selector-button:active {
+  color: var(--color-interactive-focus);
+  background-color: var(--color-teal-50);
+  border-color: var(--color-interactive-focus);
+}
+
+/* Custom select-arrow — mask-image so the color follows --text-body
+   (the SVG's own stroke value only needs enough opacity to mask, since
+   the visible color comes from background-color). */
+.hs-form .input:has(> select) { position: relative; }
+.hs-form select { appearance: none; }
+.hs-form .input:has(> select)::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: var(--spacing-L);
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  background-color: var(--text-body);
+  mask-image: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg clip-path='url(%23clip0_7575_1534)'%3E%3Cpath d='M14.667 4.66675C14.0003 5.33341 9.94477 9.38897 8.00032 11.3334L1.33366 4.66675' stroke='%23868394' stroke-width='2'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='clip0_7575_1534'%3E%3Crect width='16' height='16' fill='white' transform='translate(16) rotate(90)'/%3E%3C/clipPath%3E%3C/defs%3E%3C/svg%3E");
+  mask-repeat: no-repeat;
+  mask-size: 100% 100%;
+  pointer-events: none;
+}
+
+/* Keyboard focus ring for <select>. The field rule above clears `outline: 0`
+   (ported from live) — harmless for text fields, which still show a caret, but a
+   select has no caret, so tabbing onto one showed nothing at all. The submit
+   button is deliberately excluded: it already changes background on :focus.
+
+   Ties the field rule's specificity at (0,2,1), so it wins on SOURCE ORDER and
+   has to stay below it. */
+.hs-form select:focus-visible {
+  outline: 2px solid var(--color-interactive-focus);
+  outline-offset: 2px;
+}
+
+.hs-form .hs-error-msgs { list-style: none; margin-top: var(--spacing-S); padding: 0; }
+.hs-form .hs-error-msgs label { color: var(--color-red-500); }
+.hs-form .hs-error-msg { padding: 0 var(--spacing-S); font-size: 11px; font-weight: 500; } /* live: 0 10px, snapped */
+
+.hs-form :is(.hs-richtext, .legal-consent-container > div) { margin-bottom: var(--spacing-2XL); }
+.hs-form :is(.hs-richtext, .legal-consent-container > div):last-child { margin-bottom: 0; }
+
+.hs-form fieldset.form-columns-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: var(--spacing-2XL);
+}
+/* !important: v2.js injects a per-form-instance <style> with this same
+   selector shape (`.hs-form-<id>_<hash> fieldset.form-columns-2 .hs-form-field`)
+   at equal specificity but later in the cascade, so it wins on tie without this. */
+.hs-form fieldset.form-columns-2 .hs-form-field { width: 100% !important; float: none !important; }
+@media (max-width: 767px) {
+  .hs-form fieldset.form-columns-2 { grid-template-columns: 100%; }
+}
+
+.hs-form .actions input[type="submit"] {
+  padding: 11px 21px;
+  font-size: 16px;
+  font-weight: 500;
+  min-height: 48px;
+  outline: 0;
+  border: 0;
+  border-radius: var(--border-radius-S);
+  background: var(--button-dark-color);
+  color: var(--button-light-color);
+  margin-bottom: 0;
+  cursor: pointer;
+  transition: background var(--transition-base), color var(--transition-base);
+}
+.hs-form .actions input[type="submit"]:hover {
+  --button-light-color: var(--color-grayscale-50);
+  background-color: var(--color-interactive-hover);
+}
+.hs-form .actions input[type="submit"]:focus {
+  --button-light-color: var(--color-grayscale-50);
+  background-color: var(--color-interactive-focus);
+}
+.hs-form .actions input[type="submit"]:active {
+  --button-light-color: var(--color-grayscale-50);
+  background-color: var(--color-interactive-active);
+}
+
+/* Content-authoring modifier classes — add to the `.hs-form-embed` div in
+   markdown, matching live's usage exactly. */
+.form-button-center .hs-form .actions { text-align: center; }
+.form-button-fullwidth .hs-form .actions input[type="submit"] { display: block; width: 100%; text-align: center; }
+.form-no-shadow .hs-form :is(
+  input[type="color"], input[type="date"], input[type="datetime-local"], input[type="datetime"],
+  input[type="email"], input[type="month"], input[type="number"], input[type="password"],
+  input[type="search"], input[type="tel"], input[type="text"], input[type="time"],
+  input[type="url"], input[type="week"], select, textarea
+) { box-shadow: none; }
+.form-no-shadow .hs-form .inputs-list :is(.hs-form-checkbox-display, .hs-form-radio-display, .hs-form-booleancheckbox-display)::before {
+  box-shadow: none;
+}
+.form-surface-background-bright .hs-form :is(
+  input[type="color"], input[type="date"], input[type="datetime-local"], input[type="datetime"],
+  input[type="email"], input[type="month"], input[type="number"], input[type="password"],
+  input[type="search"], input[type="tel"], input[type="text"], input[type="time"],
+  input[type="url"], input[type="week"], select, textarea
+) { background-color: var(--surface-background-bright) !important; }
+.form-surface-background-dim .hs-form :is(
+  input[type="color"], input[type="date"], input[type="datetime-local"], input[type="datetime"],
+  input[type="email"], input[type="month"], input[type="number"], input[type="password"],
+  input[type="search"], input[type="tel"], input[type="text"], input[type="time"],
+  input[type="url"], input[type="week"], select, textarea
+) { background-color: var(--surface-background-dim) !important; }
+
+/* Checkbox / radio fields — HubSpot renders the real <input> invisible and
+   absolutely positioned; the visible box + checkmark are drawn via
+   pseudo-elements on the sibling label. This also kills the `.prose` diamond
+   marker bleeding onto these <li>s (::before reset below). */
+.hs-form :is(.inputs-list, .hs-error-msgs) li::before { content: none !important; }
+.hs-form .inputs-list { list-style: none; margin: 0; padding: 0; }
+.hs-form .inputs-list li { padding-left: 0; margin-bottom: var(--spacing-XS); } /* live: 7px, snapped */
+.hs-form .inputs-list li:last-child { margin-bottom: 0; }
+.hs-form .hs-error-msgs li { padding-left: 0 !important; }
+.hs-form .hs-error-msgs li label { padding-left: 0 !important; }
+
+.hs-form .hs-fieldtype-booleancheckbox { display: flex; flex-direction: column-reverse; }
+.hs-form .hs-fieldtype-booleancheckbox > .hs-field-desc {
+  padding-left: 28px; /* live: 16px box + 12px gap — not a spacing-scale value */
+  /* font-size: 14px via the .text-small group above. */
+  margin-top: var(--spacing-2XS); /* live: 5px, snapped */
+  margin-bottom: initial;
+  /* Live paints grayscale-550 here in both modes (= --text-subtle), while the
+     form's body/label copy themes. Known contrast gap carried to match live —
+     see the token comment in tokens.css. */
+  color: var(--text-subtle);
+}
+
+.hs-form .inputs-list .hs-input { position: absolute; top: 0; left: 0; opacity: 0; }
+.hs-form .inputs-list :is(.hs-form-checkbox-display, .hs-form-radio-display, .hs-form-booleancheckbox-display) {
+  position: relative;
+  margin-bottom: 0;
+  padding-left: 28px; /* live: 16px box + 12px gap — not a spacing-scale value */
+  line-height: 1.5;
+}
+.hs-form .inputs-list :is(.hs-form-checkbox-display, .hs-form-radio-display, .hs-form-booleancheckbox-display):has(input:checked)::after {
+  opacity: 1;
+}
+.hs-form .inputs-list :is(.hs-form-checkbox-display, .hs-form-radio-display, .hs-form-booleancheckbox-display) span {
+  display: block;
+  margin-left: initial;
+}
+.hs-form .inputs-list :is(.hs-form-checkbox-display, .hs-form-radio-display, .hs-form-booleancheckbox-display)::before {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 4px;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--border-radius-XS);
+  background-color: var(--color-grayscale-50);
+  box-shadow: var(--shadow-sm);
+}
+/* Keyboard focus ring. The real <input> is `opacity: 0` (above) — still focusable,
+   but its own outline paints on a transparent box, so tabbing through a checkbox
+   list showed nothing at all. Live has the same gap. Draw the indicator on the
+   ::before box that visually stands in for the input.
+
+   `outline` (not a border/shadow) so it costs no layout and follows the box's
+   border-radius — which makes radios get a round ring for free. Same treatment
+   the site uses for every other form control, including the equivalent
+   hidden-input case (`DonateModal.astro → .donate-form__preset input:focus-visible`).
+
+   `:focus-visible`, not `:focus`, so a mouse click on a checkbox doesn't leave a
+   ring behind — matching the rest of the site. */
+.hs-form .inputs-list :is(.hs-form-checkbox-display, .hs-form-radio-display, .hs-form-booleancheckbox-display):has(input:focus-visible)::before {
+  outline: 2px solid var(--color-interactive-focus);
+  outline-offset: 2px;
+}
+/* TODO(decision): live keeps this box + checkmark fixed to light-palette
+   values (--grayscale-50 bg, #353243 ink) even inside its `.dark-theme`
+   sections — never token-remapped. Carried as-is (literal ink hex below);
+   flag if a genuinely dark-surface embed later needs it to invert. */
+.hs-form .inputs-list :is(.hs-form-checkbox-display, .hs-form-radio-display, .hs-form-booleancheckbox-display)::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M13.3332 4L5.99984 11.3333L2.6665 8' stroke='%23353243' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  width: 16px;
+  height: 16px;
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+.hs-form .inputs-list .hs-form-radio-display::before { border-radius: var(--border-radius-full); }
+.hs-form .inputs-list .hs-form-radio-display::after {
+  width: 16px;
+  height: 16px;
+  border-radius: var(--border-radius-full);
+  background-image: initial;
+  background-color: var(--color-grayscale-750); /* live: #353243 literal */
+  border: 1px solid var(--color-grayscale-50);
+}

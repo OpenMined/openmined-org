@@ -1,0 +1,67 @@
+---
+/**
+ * BlogCategoryNav — the blog's category menu, reproducing the live
+ * `ul.category-list` (openmined.org/blog): a plain lowercase text-link row
+ * (`all news product research policy stories community foundation`), 20px
+ * gap, no pills/borders. These are real navigation links — `all` → /blog,
+ * each category → /blog/category/<id>/ — matching live (the client-side
+ * grid filtering is the separate "Filter" control, deferred).
+ *
+ * Shared by /blog and the category archive pages; pass `active` = the current
+ * category id (or 'all' on /blog) to mark the current item.
+ *
+ * It pins at the top of the scroll area as live's does, with the toolbar
+ * stacking beneath it — the mechanism (and why it costs no layout) is
+ * `global.css → .blog-sticky`. Every listing that renders this nav wants it
+ * pinned, so it's behavior here rather than a prop.
+ */
+interface Category {
+  id: string;
+  label: string;
+}
+interface Props {
+  categories: Category[];
+  active?: string; // category id, or 'all'
+}
+const { categories, active = 'all' } = Astro.props;
+---
+
+<nav class="category-nav blog-sticky blog-sticky--nav" aria-label="Blog categories">
+  <ul class="category-nav__list">
+    <li>
+      <a href="/blog/" class:list={['category-nav__link', { 'is-active': active === 'all' }]} aria-current={active === 'all' ? 'page' : undefined}>all</a>
+    </li>
+    {categories.map((c) => (
+      <li>
+        <a
+          href={`/blog/category/${c.id}/`}
+          class:list={['category-nav__link', { 'is-active': active === c.id }]}
+          aria-current={active === c.id ? 'page' : undefined}
+        >{c.label}</a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  .category-nav__list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-XS) var(--spacing-XL);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .category-nav__link {
+    text-transform: lowercase;
+    color: var(--text-body);
+    text-decoration: none;
+    transition: color var(--transition-base);
+  }
+  .category-nav__link:hover { color: var(--text-headline); }
+  .category-nav__link.is-active {
+    color: var(--text-headline);
+    font-weight: 500;
+  }
+</style>

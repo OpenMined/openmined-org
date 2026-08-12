@@ -1,0 +1,128 @@
+---
+/**
+ * InquiryLanding — the P2 "inquiry form" page body (/major-gift/, /grant/,
+ * /partner/). Two columns: left = copy (h1 + tagline + body, left-aligned,
+ * ~col-5); right = a HubSpot form on a --surface-foreground-low card (locked
+ * always-light so it stays legible in dark mode). A soft radial blob, tinted by
+ * the brand accent for `tone`, bleeds off the right edge behind the form.
+ *
+ * Reference: the live /major-gift/, /grant/ and
+ * partner}.md; measure ladder = copy col ~col-5, left-aligned). The live
+ * decorative ellipse PNG is rendered here as a brand gradient (project decision,
+ * 2026-07-20). Tone→accent mapping matches the get-involved cards.
+ *
+ * `after` slot: full-width content below the two columns (e.g. the partner
+ * logos strip).
+ */
+import FormEmbed from '@elements/FormEmbed.astro';
+
+interface Props {
+  heading: string;
+  tagline: string;
+  formId: string;
+  tone: 'gift' | 'grant' | 'partner';
+}
+const { heading, tagline, formId, tone } = Astro.props;
+---
+
+<section class:list={['inq', `inq--${tone}`]}>
+  <div class="container inq__grid">
+    <div class="inq__copy">
+      <h1>{heading}</h1>
+      {/* Tagline is a styled lead paragraph, not a heading — keeps a clean
+          h1-only heading order in this block (live uses a decorative h5). */}
+      <p class="inq__tagline">{tagline}</p>
+      <div class="inq__body"><slot /></div>
+    </div>
+    {/* No data-section: the card themes off --surface-foreground-low, matching live. */}
+    <div class="inq__form">
+      {/* Decorative accent ellipse is the ::before of .inq__form (see styles) —
+          a pseudo-element so it doesn't count as a child, keeping the form the
+          sole child (its edge margins trim flush to the card padding). */}
+      <FormEmbed formId={formId} />
+    </div>
+  </div>
+  <slot name="after" />
+</section>
+
+<style>
+  .inq {
+    position: relative;
+    padding-block: var(--spacing-5XL) var(--spacing-max);
+    overflow: clip; /* contain the blob's right-edge bleed (no h-scroll) */
+  }
+
+  .inq--gift    { --tone: var(--color-red-500); }
+  .inq--grant   { --tone: var(--color-green-500); }
+  .inq--partner { --tone: var(--color-blue-500); }
+
+  .inq__grid {
+    position: relative;
+    z-index: 1;
+    max-width: var(--col-10); /* content column; blob stays section-width */
+    display: grid;
+    /* Live grid is 50% / 38.4% with an ~11.6% gutter. Map onto the column grid:
+       50% ≈ --col-5 (copy), 38.4% ≈ --col-4 (form); the leftover track is the
+       gutter, so the two columns hug the edges via space-between. minmax(0,…)
+       lets them shrink (no overflow) before the mobile stack at 991px. */
+    grid-template-columns: minmax(0, var(--col-5)) minmax(0, var(--col-4));
+    justify-content: space-between;
+    align-items: start;
+  }
+
+  .inq__copy h1 {
+    margin-bottom: var(--spacing-XL);
+  }
+  .inq__tagline {
+    font-weight: 700;
+    font-size: 20px;
+    margin-bottom: var(--spacing-2XL);
+  }
+  .inq__body :where(p) {
+    margin-bottom: var(--spacing-L);
+  }
+  .inq__body :last-child {
+    margin-bottom: 0;
+  }
+
+  .inq__form {
+    position: relative; /* stacking + positioning context for the breakout blob */
+    background-color: var(--surface-foreground-low);
+    border-radius: var(--border-radius-L);
+    padding: var(--spacing-4XL);
+  }
+
+  /* Breakout accent ellipse — live values (top/left/size), brand-gradient fill.
+     A pseudo-element (not a child), so the form embed stays the card's sole
+     child and its edge margins trim flush. z-index -1 keeps it behind the
+     card's own background, so only the halo spilling past the card edges shows. */
+  .inq__form::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: -54px;
+    left: -201px;
+    width: 1089px;
+    height: 1089px;
+    max-width: initial;
+    border-radius: var(--border-radius-full);
+    background: radial-gradient(circle, var(--tone) 0%, transparent 70%);
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  @media (max-width: 991px) {
+    .inq__grid {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-5XL);
+    }
+    /* Rein in the breakout on the full-width mobile card + center it. */
+    .inq__form::before {
+      width: 700px;
+      height: 700px;
+      top: -60px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+</style>

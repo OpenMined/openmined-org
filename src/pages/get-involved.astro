@@ -1,0 +1,120 @@
+---
+/**
+ * /get-involved/ — the community-join / conversion page.
+ *
+ * Distinct chrome vs. the rest of the site (all verbatim from the live page):
+ *   - Simple header variant (logo + burger only; reveals full nav in place).
+ *   - The whole page sits on --surface-background-dim (the form-card gray) —
+ *     set on <body> for this route; footer stays always-dark.
+ *   - The site's only COLORED icons: the three "more ways" line marks carry
+ *     brand-accent colors (live baked stroke #CC677B/#53BEA9/#6976AE →
+ *     --color-red-500 / --color-green-500 / --color-blue-500). Icons are saved
+ *     as currentColor SVGs; the color is applied per-card here.
+ *
+ * Two-column body: left = "Join the community today" HubSpot form
+ * (formId b7a08fdc… — fields firstname/lastname/email + email_opt_in +
+ * slack_status, submit "Join", confirmed via scripts/probe-forms.mjs); right =
+ * "More ways to get involved" (Donate / Grant / Partner).
+ */
+import Page from '@layouts/Page.astro';
+import Header from '@components/layout/Header.astro';
+import FormEmbed from '@elements/FormEmbed.astro';
+import HelpWays from '@elements/HelpWays.astro';
+---
+
+<Page
+  title="Get Involved with OpenMined"
+  description="Join the OpenMined community: sign up for updates, get a Slack invite, donate, offer a grant, or partner with us on mission-aligned projects."
+>
+  <Header variant="simple" slot="header" />
+
+  <section class="gi">
+    <div class="container gi__head">
+      <img class="gi__mark" src="/logos/OpenMined-Icon.svg" alt="" width="72" height="72" data-fade />
+      <h1>Get Involved with OpenMined</h1>
+    </div>
+
+    <div class="container gi__grid">
+      <!-- Left: community sign-up -->
+      <div class="gi__col">
+        <h4 class="gi__col-title">Join the community today:</h4>
+        <FormEmbed formId="b7a08fdc-0fb5-4938-99e8-4a09e7bbc09e" />
+        <p class="gi__fineprint">
+          Joining subscribes you to the OpenMined Newsletter and confirms you agree
+          with our <a href="/privacy-policy/">privacy policy</a>.
+        </p>
+      </div>
+
+      <!-- Right: more ways to get involved -->
+      <div class="gi__col">
+        <h4 class="gi__col-title">More ways to get involved:</h4>
+        <HelpWays />
+      </div>
+    </div>
+  </section>
+</Page>
+
+<style is:global>
+  /* Whole-page dim surface for this route only (footer is always-dark, so it
+     is unaffected). No page-level surface hook exists yet — set body directly.
+     `--header-bg` inherits into the sticky header so its solid fill matches this
+     page's surface rather than cutting a default-colored band across the top
+     (Header.astro → .site-header background-color). */
+  body:has(.gi) {
+    background-color: var(--surface-background-dim);
+    --header-bg: var(--surface-background-dim);
+    /* The form here has no card — the page IS the card surface. Since that surface
+       is `dim`, fields sit one step the OTHER way, at `default`, rather than
+       recessing to `dim` and coming out the same colour as the page in dark mode.
+       Live does this too (verified 2026-08-05: dark input = grayscale-800 on a dim
+       page). Light mode is unaffected — `default` is where fields already sat.
+       See the override seam in `global/hubspot-form.css`. */
+    --hs-field-bg: var(--surface-background-default);
+  }
+</style>
+
+<style>
+  .gi {
+    padding-block: var(--spacing-5XL) var(--spacing-max);
+  }
+
+  /* Live content column is 1080px → --col-10 (cap the full .container). */
+  .gi__head,
+  .gi__grid {
+    max-width: var(--col-10);
+  }
+
+  /* ── Heading block ─────────────────────────────────────────────── */
+  .gi__head {
+    text-align: center;
+    margin-bottom: var(--spacing-full);
+  }
+  .gi__mark {
+    width: 72px;
+    height: auto;
+    margin: 0 auto var(--spacing-XL);
+  }
+
+  /* ── Two-column body ───────────────────────────────────────────── */
+  .gi__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-full);
+    align-items: start;
+  }
+  .gi__col-title {
+    text-align: center;
+    margin-bottom: var(--spacing-3XL);
+  }
+
+  .gi__fineprint {
+    margin-top: var(--spacing-XL);
+    text-align: center;
+    font-size: 14px;
+    color: var(--text-subtle);
+  }
+
+  @media (max-width: 991px) {
+    .gi__grid { grid-template-columns: 1fr; gap: var(--spacing-5XL); }
+  }
+</style>

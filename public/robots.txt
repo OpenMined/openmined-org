@@ -1,0 +1,8 @@
+# OpenMined — crawl policy.
+# NOTE: pre-launch, every page also carries <meta name="robots" content="noindex">
+# (Base.astro → noindex default). Crawling is allowed so engines can READ the
+# noindex; nothing gets indexed until that default is flipped at launch.
+User-agent: *
+Allow: /
+
+Sitemap: https://openmined.org/sitemap-index.xml

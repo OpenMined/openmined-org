@@ -1,0 +1,37 @@
+---
+/**
+ * TocAnchor — marks where in a post's body the sticky TOC sidebar (`PostToc.astro`)
+ * should start appearing, instead of the top of the post body (the default).
+ *
+ * Drop it in the MDX/MD content at the point the TOC should "begin" — after an
+ * intro paragraph, before a video, wherever:
+ *
+ *   ## Introduction
+ *   A few paragraphs the TOC shouldn't cover yet...
+ *
+ *   <TocAnchor />
+ *
+ *   ## The real content
+ *   ...
+ *
+ * Renders nothing visible — it's a zero-size marker `PostToc` measures at
+ * runtime (browsers don't exist at Astro build time, so this can't be a
+ * build-time offset; see `PostToc.astro`'s script). Optional: omit it and the
+ * TOC starts at the top of the body, as before.
+ *
+ * Plain `.md` posts (no component imports) can use the same mechanism without
+ * this component — raw HTML passes through Markdown verbatim, so
+ * `<span data-toc-anchor></span>` dropped directly in the body works
+ * identically. This component is just the `.mdx` sugar for it.
+ */
+---
+<span data-toc-anchor aria-hidden="true"></span>
+
+<style>
+  span[data-toc-anchor] {
+    display: block;
+    height: 0;
+    width: 0;
+    overflow: hidden;
+  }
+</style>

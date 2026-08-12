@@ -1,0 +1,559 @@
+---
+/**
+ * DonateModal — the site-wide "Secure Donation" dialog.
+ *
+ * Faithful rebuild of the live Bricks popup (#5499): a two-column panel —
+ * left = OpenMined mark + mission copy + foundation links; right = the donate
+ * form (Give Once / Monthly tabs, preset amounts, custom amount + currency).
+ * Measured off the live donation dialog.
+ *
+ * Rendered ONCE, globally, from Base.astro so it's available on every page.
+ * Opened by any `[data-donate-open]` trigger (header nav, hero buttons, footer,
+ * foundation, get-involved). Uses a native <dialog> (top-layer, ::backdrop,
+ * Esc-to-close, focus trap) — no z-index juggling.
+ *
+ * The panel is `data-section="always-light"`: like the live modal it stays the
+ * light "dim panel" treatment in both page themes (legible dark text on a light
+ * surface). Submit POSTs to /api/create-donation, which creates a Stripe
+ * Checkout Session and returns a URL to redirect to (see that endpoint).
+ *
+ * Clean-ups vs. live (intentional): the live form fetched its currency list
+ * from a WP AJAX action and mirrored two separate <select>s; here the list is
+ * static (@data/donation) and the two per-tab selects stay synced by the script.
+ */
+import Icon from '@elements/Icon.astro';
+import { PRESETS, CURRENCIES } from '@data/donation.mjs';
+
+const MODES = [
+  { key: 'once', tabLabel: 'Give Once', submit: 'Donate', presets: PRESETS.once },
+  { key: 'monthly', tabLabel: 'Monthly', submit: 'Donate Monthly', presets: PRESETS.monthly },
+] as const;
+---
+
+<dialog class="donate" aria-labelledby="donate-heading" data-donate-modal data-pagefind-ignore>
+  <div class="donate__panel">
+    <button type="button" class="donate__close" data-donate-close aria-label="Close donation dialog">
+      <Icon name="close" size={24} />
+    </button>
+
+    <div class="donate__grid">
+      <!-- Left: mission + foundation links -->
+      <div class="donate__intro">
+        <img class="donate__mark" src="/logos/OpenMined-Icon.svg" alt="" width="96" height="96" />
+        <div class="donate__copy">
+          <p><strong>OpenMined</strong> is a 501(c)(3) non-profit foundation and a global community on a mission to create the public network for non-public information.</p>
+          <p>With your support, we can unlock the world’s insights while making privacy accessible to everyone.</p>
+          <p>We can do it, with your help.</p>
+        </div>
+        <ul class="donate__links">
+          <li><a class="animated-in-out" href="/foundation/">About the foundation</a></li>
+          <li><a class="animated-in-out" href="/get-involved/">Get involved</a></li>
+        </ul>
+      </div>
+
+      <!-- Right: the donation form -->
+      <div class="donate__form-col">
+        <p class="donate__heading" id="donate-heading">Secure Donation</p>
+
+        <form class="donate-form" data-donate-form novalidate>
+          <nav class="donate-form__tabs" role="tablist" aria-label="Donation frequency">
+            {MODES.map((m, i) => (
+              <button
+                type="button"
+                role="tab"
+                class:list={['donate-form__tab', { 'is-active': i === 0 }]}
+                data-tab={m.key}
+                aria-selected={i === 0 ? 'true' : 'false'}
+              >
+                {m.key === 'monthly' && <span class="donate-form__spark"><Icon name="sparkles" size={16} /></span>}
+                {m.tabLabel}
+              </button>
+            ))}
+          </nav>
+
+          {MODES.map((m, i) => (
+            <div class:list={['donate-form__group', { 'is-active': i === 0 }]} data-group={m.key}>
+              <div class="donate-form__presets">
+                {m.presets.map((amt, j) => (
+                  <label class="donate-form__preset">
+                    <input type="radio" name={`amount-${m.key}`} value={amt} checked={j === 0} />
+                    <span class="donate-form__preset-face">
+                      <span class="donate-cur">$</span>{amt.toLocaleString('en-US')}
+                    </span>
+                  </label>
+                ))}
+              </div>
+
+              <div class="donate-form__custom">
+                <span class="donate-form__symbol donate-cur" aria-hidden="true">$</span>
+                <input
+                  type="number"
+                  min="1"
+                  step="any"
+                  name={`custom-${m.key}`}
+                  class="donate-form__amount"
+                  placeholder="Other amount"
+                  aria-label={m.key === 'monthly' ? 'Custom monthly amount' : 'Custom one-time amount'}
+                />
+                <select class="donate-form__currency" name={`currency-${m.key}`} aria-label="Currency">
+                  {CURRENCIES.map((c) => <option value={c}>{c}</option>)}
+                </select>
+              </div>
+            </div>
+          ))}
+
+          <button type="submit" class="donate-form__submit">Donate</button>
+          <p class="donate-form__error" role="alert" hidden></p>
+        </form>
+
+        <p class="donate__more">
+          <Icon name="hand-heart" size={22} class="donate__more-icon" />
+          <span>Philanthropist looking for more? <a href="/major-gift/">Contact us</a></span>
+        </p>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<style>
+  /* ── Dialog shell / backdrop ─────────────────────────────────────── */
+  .donate {
+    /* The global `* { margin: 0 }` reset kills the UA's `margin:auto` that
+       centers a modal <dialog>, so restore it explicitly (fixed + inset:0 +
+       margin:auto centers both axes; max-height + overflow lets it scroll). */
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    width: min(900px, calc(100vw - 2 * var(--spacing-XL)));
+    max-width: 900px;
+    max-height: calc(100dvh - 2 * var(--spacing-XL));
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--text-body);
+    overflow: auto;
+  }
+  .donate::backdrop {
+    /* live rgba(39,37,50,.8) → --color-grayscale-850 at 0.8 */
+    background: color-mix(in srgb, var(--color-grayscale-850) 80%, transparent);
+  }
+  /* Only shown while open (dialog[open]); the closed state is display:none. */
+
+  .donate__panel {
+    position: relative;
+    padding: var(--spacing-5XL);
+    background-color: var(--surface-foreground-low);
+    border-radius: var(--border-radius-S);
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* ── Entrance animation ──────────────────────────────────────────────
+     Runs on open (the [open] rules begin applying when showModal() fires):
+     backdrop fades in; panel does a very subtle zoom + rise + fade. */
+  @keyframes donateBackdropIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes donatePanelIn {
+    from { opacity: 0; transform: translateY(6px) scale(0.98); }
+    to   { opacity: 1; transform: none; }
+  }
+  .donate[open]::backdrop { animation: donateBackdropIn 0.3s ease both; }
+  .donate[open] .donate__panel { animation: donatePanelIn 0.28s ease-out both; }
+
+  .donate__close {
+    position: absolute;
+    top: var(--spacing-L);
+    right: var(--spacing-L);
+    display: inline-flex;
+    padding: var(--spacing-2XS);
+    color: var(--text-body);
+    background: none;
+    border: 0;
+    border-radius: var(--border-radius-XS, 4px);
+    cursor: pointer;
+    transition: color var(--transition-base);
+  }
+  .donate__close:hover { color: var(--text-headline); }
+
+  /* ── Two-column layout ───────────────────────────────────────────── */
+  .donate__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+  /* Divider sits in the gutter: left col padded right, right col padded left
+     with a hairline (live's centered rule between the 372px columns). */
+  .donate__intro { padding-right: var(--spacing-5XL); }
+  .donate__form-col {
+    padding-left: var(--spacing-5XL);
+    border-left: var(--border-subtle);
+  }
+
+  .donate__mark {
+    width: 96px;
+    height: auto;
+    margin-bottom: var(--spacing-XL);
+  }
+  .donate__copy p { margin: 0 0 var(--spacing-M); }
+
+  .donate__links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-M);
+    margin-top: var(--spacing-XL);
+    list-style: none;
+    font-size: 14px;
+  }
+  .donate__links li {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-M);
+  }
+  /* Small brand diamond between links (rotated square). */
+  .donate__links li:not(:first-child)::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    background-color: var(--text-subtle);
+    transform: rotate(45deg);
+    flex: none;
+  }
+  /* Links reuse the shared global `.animated-in-out` treatment (resting
+     underline → animates out then back in green on hover), matching the
+     "Contact us" link below. Only the size is set here. */
+
+  .donate__heading {
+    /* 21px matches live — a step above body, not a heading element. */
+    margin-bottom: var(--spacing-2XL);
+    font-size: 21px;
+  }
+
+  /* ── Tabs ────────────────────────────────────────────────────────── */
+  .donate-form__tabs {
+    display: flex;
+    margin-bottom: var(--spacing-L);
+    background-color: var(--surface-background-bright);
+    border-radius: var(--border-radius-S);
+    box-shadow: var(--shadow-md);
+  }
+  .donate-form__tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-XS);
+    flex: 1;
+    min-height: 48px;
+    padding: var(--spacing-M) var(--spacing-XL);
+    color: var(--text-body);
+    background: transparent;
+    border: 0;
+    border-radius: var(--border-radius-S);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color var(--transition-base), color var(--transition-base);
+  }
+  .donate-form__tab.is-active {
+    background-color: var(--button-dark-color);
+    color: var(--button-light-color);
+  }
+
+  /* ── Amount groups (only the active one shows) ───────────────────── */
+  .donate-form__group { display: none; }
+  .donate-form__group.is-active { display: block; }
+
+  .donate-form__presets {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-L);
+    margin-bottom: var(--spacing-L);
+  }
+  .donate-form__preset { cursor: pointer; }
+  /* Visually-hidden native radio; the face is the button. */
+  .donate-form__preset input {
+    position: absolute;
+    width: 1px; height: 1px;
+    margin: -1px; padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .donate-form__preset-face {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: var(--spacing-M) var(--spacing-2XS);
+    background-color: var(--surface-background-bright);
+    color: var(--text-headline);
+    border-radius: var(--border-radius-S);
+    box-shadow: var(--shadow-sm);
+    font-weight: 500;
+    transition: background-color var(--transition-base), color var(--transition-base);
+  }
+  .donate-form__preset input:checked + .donate-form__preset-face {
+    background-color: var(--button-dark-color);
+    color: var(--button-light-color);
+  }
+  .donate-form__preset input:focus-visible + .donate-form__preset-face {
+    outline: 2px solid var(--color-interactive-focus);
+    outline-offset: 2px;
+  }
+
+  /* ── Custom amount + currency ────────────────────────────────────── */
+  .donate-form__custom { position: relative; }
+  .donate-form__amount {
+    width: 100%;
+    min-height: 48px;
+    /* room for the leading symbol + trailing currency select */
+    padding: 0 84px 0 var(--spacing-4XL);
+    background-color: var(--surface-background-bright);
+    color: var(--text-headline);
+    border: var(--border-strong);
+    border-radius: var(--border-radius-S);
+    box-shadow: none; /* override the global input shadow — this field is bordered */
+    font-size: 16px;
+  }
+  /* Hide the number spinner — the presets + free entry are the controls. */
+  .donate-form__amount::-webkit-outer-spin-button,
+  .donate-form__amount::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .donate-form__amount { -moz-appearance: textfield; appearance: textfield; }
+
+  .donate-form__symbol {
+    position: absolute;
+    top: 50%;
+    left: var(--spacing-XL);
+    transform: translateY(-50%);
+    color: var(--text-headline);
+    font-weight: 500;
+    pointer-events: none;
+  }
+  .donate-form__currency {
+    position: absolute;
+    top: 50%;
+    right: var(--spacing-S);
+    transform: translateY(-50%);
+    /* Override the global select (width:100%, shadow, filled bg) — this sits
+       INSIDE the amount field as a compact, borderless picker with a divider. */
+    width: auto;
+    height: 40px;
+    padding: 0 var(--spacing-L) 0 var(--spacing-S);
+    background-color: transparent;
+    background-position: right 2px center; /* keep the global arrow, nudged in */
+    box-shadow: none;
+    color: var(--text-body);
+    border: 0;
+    border-left: var(--border-subtle);
+    border-radius: 0;
+    cursor: pointer;
+  }
+
+  /* ── Submit + error ──────────────────────────────────────────────── */
+  .donate-form__submit {
+    width: 100%;
+    min-height: 48px;
+    margin-top: var(--spacing-L);
+    padding: 11px 21px;
+    background-color: var(--button-dark-color);
+    color: var(--button-light-color);
+    border: 0;
+    border-radius: var(--border-radius-S);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color var(--transition-base);
+  }
+  .donate-form__submit:hover { background-color: var(--color-interactive-hover); }
+  .donate-form__submit[disabled] { background-color: var(--color-interactive-disabled); cursor: default; }
+
+  /* The Monthly tab's sparkle mark is OM gold (native span carries the scope +
+     color; the <Icon> uses currentColor). Stays gold on the dark active tab. */
+  .donate-form__spark {
+    display: inline-flex;
+    color: var(--color-gold-500);
+  }
+
+  .donate-form__error {
+    margin: var(--spacing-M) 0 0;
+    color: var(--color-red-500);
+    font-size: 14px;
+  }
+
+  /* ── "Philanthropist looking for more?" ──────────────────────────── */
+  .donate__more {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-S);
+    margin: var(--spacing-2XL) 0 0;
+    font-size: 14px;
+    color: var(--text-body);
+  }
+  .donate__more-icon { color: var(--color-green-500); flex: none; }
+  .donate__more a { color: var(--text-headline); font-weight: 500; }
+
+  /* ════════════════════════════════════════════════════════════════
+     MOBILE — stack the columns, drop the divider, tighten padding.
+     ════════════════════════════════════════════════════════════════ */
+  @media (max-width: 767px) {
+    .donate__panel { padding: var(--spacing-3XL) var(--spacing-XL); }
+    .donate__grid { grid-template-columns: 1fr; gap: var(--spacing-3XL); }
+    .donate__intro { padding-right: 0; }
+    .donate__form-col { padding-left: 0; border-left: 0; }
+    .donate__mark { width: 72px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .donate-form__tab,
+    .donate-form__preset-face,
+    .donate-form__submit,
+    .donate__close { transition: none; }
+    .donate[open]::backdrop,
+    .donate[open] .donate__panel { animation: none; }
+  }
+</style>
+
+<script>
+  import { symbolFor } from '@data/donation.mjs';
+
+  const dialog = document.querySelector<HTMLDialogElement>('[data-donate-modal]');
+  if (dialog) {
+    const form = dialog.querySelector<HTMLFormElement>('[data-donate-form]')!;
+    const tabs = Array.from(dialog.querySelectorAll<HTMLButtonElement>('.donate-form__tab'));
+    const groups = Array.from(dialog.querySelectorAll<HTMLElement>('.donate-form__group'));
+    const submit = dialog.querySelector<HTMLButtonElement>('.donate-form__submit')!;
+    const errorEl = dialog.querySelector<HTMLElement>('.donate-form__error')!;
+    const currencySelects = Array.from(dialog.querySelectorAll<HTMLSelectElement>('.donate-form__currency'));
+    const SUBMIT_LABEL = { once: 'Donate', monthly: 'Donate Monthly' } as const;
+
+    const activeMode = () =>
+      (dialog.querySelector('.donate-form__group.is-active')?.getAttribute('data-group') as
+        | 'once'
+        | 'monthly') || 'once';
+
+    // Restore the submit button to its idle state for the active tab.
+    const resetSubmit = () => {
+      submit.disabled = false;
+      submit.textContent = SUBMIT_LABEL[activeMode()];
+      errorEl.hidden = true;
+    };
+
+    // Back from Stripe Checkout restores this page from the bfcache with the
+    // button still disabled ("Redirecting…") — re-arm it, but leave the dialog
+    // open: the donor coming Back almost certainly wants to adjust the amount.
+    window.addEventListener('pageshow', (e) => {
+      if (e.persisted) resetSubmit();
+    });
+
+    // ── Open / close ───────────────────────────────────────────────
+    const open = () => {
+      if (!dialog.open) {
+        resetSubmit();
+        dialog.showModal();
+        document.body.style.overflow = 'hidden';
+      }
+    };
+    const close = () => {
+      if (dialog.open) dialog.close();
+    };
+
+    // Delegate: any [data-donate-open] anywhere opens the modal.
+    document.addEventListener('click', (e) => {
+      const trigger = (e.target as HTMLElement).closest('[data-donate-open]');
+      if (trigger) {
+        e.preventDefault();
+        open();
+      }
+    });
+
+    dialog.addEventListener('close', () => { document.body.style.overflow = ''; });
+    dialog.querySelector('[data-donate-close]')?.addEventListener('click', close);
+    // Click on the backdrop (the dialog element itself, outside the panel) closes.
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) close();
+    });
+
+    // ── Tabs ───────────────────────────────────────────────────────
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const key = tab.dataset.tab!;
+        tabs.forEach((t) => {
+          const on = t === tab;
+          t.classList.toggle('is-active', on);
+          t.setAttribute('aria-selected', String(on));
+        });
+        groups.forEach((g) => g.classList.toggle('is-active', g.dataset.group === key));
+        submit.textContent = SUBMIT_LABEL[key as 'once' | 'monthly'];
+      });
+    });
+
+    // ── Preset ⇄ custom sync (per group) ───────────────────────────
+    groups.forEach((group) => {
+      const custom = group.querySelector<HTMLInputElement>('.donate-form__amount')!;
+      const radios = Array.from(group.querySelectorAll<HTMLInputElement>('input[type="radio"]'));
+      // Picking a preset clears the custom field.
+      radios.forEach((r) => r.addEventListener('change', () => { if (r.checked) custom.value = ''; }));
+      // Typing a custom amount unchecks presets — unless it exactly matches one.
+      custom.addEventListener('input', () => {
+        const v = parseFloat(custom.value);
+        radios.forEach((r) => { r.checked = !isNaN(v) && parseFloat(r.value) === v; });
+      });
+    });
+
+    // ── Currency: update every symbol, keep both selects in sync ────
+    const applyCurrency = (code: string) => {
+      const sym = symbolFor(code);
+      dialog.querySelectorAll<HTMLElement>('.donate-cur').forEach((el) => { el.textContent = sym; });
+      currencySelects.forEach((s) => { if (s.value !== code) s.value = code; });
+    };
+    currencySelects.forEach((s) => s.addEventListener('change', () => applyCurrency(s.value)));
+
+    // ── Resolve the amount to charge for the active mode ────────────
+    const resolveAmount = (mode: 'once' | 'monthly') => {
+      const group = groups.find((g) => g.dataset.group === mode)!;
+      const custom = parseFloat(group.querySelector<HTMLInputElement>('.donate-form__amount')!.value);
+      if (!isNaN(custom) && custom > 0) return custom;
+      const checked = group.querySelector<HTMLInputElement>('input[type="radio"]:checked');
+      return checked ? parseFloat(checked.value) : NaN;
+    };
+
+    // ── Submit → create a Checkout Session → redirect ──────────────
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const mode = activeMode();
+      const amount = resolveAmount(mode);
+      const currency = (currencySelects[0]?.value || 'USD').toUpperCase();
+
+      if (!amount || amount < 1) {
+        errorEl.textContent = 'Please select or enter a valid donation amount.';
+        errorEl.hidden = false;
+        return;
+      }
+
+      errorEl.hidden = true;
+      submit.disabled = true;
+      const original = submit.textContent;
+      submit.textContent = 'Redirecting…';
+
+      try {
+        const res = await fetch('/api/create-donation', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ amount, is_monthly: mode === 'monthly', currency }),
+        });
+        const data = await res.json();
+        if (res.ok && data.checkout_url) {
+          window.location.href = data.checkout_url;
+          return; // leave the button disabled through the redirect
+        }
+        errorEl.textContent = data.message || 'Something went wrong. Please try again.';
+        errorEl.hidden = false;
+      } catch {
+        errorEl.textContent = 'Network error. Please try again.';
+        errorEl.hidden = false;
+      }
+      submit.disabled = false;
+      submit.textContent = original;
+    });
+  }
+</script>

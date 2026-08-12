@@ -1,0 +1,895 @@
+[
+  {
+    "id": "andrew-trask",
+    "name": "Andrew Trask",
+    "role": "Founder & Leader",
+    "bio": "Creator & Executive Director of OpenMined",
+    "roles": [
+      "author",
+      "team"
+    ]
+  },
+  {
+    "id": "osam",
+    "name": "Osam Kyemenu-Sarsah",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "khoa-nguyen",
+    "name": "Khoa Nguyen",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "irina-bejan",
+    "name": "Irina Bejan",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "matt-prewitt",
+    "name": "Matt Prewitt",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "openmined-community",
+    "name": "OpenMined Team",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "lacey-strahm",
+    "name": "Lacey Strahm",
+    "avatar": "/people/lacey-strahm.jpg",
+    "role": "Head of Policy",
+    "roles": [
+      "team",
+      "author"
+    ]
+  },
+  {
+    "id": "dave-buckley",
+    "name": "Dave Buckley",
+    "avatar": "/people/dave-buckley.jpg",
+    "role": "Senior Policy Manager",
+    "roles": [
+      "team",
+      "author"
+    ]
+  },
+  {
+    "id": "noah-ringler",
+    "name": "Noah Ringler",
+    "bio": "Noah Ringler is Head of Outtake for Government at Outtake, where he leads work on AI-agent defense for public-sector clients. He previously served as AI Policy Lead at the U.S. Department of Homeland Security and as Lead Data Scientist for AI at the U.S. Treasury, where he contributed to the October 2023 Executive Order on Artificial Intelligence and to AI policy across cyberspace and critical infrastructure. He holds a master's from Georgetown University's Security Studies Program.",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "claudia-ghezzou-cuervas-mons",
+    "name": "Claudia Ghezzou Cuervas-Mons",
+    "bio": "Biochemistry and Neuroscience background. Working on data management in clinical trials.",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "madhava-jay",
+    "name": "Madhava Jay",
+    "bio": "Staff Engineer & Architect @ OpenMined",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "openmined-team",
+    "name": "OpenMined Team",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "osam-kyemenu-sarsah",
+    "name": "Osam Kyemenu-Sarsah",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "jack-hardinges",
+    "name": "Jack Hardinges",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "siddhant-rai",
+    "name": "Siddhant Rai",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "subha-ramkumar",
+    "name": "Subha Ramkumar",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "peter-ide-kostic",
+    "name": "Peter Ide-Kostic",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "elise-pi",
+    "name": "Elise Pi",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "bennett-farkas",
+    "name": "Bennett Farkas",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "zarreen-reza",
+    "name": "Zarreen Reza",
+    "bio": "Senior Applied AI Research Scientist",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "valerio-maggio",
+    "name": "Valerio Maggio",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "laura-ayre",
+    "name": "Laura Ayre",
+    "bio": "Strategic Partnerships | Global Private AI Research Programs | Growth Strategist",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "sarah-majors",
+    "name": "Sarah Majors",
+    "bio": "Archaeologist turned machine learning engineer :)",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "harshwardhan-fartale",
+    "name": "Harshwardhan Fartale",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "bhaswati-roy",
+    "name": "Bhaswati Roy",
+    "bio": "A passionate software developer interested in machine learning and writing blogs.",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "arya-gupta",
+    "name": "Arya Gupta",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "callis-ezenwaka",
+    "name": "Callis Ezenwaka",
+    "bio": "Program Manager & Enterprise Data Privacy Researcher",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "teo-milea",
+    "name": "Teo Milea",
+    "bio": "Differential Privacy @ OpenMined",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "bivin-v-b",
+    "name": "Bivin V B",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "sukanya-r",
+    "name": "Sukanya R",
+    "bio": "AI Data Privacy & Security (Technical Writer and Communication Navigator at OpenMined)",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "gatha-varma",
+    "name": "Gatha Varma",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "rachel-dulberg",
+    "name": "Rachel Dulberg",
+    "bio": "Rachel is a former technology and privacy lawyer turned data & AI nerd. She is passionate about innovation, the future of privacy and technology's power to solve the biggest problems of our time.",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "hema-krishnamurthy",
+    "name": "Hema Krishnamurthy",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "eswari-jayakumar",
+    "name": "Eswari Jayakumar",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "chinmay-shah",
+    "name": "Chinmay Shah",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "abinav-ravi-venkatakrishnan",
+    "name": "Abinav Ravi Venkatakrishnan",
+    "bio": "Data Scientist at deepc GmbH, Alumnus of Technical University of Munich, Interested in Deep learning for medical imaging , Federated learning and Privacy-preserving Machine learning",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "george-livingston",
+    "name": "George Livingston",
+    "bio": "Product Leader, Entrepreneur & Investor",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "nasron-cheong",
+    "name": "Nasron Cheong",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "wenhui-zhang",
+    "name": "Wenhui Zhang",
+    "bio": "I am working on building secure systems. I am always curious about new technologies.",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "krunal-kshirsagar",
+    "name": "Krunal Kshirsagar",
+    "bio": "Research Engineer & Writer @OpenMined",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "zumrut-muftuoglu",
+    "name": "Zumrut Muftuoglu",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "dr-martin-goodfellow",
+    "name": "Dr Martin Goodfellow",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "andrea-la-mantia",
+    "name": "Andrea La Mantia",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "bala-priya-c",
+    "name": "Bala Priya C",
+    "bio": "Technical Writer | Python Developer",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "sam-brown",
+    "name": "Sam Brown",
+    "bio": "Consequential is a social innovation practice focused on disruption for the common good. We specialise in strategy, culture and change for responsible businesses and products.",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "gonzalo-munilla-garrido",
+    "name": "Gonzalo Munilla Garrido",
+    "bio": "I am a Ph.D. student in computer science researching privacy-enhancing technology at the intersection of science and industry at the TU Munich and The BMW Group.",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "johannes-stutz",
+    "name": "Johannes Stutz",
+    "bio": "Writer for OpenMined | Machine learning enthusiast",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "lourdes-m-turrecha",
+    "name": "Lourdes M. Turrecha",
+    "bio": "Founder, The Rise of Privacy Tech | CEO, PIX LLC | Privacy Tech Strategist, Advisor, and Investor | Startup Privacy Officer | Reformed Silicon Valley Lawyer | @LourdesTurrecha @PrivacyTechRise",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "will-clark",
+    "name": "Will Clark",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "daniel-huynh",
+    "name": "Daniel Huynh",
+    "bio": "Data Scientist working on privacy preserving solutions",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "rene-schwermer",
+    "name": "René Schwermer",
+    "bio": "Doctoral candidate working on Federated Learning at the Technical University of Munich. My research interests include various topics in energy informatics and distributed systems.",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "ishan-mistry",
+    "name": "Ishan Mistry",
+    "bio": "An ML/Data Science enthusiast, pursuing undergrad in the ICT domain.",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "pamely-zantou",
+    "name": "Pamely ZANTOU",
+    "bio": "Deep Learning, Edge AI",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "shaistha-fathima",
+    "name": "Shaistha Fathima",
+    "bio": "ML Privacy and Security | Research and Team RecSys @OpenMined",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "mat-leonard",
+    "name": "Mat Leonard",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "angela-martin",
+    "name": "Angela Martin",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "openmined",
+    "name": "OpenMined",
+    "roles": [
+      "author",
+      "team"
+    ]
+  },
+  {
+    "id": "nick-doiron",
+    "name": "Nick Doiron",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "tejas-jain",
+    "name": "Tejas Jain",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "carlos-escapa",
+    "name": "Carlos Escapa",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "mir-mohammad-jaber",
+    "name": "Mir Mohammad Jaber",
+    "bio": "Software Engineer",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "siddhesh-shinde",
+    "name": "Siddhesh Shinde",
+    "bio": "Just another active learner, who is trying to make a positive impact in this world.",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "rohith-pudari",
+    "name": "Rohith Pudari",
+    "bio": "Grad Student in computer science focusing on Privacy Preserving and software engineering for Machine Learning Process. Twitter: @rohithpudari",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "tom-titcombe",
+    "name": "Tom Titcombe",
+    "bio": "Data Scientist @ Tessella",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "emma-bluemke",
+    "name": "Emma Bluemke",
+    "bio": "PhD student in medical imaging, University of Oxford. Twitter: @emmabluemke",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "daniele-gadler",
+    "name": "Daniele Gadler",
+    "bio": "Data Scientist @ Südtiroler Informatik AG.\n\nMSc. in Computer Science and Networking at Scuola Superiore Sant'Anna and at the University of Pisa. \n\nInterested in Decentralized AI and Machine Learning!",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "ben-fielding",
+    "name": "Ben Fielding",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "kartik-chopra",
+    "name": "Kartik Chopra",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "srishilesh-p-s",
+    "name": "Srishilesh P S",
+    "bio": "Computer Science undergraduate who is really passionate about Artificial Intelligence and Blockchain || OpenMined Writing team || Twitter: @srishilesh",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "kritika-prakash",
+    "name": "Kritika Prakash",
+    "bio": "Differential Privacy Lead at OpenMined",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "kellye-trask",
+    "name": "Kellye Trask",
+    "bio": "Placements @ OpenMined",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "andrew-gooday",
+    "name": "Andrew Gooday",
+    "bio": "A technology professional and AI enthusiast. I've worked in various technology roles, most recently in innovation and product management. I love both the technology and the possibilities of AI!",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "theo-ryffel",
+    "name": "Théo Ryffel",
+    "bio": "Crypto Team Lead at OpenMined, PhD student in Federated and Secure Machine Learning at ENS Ulm, and Co-founder of Arkhn.",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "ko-ohashi",
+    "name": "Ko Ohashi",
+    "bio": "I'm a software developer and startup founder. I love running, reading, and coding.",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "tj-misra",
+    "name": "TJ Misra",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "sachin-deshpande",
+    "name": "Sachin Deshpande",
+    "bio": "Twitter: @sdesh",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "aseem-p-langham",
+    "name": "Aseem P Langham",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "helena-barmer",
+    "name": "Helena Barmer",
+    "bio": "Events Team Lead",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "antonio-lopardo",
+    "name": "Antonio Lopardo",
+    "bio": "MSc of computer science student at Politecnico di Milano. Data Science and NLP practitioner, writer at OpenMined.",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "eitan-rovero-shein",
+    "name": "Eitan Rovero-Shein",
+    "bio": "Working on FL and Privacy Preserving ML",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "nate-solon",
+    "name": "Nate Solon",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "yemissi-b-kifouly",
+    "name": "Yemissi B. Kifouly",
+    "bio": "Learning Team Lead",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "ayoub-benaissa",
+    "name": "Ayoub Benaissa",
+    "bio": "Homomorphic Encryption Team Lead at OpenMined.",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "patrick-cason",
+    "name": "Patrick Cason",
+    "bio": "UI designer and full-stack web developer. Interested in online privacy and the psychology of Internet usage. Traveller. Entrepreneur. Musician.",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "sadegh-riazi",
+    "name": "Sadegh Riazi",
+    "bio": "Technology Enthusiast, PhD | privacy-preserving ML, secure computation @ UCSD, Microsoft Research | Past: Astrophysics, BCI, EE",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "carlos-salgado",
+    "name": "Carlos Salgado",
+    "bio": "Privacy Foundations: Secure Multiparty Computation",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "chris-briggs",
+    "name": "Chris Briggs",
+    "bio": "PhD Researcher in Federated Learning for Smart Energy Applications & OpenMined Privacy Conference 2020 Lead Organiser",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "julian-sprung",
+    "name": "Julian Sprung",
+    "bio": "Excited about the possibilities of privacy-preserving ML.\nCofounder at Genesis Cloud: providing cloud infrastructure for machine learning that is easy to use, affordable & running on renewable energy.",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "sabrina-steinert",
+    "name": "Sabrina Steinert",
+    "bio": "Data Scientist and Business Manager at apheris AI",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "ben-szymkow",
+    "name": "Ben Szymkow",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "alan-aboudib",
+    "name": "Alan Aboudib",
+    "bio": "Creator of SyferText & NLP Team Lead @OpenMined",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "david-gilmore",
+    "name": "David Gilmore",
+    "bio": "ceo @ datafleets. ppml & distributed systems in the wild",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "avinath-gunasekara",
+    "name": "Avinath Gunasekara",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "peter-smith",
+    "name": "Peter Smith",
+    "bio": "Partner Lead, OpenMined; President/COO, Golden Spiral",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "ivoline-ngong",
+    "name": "Ivoline Ngong",
+    "bio": "Open Source Contributor @ OpenMined",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "sigrid-keydana",
+    "name": "Sigrid Keydana",
+    "bio": "Sigrid is an applied researcher at RStudio, PBC. She helps maintaining RStudio's deep learning related packages, and writes for the RStudio AI blog (https://blogs.rstudio.com/ai/).",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "pooja-vinod",
+    "name": "Pooja Vinod",
+    "bio": "IEEE UPE Honor Society Award Winner '19|FB Secure and Private AI Scholar '19|Grace Hopper Celebration India Scholar '19|TEDx Speaker|Deep Learning Enthusiast|Final Year Undergrad Student(CS major)",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "ria-cheruvu",
+    "name": "Ria Cheruvu",
+    "bio": "AI Research Engineer intern at Intel and graduate student at Harvard University studying data science.",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "shahrokh-bahtooei",
+    "name": "Shahrokh Bahtooei",
+    "bio": "MSc. Information Security",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "georgios-kaissis",
+    "name": "Georgios Kaissis",
+    "bio": "George is a Radiologist at the Technical University of Munich, AI researcher at Imperial College London and a Research Scientist at OpenMined.",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "hericles-emanuel",
+    "name": "Héricles Emanuel",
+    "bio": "PyGrid Team - Software Engineer - Open Source Enthusiast - @hericlesme",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "fatemehsadat-mireshghallah",
+    "name": "Fatemehsadat Mireshghallah",
+    "bio": "PhD student at UC San Diego",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "nick-duddy",
+    "name": "Nick Duddy",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "aditya-patel",
+    "name": "Aditya Patel",
+    "bio": "Director of Data Science at Glance. M.S. in Electrical Engineering, M.S. in Biomedical Engineering at the University of Southern California.",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "tom-farrand",
+    "name": "Tom Farrand",
+    "bio": "Deep Learning Engineer @ IBM",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "matthias-lau",
+    "name": "Matthias Lau",
+    "bio": "IT-Freak and Development-Allrounder, love coding, awesome internet concepts, Chrome, Machine Learning, Evernote, the Apple Multi-Touch Trackpad, Bouldering, Wikipedia and Espresso.",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "madalin-mamuleanu",
+    "name": "Madalin Mamuleanu",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "urvashi-raheja-bhattacharyya",
+    "name": "Urvashi Raheja Bhattacharyya",
+    "bio": "Senior Research Analyst at StudyMode",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "arturo-marquez",
+    "name": "Arturo Marquez",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "kapil-chandorikar",
+    "name": "Kapil Chandorikar",
+    "bio": "Deep Learning enthusiast",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "amber-leigh-trask",
+    "name": "Amber Leigh Trask",
+    "bio": "Mentorship Team Lead",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "adam-j-hall",
+    "name": "Adam J Hall",
+    "bio": "Privacy-Preserving Machine-Learning Researcher. Security and Identity lead at OpenMined. PhD Student at the Blockpass Identity Lab.",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "jason-mancuso",
+    "name": "Jason Mancuso",
+    "bio": "ML Research & Engineering at Dropout Labs",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "silvia-gandy",
+    "name": "Silvia Gandy",
+    "bio": "Machine learning expert and software developer",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "ruben-seggers",
+    "name": "Ruben Seggers",
+    "bio": "Machine learning researcher. Focus on natural language, differential privacy and cryptography for private machine learning.",
+    "roles": [
+      "author"
+    ]
+  },
+  {
+    "id": "morten-dahl",
+    "name": "Morten Dahl",
+    "bio": "Mixing cryptography and machine learning.",
+    "roles": [
+      "author"
+    ]
+  }
+]

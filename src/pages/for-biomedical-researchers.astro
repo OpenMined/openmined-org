@@ -1,0 +1,193 @@
+---
+/**
+ * /for-biomedical-researchers/ — one of the four "Supported Subnets" pages
+ * (home Federated-Network section). Product page for BioVault: privacy-first
+ * biomedical data collaboration on SyftBox.
+ *
+ * Content verbatim from the live page.
+ */
+import Page from '@layouts/Page.astro';
+import SimpleHero from '@components/sections/hero/SimpleHero.astro';
+import ContentSection from '@components/sections/ContentSection.astro';
+import CardGrid from '@elements/CardGrid.astro';
+import IconCard from '@elements/IconCard.astro';
+import CtaSection from '@components/sections/cta/CtaSection.astro';
+import FormEmbed from '@elements/FormEmbed.astro';
+import Button from '@ui/Button.astro';
+
+// Icons are the real live inline-SVG (Lucide) marks fetched from production.
+// Some live cards render font-icon glyphs from libraries we don't load
+// (Themify `ti-*`) — flagged inline, using the nearest real SVG.
+const helps = [
+  { icon: 'file-check', title: 'Collaborative analysis without copying data' },
+  { icon: 'settings', title: 'Preservation of institutional governance' }, // FONT: ti-settings → settings
+  { icon: 'users', title: 'Participation across jurisdictions' },
+  { icon: 'network-discovery', title: 'Use of existing computing environments' },
+];
+
+const workflows = [
+  { icon: 'dna', title: 'Genomic and GWAS analyses' },
+  { icon: 'search', title: 'Single-cell and multi-omics workflows' },
+  { icon: 'circle-check', title: 'Medical imaging studies' },   // FONT: ti-gallery (live shows a generic check) → circle-check
+  { icon: 'trending-up', title: 'Clinical time-series analysis' }, // FONT: ti-bar-chart → trending-up (placeholder)
+  { icon: 'network', title: 'Machine learning model evaluation' },
+];
+
+const governance = [
+  { icon: 'users', title: 'Human-in-the-loop approval for each execution' }, // FONT: ti-user → users (placeholder)
+  { icon: 'file-check', title: 'Transparent audit trails' },
+  { icon: 'settings', title: 'Fine-grained control over outputs' }, // FONT: ti-target → settings (placeholder)
+  { icon: 'server', title: 'Computation performed locally within existing systems' },
+  { icon: 'lock', title: 'Encrypted communication between collaborators' },
+];
+---
+
+<Page
+  title="BioVault: Open-Source Biomedical Data Collaboration"
+  description="BioVault is an open-source platform that enables biomedical research across institutions without transferring sensitive data — approved analyses travel to the data, not the other way around."
+>
+  <SimpleHero eyebrow="for Biomedical Researchers" eyebrowItalic heading="Privacy-First Collaboration for Biomedical Data" subheadAs="h6" padBottom="var(--spacing-4XL)" contentGap="tight">
+    <Fragment slot="subhead"><a href="http://biovault.net" target="_blank" rel="noopener noreferrer">Biovault</a> is an open-source platform that enables biomedical research across institutions without transferring sensitive data. It implements a data-visitation model in which approved analyses travel to data rather than data being moved to analysts.</Fragment>
+    <Button slot="actions" href="#cta">Join Beta</Button>
+  </SimpleHero>
+
+  <!-- The Challenge — two-column: framing left, structural-conflict card right.
+       Opens with the hero's bottom rule (content-top-rule), spanning col-10. -->
+  <section class="bio-challenge">
+    <div class="container content-top-rule bio-challenge__container">
+      <div class="bio-challenge__grid">
+        <div class="bio-challenge__lede">
+          <h4>The Challenge</h4>
+          <p>Progress in precision medicine depends on collaboration between hospitals, biobanks and research groups. At the same time, privacy regulations and governance requirements increasingly restrict how biomedical data can be shared.</p>
+        </div>
+        <div class="bio-challenge__card">
+          <p>This creates a structural conflict:</p>
+          <ul>
+            <li>Meaningful research requires combining datasets</li>
+            <li>Ethical and legal obligations limit data movement</li>
+          </ul>
+          <p>Traditional solutions of centralized repositories, trusted research environments, and formal data-sharing agreements all often require significant resources and can reduce local control over sensitive information.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How BioVault Helps -->
+  <ContentSection surface="dim" as="h4" width="col-10" headGap="tight" heading="How BioVault Helps">
+    <div class="bio-body measure" style="--measure: 45em;">
+      <p>BioVault offers a practical alternative: local execution instead of data transfer.</p>
+      <p>Researchers develop analyses using privacy-safe mock datasets that mirror the structure of private data. When ready, those analyses are submitted for approval. Approved workflows run inside the data owner’s environment, and only permitted results are returned.</p>
+      <p>This model enables:</p>
+    </div>
+    <CardGrid cols={2} gap="var(--spacing-XL)">
+      {helps.map((c) => <IconCard icon={c.icon} layout="stacked" titleAs="body" title={c.title} />)}
+    </CardGrid>
+    <div class="bio-aftergrid measure" style="--measure: 45em;">
+      <p>Raw biomedical data remain under the control of their owners at all times.</p>
+    </div>
+  </ContentSection>
+
+  <!-- Supported Workflows -->
+  <ContentSection as="h4" width="col-10" headGap="tight" heading="Supported Workflows">
+    <div class="bio-body measure" style="--measure: 35em;">
+      <p>BioVault is designed to be domain-agnostic. It can support a wide range of biomedical applications, including:</p>
+    </div>
+    <CardGrid cols={5} gap="var(--spacing-XL)">
+      {workflows.map((c) => <IconCard icon={c.icon} surface="dim" layout="stacked" titleAs="body" title={c.title} />)}
+    </CardGrid>
+    <div class="bio-aftergrid measure" style="--measure: 35em;">
+      <p>Analyses can be submitted as Jupyter notebooks or Nextflow pipelines and executed on laptops, servers, HPC systems, or cloud infrastructure.</p>
+      <div class="bio-actions"><Button href="#cta">Join Beta</Button></div>
+    </div>
+  </ContentSection>
+
+  <!-- Governance and Security Model -->
+  <ContentSection
+    surface="dim"
+    as="h4"
+    width="col-10"
+    heading="Governance and Security Model"
+    intro="BioVault is built around practical institutional requirements:"
+  >
+    <CardGrid cols={5} gap="var(--spacing-XL)">
+      {governance.map((c) => <IconCard icon={c.icon} layout="stacked" titleAs="body" title={c.title} />)}
+    </CardGrid>
+    <div class="bio-aftergrid measure" style="--measure: 45em;">
+      <p>Data protection is achieved through local execution, controlled permissions, and auditable workflows, ensuring strong privacy without requiring data centralization.</p>
+    </div>
+  </ContentSection>
+
+  <!-- Evidence From Practice / Open Infrastructure -->
+  <ContentSection width="col-10">
+    <CardGrid cols={2} gap="var(--spacing-XL)">
+      <IconCard icon="search-check" surface="dim" layout="stacked" title="Evidence From Practice">
+        <p>BioVault has already supported cross-institution collaborations on sensitive biomedical datasets. These projects showed that complex analyses such as genomic studies and machine learning workflows can be completed effectively without exporting patient data.</p>
+      </IconCard>
+      <IconCard icon="globe" surface="dim" layout="stacked" title="Open Infrastructure">
+        <p>BioVault is fully open source and built on the SyftBox protocol for decentralized, privacy-preserving computation. It integrates with existing tools and workflows, allowing institutions to participate without adopting new centralized platforms.</p>
+      </IconCard>
+    </CardGrid>
+  </ContentSection>
+
+  <!-- CTA -->
+  <div id="cta">
+    <CtaSection variant="gradient" icon={false} heading="Join the Beta" body="Biovault is available for researchers and institutions seeking to collaborate responsibly on sensitive data.">
+      <FormEmbed slot="form" formId="6cce45ab-4571-46c1-a97a-55c730aa8058" />
+      <Fragment slot="fineprint">
+        <p>This will subscribe you to Product &amp; Protocol News. Want to change that later? Use the link at the bottom of our emails.</p>
+        <p>Joining confirms you agree with our <a href="/privacy-policy/">privacy policy</a>.</p>
+      </Fragment>
+    </CtaSection>
+  </div>
+</Page>
+
+<style>
+  /* The Challenge — two-column band (one-off; framing + structural-conflict card).
+     Constrained to col-10; the content-top-rule is the hero's bottom border and
+     spans this col-10 measure, with padding below it before the grid. */
+  /* Spacing lives on the container (which carries the content-top-rule border-top):
+     the border sits at the container's top edge, so the hero's own bottom padding
+     is the only gap above it (rule reads as the hero's bottom border), and the
+     full padding-block gives the challenge content its vertical rhythm below. */
+  .bio-challenge { margin: 0; }
+  .bio-challenge__container {
+    max-width: var(--col-10);
+    padding-block: var(--spacing-full);
+  }
+  .bio-challenge__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-5XL);
+    align-items: start;
+  }
+  .bio-challenge__lede h4 { margin-bottom: var(--spacing-L); }
+  .bio-challenge__lede p { margin: 0; }
+  .bio-challenge__card {
+    padding: var(--spacing-3XL);
+    border-radius: var(--border-radius-S);
+    background-color: var(--surface-background-dim);
+  }
+  .bio-challenge__card p { margin: 0 0 var(--spacing-L); }
+  .bio-challenge__card ul { margin: 0 0 var(--spacing-L); padding-left: 1.25em; }
+  .bio-challenge__card li { margin-bottom: var(--spacing-XS); }
+  .bio-challenge__card p:last-child { margin-bottom: 0; }
+
+  @media (max-width: 991px) {
+    .bio-challenge__grid { grid-template-columns: 1fr; gap: var(--spacing-2XL); }
+  }
+
+  /* shared body/intro copy blocks around the card grids */
+  .bio-body { margin: 0 auto var(--spacing-4XL); text-align: center; }
+  .bio-body p { margin: 0 0 var(--spacing-L); }
+  .bio-body p:last-child { margin-bottom: 0; }
+
+  .bio-aftergrid { margin: var(--spacing-4XL) auto 0; text-align: center; }
+  .bio-aftergrid p { margin: 0; }
+  .bio-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px var(--spacing-XL);
+    margin-top: var(--spacing-3XL);
+  }
+</style>

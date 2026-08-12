@@ -1,0 +1,135 @@
+/* ══════════════════════════════════════════════════════════════════
+   TYPOGRAPHY.CSS — Font declarations and type scale utilities
+   ══════════════════════════════════════════════════════════════════ */
+
+/*
+  FONT LOADING — self-hosted via the Astro Fonts API (config in
+  astro.config.mjs → fonts; <Font> + preload in Base.astro). @font-face rules,
+  metric-matched fallbacks, and preloads are all generated at build time — no
+  @font-face is hand-authored here. Families are consumed through the semantic
+  --font-primary / --font-secondary tokens (tokens.css → FONT FAMILIES), which
+  already carry the fallback stack, so declarations below name only the token.
+*/
+
+
+/* ── Body defaults ───────────────────────────────────────────────── */
+body {
+  font-family: var(--font-primary);
+  font-size: 16px;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.5;
+  color: var(--text-body);
+  background-color: var(--surface-background-default);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+/* ── Heading defaults ────────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-headline);
+  letter-spacing: 0;
+}
+
+/* Fluid clamp: min = mobile floor, max = desktop ceiling (from --hN-min/max tokens).
+   vw rate = max/13 — hits max exactly at the 1300px container width.
+   Components override --hN-max for a custom desktop size; the floor is automatic. */
+h1 { font-family: var(--font-secondary); font-size: clamp(var(--h1-min), 4.69vw, var(--h1-max)); font-weight: 400; line-height: 1.2; }
+h2 { font-family: var(--font-secondary); font-size: clamp(var(--h2-min), 3.62vw, var(--h2-max)); font-weight: 400; line-height: 1.2; }
+h3 { font-family: var(--font-secondary); font-size: clamp(var(--h3-min), 2.77vw, var(--h3-max)); font-weight: 400; line-height: 1.2; }
+h4 { font-family: var(--font-secondary); font-size: clamp(var(--h4-min), 2.08vw, var(--h4-max)); font-weight: 400; line-height: 1.2; }
+
+/* Site page H5/H6 use Inter 400 — prose context switches to Inter 600 via .prose */
+h5 { font-family: var(--font-primary); font-size: clamp(var(--h5-min), 1.62vw, var(--h5-max)); font-weight: 400; line-height: 1.4; }
+h6 { font-family: var(--font-primary); font-size: clamp(var(--h6-min), 1.54vw, var(--h6-max)); font-weight: 400; line-height: 1.5; }
+
+
+/* ── Type scale utility classes ──────────────────────────────────── */
+
+.text-subtitle {
+  font-family: var(--font-primary);
+  font-size: 21px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--text-subtle);
+}
+
+/* Eyebrow: semantic hook only — inherits all body styles, no extra CSS needed */
+.text-eyebrow {
+  /* Inherits: Inter 400, 16px, 1.5 lh, --text-body */
+}
+
+.text-caption {
+  font-family: var(--font-primary);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-body);
+}
+
+.text-caption-error {
+  font-family: var(--font-primary);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-red-500);
+}
+
+
+/* ── Prose heading scale ─────────────────────────────────────────── */
+/* Heading type-scale for long-form `.prose` content (blog posts,
+   whitepapers, letters, …). Spacing/rhythm for prose lives in global.css.
+
+   FLUID: prose headings use the same clamp() system as the rest of the site
+   (global.css h1–h6), NOT static px. h2/h3 inherit the global h2/h3 clamp
+   untouched; h4 only adds line-height 1.3; h5/h6 switch to a smaller Inter-600
+   prose scale (matching live's `.article-single__content` h5/h6).
+
+   HEADER DOWNSIZE — per-post option (live ACF `header_downsize`, applied on the
+   body as `.header-downsize-1/2`). Adding `.downsize-1` / `.downsize-2` to the
+   `.prose` container shifts every in-content heading DOWN one / two levels
+   (h2→h3→…→h6, floored at h6): each heading takes the target level's *clamp* and
+   treatment — a downsized h2 uses the SAME clamp as a real h3, so it stays fluid.
+
+   SIZE ONLY — downsize does NOT change spacing. Prose rhythm follows the TAG
+   (`global.css` → prose flow rhythm): an `<h2>` is the top-level section heading
+   and keeps its full break whatever size it renders at. Live authors were
+   hand-inserting spacer blocks above downsized h2s to restore that break, which
+   is the behaviour the tag-based rhythm encodes.
+   Written as target-level tier groups (a heading + the downsized headings that
+   render at that tier), mirroring live's SCSS `@extend %article-hN`. The more
+   specific `.prose.downsize-N hX` (0,3,0) overrides the base heading. The clamp
+   vw rates mirror the global h2–h4 rules — keep them in sync. */
+
+/* h3 tier — downsize-1 h2 (a real h3 keeps the global h3 clamp as-is). */
+.prose.downsize-1 h2 { font-size: clamp(var(--h3-min), 2.77vw, var(--h3-max)); }
+
+/* h4 tier — real h4 (+line-height) · downsize-1 h3 · downsize-2 h2. */
+.prose h4,
+.prose.downsize-1 h3,
+.prose.downsize-2 h2 {
+  font-size: clamp(var(--h4-min), 2.08vw, var(--h4-max));
+  line-height: 1.3;
+}
+
+/* h5 tier — real h5 · downsize-1 h4 · downsize-2 h3 — Inter 600, prose scale
+   (18→20px; min shares --h5-min, max is the prose-specific 20px). */
+.prose h5,
+.prose.downsize-1 h4,
+.prose.downsize-2 h3 {
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: clamp(var(--h5-min), 1.5vw, 20px);
+  line-height: 1.5;
+}
+
+/* h6 tier — real h6 · downsize-1 h5 · downsize-2 h4/h5 — Inter 600, prose scale
+   (16→18px; min shares --h6-min, max is the prose-specific 18px). */
+.prose h6,
+.prose.downsize-1 h5,
+.prose.downsize-2 h4,
+.prose.downsize-2 h5 {
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: clamp(var(--h6-min), 1.4vw, 18px);
+  line-height: 1.5;
+}

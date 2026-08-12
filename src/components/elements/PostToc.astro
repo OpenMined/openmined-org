@@ -1,0 +1,383 @@
+---
+/**
+ * PostToc — blog-post table of contents (prose-blog-spec §7).
+ *
+ * Three states, matching live (`theme-main.js` stick-to-top/expanded logic,
+ * reverse-engineered from openmined.org 2026-07-01 — no CSS class names
+ * survive from that reference, this is a token-mapped reimplementation):
+ * - Desktop, at rest: `position: absolute` in the natural left gutter left
+ *   over by the centered prose column — it does NOT occupy a grid track, so
+ *   it never pushes the reading column off-center (`BlogPost.astro`'s
+ *   `.post-layout` supplies `position: relative` as the containing block).
+ * - Desktop, scrolled past (`.is-stuck`): the instant the sidebar's OWN
+ *   BOTTOM edge would clear the TOP OF THE VIEWPORT, it collapses into a
+ *   full-width bar fixed at `top: 0` showing a bold "Table of Contents"
+ *   label + the current section — so the handoff is gapless, the user never
+ *   sees it disappear. The same scroll position reverses it on the way back
+ *   up. The bar sits flush at the very top, not offset for header height —
+ *   `Header.astro`'s normal hide-on-scroll-down behavior (unmodified on TOC
+ *   posts) gets it out of the way well before the TOC's own trigger point,
+ *   since the header hides on the first few px of downward scroll while the
+ *   TOC needs roughly a full viewport of scroll first.
+ *   Also collapses (regardless of scroll position) whenever the viewport is
+ *   too narrow to fit the sidebar in the gutter without overlapping the
+ *   prose column (mirrors live's horizontal check). A chevron expands it
+ *   into the full list, which collapses again on any link click.
+ * - Mobile (<992px): a closed-by-default disclosure above the prose body,
+ *   toggled by a plain button + `is-open` class. Always sits at the top of
+ *   the body regardless of a `TocAnchor` (below) — the anchor only affects
+ *   the desktop sidebar's start position; there's no "to the left" on mobile.
+ *
+ * **Starting mid-article.** By default the sidebar starts at the top of the
+ * post body. To start it further down instead (after an intro, before a
+ * video, etc.), drop a `TocAnchor.astro` (or, in a plain `.md` post, the raw
+ * `<span data-toc-anchor></span>` it renders) at that point in the content.
+ * This can only be measured at runtime (Astro has no browser at build time
+ * to compute a real pixel offset), so the script below finds it once on load
+ * (and re-measures on resize, since reflow can shift it) and sets
+ * `--post-toc-start-offset`, which the CSS `top` reads with a `0px` fallback
+ * when no anchor is present.
+ */
+import Icon from '@elements/Icon.astro';
+
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+  minDepth?: number;
+  maxDepth?: number;
+  /** Buffer (px) used only to decide which heading counts as "currently
+   * being read" for the active-item highlight — a heading isn't marked
+   * active until it's scrolled this far below the viewport top, so it isn't
+   * flagged while still hidden behind the site header (which briefly
+   * reappears on scroll-up; default 128 matches `Header.astro`'s desktop
+   * height). Unrelated to the stuck bar's own position, which is always
+   * flush at `top: 0` (see docstring above). */
+  headingOffset?: number;
+}
+
+const { headings, minDepth = 2, maxDepth = 3, headingOffset = 128 } = Astro.props;
+const items = headings.filter((h: Heading) => h.depth >= minDepth && h.depth <= maxDepth);
+---
+
+{items.length > 0 && (
+  <nav class="post-toc" aria-label="Table of contents" data-heading-offset={headingOffset}>
+    <button class="post-toc__toggle" type="button" aria-expanded="false">Contents</button>
+    <div class="post-toc__inner">
+      <div class="post-toc__bar">
+        <div class="post-toc__label">
+          <p class="post-toc__label-title">Table of Contents</p>
+          <p class="post-toc__label-current" data-current-section></p>
+        </div>
+        <button class="post-toc__expand-btn" type="button" aria-expanded="false" aria-label="Expand table of contents">
+          <Icon name="chevron-down" size={20} />
+        </button>
+      </div>
+      <p class="post-toc__title">Table of Contents</p>
+      <ul class="post-toc__list">
+        {items.map((h: Heading) => (
+          <li class={`post-toc__item post-toc__item--h${h.depth}`} data-toc-item={h.slug}>
+            <a href={`#${h.slug}`} data-toc-link={h.slug}>{h.text}</a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </nav>
+)}
+
+<script>
+  const toc = document.querySelector<HTMLElement>('.post-toc');
+  if (toc) {
+    // Mobile disclosure toggle.
+    const toggle = toc.querySelector<HTMLButtonElement>('.post-toc__toggle');
+    toggle?.addEventListener('click', () => {
+      const open = toc.classList.toggle('is-open');
+      toggle.setAttribute('aria-expanded', String(open));
+    });
+
+    // Desktop: chevron expands/collapses the condensed stuck bar.
+    const expandBtn = toc.querySelector<HTMLButtonElement>('.post-toc__expand-btn');
+    expandBtn?.addEventListener('click', () => {
+      const expanded = toc.classList.toggle('is-expanded');
+      expandBtn.setAttribute('aria-expanded', String(expanded));
+    });
+
+    // Clicking any heading link collapses the expanded dropdown back down.
+    const links = toc.querySelectorAll<HTMLAnchorElement>('[data-toc-link]');
+    links.forEach((l) => l.addEventListener('click', () => {
+      toc.classList.remove('is-expanded');
+      expandBtn?.setAttribute('aria-expanded', 'false');
+    }));
+
+    // Optional `TocAnchor` mid-article start point (see docstring above).
+    // Only meaningful at desktop widths; `checkStuck()`'s rect-based math
+    // below already works unmodified once `top` reflects this offset —
+    // scrolled-past-the-header detection doesn't care WHERE the sidebar
+    // rests, only where it currently sits.
+    const postLayout = toc.closest<HTMLElement>('.post-layout');
+    const anchor = postLayout?.querySelector<HTMLElement>('[data-toc-anchor]');
+    function measureAnchorOffset() {
+      if (!anchor || !postLayout) return;
+      const layoutTop = postLayout.getBoundingClientRect().top + window.scrollY;
+      const anchorTop = anchor.getBoundingClientRect().top + window.scrollY;
+      toc!.style.setProperty('--post-toc-start-offset', `${Math.max(0, anchorTop - layoutTop)}px`);
+    }
+    measureAnchorOffset();
+    window.addEventListener('resize', measureAnchorOffset);
+
+    // Buffer for the active-heading highlight only (see `headingOffset` prop
+    // doc) — read from the DOM so JS and the prop never drift apart.
+    const HEADING_OFFSET = Number(toc.dataset.headingOffset) || 128;
+    const MIN_LEFT_GUTTER = 20; // px — below this, the sidebar would crowd/overlap the reading column.
+    const inner = toc.querySelector<HTMLElement>('.post-toc__inner');
+    let triggerScrollY: number | null = null;
+    let ticking = false;
+
+    function setStuck(stuck: boolean) {
+      toc!.classList.toggle('is-stuck', stuck);
+      if (!stuck) {
+        toc!.classList.remove('is-expanded');
+        expandBtn?.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    function checkStuck() {
+      ticking = false;
+      if (!inner) return;
+
+      if (window.innerWidth < 992) {
+        setStuck(false);
+        triggerScrollY = null;
+        return;
+      }
+
+      // Horizontal: not enough room in the left gutter for the sidebar to sit
+      // without overlapping the (centered) reading column — collapse
+      // regardless of scroll position. `.post-toc` itself stays
+      // `position: absolute` even while stuck (only `.post-toc__inner`
+      // becomes `fixed`), so this measurement stays valid in both states.
+      const tooNarrow = toc!.getBoundingClientRect().left < MIN_LEFT_GUTTER;
+      if (tooNarrow) {
+        setStuck(true);
+        triggerScrollY = null; // no scroll threshold applies while horizontally forced
+        return;
+      }
+
+      if (toc!.classList.contains('is-stuck')) {
+        // Currently stuck. If we have a valid scroll threshold (stuck via the
+        // vertical rule), un-stick once scrolled back up past it. If we don't
+        // (we were only stuck because of the narrow-viewport rule, which just
+        // stopped applying), un-stick provisionally — if that's wrong, the
+        // very next frame re-measures `inner` fresh (now un-stuck) and
+        // re-triggers correctly.
+        if (triggerScrollY === null || window.scrollY <= triggerScrollY) {
+          setStuck(false);
+          triggerScrollY = null;
+        }
+      } else {
+        // Bar sits flush at the top (0), so the trigger is simply "the
+        // sidebar's own bottom edge has cleared the viewport top."
+        const rect = inner.getBoundingClientRect();
+        if (rect.bottom <= 0) {
+          triggerScrollY = window.scrollY + rect.bottom;
+          setStuck(true);
+        }
+      }
+    }
+    function onScrollOrResize() {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(checkStuck);
+      }
+    }
+    window.addEventListener('scroll', onScrollOrResize, { passive: true });
+    window.addEventListener('resize', onScrollOrResize);
+    checkStuck();
+
+    // Active-heading highlight — drives the sidebar's current-item state and
+    // the collapsed stuck bar's "current section" line.
+    const currentLabel = toc.querySelector<HTMLElement>('[data-current-section]');
+    if (links.length) {
+      const setActive = (slug: string | null) => {
+        links.forEach((l) => {
+          const active = l.dataset.tocLink === slug;
+          l.classList.toggle('is-active', active);
+          l.closest('.post-toc__item')?.classList.toggle('is-active-item', active);
+          if (active && currentLabel) currentLabel.textContent = l.textContent;
+        });
+      };
+      const targets = [...links]
+        .map((l) => document.getElementById(l.dataset.tocLink!))
+        .filter((el): el is HTMLElement => !!el);
+      const activeObserver = new IntersectionObserver(
+        (entries) => {
+          const visible = entries
+            .filter((e) => e.isIntersecting)
+            .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+          if (visible.length) setActive(visible[0].target.id);
+        },
+        { rootMargin: `-${HEADING_OFFSET}px 0px -70% 0px` }
+      );
+      targets.forEach((t) => activeObserver.observe(t));
+    }
+  }
+</script>
+
+<style>
+  .post-toc__toggle {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text-headline);
+    padding-block: var(--spacing-S);
+  }
+
+  .post-toc__bar {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-M);
+  }
+
+  .post-toc__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-XS);
+    margin-top: var(--spacing-S);
+    list-style: none;
+    padding-left: 0;
+  }
+  .post-toc__item a {
+    display: block;
+    color: var(--text-body);
+    text-decoration: none;
+    font-size: 14px;
+    line-height: 1.4;
+    padding-block: var(--spacing-3XS);
+    transition: color var(--transition-base);
+  }
+  .post-toc__item a:hover,
+  .post-toc__item a.is-active {
+    color: var(--text-headline);
+  }
+  .post-toc__item--h3 a { padding-left: var(--spacing-2XL); }
+
+  /* Stuck-bar-only label — hidden at rest (only the plain list shows then). */
+  .post-toc__label { display: none; }
+  .post-toc__label-title {
+    font-weight: 600;
+    color: var(--text-headline);
+    margin: 0;
+  }
+  .post-toc__label-current {
+    color: var(--text-body);
+    font-weight: 400;
+    margin: 0;
+  }
+
+  .post-toc__expand-btn { display: none; }
+
+  /* At-rest sidebar title — desktop only (mobile uses the disclosure toggle,
+     the stuck bar uses its own label). Bold body text. */
+  .post-toc__title { display: none; margin: 0; }
+
+  /* Mobile (<992px): closed-by-default disclosure above the prose body. */
+  @media (max-width: 991px) {
+    .post-toc {
+      margin-bottom: var(--spacing-2XL);
+      border: var(--border-subtle);
+      border-radius: var(--border-radius-S);
+      padding-inline: var(--spacing-L);
+    }
+    .post-toc__list { display: none; padding-bottom: var(--spacing-L); }
+    .post-toc.is-open .post-toc__list { display: flex; }
+  }
+
+  /* Desktop (>=992px): at rest, `position: absolute` in the left gutter —
+     never a grid/flex track, so it can't push the centered prose column. */
+  @media (min-width: 992px) {
+    .post-toc__toggle { display: none; }
+
+    /* Sidebar title: bold body, sits above the list with a 16px gap; the same
+       16px is added as top margin so the whole TOC starts a little lower. */
+    .post-toc__title {
+      display: block;
+      font-weight: 700;
+      color: var(--text-body);
+      padding-bottom: var(--spacing-L);
+    }
+    /* Title's padding-bottom is the gap to the list at rest — drop the list's
+       own top margin so the gap stays exactly 16px. */
+    .post-toc:not(.is-stuck) .post-toc__list { margin-top: 0; }
+    /* Stuck bar shows its own label — hide the at-rest title. */
+    .post-toc.is-stuck .post-toc__title { display: none; }
+
+    .post-toc {
+      position: absolute;
+      /* Defaults to the top of the body; a `TocAnchor` in the content moves
+         this down (see docstring above + the script's `measureAnchorOffset`). */
+      top: var(--post-toc-start-offset, 0px);
+      margin-top: var(--spacing-L);
+      /* Clear the actual reading column (`--col-6`, inset within the wider
+         `--col-8` `.post-layout` box by half the difference), not the wider
+         `--col-8` breakout zone — matches live, where the TOC only needs to
+         clear the narrow text column, leaving a much bigger natural gutter
+         to work with at common desktop widths. */
+      left: calc((var(--col-8) - var(--col-6)) / 2 - 250px - var(--spacing-3XL));
+      width: 250px;
+    }
+
+    /* Scrolled past (or viewport too narrow): collapse into a full-width bar
+       fixed under the header. Applied to `.post-toc__inner`, NOT `.post-toc`
+       itself — `.post-toc` stays `position: absolute` throughout so the
+       horizontal too-narrow check keeps measuring a stable, meaningful box. */
+    .post-toc.is-stuck .post-toc__inner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 40;
+      background: var(--surface-background-default);
+      border-bottom: var(--border-subtle);
+      box-shadow: var(--shadow-sm);
+      padding-block: var(--spacing-S);
+    }
+    .post-toc.is-stuck .post-toc__bar,
+    .post-toc.is-stuck .post-toc__list {
+      max-width: var(--col-8);
+      margin-inline: auto;
+      padding-inline: var(--spacing-XL);
+    }
+    .post-toc.is-stuck .post-toc__label { display: block; flex: 1; }
+
+    /* Collapsed: hide the full list entirely — the bar's label already shows
+       the current section. Expanded: reveal it as a scrollable dropdown. */
+    .post-toc.is-stuck:not(.is-expanded) .post-toc__list { display: none; }
+    .post-toc.is-stuck.is-expanded .post-toc__list {
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    .post-toc.is-stuck .post-toc__expand-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-body);
+      font-size: 20px;
+      line-height: 1;
+      transition: transform var(--transition-base);
+    }
+    .post-toc.is-stuck.is-expanded .post-toc__expand-btn { transform: rotate(180deg); }
+  }
+</style>

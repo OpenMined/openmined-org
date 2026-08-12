@@ -1,0 +1,198 @@
+---
+/**
+ * /blog/category/[category] — one of the 7 nav-category archives. Mirrors the
+ * /blog listing header: category nav, then a two-column header [featured post |
+ * per-category rail], then the toolbar (category name + count) over the shared
+ * PostCard grid. URLs are preserved verbatim from live (indexed).
+ *
+ * The right rail is per-category, from `categories.json` → `rail` (see the
+ * schema): a `tags` widget (titled tag links, e.g. product's "Solutions &
+ * Resources") or a `team` widget (this category's people + description, e.g.
+ * policy). Categories with no `rail` get a full-width featured header.
+ */
+import BlogListing from '@layouts/BlogListing.astro';
+import PostCard from '@elements/PostCard.astro';
+import BlogFeatured from '@components/sections/blog/BlogFeatured.astro';
+import BlogCategoryNav from '@elements/BlogCategoryNav.astro';
+import BlogToolbar from '@components/sections/blog/BlogToolbar.astro';
+import PopularTopics from '@elements/PopularTopics.astro';
+import TeamList from '@elements/TeamList.astro';
+import BlogPagination from '@elements/BlogPagination.astro';
+import { getCollection, getEntry, getEntries, type CollectionEntry } from 'astro:content';
+import { postSlug, resolveFeatured, pageCount, pageSlice } from '@utils/posts';
+
+export async function getStaticPaths() {
+  const NAV_ORDER = ['product', 'policy', 'news', 'research', 'stories', 'community', 'foundation'];
+  return NAV_ORDER.map((category) => ({ params: { category } }));
+}
+
+const { category } = Astro.params;
+const includeDrafts = import.meta.env.DEV;
+
+const categoryEntry = await getEntry('categories', category!);
+const label = categoryEntry?.data.label ?? category;
+// Meta description is a plain, always-present template per category — NOT the
+// display `description` (sparse + may carry inline HTML). Base.astro supplies the
+// site default if a page passes nothing.
+const metaDescription = `${label} — articles from OpenMined, the public network for non-public information.`;
+
+// Category nav — same 7-item nav as /blog, with this category active.
+const NAV_ORDER = ['news', 'product', 'research', 'policy', 'stories', 'community', 'foundation'];
+const allCats = await getCollection('categories');
+const navCats = NAV_ORDER
+  .map((id) => allCats.find((c) => c.id === id))
+  .filter((c) => c !== undefined)
+  .map((c) => ({ id: c.id, label: c.data.label }));
+
+// People for a `team` rail widget.
+const people = categoryEntry?.data.people?.length
+  ? await getEntries(categoryEntry.data.people.map((id) => ({ collection: 'people', id })))
+  : [];
+
+const posts = (await getCollection('blog', ({ data }) => (includeDrafts || !data.draft) && data.categories.some((c) => c.id === category)))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+// Left/hero column: featured post (default) or this category's team block.
+const headerLeft = categoryEntry?.data.headerLeft ?? 'featured';
+const teamPeople = people.map((p) => ({ id: p.id, name: p.data.name, role: p.data.role, avatar: p.data.avatar }));
+
+// Featured (left column) — only in 'featured' mode: category.featured slug, else
+// newest in category. In 'team' mode there is no featured, so nothing is excluded.
+const featuredEntry = headerLeft === 'featured'
+  ? resolveFeatured(posts, categoryEntry?.data.featured, `category "${category}"`)
+  : undefined;
+const gridPosts = featuredEntry ? posts.filter((p) => p.id !== featuredEntry.id) : posts;
+
+const resolveCard = async (p: CollectionEntry<'blog'>) => {
+  const cat = (await getEntry(p.data.categories[0]))!;
+  return {
+    href: `/blog/${postSlug(p)}/`,
+    title: p.data.title,
+    date: p.data.date,
+    category: { slug: cat.id, label: cat.data.label },
+    cover: p.data.cover,
+    coverAlt: p.data.coverAlt,
+    cardText: p.data.cardText,
+    draft: p.data.draft,
+  };
+};
+
+const featured = featuredEntry ? await resolveCard(featuredEntry) : null;
+
+// Page 1 renders 12 cards; the rest stream from /blog/category/<cat>/page/N/.
+const totalPages = pageCount(gridPosts.length);
+const cards = await Promise.all(pageSlice(gridPosts, 1).map(resolveCard));
+
+// Right-rail widgets — resolve tag labels + people here so the template renders.
+const tags = await getCollection('tags');
+const tagLabel = (id: string) =>
+  tags.find((t) => t.id === id)?.data.label ??
+  id.replace(/-/g, ' ').replace(/\b\w/g, (m) => m.toUpperCase());
+const rail = (categoryEntry?.data.rail ?? []).map((w) =>
+  w.type === 'tags'
+    ? { type: 'tags' as const, title: w.title, topics: w.tags.map((id) => ({ id, label: tagLabel(id) })) }
+    : {
+        type: 'team' as const,
+        title: w.title,
+        description: categoryEntry?.data.description,
+        people: people.map((p) => ({ id: p.id, name: p.data.name, role: p.data.role, avatar: p.data.avatar })),
+      }
+);
+---
+
+<BlogListing title={`${label} — Blog — OpenMined`} description={metaDescription}>
+  <section class="cat-archive container content-top-rule">
+    <BlogCategoryNav categories={navCats} active={category} />
+
+    <div class:list={['cat-archive__header', (rail.length > 0 || headerLeft === 'team') && 'cat-archive__header--split']}>
+      {headerLeft === 'team' ? (
+        <TeamList description={categoryEntry?.data.description} people={teamPeople} />
+      ) : featured && (
+        <BlogFeatured
+          href={featured.href}
+          title={featured.title}
+          date={featured.date}
+          category={featured.category}
+          cover={featured.cover}
+          coverAlt={featured.coverAlt}
+          cardText={featured.cardText}
+        />
+      )}
+      {rail.length > 0 && (
+        <div class="cat-archive__rail">
+          {rail.map((w) => (
+            <>
+              {w.type === 'tags' && <PopularTopics heading={w.title} topics={w.topics} />}
+              {w.type === 'team' && <TeamList heading={w.title} description={w.description} people={w.people} />}
+            </>
+          ))}
+        </div>
+      )}
+    </div>
+
+    <BlogToolbar
+      heading={label}
+      count={gridPosts.length}
+      scope={{ cat: category, exclude: featuredEntry && postSlug(featuredEntry) }}
+    />
+
+    <div class="blog-grid">
+      {cards.map((c) => (
+        <PostCard
+          href={c.href}
+          title={c.title}
+          date={c.date}
+          category={c.category}
+          cover={c.cover}
+          coverAlt={c.coverAlt}
+          cardText={c.cardText}
+          draft={c.draft}
+        />
+      ))}
+    </div>
+
+    <BlogPagination base={`/blog/category/${category}`} currentPage={1} totalPages={totalPages} />
+  </section>
+</BlogListing>
+
+<style>
+  .cat-archive {
+    /* stroke from .content-top-rule; own top padding (decoupled from the rule) */
+    padding-top: var(--spacing-3XL);
+    padding-bottom: var(--spacing-full);
+  }
+
+  /* Two-column header when the category has a rail (featured | rail, matching
+     /blog); otherwise the featured spans full width. */
+  .cat-archive__header {
+    margin-block: var(--spacing-3XL) var(--spacing-4XL);
+  }
+  .cat-archive__header--split {
+    display: grid;
+    grid-template-columns: 1fr 391px;
+    gap: var(--spacing-5XL);
+    align-items: start;
+  }
+  .cat-archive__rail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4XL);
+  }
+
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: var(--spacing-XL);
+    row-gap: var(--spacing-2XL);
+  }
+
+  @media (max-width: 991px) {
+    .cat-archive__header--split { grid-template-columns: 1fr; gap: var(--spacing-3XL); }
+  }
+  @media (max-width: 1099px) {
+    .blog-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 767px) {
+    .blog-grid { grid-template-columns: 1fr; }
+  }
+</style>

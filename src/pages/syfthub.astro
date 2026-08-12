@@ -1,0 +1,599 @@
+---
+import Page from '@layouts/Page.astro';
+import SimpleHero from '@components/sections/hero/SimpleHero.astro';
+import ContentSection from '@components/sections/ContentSection.astro';
+import ButtonCta from '@components/sections/cta/ButtonCta.astro';
+import CtaSection from '@components/sections/cta/CtaSection.astro';
+import FormEmbed from '@elements/FormEmbed.astro';
+import CardGrid from '@elements/CardGrid.astro';
+import IconCard from '@elements/IconCard.astro';
+import LinkCard from '@elements/LinkCard.astro';
+import FlowDiagram from '@elements/FlowDiagram.astro';
+import StepList from '@elements/StepList.astro';
+import Icon from '@elements/Icon.astro';
+import Button from '@ui/Button.astro';
+
+const spaceFeatures = [
+  'Upload documents or connect vector databases',
+  'Connect OpenAI, Anthropic, Ollama, or any provider',
+  'Create queryable RAG endpoints',
+  'Set access policies and pricing',
+];
+
+const hubFeatures = [
+  'Discover knowledge endpoints across the network',
+  'Query multiple sources with full attribution',
+  'Federated RAG and Mixture of Experts',
+  'Transparent source selection',
+];
+
+const coreComponents = [
+  {
+    icon: 'database',
+    title: 'Datasets',
+    body: 'Upload documents or connect vector databases like Weaviate, Qdrant, or ChromaDB. Files are automatically indexed for AI search.',
+  },
+  {
+    icon: 'sparkles',
+    title: 'Models',
+    body: 'Connect OpenAI, Anthropic, Ollama, vLLM, or any OpenAI-compatible provider. Your choice, your keys.',
+  },
+  {
+    icon: 'code',
+    title: 'Endpoints',
+    body: 'Combine datasets and models into queryable RAG endpoints. Configure output as search results, AI summaries, or both.',
+  },
+  {
+    icon: 'settings',
+    title: 'Policies',
+    body: 'Control access, set rate limits, and configure pricing. Your knowledge, your terms.',
+  },
+];
+
+const spaceSteps = [
+  {
+    title: 'Add Your Data',
+    body: 'Create a dataset from your documents, files, or folders. Automatic processing and indexing begins immediately.',
+  },
+  {
+    title: 'Create an Endpoint',
+    body: 'Combine your dataset with an AI model. Configure access policies, pricing, and test with the built-in query interface.',
+  },
+  {
+    title: 'Publish to SyftHub',
+    body: 'Make your endpoint discoverable. Choose visibility, monitor usage, and adjust policies anytime.',
+  },
+];
+
+const hubSteps = [
+  {
+    title: 'Select Sources',
+    body: 'Choose which endpoints to query—specific data owners, categories, or criteria. Selection is explicit and transparent.',
+  },
+  {
+    title: 'Distribute Query',
+    body: 'Query goes to all selected endpoints simultaneously. Each processes on its own infrastructure—data never leaves the owner.',
+  },
+  {
+    title: 'Synthesize with Citations',
+    body: 'Responses are combined into a coherent answer with inline citations linking each claim to its source.',
+  },
+];
+
+const applications = [
+  {
+    icon: 'newspaper',
+    title: 'Publishers & Creators',
+    body: 'Make your content AI-queryable for your audience. Let readers ask questions and get answers drawn directly from your work while maintaining attribution.',
+  },
+  {
+    icon: 'message-circle',
+    title: 'Research Synthesis',
+    body: 'Query multiple research institutions and academic databases to synthesize findings on specific topics with full citations.',
+  },
+  {
+    icon: 'lightbulb',
+    title: 'Enterprise Intelligence',
+    body: 'Combine insights from internal documentation, industry reports, and expert analysis for strategic decisions.',
+  },
+  {
+    icon: 'code',
+    title: 'Customer Support',
+    body: 'Build an AI assistant that knows your product documentation, answering customer questions accurately without human intervention.',
+  },
+  {
+    icon: 'dollar-sign',
+    title: 'Data Monetization',
+    body: 'Share valuable insights from your data without exposing the underlying information. Charge for access on your terms.',
+  },
+  {
+    icon: 'core-concepts',
+    title: 'Internal Knowledge Base',
+    body: "Turn your team's scattered documentation into a searchable knowledge hub that anyone on the team can query.",
+  },
+];
+
+const benefits = [
+  {
+    icon: 'lock',
+    title: 'Privacy-First',
+    body: 'Your data never leaves your control. Queries are processed on your infrastructure, and only results are shared.',
+  },
+  {
+    icon: 'zap',
+    title: 'Selective Sharing',
+    body: 'Share insights, not raw data. Control exactly what information is accessible through your endpoints.',
+  },
+  {
+    icon: 'dollar-sign',
+    title: 'Monetization',
+    body: 'Set your own pricing and access rules. Get paid when your knowledge is used.',
+  },
+  {
+    icon: 'globe',
+    title: 'Decentralized Network',
+    body: 'Part of a growing network while maintaining complete independence. No single point of control.',
+  },
+];
+
+const sdkTools = [
+  {
+    icon: 'network',
+    title: 'Syft MCP',
+    tag: 'Model Context Protocol',
+    body: 'Connect AI models to Spaces via the Model Context Protocol for seamless integration.',
+  },
+  {
+    icon: 'logo-python',
+    title: 'Python SDK',
+    tag: 'syft-sdk',
+    body: 'Query and integrate Spaces in Python applications with full type support.',
+  },
+  {
+    icon: 'logo-node',
+    title: 'TypeScript SDK',
+    tag: '@syfthub/sdk',
+    body: 'Full-featured SDK for Node.js and browser environments.',
+  },
+];
+
+const flowNodes = [
+  { icon: 'database', label: 'Your Data' },
+  { icon: 'sparkles', label: 'AI Model' },
+  { icon: 'code', label: 'Endpoint' },
+  { icon: 'settings', label: 'Your Rules' },
+  { icon: 'globe', label: 'Controlled Sharing' },
+];
+
+const flowOps = [
+  { glyph: '+' },
+  { glyph: '->', accent: true },
+  { glyph: '+' },
+  { glyph: '=', accent: true },
+];
+---
+
+<Page
+  title="SyftHub — Make Your Knowledge Queryable Without Giving It Up"
+  description="Create AI-powered knowledge endpoints others can query while your data stays private. SyftHub: knowledge as a service for collective intelligence."
+>
+
+  <!-- § Hero -->
+  <SimpleHero
+    eyebrow="Protocol for Collective Intelligence"
+    heading="Make Your Knowledge Queryable Without Giving It Up"
+    subhead="SyftHub &amp; Syft Space let you create AI-powered endpoints that others can query while your data stays under your control. Share insights, not raw data."
+    subheadAs="h6"
+    subheadMeasure="40em"
+    contentWidth="col-10"
+  >
+    <Fragment slot="actions">
+      <Button href="https://syfthub.openmined.org/">Open SyftHub -></Button>
+      <Button href="https://github.com/OpenMined/syft-space" variant="outline">
+        <Icon name="logo-github" size={18} />Github
+      </Button>
+    </Fragment>
+  </SimpleHero>
+
+  <!-- § LinkCards (Quickstart / Installation / Core Concepts) -->
+  <!-- Live: 0 top / 88px bottom padding; 3×420px grid, gap 20px, page-default surface -->
+  <section class="syh-linkcards">
+    <div class="container">
+      <div class="syh-linkcards__grid">
+        <LinkCard
+          href="http://syft.docs.openmined.org/space/quickstart"
+          icon="zap"
+          title="Quickstart"
+          subtitle="Get up and running in 5 minutes"
+        />
+        <LinkCard
+          href="http://syft.docs.openmined.org/space/installation"
+          icon="installation"
+          title="Installation"
+          subtitle="Desktop app or Docker deployment"
+        />
+        <LinkCard
+          href="http://syft.docs.openmined.org/space"
+          icon="core-concepts"
+          title="Core Concepts"
+          subtitle="Learn the building blocks"
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- § The Ecosystem — Two Products, One Vision -->
+  <!-- Live: dim surface section, centered head, bright (white) cards; SyftHub title + button in green -->
+  <section class="syh-products">
+    <div class="container">
+      <p class="syh-products__eyebrow">The Ecosystem</p>
+      <h3 class="syh-products__heading">Two Products, One Vision</h3>
+      <p class="syh-products__intro measure" style="--measure: 35em">Together, Syft Space and SyftHub create a decentralized network where knowledge flows without sacrificing control.</p>
+
+      <div class="syh-products__grid">
+
+        <div class="syh-products__card">
+          <h4 class="syh-products__product">Syft Space</h4>
+          <h6 class="syh-products__tagline">Your Personal AI-Powered Knowledge Hub</h6>
+          <p class="syh-products__desc">A decentralized node operated by anyone with knowledge to share. You add your documents, connect an AI model, and create endpoints that others can query. You control who gets access, what they can ask, and whether they pay.</p>
+          <ul class="syh-products__list">
+            {spaceFeatures.map((f) => <li>{f}</li>)}
+          </ul>
+          <Button href="http://syft.docs.openmined.org/space/quickstart">Deploy a Space -></Button>
+        </div>
+
+        <div class="syh-products__card">
+          <!-- Live: SyftHub title and CTA button in --color-green-600 -->
+          <h4 class="syh-products__product syh-products__product--green">SyftHub</h4>
+          <h6 class="syh-products__tagline">The Directory for Collective Intelligence</h6>
+          <p class="syh-products__desc">A registry that maps who has knowledge, what they're willing to share, and how to reach them. No middleman holding data—just the connective tissue that lets seekers find what they need and providers share on their terms.</p>
+          <ul class="syh-products__list">
+            {hubFeatures.map((f) => <li>{f}</li>)}
+          </ul>
+          <Button href="https://syfthub.openmined.org/" class="btn--green">Explore SyftHub -></Button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- § How It Works (flow diagram) -->
+  <ContentSection eyebrow="The Flow" heading="How It Works" width="col-10">
+    <FlowDiagram nodes={flowNodes} operators={flowOps} />
+  </ContentSection>
+
+  <!-- § Core Components — dim surface, 4-col, bright cards, subtitle -->
+  <!-- TODO(content:) subtitle text was a CMS placeholder on live site; confirm final copy -->
+  <ContentSection
+    heading="Core Components"
+    as="h4"
+    intro="Everything you need to build and share AI-powered knowledge endpoints."
+    width="full"
+    surface="dim"
+  >
+    <CardGrid cols={4} gap="var(--spacing-XL)">
+      {coreComponents.map((c) => (
+        <IconCard icon={c.icon} title={c.title} surface="bright" layout="stacked">
+          <p>{c.body}</p>
+        </IconCard>
+      ))}
+    </CardGrid>
+  </ContentSection>
+
+  <!-- § From Your Data to the Network — dual step lists with connectors -->
+  <!-- Live: h3 centered; Syft Space dark badges; SyftHub green badges + product label; vertical connector lines; dim quote card -->
+  <section class="syh-paths">
+    <div class="container">
+      <p class="syh-paths__eyebrow">How it Works</p>
+      <h3 class="syh-paths__heading">From Your Data to the Network</h3>
+      <p class="syh-paths__intro">Two paths, one ecosystem—publish your knowledge or query the collective</p>
+
+      <div class="syh-paths__grid">
+
+        <!-- Syft Space: dark connector -->
+        <div class="syh-paths__col">
+          <p class="syh-paths__product-label">Syft Space</p>
+          <h4 class="syh-paths__path-heading">Get Queryable in 3 Steps</h4>
+          <p class="syh-paths__path-intro">Publish your knowledge to the network</p>
+          <StepList steps={spaceSteps} connector />
+        </div>
+
+        <!-- SyftHub: green connector, green label, dim quote card -->
+        <div class="syh-paths__col">
+          <p class="syh-paths__product-label syh-paths__product-label--green">SyftHub</p>
+          <h4 class="syh-paths__path-heading">Query the Network</h4>
+          <p class="syh-paths__path-intro">Pull insights from multiple sources with full attribution</p>
+          <StepList steps={hubSteps} connector accent="green" />
+          <!-- Live: dim surface card with subtle citation text, below the steps list -->
+          <div class="syh-paths__quote">
+            <p>"Climate change is accelerating faster than predicted<sup>1</sup> with ice sheet loss contributing 40% more to sea level rise.<sup>2</sup>"</p>
+            <footer class="syh-paths__quote-footer">
+              <span><sup>1</sup> Nature Climate Change – Oxford</span>
+              <span><sup>2</sup> Journal of Glaciology – MIT</span>
+            </footer>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- § What Can You Build? — dim surface, bright cards, icons -->
+  <ContentSection eyebrow="Applications" heading="What Can You Build?" surface="dim" width="full">
+    <CardGrid cols={3} gap="var(--spacing-XL)">
+      {applications.map((a) => (
+        <IconCard icon={a.icon} title={a.title} surface="bright" layout="stacked">
+          <p>{a.body}</p>
+        </IconCard>
+      ))}
+    </CardGrid>
+  </ContentSection>
+
+  <!-- § Key Benefits — icons added -->
+  <ContentSection eyebrow="Why SyftHub &amp; Space" heading="Key Benefits" width="col-10">
+    <CardGrid cols={2} gap="var(--spacing-XL)">
+      {benefits.map((b) => (
+        <IconCard icon={b.icon} title={b.title} surface="dim">
+          <p>{b.body}</p>
+        </IconCard>
+      ))}
+    </CardGrid>
+  </ContentSection>
+
+  <!-- § Developer Tools — dim surface, bright cards, icon-above-title layout -->
+  <ContentSection eyebrow="Build With Syft" heading="Developer Tools" surface="dim" width="full">
+    <div class="syh-devtools-cards">
+      <CardGrid cols={3} gap="var(--spacing-XL)">
+        {sdkTools.map((t) => (
+          <IconCard icon={t.icon} title={t.title} surface="bright">
+            <p><code>{t.tag}</code></p>
+            <p>{t.body}</p>
+          </IconCard>
+        ))}
+      </CardGrid>
+    </div>
+  </ContentSection>
+
+  <!-- § "What if…" callout — continues the dim band from Developer Tools, inverted card -->
+  <section class="syh-callout">
+    <div class="container">
+      <div class="syh-callout__inner" data-section="invert">
+        <h4 class="syh-callout__heading">What if everyone's knowledge made everyone's AI smarter?</h4>
+        <p>A hospital's research improves a journalist's questions. A publisher's archive sharpens a scientist's model. The best AI would draw on all human knowledge—not just what's been scraped and frozen into weights, but living expertise that updates, corrects itself, and grows. That's only possible if contributing knowledge doesn't mean losing it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- § Ready to Make Your Knowledge Queryable? -->
+  <ButtonCta
+    heading="Ready to Make Your Knowledge Queryable?"
+    body="Join the network of knowledge providers and seekers building the future of AI-powered information sharing."
+    surface="bright"
+  >
+    <Button href="https://syfthub.openmined.org/">Open SyftHub -></Button>
+    <Button href="https://github.com/OpenMined/syft-space" variant="outline">Deploy a Space</Button>
+    <Button href="http://syft.docs.openmined.org/" variant="outline">Read the Docs</Button>
+  </ButtonCta>
+
+  <!-- § Talk to Our Team -->
+  <CtaSection heading="Talk to Our Team" body="Find out more about OpenMined" variant="subtle">
+    <FormEmbed slot="form" formId="46b97761-19b1-4300-9e59-28ce97576a4c" />
+    <Fragment slot="fineprint">
+      <p>Subscribing confirms you agree with our <a href="/privacy-policy/">privacy policy</a>.</p>
+    </Fragment>
+  </CtaSection>
+
+</Page>
+
+<style>
+  /* ─── LinkCards ─────────────────────────────────────────── */
+  .syh-linkcards {
+    padding-bottom: var(--spacing-full);
+  }
+
+  .syh-linkcards__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-XL); /* live: 20px */
+  }
+
+  @media (max-width: 767px) {
+    .syh-linkcards__grid { grid-template-columns: 1fr; }
+  }
+
+  /* ─── Two Products ──────────────────────────────────────── */
+  .syh-products {
+    padding-block: var(--spacing-full);
+    background-color: var(--surface-background-dim); /* slightly darker section surface */
+  }
+
+  .syh-products__eyebrow {
+    font-weight: 500;
+    color: var(--text-body);
+    margin-bottom: var(--spacing-M);
+    text-align: center;
+  }
+
+  .syh-products__heading {
+    margin-bottom: var(--spacing-XL);
+    text-align: center;
+  }
+
+  .syh-products__intro {
+    /* width comes from .measure (--measure set in markup); don't set max-width
+       here or it beats the .measure utility and blocks the mobile strip. */
+    margin-inline: auto;
+    margin-bottom: var(--spacing-full);
+    text-align: center;
+  }
+
+  .syh-products__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-XL);
+  }
+
+  .syh-products__card {
+    padding: var(--spacing-4XL);
+    border-radius: var(--border-radius-M);
+    background-color: var(--surface-background-bright); /* white cards on dim section */
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-L);
+  }
+
+  .syh-products__product {
+    color: var(--text-headline);
+    margin: 0;
+  }
+  .syh-products__product--green { color: var(--color-green-600); }
+
+  .syh-products__tagline {
+    margin: 0;
+  }
+
+  .syh-products__desc { margin: 0; }
+
+  .syh-products__list {
+    margin: 0;
+    padding-left: var(--spacing-XL);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-S);
+    flex: 1; /* push button to bottom of card */
+  }
+
+  /* buttons in flex-column cards must not stretch to fill card width */
+  .syh-products__card :global(.btn) {
+    align-self: flex-start;
+  }
+
+  /* Green CTA button for SyftHub card — page-scoped override via :global */
+  :global(.btn--green) {
+    background-color: var(--color-green-600) !important;
+    color: var(--surface-background-bright) !important;
+    border-color: transparent !important;
+  }
+  :global(.btn--green:hover) {
+    background-color: var(--color-green-700) !important;
+    color: var(--surface-background-bright) !important;
+  }
+
+  @media (max-width: 767px) {
+    .syh-products__grid { grid-template-columns: 1fr; }
+  }
+
+  /* ─── From Your Data to the Network ────────────────────── */
+  .syh-paths {
+    padding-block: var(--spacing-full);
+  }
+
+  .syh-paths__eyebrow {
+    font-weight: 500;
+    color: var(--text-body);
+    margin-bottom: var(--spacing-M);
+    text-align: center;
+  }
+
+  /* Live: h3 heading is centered above the two-column grid */
+  .syh-paths__heading {
+    margin-bottom: var(--spacing-XL);
+    text-align: center;
+  }
+
+  .syh-paths__intro {
+    max-width: var(--col-8);
+    margin-inline: auto;
+    margin-bottom: var(--spacing-full);
+    text-align: center;
+  }
+
+  .syh-paths__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-full);
+    align-items: start;
+  }
+
+  .syh-paths__product-label {
+    font-weight: 500;
+    color: var(--text-body);
+    margin-bottom: var(--spacing-S);
+  }
+  .syh-paths__product-label--green { color: var(--color-green-600); }
+
+  .syh-paths__path-heading { margin-bottom: var(--spacing-S); }
+
+  .syh-paths__path-intro {
+    color: var(--text-subtle);
+    margin-bottom: var(--spacing-3XL);
+  }
+
+  /* Quote card: dim surface, subtle text — live: rgb(244,243,246) = --surface-background-dim */
+  .syh-paths__quote {
+    margin-top: var(--spacing-3XL);
+    padding: var(--spacing-3XL);
+    border-radius: var(--border-radius-S);
+    background-color: var(--surface-background-dim);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-L);
+  }
+
+  .syh-paths__quote p {
+    color: var(--text-body);
+    font-style: italic;
+    margin: 0;
+  }
+
+  .syh-paths__quote-footer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-XS);
+    font-size: 14px;
+    color: var(--text-subtle);
+  }
+
+  @media (max-width: 767px) {
+    .syh-paths__grid { grid-template-columns: 1fr; }
+  }
+
+  /* ─── Developer Tools: vertical card layout ────────────── */
+  /* Icon sits above title (flex-direction: column) rather than inline.
+     :global() bypasses Astro scope to reach IconCard's .icon-card elements. */
+  .syh-devtools-cards :global(.icon-card) {
+    flex-direction: column;
+    gap: var(--spacing-L);
+  }
+
+  /* Strip the global gray badge from code labels inside these cards — live site
+     shows them as plain monospace text, not a pill/badge. */
+  .syh-devtools-cards :global(code) {
+    background: none;
+    padding: 0;
+    font-size: 0.85em;
+    color: var(--text-subtle);
+  }
+
+  /* ─── "What if…" callout ────────────────────────────────── */
+  /* Continues the dim surface band from Developer Tools — no top padding
+     so the two sections read as one unbroken tinted area. */
+  .syh-callout {
+    background-color: var(--surface-background-dim);
+    padding-top: 0;
+    padding-bottom: var(--spacing-full);
+  }
+
+  /* Inverted card sits inside the dim band */
+  .syh-callout__inner {
+    max-width: var(--col-8);
+    margin-inline: auto;
+    background-color: var(--surface-background-default);
+    padding: var(--spacing-4XL);
+    border-radius: var(--border-radius-M);
+  }
+
+  .syh-callout__heading { margin-bottom: var(--spacing-XL); }
+
+  .syh-callout__inner p { margin: 0; }
+</style>

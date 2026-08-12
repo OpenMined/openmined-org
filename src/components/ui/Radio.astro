@@ -1,0 +1,90 @@
+---
+interface Props {
+  label?: string;
+  checked?: boolean;
+  disabled?: boolean;
+  id?: string;
+  name?: string;
+  value?: string;
+  class?: string;
+}
+
+const {
+  label = 'Radio label',
+  checked = false,
+  disabled = false,
+  id,
+  name,
+  value,
+  class: className = '',
+} = Astro.props;
+---
+
+<label class={['radio-wrap', className].filter(Boolean).join(' ')}>
+  <span class="radio-control">
+    <input
+      type="radio"
+      checked={checked}
+      disabled={disabled}
+      id={id}
+      name={name}
+      value={value}
+      class="radio-input"
+    />
+    <span class="radio-custom"></span>
+  </span>
+  <span class="radio-label">{label}</span>
+</label>
+
+<style>
+  .radio-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-S);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .radio-control {
+    position: relative;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  .radio-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .radio-custom {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 1px solid var(--dark-surface-background-default);
+    border-radius: 50%;
+    background-color: var(--surface-background-default);
+    position: relative;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .radio-input:checked + .radio-custom::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--dark-surface-background-default);
+    border: 1px solid var(--color-grayscale-50);
+  }
+
+  .radio-label {
+    padding-left: 5px;
+    margin-bottom: 0;
+    cursor: pointer;
+  }
+</style>

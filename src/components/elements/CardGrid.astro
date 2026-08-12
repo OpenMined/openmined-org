@@ -1,0 +1,47 @@
+---
+/**
+ * CardGrid — responsive grid wrapper for IconCard (or any cards). Two modes:
+ *
+ *   cols={N}  fixed N-column grid (deterministic, even rows). Prefer this for
+ *             feature-card sections so item counts stack into even columns —
+ *             4 items → 2 cols, 6 → 3 cols, etc. (odd counts match the live
+ *             per-section layout). Collapses to 1-up at the 991px breakpoint.
+ *   min       fallback: auto-fit grid where `min` sets the smallest column
+ *             width before wrapping. Used when a fixed count isn't wanted.
+ *
+ * Live grids: 2-col (Real-World Apps, Core Capabilities, What Can You Do, Key
+ * Features), 3-col (syftbox personas).
+ */
+interface Props {
+  /** Fixed column count (even-stacking). Omit to use auto-fit `min`. */
+  cols?: number;
+  /** Min column width before wrapping (auto-fit mode only). */
+  min?: string;
+  /** Grid gap. */
+  gap?: string;
+}
+const { cols, min = '400px', gap = 'var(--spacing-XL)' } = Astro.props;
+---
+
+<div
+  class:list={['card-grid', { 'card-grid--fixed': cols }]}
+  style={`--card-min:${min};--card-gap:${gap};${cols ? `--card-cols:${cols};` : ''}`}
+>
+  <slot />
+</div>
+
+<style>
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--card-min)), 1fr));
+    gap: var(--card-gap);
+  }
+  /* fixed-column mode — deterministic even rows */
+  .card-grid--fixed {
+    grid-template-columns: repeat(var(--card-cols), minmax(0, 1fr));
+  }
+  /* stack to 1-up on mobile, matching the rest of the site (991px breakpoint) */
+  @media (max-width: 991px) {
+    .card-grid--fixed { grid-template-columns: 1fr; }
+  }
+</style>

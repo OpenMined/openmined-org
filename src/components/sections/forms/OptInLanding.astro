@@ -1,0 +1,93 @@
+---
+/**
+ * OptInLanding — the P1 "email opt-in" page body used by the /subscribe/* pages
+ * (and reusable for /slack/, /contractor-form/ variants). A centered card on the
+ * decorative post-background texture, holding: an icon (emoji/img via `icon`
+ * slot), a title, lede copy (default slot), a live HubSpot form, and fine print
+ * (`fine` slot).
+ *
+ * Reference: the live /subscribe/newsletter/ pages et al.
+ * Surface ladder: a full-spectrum post-background band (post-background-small.png,
+ * shared with CtaSection) + a --surface-foreground-low card. The card is a narrow
+ * --col-5 measure (content flows within its padding). The card is locked
+ * always-light (like the CtaSection card) so it stays legible on the light
+ * texture in dark mode too.
+ */
+import FormEmbed from '@elements/FormEmbed.astro';
+
+interface Props {
+  heading: string;
+  formId: string;
+}
+const { heading, formId } = Astro.props;
+---
+
+<section class="optin">
+  {/* No data-section: the card themes off --surface-foreground-low, matching live. */}
+  <div class="optin__card">
+    <div class="optin__inner">
+      <div class="optin__icon" aria-hidden="true"><slot name="icon" /></div>
+      <h1 class="optin__title">{heading}</h1>
+      <div class="optin__body"><slot /></div>
+      <FormEmbed formId={formId} />
+      <div class="optin__fine text-small"><slot name="fine" /></div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .optin {
+    /* Long title → smaller desktop h1 (mobile floor + fluid rate stay automatic). */
+    --h1-max: 36px;
+    padding-block: var(--spacing-5XL) var(--spacing-max);
+    /* Full-spectrum decorative band — the live raster (post-background-small.png). */
+    background-image: url('/images/post-background-small.png');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+  }
+
+  .optin__card {
+    max-width: var(--col-5);
+    margin-inline: auto;
+    padding: var(--spacing-5XL) var(--spacing-3XL);
+    background-color: var(--surface-foreground-low);
+    border-radius: var(--border-radius-L);
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+  }
+
+  .optin__inner {
+    margin-inline: auto;
+  }
+
+  .optin__icon {
+    font-size: 48px;
+    line-height: 1;
+    margin-bottom: var(--spacing-L);
+  }
+
+  .optin__title {
+    margin-bottom: var(--spacing-XL);
+  }
+
+  .optin__body {
+    margin-bottom: var(--spacing-3XL);
+    color: var(--text-body);
+  }
+  .optin__body :last-child {
+    margin-bottom: 0;
+  }
+
+  .optin__fine {
+    margin-top: var(--spacing-XL);
+    /* font-size: 14px via the global .text-small class on the element. */
+    color: var(--text-subtle);
+  }
+
+  @media (max-width: 767px) {
+    .optin__card {
+      padding: var(--spacing-3XL) var(--spacing-XL);
+    }
+  }
+</style>

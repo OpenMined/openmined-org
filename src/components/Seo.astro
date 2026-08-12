@@ -1,0 +1,103 @@
+---
+/**
+ * Seo — the single owner of the document's SEO + social head tags.
+ *
+ * Mounted once from Base.astro's <head>. Emits <title>, description, canonical,
+ * robots, Open Graph, and Twitter Card tags (+ article:* when type="article").
+ * Every page reaches this through Base, so per-page SEO is just props on the
+ * page's layout (Page / BlogPost) — see those layouts for the pass-through.
+ *
+ * The only logic here is (a) composing the final <title> from the page title +
+ * site name and (b) absolutizing the canonical + image URLs against `site`
+ * (astro.config.mjs → site). Callers pass a page-relative image path (e.g. a
+ * blog cover's build URL); Seo resolves it to an absolute URL for OG/Twitter.
+ *
+ * Modeled on the live site's head (verified against openmined.org: 2026-07-15).
+ */
+import { SITE_NAME, SITE_URL, DEFAULT_DESCRIPTION, DEFAULT_OG_IMAGE } from '@data/site.mjs';
+
+interface Props {
+  /** Raw page title (no site suffix) — Seo appends " — OpenMined" when needed. */
+  title?: string;
+  description?: string;
+  /** Page-relative or absolute image; absolutized against site for OG/Twitter. */
+  image?: string;
+  imageAlt?: string;
+  /** Canonical / og:url path — defaults to the current route. */
+  canonicalPath?: string;
+  type?: 'website' | 'article';
+  /**
+   * Keep the page out of search indexes. Defaults TRUE — a deliberate
+   * pre-launch guard so the in-progress migration is never indexed. AT LAUNCH:
+   * flip the default in Base.astro's Props to false (one switch, whole site).
+   */
+  noindex?: boolean;
+  /** article:* metadata — emitted only when type="article". */
+  publishedTime?: string;
+  modifiedTime?: string;
+  authors?: string[];
+  section?: string;
+  tags?: string[];
+}
+
+const {
+  title,
+  description = DEFAULT_DESCRIPTION,
+  image,
+  imageAlt = '',
+  canonicalPath,
+  type = 'website',
+  noindex = true,
+  publishedTime,
+  modifiedTime,
+  authors = [],
+  section,
+  tags = [],
+} = Astro.props;
+
+// Final <title>: append the site name UNLESS the page title already carries the
+// brand (home, "Careers at OpenMined", etc. already contain "OpenMined"). No
+// page title at all → the bare site name.
+const pageTitle = title?.trim();
+const fullTitle = !pageTitle
+  ? SITE_NAME
+  : pageTitle.includes(SITE_NAME)
+    ? pageTitle
+    : `${pageTitle} — ${SITE_NAME}`;
+
+// `Astro.site` is set from astro.config.mjs → site; fall back to the constant so
+// this never throws if the config value is ever unset.
+const base = Astro.site ?? new URL(SITE_URL);
+const canonical = new URL(canonicalPath ?? Astro.url.pathname, base).href;
+const ogImage = new URL(image ?? DEFAULT_OG_IMAGE, base).href;
+---
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+<meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow'} />
+
+{/* Open Graph */}
+<meta property="og:type" content={type} />
+<meta property="og:site_name" content={SITE_NAME} />
+<meta property="og:locale" content="en_US" />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={ogImage} />
+{imageAlt && <meta property="og:image:alt" content={imageAlt} />}
+
+{/* Twitter Card */}
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+
+{type === 'article' && (
+  <>
+    {publishedTime && <meta property="article:published_time" content={publishedTime} />}
+    {modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
+    {authors.map((a) => <meta property="article:author" content={a} />)}
+    {section && <meta property="article:section" content={section} />}
+    {tags.map((t) => <meta property="article:tag" content={t} />)}
+  </>
+)}

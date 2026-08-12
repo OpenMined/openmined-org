@@ -1,0 +1,262 @@
+---
+import Page from '@layouts/Page.astro';
+import SimpleHero from '@components/sections/hero/SimpleHero.astro';
+import HeroSwoop from '@components/graphics/HeroSwoop.astro';
+import ContentSection from '@components/sections/ContentSection.astro';
+import FeatureListGraphic from '@components/sections/features/FeatureListGraphic.astro';
+import SyftFlwrBuildPaths from '@components/sections/cta/SyftFlwrBuildPaths.astro';
+import ComparisonTable from '@elements/ComparisonTable.astro';
+import CardGrid from '@elements/CardGrid.astro';
+import IconCard from '@elements/IconCard.astro';
+import Button from '@ui/Button.astro';
+
+const challengeRows = [
+  '<b>Weeks coordinating VPNs &amp; firewalls</b> just to connect data sites. No way to find new partners.',
+  '<b>No separation of user roles,</b> forcing you to build custom and complex authentication systems.',
+  '<b>No native way for data owners to approve code,</b> requiring manual processes to track governance and satisfy compliance.',
+  '<b>No official, production-ready deployment method,</b> leaving you to build everything from the ground up.',
+];
+const solutionRows = [
+  '<b>Auto-discovery of data sites and assets.</b> A secure, zero-config network that just works.',
+  '<b>Built-in identity and access control</b> with distinct roles for Data Owners and Data Scientists. Built in request, review and approval system.',
+  '<b>Built-in code approval workflows</b> that give data owners control and create an immutable audit log for compliance.',
+  '<b>A simple, robust, and fully open-source deployment engine,</b> ready for production with official Docker support.',
+];
+
+const whyChoose = [
+  { title: 'Built-in Governance and Trust:', body: 'Unlike other frameworks, <code>syft-flwr</code> is designed for real-world trust limitations. Its code approval system allows data owners to see exactly what code will run on their data, fostering trust between collaborating organizations.' },
+  { title: 'Multi-Role User Management:', body: 'Features distinct, built-in roles for “Data Providers” and “Data Scientists,” reflecting the reality of multi-stakeholder projects and solving a key limitation of other frameworks.' },
+  { title: 'Simplified Data &amp; Network Discovery:', body: 'The built-in network allows users to automatically discover other data sites and query metadata about available assets, a critical feature for scaling collaboration that is missing elsewhere.' },
+  { title: 'Fully Open-Source for Maximum Transparency:', body: '<code>syft-flwr</code> is completely open-source, ensuring that all code can be audited. This transparency is essential for gaining the trust of partners in a production environment, especially when dealing with sensitive data.' },
+  { title: 'Scientific Flexibility, Production Ready:', body: 'Keep your existing Flower code and use any Python library you need. <code>syft-flwr</code> provides the production guardrails without limiting your research questions, whether you’re running simple statistical tests or fine-tuning complex models.' },
+];
+---
+
+<Page
+  title="syft-flwr — Production-ready federated learning infrastructure"
+  description="Deploy production-ready federated learning infrastructure in days. Syft-FLWR combines Flower FL with built-in governance, audit logs, and privacy controls."
+>
+  <SimpleHero
+    eyebrow="syft-flwr:"
+    heading="Stop Wrestling with Infrastructure. Start Your Federated Learning Project."
+    headingMeasure='18em'
+    lede="Production-ready federated learning infrastructure in days, not months. Get the governance, security, and collaboration tools stakeholders demand without custom engineering headaches."
+    ledeMeasure="48em"
+    contentWidth="col-12"
+  >
+    <Button slot="actions" href="https://openmined.org/syft-flwr/">Get Started</Button>
+    <HeroSwoop slot="swoop" src="/images/om-flow-hero.png" width={1024} height={288} />
+  </SimpleHero>
+
+  {/* 2-col: heading + intro left, comparison right. Live is a 276/644 split;
+      mapped to col-4 / col-6 (= col-10 total) to stay on the column scale. */}
+  <section class="hardpart">
+    <div class="container">
+      <div class="hardpart__grid">
+        <div class="hardpart__intro">
+          <h4 class="hardpart__heading">The Hard Part Isn’t the Model, It’s the Production Infrastructure.</h4>
+          <p class="hardpart__lede">Setting up a real-world federated learning project often means weeks of infrastructure work before any ML happens.</p>
+        </div>
+        <div class="hardpart__compare">
+          <ComparisonTable
+            columns={[
+              { title: 'The Challenge:', subtitle: 'Manual Deployment', icon: 'x-solid', rows: challengeRows },
+              { title: 'The Solution:', subtitle: 'syft-flwr', icon: 'check-solid', rows: solutionRows },
+            ]}
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <ContentSection
+    as="h4"
+    width="col-10"
+    headWidth="col-6"
+    heading="Choose Your Deployment Path"
+    intro="syft-flwr works with your choice of transport layer. Same FL workflow, same governance features – pick what fits your environment."
+  >
+    <div class="deploy-grid" style="--cols:2; --rows:5">
+      <div class="deploy-col">
+        <div class="deploy-col__title"><h5>SyftBox</h5></div>
+        <p class="deploy-col__field"><strong>Best for:</strong> Production deployments with IT support</p>
+        <p class="deploy-col__field"><strong>How it works:</strong> Server-coordinated network — code executes at data sites, only results sync</p>
+        <p class="deploy-col__field"><strong>Requirements:</strong> Use OpenMined relay server or self-host; Docker/K8s ready</p>
+        <div class="deploy-col__cta"><Button href="https://openmined.org/syft-flwr/">Request a Demo</Button></div>
+      </div>
+      <div class="deploy-col">
+        <div class="deploy-col__title"><h5>Zero-Setup P2P (Alpha)</h5></div>
+        <p class="deploy-col__field"><strong>Best for:</strong> Zero-setup pilots, GDPR compliance, clinician-friendly environments</p>
+        <p class="deploy-col__field"><strong>How it works:</strong> Serverless architecture using familiar cloud storage (e.g. Google Drive) — no public server, no infrastructure to maintain</p>
+        <p class="deploy-col__field"><strong>Requirements:</strong> Just Google Colab + a Google account</p>
+        <div class="deploy-col__cta"><Button variant="outline" href="https://openmined.org/blog/zero-setup-federated-learning-google-colab/">Try the Zero-Setup Tutorial</Button></div>
+      </div>
+    </div>
+    <p class="deploy-note">Both options use the same syft-flwr framework. Your FL code works identically – only the transport layer differs.</p>
+  </ContentSection>
+
+  <ContentSection
+    surface="dim"
+    width="col-8"
+    align="left"
+    headWidth="col-6"
+    heading="Real-World Applications"
+    intro="Federated learning enables secure collaboration across organizations that can’t share raw data. Train models on distributed datasets while maintaining privacy, compliance, and trust between all parties involved."
+  >
+    <CardGrid cols={2} gap="var(--spacing-3XL)">
+      <IconCard icon="circle-check" titleAs="strong" title="Healthcare & Life Sciences:">
+        <p>Enable multi-hospital research consortia to train models on sensitive patient data for applications like cancer research while maintaining privacy.</p>
+      </IconCard>
+      <IconCard icon="circle-check" titleAs="strong" title="Government & Research:">
+        <p>Allow academic consortia and government agencies to perform federated analytics across heterogeneous datasets without data pooling.</p>
+      </IconCard>
+      <IconCard icon="circle-check" titleAs="strong" title="Financial Services:">
+        <p>Facilitate cross-enterprise fraud detection or federated credit scoring without sharing proprietary customer data.</p>
+      </IconCard>
+      <IconCard icon="circle-check" titleAs="strong" title="Any Current Flower User">
+        <p>Teams with existing <a href="http://flower.ai/" target="_blank" rel="noopener">Flower</a> code can leverage <code>syft-flwr</code> to deploy to a production environment in days, gaining governance, audit trails, and security features with minimal changes.</p>
+      </IconCard>
+      <IconCard icon="circle-check" titleAs="strong" title="Any Federated Computations on Distributed Data">
+        <p>More generally, <code>syft-flwr</code> can be used wherever a piece of code (computation) needs to run on distributed machines with their private data, then aggregate the outputs.</p>
+      </IconCard>
+    </CardGrid>
+  </ContentSection>
+
+  <FeatureListGraphic heading="Why Choose syft-flwr" features={whyChoose} headingAboveGraphic width="col-8">
+    <img slot="graphic" src="/images/om-cube.svg" alt="" width="311" height="360" data-fade />
+  </FeatureListGraphic>
+
+  <ContentSection as="h4" width="col-10" heading="Core Capabilities:" align="left">
+    <CardGrid cols={2} gap="var(--spacing-XL)">
+      <IconCard icon="logo-flower" surface="dim" title="Full Flower Integration:">
+        <p>Run unmodified <a href="http://flower.ai/" target="_blank" rel="noopener">Flower</a> code with only 2–3 lines needed to connect to the SyftBox network.</p>
+      </IconCard>
+      <IconCard icon="network-discovery" surface="dim" title="Network Discovery:">
+        <p>Automatically detect participating data sites, eliminating manual node configuration.</p>
+      </IconCard>
+      <IconCard icon="circle-check" surface="dim" title="Immutable Audit Logs:">
+        <p>A built-in record of all training rounds and approvals for compliance purposes.</p>
+      </IconCard>
+      <IconCard icon="lock" surface="dim" title="Secure Data Storage & Management">
+        <p>Provides secure and efficient mechanisms for storing and managing sensitive data.</p>
+      </IconCard>
+    </CardGrid>
+  </ContentSection>
+
+  <ContentSection as="h4" width="col-10" heading="Deployment:" align="left">
+    <CardGrid cols={2} gap="var(--spacing-XL)">
+      <IconCard icon="network-discovery" surface="dim" title="Docker & Kubernetes Ready:">
+        <p>Provides official Docker images and Helm charts for standardized, production-ready deployment, a foundational requirement for users.</p>
+      </IconCard>
+      <IconCard icon="globe" surface="dim" title="Deploy Anywhere:">
+        <p>Works on-premise or in any major cloud environment (AWS, Azure, GCP).</p>
+      </IconCard>
+    </CardGrid>
+  </ContentSection>
+
+  <SyftFlwrBuildPaths />
+
+  <ContentSection heading="Resources" align="left">
+    <div class="resources">
+      <h5>Getting Started:</h5>
+      <ul>
+        <li><a href="https://openmined.org/blog/zero-setup-federated-learning-google-colab/">Zero-Setup Federated Learning in Google Colab</a></li>
+        <li><a href="https://openmined.org/blog/federated-learning-in-practice-diabetes-prediction/">Federated Learning for Diabetes Prediction: A Real-World Example</a></li>
+      </ul>
+      <h5>NAIRR Partners:</h5>
+      <ul>
+        <li><a href="https://openmined.org/programs/nairr/">NAIRR Program ⬩ OpenMined</a></li>
+      </ul>
+    </div>
+  </ContentSection>
+</Page>
+
+<style>
+  /* "The Hard Part" — heading/intro left (col-4), comparison right (col-6),
+     centered as a col-10 composition. Stacks at the mobile breakpoint. */
+  .hardpart {
+    margin-block: var(--spacing-full);
+  }
+  .hardpart__grid {
+    display: grid;
+    /* heading : comparison = 3 : 7 within a col-10 measure */
+    grid-template-columns: minmax(0, 3fr) minmax(0, 7fr);
+    gap: var(--spacing-XL); /* live: 20px */
+    max-width: var(--col-10);
+    margin-inline: auto;
+    align-items: start;
+  }
+  .hardpart__heading { margin: 0 0 var(--spacing-L); }
+  .hardpart__lede { margin: 0; }
+  @media (max-width: 991px) {
+    .hardpart__grid { grid-template-columns: 1fr; }
+  }
+
+  /* Deployment paths — the ComparisonTable connected-table look: one card on the
+     default surface, soft shadow, small radius, 1px dividers on both axes. Each
+     column is a subgrid so its title / fields / CTA align to shared row tracks —
+     equal-height rows, dividers run straight across, the two CTAs share a bottom
+     edge. No icons (these columns carry labeled fields + a CTA, not icon rows). */
+  .deploy-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr));
+    grid-template-rows: auto repeat(calc(var(--rows, 5) - 1), auto);
+    background-color: var(--surface-background-default);
+    border-radius: var(--border-radius-S);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden; /* clip columns to the rounded corners */
+  }
+  .deploy-col {
+    display: grid;
+    grid-template-rows: subgrid;
+    grid-row: 1 / -1;
+  }
+  /* vertical divider between columns (inside only) */
+  .deploy-col:not(:first-child) { border-left: var(--border-subtle); }
+
+  .deploy-col__title {
+    padding: var(--spacing-4XL) var(--spacing-4XL) var(--spacing-L);
+    text-align: center; /* centered heading cell */
+  }
+  .deploy-col__title :global(h5) { margin: 0; }
+  .deploy-col__field {
+    margin: 0;
+    padding: var(--spacing-L) var(--spacing-4XL);
+    border-top: var(--border-subtle); /* thin borderline per sub-item */
+  }
+  .deploy-col__cta {
+    padding: var(--spacing-4XL);
+    border-top: var(--border-subtle);
+    text-align: center; /* center the CTA button within its cell */
+  }
+
+  @media (max-width: 991px) {
+    .deploy-grid {
+      grid-template-columns: 1fr;
+      grid-template-rows: none;
+    }
+    .deploy-col {
+      grid-template-rows: none;
+      grid-row: auto;
+    }
+    .deploy-col:not(:first-child) {
+      border-left: none;
+      border-top: var(--border-subtle);
+    }
+  }
+  .deploy-note {
+    margin: var(--spacing-3XL) auto 0;
+    max-width: var(--col-8);
+    text-align: center;
+    color: var(--text-body);
+    font-style: italic;
+  }
+
+  /* Resources: each group is a heading over a link list, so groups after the
+     first need a clear break. Space BEFORE a heading is page-owned — a global
+     rule there would stack with a parent's flex gap (see global.css →
+     "Authored headings"). */
+  .resources * + h5 {
+    margin-top: var(--spacing-3XL);
+  }
+</style>

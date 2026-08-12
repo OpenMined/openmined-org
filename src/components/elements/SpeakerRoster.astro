@@ -1,0 +1,103 @@
+---
+/**
+ * SpeakerRoster — an event/session speaker grid: an optional heading over a
+ * two-column list of people (circular headshot + name · role · org). One column
+ * on mobile. Distinct from TeamList (small wrapping name·role pills used as a
+ * blog rail widget) — this is the larger roster treatment used on event pages
+ * (e.g. /events/india-ai-impact-summit-2026/register/).
+ *
+ * Reference: the live summit register page.
+ * Headshots are localized under /images/summit-2026/. Missing avatar → initials
+ * fallback (same pattern as TeamList).
+ */
+interface Speaker {
+  name: string;
+  role?: string;
+  org?: string;
+  avatar?: string;
+}
+interface Props {
+  heading?: string;
+  speakers: Speaker[];
+}
+const { heading, speakers } = Astro.props;
+
+const initials = (name: string) =>
+  name.split(/\s+/).map((p) => p[0]).slice(0, 2).join('').toUpperCase();
+---
+
+<div class="roster">
+  {heading && <h4 class="roster__heading">{heading}</h4>}
+  <ul class="roster__grid" role="list">
+    {speakers.map((s) => (
+      <li class="roster__person">
+        {s.avatar
+          ? <img class="roster__avatar" src={s.avatar} alt="" width="120" height="120" loading="lazy" />
+          : <span class="roster__avatar roster__avatar--fallback" aria-hidden="true">{initials(s.name)}</span>}
+        <span class="roster__info text-small">
+          <span class="roster__name">{s.name}</span>
+          {s.role && <span class="roster__role">{s.role}</span>}
+          {s.org && <span class="roster__org">{s.org}</span>}
+        </span>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  .roster__heading {
+    margin: 0 0 var(--spacing-2XL);
+  }
+  .roster__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--spacing-3XL);
+    row-gap: var(--spacing-2XL);
+  }
+  .roster__person {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-L);
+  }
+  .roster__avatar {
+    flex: none;
+    width: 60px;
+    height: 60px;
+    border-radius: var(--border-radius-full);
+    object-fit: cover;
+    filter: grayscale(100%);
+  }
+  .roster__avatar--fallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--surface-foreground-low);
+    color: var(--text-subtle);
+    font-weight: 500;
+    font-size: 18px;
+  }
+  .roster__info {
+    display: flex;
+    flex-direction: column;
+  }
+  .roster__name {
+    font-weight: 500;
+    color: var(--text-headline);
+  }
+  .roster__role {
+    color: var(--text-body);
+  }
+  .roster__org {
+    font-style: italic;
+    color: var(--text-subtle);
+  }
+
+  @media (max-width: 767px) {
+    .roster__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

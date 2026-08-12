@@ -1,0 +1,122 @@
+/* ══════════════════════════════════════════════════════════════════
+   LAYOUT — how wide things are
+   Page containers, the 12-column grid, section dividers, and the text-width
+   utilities. One question: how wide is this box (or this line of text).
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Container utilities ─────────────────────────────────────────── */
+/* min() keeps content at the token width on wide viewports while
+   the subtracted gutter (2 × XL) prevents it from touching viewport edges. */
+.container {
+  width: min(var(--container-full), 100% - 2 * var(--spacing-XL));
+  margin-inline: auto;
+}
+
+.container-xfull {
+  width: min(var(--container-xfull), 100% - 2 * var(--spacing-XL));
+  margin-inline: auto;
+}
+
+/* Strong rule under the site header at the top of a page's content container.
+   Compose with .container so the stroke spans the content width (gutters are
+   margin, not padding). Matches live #brxe-c96be3: 1px headline stroke +
+   ~30px top padding (→ --spacing-3XL). Used by the blog listing + post templates. */
+/* The hairline only — the space below it is decoupled: each consumer sets its
+   own `padding-top` (post uses --spacing-max, the listings --spacing-3XL). */
+.content-top-rule {
+  border-top: var(--border-strong);
+}
+
+/* 12-column CSS grid. Use when a section needs proportional column structure
+   (bordered cards, subgrid content insets, etc.). Children use grid-column to
+   address tracks — e.g. grid-column: 2 / 12 for 10-col content with 1-col
+   breathing room each side. Row gap omitted; sections own vertical rhythm.
+   Alternative: for a simple content-width constraint without a grid, use
+   max-width: var(--col-N) + margin-inline: auto instead (no .grid-12 needed).
+   Global mobile collapse to 1fr — override per component if spacing must persist
+   at narrow viewports (see HomeFederatedNetwork for the pattern). */
+.grid-12 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: var(--grid-gap);
+}
+
+@media (max-width: 991px) {
+  .grid-12 {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ── Section divider ─────────────────────────────────────────────────
+   Centered hairline rule between sections (the live "line" — a col-8-wide
+   1px divider). Themes via the semantic surface token. */
+.section-divider {
+  width: 100%;
+  max-width: var(--col-8);
+  margin-inline: auto;
+  border: 0;
+  border-top: 1px solid var(--surface-foreground-high);
+}
+/* underline beneath a content group (sits inside a section, under its body):
+   spans the col-10 group measure and adds a gap above it. */
+.section-divider--group {
+  max-width: var(--col-10);
+  margin-top: var(--spacing-5XL);
+}
+/* strong variant: the visible headline-color hairline (--border-strong), for a
+   divider that reads as a deliberate rule rather than a subtle separator. */
+.section-divider--strong {
+  border-top-color: var(--text-headline);
+}
+
+
+/* ── Text measure ────────────────────────────────────────────────── */
+/* Readability line-length constraint. Add class="measure" to any text element,
+   then set --measure to any length (em, ch, px, var(--col-N)) inline or via
+   scoped CSS. Removed at ≤767px. To keep a constraint at mobile, skip the class
+   and set max-width directly in the component.
+   RULE: components must set --measure only, never max-width, on .measure elements
+   — this ensures the mobile strip always wins. */
+@property --measure {
+  syntax: '<length> | none';
+  inherits: false;
+  initial-value: none;
+}
+
+.measure {
+  max-width: var(--measure);
+}
+
+@media (max-width: 767px) {
+  .measure { max-width: none; }
+}
+
+
+/* ── Small body text ─────────────────────────────────────────────────
+   14px — the step between body (16px) and the 11px caption/eyebrow. The
+   site's de-facto small size; named here so it has one home. The extra
+   selectors adopt it for markup that can't take the class (prose figcaption,
+   HubSpot field descriptions). A website utility, deliberately NOT a
+   font-size token (we don't tokenize type sizes). */
+.text-small,
+.prose figcaption,
+.hs-form .hs-fieldtype-booleancheckbox > .hs-field-desc {
+  font-size: 14px;
+}
+
+
+/* ── Trailing-margin trim ────────────────────────────────────────────
+   Zero the bottom margin of a flow container's last child, so the space
+   below the block is owned by the section's padding — not a leftover
+   inter-element text margin compounding on top of it. Add to any flow
+   column whose trailing margin would otherwise stack onto section padding
+   (heroes, tinted/dark bands). Generalizes the local .prose *:last-child
+   trims. Direct children only — the margins we trim sit on those.
+   !important: the margins we override are component-scoped rules, which Astro
+   compiles to `.foo[data-astro-cid]` — specificity (0,2,0), tying this
+   selector and winning on source order. !important is the reliable override
+   for a single-purpose trim utility (same pattern as `.hs-form .input`). */
+.trim-flow > :last-child {
+  margin-bottom: 0 !important;
+}
