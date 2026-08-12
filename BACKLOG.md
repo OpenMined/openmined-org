@@ -410,6 +410,54 @@ instead — **zero** new image files site-wide.
 
 ---
 
+### 13. Content-Security-Policy for scripts and styles — `NEEDS DECISION`, post-launch — found 2026-08-12
+
+`public/_headers` ships the cheap security headers (nosniff, `Referrer-Policy`,
+`Permissions-Policy`, `Cross-Origin-Opener-Policy`, and a `frame-ancestors 'none'` CSP). What
+it deliberately does **not** ship is a real CSP — a `script-src` / `style-src` allowlist, the
+half that would contain an injected `<script>`.
+
+**Why it was deferred rather than done.** Three findings, in the order they bite:
+
+- **Shiki blocks the clean path.** Astro has native CSP (`security.csp`, stable), which
+  auto-hashes its own scripts and styles — but its docs state Shiki isn't supported, and this
+  site highlights every code fence with it (`astro.config.mjs → markdown.shikiConfig`). Shiki
+  emits per-token inline `style` **attributes**, which CSP hashes cannot cover at all; only
+  `'unsafe-inline'` admits them. And per spec `'unsafe-inline'` is *ignored* when a hash is
+  present in the same directive, so "hashes for scripts, unsafe-inline for styles" is not
+  cleanly expressible today (withastro/astro#14798; opt-out requested in
+  withastro/roadmap#1325). Enabling it risks unstyled code blocks across the blog.
+- **The payoff here is small.** CSP mainly contains XSS, and the usual entry points are absent:
+  no logins, no sessions, no cookies at all (verified empirically — see `LAUNCH.md` §5), no
+  comments or user-generated content, no input echoed back into a page. Every word of content
+  is markdown in this repo. There is no session to steal and no privileged action to forge.
+- **The residual risk it wouldn't fix.** The two third-party scripts that *do* run with full
+  page rights are the Ionicons CDN on `/style-guide` (`unpkg.com`, no SRI) and HubSpot on form
+  pages. A CSP has to allowlist both to keep them working, so it doesn't constrain either.
+  Self-hosting the two style-guide icons is the higher-value move and is independent of this.
+
+**What unblocks it:** ship `Content-Security-Policy-Report-Only` via `public/_headers` first,
+conceding `style-src 'unsafe-inline'` for Shiki, and collect violations across the blog, the
+HubSpot form pages, and a live donate run before enforcing anything. Origins to expect:
+`js.hsforms.net` (plus HubSpot's runtime injections), `www.youtube.com` (`frame-src`, 4 posts),
+`apply.workable.com` (`connect-src`, `/careers`), `unpkg.com` (`script-src`, `/style-guide`
+only). Fonts are self-hosted and Pagefind is same-origin, so neither needs an entry. Stripe
+needs none — Checkout is a top-level redirect.
+
+**Guard gap, cheaper than the CSP itself.** The adapter silently skips injecting its
+`/_astro/*` `Cache-Control` block if `public/_headers` ever sets `Cache-Control` on a rule
+matching `/_astro/*` — logged at debug level only, so a normal build looks clean while immutable
+asset caching disappears. This is **already asserted post-deploy**: `scripts/smoke-deploy.mjs`
+carries a `_headers: /_astro/* immutable` row. What's missing is a **build-time** check, because
+smoke needs a live host and so can't run in CI — the footgun therefore reaches a deploy before
+anything catches it. A static assertion over the built `dist/client/_headers` would close that,
+and would fit the CI guard set that already includes `audit:image-urls`.
+
+Note also what smoke does **not** cover: the six security headers `public/_headers` actually
+ships. Its `_headers` row checks cache-control only.
+
+---
+
 ## Tracked elsewhere — do not duplicate here
 
 Pointers only, so this file doesn't become a second source of truth:
