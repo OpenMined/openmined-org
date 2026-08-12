@@ -22,9 +22,9 @@ Item numbers are **stable, not sequential** — closed items are deleted without
 the rest, so gaps are expected and existing references stay valid.
 
 **Scanning for what's actually open:** every heading carries its state, so `FIXED` entries are
-skippable at a glance. As of 2026-08-12 the open ones are **§2, §3, §4, §5(b/d), §7, §7f, §10**
-plus the cleanup items **§7d, §7e, §8, §9, §12, §13** — §1, §5(a/c), §6, §7b, §7c and §7g are
-records. §12 is deliberately gated on cutover.
+skippable at a glance. As of 2026-08-12 the open ones are **§2, §3, §4, §5(b/d), §7, §7f, §10,
+§14, §15** plus the cleanup items **§7d, §7e, §8, §9, §12, §13, §16, §17, §18** — §1, §5(a/c),
+§6, §7b, §7c and §7g are records. §12 is deliberately gated on cutover.
 
 ---
 
@@ -297,6 +297,42 @@ eyebrows). It is static, and measures **3.25–4.07:1** on every surface we pain
 
 ---
 
+### 14. Donation endpoint hardening — **4 items, one file** — `READY` — found 2026-08-12
+
+`src/pages/api/create-donation.ts` is the only server-side code the site ships, so it is the
+whole server attack surface. It works and is verified end-to-end, but four things are missing.
+None is exploitable for theft — the secret key never leaves the Worker and Stripe validates the
+session — so this is abuse-resistance and hygiene, not a vulnerability:
+
+- **No rate limiting.** An unauthenticated POST creates a Stripe Checkout Session per request,
+  spending Worker invocations and Stripe write-rate (100/s on live) and polluting the dashboard.
+  Cheapest fix is a Cloudflare rate-limiting rule scoped to `/api/create-donation` — config, not
+  code, so it can land the same day as cutover. Turnstile is the heavier option.
+- **No maximum amount.** The handler rejects `< 1` with no ceiling. Above Stripe's 8-digit
+  smallest-unit limit the request 502s carrying Stripe's own error text, and very large values
+  stringify to exponential notation (`String(1e302)` → `"1e+302"`) in the `unit_amount` param.
+- **Stripe error text is forwarded to the browser** (the `!res.ok` branch). Stripe's
+  authentication-failure messages include a partially-redacted key — an unnecessary information
+  channel out of the one route holding the secret. Log server-side, return a fixed message.
+- **`success_url` / `cancel_url` are built from the request's own origin**, i.e. the Host header,
+  rather than `@data/site.mjs → SITE_URL`, which already exists. Workers constrains the reachable
+  hostnames so severity is low, but pinning removes a Host-dependent redirect target and the
+  `session_id` leak path via `*.workers.dev`.
+
+**Gating:** rate limiting is the one that bites hardest once the **live** key is in — cross-ref
+`LAUNCH.md` §2. The other three are code-quality and can follow.
+
+### 15. `/un-isi-25/` CTA icon is squashed out of its aspect ratio — `READY` — found 2026-08-12
+
+`CtaSection.astro → .cta__icon` hardcodes `width="50" height="50"` on the icon `<img>`, forcing a
+non-square source into a square box. Same "resize, never reshape" class that `audit:images`
+exists to catch (AGENTS.md), but on a shared **component** rather than one page, so any page
+slotting a non-square CTA icon inherits it. `audit:images` doesn't catch it because it guards
+`<Image>`/`getImage` calls, not raw `<img>` with both dimensions set — worth considering whether
+that guard should widen.
+
+Carried over from the migration repo's own backlog, where it was filed as §15 and never ported.
+
 ## 🟢 Cleanup — explicitly NOT launch-blocking
 
 Consolidation work with no user-visible change. Safe to defer indefinitely; do it when
@@ -469,6 +505,44 @@ apply `_headers`?" is worth one smoke row at cutover. Cheap: assert the header n
 on a page response, not their values.
 
 ---
+
+### 16. Outbound `http://` links — **8 in `src/pages/`, ~90 in post bodies** — `READY` — found 2026-08-12
+
+Cleartext scheme on outbound links. In `src/pages/`: 5× `syft.docs.openmined.org`, 2×
+`flower.ai`, 1× `biovault.net`. Post bodies carry ~90 more, dominated by 43×
+`http://slack.openmined.org` and 7× `http://github.com`. They redirect to HTTPS in practice, so
+this is hygiene rather than breakage — but linking our *own* docs and Slack over cleartext is a
+poor look on a privacy project's site. Mechanical find-and-replace; check each host actually
+serves HTTPS first.
+
+Related: HSTS with `includeSubDomains` (see `public/_headers`) would force-upgrade the
+`*.openmined.org` ones, which is a reason to fix these before that lands rather than after.
+
+### 17. CI actions target a deprecated Node runtime — `READY` — found 2026-08-12
+
+The first CI run (2026-08-12) annotated: `actions/checkout@v4` and `actions/setup-node@v4` target
+Node.js 20 and are being force-run on Node.js 24. It passes today via that shim and breaks when
+GitHub drops it. One-line fix — bump both to `@v5` in `.github/workflows/ci.yml`. Note this is the
+*actions'* own runtime, unrelated to the workflow's `node-version: 22`, which is fine.
+
+### 18. `public/` media is served uncached, and Range is unsupported — `NEEDS DECISION` — found 2026-08-12
+
+Measured against the deployed Worker (2026-08-12). Two separate facts about how Cloudflare's
+static-asset layer serves `public/`:
+
+- **No caching.** Only `/_astro/*` gets the immutable rule (injected by the adapter into
+  `_headers`); everything in `public/` returns `cache-control: public, max-age=0,
+  must-revalidate`. Etags make revalidation a 0-byte 304, so the cost is a round-trip per asset
+  per view, not bandwidth — most visible on the RAG tutorial post, which now carries 11 MP4s.
+  A `/blog/*` Cache-Control rule in `public/_headers` would remove it, and that pattern cannot
+  match `/_astro/*` so it does not trip the injection-suppression footgun (`audit:headers` covers
+  that). Decide the max-age: these files are content-addressed by slug, not hashed, so an
+  aggressive value makes replacing a video awkward.
+- **Range requests are ignored.** `Range: bytes=0-1023` returns `200` with the full body, no
+  `Accept-Ranges`, no `Content-Range`. Browsers seek video via range requests, so seeking in
+  those clips is degraded. Platform behavior, not something `_headers` can change. Low impact —
+  they are short, muted, autoplay screen recordings — but it is the reason to keep them small and
+  an argument against ever serving a long video from `public/`.
 
 ## Tracked elsewhere — do not duplicate here
 

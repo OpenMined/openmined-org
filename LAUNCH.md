@@ -155,6 +155,13 @@ Plausible-only, cookie/storage disclosure (strictly-necessary only), HubSpot
 forms and the in-form consent basis. Worth an hour of EU counsel review against
 the research report.
 
+**Also missing entirely, not just wrong: Stripe.** The site takes donations
+through Stripe Checkout (`src/pages/api/create-donation.ts`) and the policy names
+no payment processor at all. Add Stripe, plus Cloudflare as host/CDN and Workable
+for job applications, and the YouTube third-party cookies noted in §5. The policy
+currently *over*claims analytics (it lists GA and Plausible, neither of which
+ships) and *under*claims payments — the second is the one that matters legally.
+
 ---
 
 ## 🟠 Cutover checklist — the day-of switches and re-audits
