@@ -11,7 +11,7 @@
  */
 import { getCollection, getEntry, getEntries, render } from 'astro:content';
 import BlogPost from '@layouts/BlogPost.astro';
-import { postSlug, postLocations } from '@utils/posts';
+import { postSlug, postLocations, postExcerpt } from '@utils/posts';
 
 const includeDrafts = import.meta.env.DEV;
 
@@ -79,6 +79,7 @@ const related = await Promise.all(
   hideCover={entry.data.hideCover}
   readingMinutes={readingMinutes}
   seoDescription={entry.data.seo?.description ?? entry.data.excerpt}
+  excerpt={postExcerpt(entry.body)}
   related={related}
   toc={entry.data.toc}
   headings={headings}

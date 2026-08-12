@@ -1,0 +1,86 @@
+---
+/**
+ * JsonLd — the single owner of the page's `application/ld+json` graph.
+ *
+ * Mounted once from Base.astro's <head>, beside Seo.astro. Seo owns the flat
+ * head tags (title, description, canonical, OG, Twitter); this owns the linked
+ * graph. Both are reached through Base, so a page only ever sets props.
+ *
+ * The graph itself is built by @utils/schema.ts → buildGraph — see that file for
+ * the node set, the `@id` conventions, and what we deliberately do differently
+ * from live's Yoast output.
+ *
+ * Emitted for EVERY page (matching live), including ones carrying `noindex`.
+ * That is harmless — a crawler that honours the robots directive never reads the
+ * graph — and it keeps the graph from silently depending on the launch flip.
+ */
+import { SITE_NAME, SITE_URL, DEFAULT_DESCRIPTION, ORG_LOGO, SAME_AS } from '@data/site.mjs';
+import { buildGraph, type SchemaAuthor, type Breadcrumb } from '@utils/schema';
+
+interface Props {
+  /** Composed page title (brand suffix included) — becomes WebPage.name. */
+  name: string;
+  /** Bare page title, no brand suffix — Article.headline. See @utils/schema.ts. */
+  headline?: string;
+  /** Absolute canonical URL of this page. */
+  url: string;
+  description?: string;
+  /** Absolute URL of the page's primary image. */
+  image?: string;
+  type?: 'website' | 'article';
+  /**
+   * Trail for the BreadcrumbList. Callers pass the FULL trail including Home;
+   * Base supplies a Home → this-page default so every page gets one.
+   */
+  breadcrumbs?: Breadcrumb[];
+  publishedTime?: string;
+  modifiedTime?: string;
+  authors?: SchemaAuthor[];
+  keywords?: string[];
+  articleSection?: string[];
+}
+
+const {
+  name,
+  headline,
+  url,
+  description,
+  image,
+  type = 'website',
+  breadcrumbs = [],
+  publishedTime,
+  modifiedTime,
+  authors = [],
+  keywords = [],
+  articleSection = [],
+} = Astro.props;
+
+const graph = buildGraph({
+  siteUrl: SITE_URL,
+  siteName: SITE_NAME,
+  siteDescription: DEFAULT_DESCRIPTION,
+  orgLogo: new URL(ORG_LOGO, SITE_URL).href,
+  sameAs: SAME_AS,
+  url,
+  name,
+  headline,
+  description,
+  image,
+  type,
+  breadcrumbs,
+  publishedTime,
+  modifiedTime,
+  authors,
+  keywords,
+  articleSection,
+});
+
+/**
+ * `<` MUST be escaped before this lands inside a <script> element. Post titles
+ * and author bios are authored content, so a literal `</script>` in any string
+ * would otherwise close the block early and spill the rest of the graph into the
+ * document as markup. `<` is valid JSON and parses back to `<`.
+ */
+const json = JSON.stringify(graph).replace(/</g, '\\u003c');
+---
+<script type="application/ld+json" is:inline set:html={json} />

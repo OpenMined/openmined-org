@@ -551,8 +551,9 @@ Pointers only, so this file doesn't become a second source of truth:
 - **Analytics not ported** (§4), **no cookie-consent gate** (§5), and
   **privacy-policy page still describes the WP-era stack** (§6) → `LAUNCH.md`
   (all three re-grounded 2026-08-11 in the analytics/privacy research)
-- **JSON-LD structured data**, **apple-touch-icon / manifest / .ico** →
-  `LAUNCH.md` (Polish)
+- **JSON-LD structured data** and the rest of the SEO-parity work → `LAUNCH.md`
+  §7 (promoted out of Polish 2026-08-12; the graph itself shipped that day)
+- **apple-touch-icon / manifest / .ico** → `LAUNCH.md` (Polish)
 - **Lighthouse + cross-browser QA on the real deployed build** →
   `LAUNCH.md` (Polish). Note this became *possible* on 2026-07-27: there is now a
   real deployed Worker to run it against.

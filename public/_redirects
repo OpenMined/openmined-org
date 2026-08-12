@@ -51,6 +51,18 @@
 # (hyphen). Redirect both indexed WP URLs so they don't 404 after cutover.
 /wp-sitemap.xml     /sitemap-index.xml   301
 /sitemap_index.xml  /sitemap-index.xml   301
+# Yoast's CHILD sitemaps. Google fetches these directly — it has each one on
+# file from crawling the index, and keeps requesting them after the index
+# itself has moved — so the parent redirect above does not cover them. These
+# are exactly the 7 children live's /sitemap_index.xml lists (verified against
+# openmined.org: 2026-08-12); all 7 404'd on the Worker before this block.
+/post-sitemap.xml           /sitemap-index.xml   301
+/page-sitemap.xml           /sitemap-index.xml   301
+/category-sitemap.xml       /sitemap-index.xml   301
+/post_tag-sitemap.xml       /sitemap-index.xml   301
+/locations-sitemap.xml      /sitemap-index.xml   301
+/resources-sitemap.xml      /sitemap-index.xml   301
+/resource_type-sitemap.xml  /sitemap-index.xml   301
 
 # --- Retired bare WordPress author base ---
 # 404s on live today; the real author archives live at /blog/author/<slug>/

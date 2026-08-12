@@ -34,6 +34,7 @@ import PostToc from '@elements/PostToc.astro';
 import BlogPostCta from '@components/sections/cta/BlogPostCta.astro';
 import Link from '@ui/Link.astro';
 import Header from '@components/layout/Header.astro';
+import { SITE_URL } from '@data/site.mjs';
 
 interface Author {
   id: string;
@@ -86,6 +87,12 @@ interface Props {
   hideCover?: boolean;
   readingMinutes: number;
   seoDescription?: string;
+  /**
+   * First-paragraph excerpt, derived from the raw body by the route. Feeds
+   * og:/twitter:description ONLY — posts ship no meta description (live parity;
+   * see @components/Seo.astro for the rule).
+   */
+  excerpt?: string;
   related?: RelatedPost[];
   toc?: boolean;
   headings?: Heading[];
@@ -112,6 +119,7 @@ const {
   hideCover = false,
   readingMinutes,
   seoDescription,
+  excerpt,
   related = [],
   toc = false,
   headings = [],
@@ -139,9 +147,11 @@ function relativeDate(d: Date): string {
 const relDate = relativeDate(date);
 const items = headings.filter((h) => h.depth >= tocMinDepth && h.depth <= tocMaxDepth);
 const showToc = toc && items.length > 0;
-// Author names for the SEO/JSON-LD side; the foot renders them as links to the
-// author archives (live links its byline the same way — verified 2026-07-27).
-const authorNames = authors.map((a) => a.name).join(', ');
+// Was `authorNames`, a joined string built for "the SEO/JSON-LD side" and never
+// actually read. JSON-LD now exists and takes the author OBJECTS (it needs the
+// id and bio to build Person nodes), so the flattened string has no consumer —
+// the foot renders its own links to the author archives (live links its byline
+// the same way — verified 2026-07-27).
 const topicLabels = topics.map((t) => t.label).join(', ');
 
 // Thumbnail for a /search/ result row. Built here rather than reusing the hero
@@ -176,14 +186,22 @@ const searchThumbMeta = searchThumb ? `thumb:${searchThumb.src}` : undefined;
 <Page
   title={seoTitle ?? title}
   description={seoDescription ?? subtitle}
+  socialDescription={seoDescription ?? subtitle ?? excerpt}
   type="article"
   image={cover?.src}
   imageAlt={coverAlt}
   publishedTime={date.toISOString()}
   modifiedTime={updated?.toISOString()}
-  authors={authors.map((a) => a.name)}
+  authors={authors}
   section={categories[0]?.label}
   tags={topics.map((t) => t.label)}
+  breadcrumbs={[
+    { name: 'Home', item: `${SITE_URL}/` },
+    { name: 'Blog', item: `${SITE_URL}/blog/` },
+    { name: title },
+  ]}
+  keywords={topics.map((t) => t.label)}
+  articleSection={categories.map((c) => c.label)}
   searchKind="post"
 >
   <Header slot="header" revealOnScrollUp={!showToc} />

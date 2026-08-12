@@ -25,3 +25,39 @@ export const DEFAULT_DESCRIPTION =
 
 /** Default social-share card (public/og-default.jpg — 1200×675). */
 export const DEFAULT_OG_IMAGE = '/og-default.jpg';
+
+/**
+ * Compose the document title from a raw page title: append the brand UNLESS the
+ * title already carries it (home, "Careers at OpenMined", …). No title at all →
+ * the bare site name.
+ *
+ * Lives here, not in Seo.astro, because two consumers need the SAME string —
+ * Seo emits it as <title>/og:title, and JsonLd uses it as the graph's
+ * WebPage.name. A second copy of this rule would drift.
+ *
+ * @param {string} [title] Raw page title, no brand suffix.
+ * @returns {string}
+ */
+export function composeTitle(title) {
+  const trimmed = title?.trim();
+  if (!trimmed) return SITE_NAME;
+  return trimmed.includes(SITE_NAME) ? trimmed : `${trimmed} — ${SITE_NAME}`;
+}
+
+/**
+ * Organization logo for the JSON-LD graph (@utils/schema.ts → Organization).
+ * Same asset live's Yoast graph points at, served locally rather than from
+ * wp-content (verified against openmined.org: 2026-08-12).
+ */
+export const ORG_LOGO = '/logos/OpenMined-Icon-large.svg';
+
+/**
+ * Canonical profile URLs for the organization — JSON-LD `sameAs`, the main
+ * knowledge-panel signal. Live omits this; we emit it. Keep in sync with the
+ * social links rendered in @components/layout/Footer.astro.
+ */
+export const SAME_AS = [
+  'https://github.com/OpenMined',
+  'https://x.com/openminedorg',
+  'https://bsky.app/profile/openmined.bsky.social',
+];

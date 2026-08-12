@@ -1,6 +1,9 @@
 ---
 import { Font } from 'astro:assets';
 import Seo from '@components/Seo.astro';
+import JsonLd from '@components/JsonLd.astro';
+import { SITE_URL, composeTitle } from '@data/site.mjs';
+import type { SchemaAuthor, Breadcrumb } from '@utils/schema';
 import DonateModal from '@components/layout/DonateModal.astro';
 import SearchModal from '@components/layout/SearchModal.astro';
 import '@styles/tokens.css';
@@ -11,10 +14,20 @@ import '@styles/global.css';
 interface Props {
   title?: string;
   description?: string;
+  /** og:/twitter:description override — see @components/Seo.astro. */
+  socialDescription?: string;
   /** Page-relative or absolute social-share image (OG/Twitter). */
   image?: string;
   imageAlt?: string;
   type?: 'website' | 'article';
+  /**
+   * JSON-LD breadcrumb trail, Home first, current page last. Defaults to
+   * Home → this page; BlogPost passes Home → Blog → post.
+   */
+  breadcrumbs?: Breadcrumb[];
+  /** Extra JSON-LD Article fields (post topics / categories). */
+  keywords?: string[];
+  articleSection?: string[];
   /**
    * Keep the page out of search indexes. Defaults TRUE as a pre-launch guard.
    * AT LAUNCH: flip this default to false to make the whole site indexable.
@@ -23,7 +36,8 @@ interface Props {
   /** article:* metadata — used by BlogPost (type="article"). */
   publishedTime?: string;
   modifiedTime?: string;
-  authors?: string[];
+  /** Post authors — names feed article:author, the rest feeds the JSON-LD graph. */
+  authors?: SchemaAuthor[];
   section?: string;
   tags?: string[];
   /**
@@ -40,10 +54,14 @@ interface Props {
 const {
   title,
   description,
+  socialDescription,
   image,
   imageAlt,
   type,
   noindex = true,
+  breadcrumbs,
+  keywords,
+  articleSection,
   publishedTime,
   modifiedTime,
   authors,
@@ -51,6 +69,19 @@ const {
   tags,
   ionicons = false,
 } = Astro.props;
+
+// Absolute URLs for the JSON-LD graph. Seo derives its canonical from the same
+// two inputs (Astro.site + the current pathname), so the two cannot disagree —
+// Base intentionally exposes no canonicalPath override for a page to split them.
+const siteBase = Astro.site ?? new URL(SITE_URL);
+const canonicalUrl = new URL(Astro.url.pathname, siteBase).href;
+const schemaImage = image ? new URL(image, siteBase).href : undefined;
+
+// Default trail: Home → this page. A page with real nesting passes its own.
+const trail = breadcrumbs ?? [
+  { name: 'Home', item: `${SITE_URL}/` },
+  { name: composeTitle(title) },
+];
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -78,6 +109,7 @@ const {
     <Seo
       title={title}
       description={description}
+      socialDescription={socialDescription}
       image={image}
       imageAlt={imageAlt}
       type={type}
@@ -87,6 +119,24 @@ const {
       authors={authors}
       section={section}
       tags={tags}
+    />
+
+    {/* JSON-LD graph — Organization/WebSite/WebPage/BreadcrumbList (+ Article and
+        Person on posts). Restores the rich-results surface live emits via Yoast;
+        the graph itself is built in @utils/schema.ts. */}
+    <JsonLd
+      name={composeTitle(title)}
+      headline={title}
+      url={canonicalUrl}
+      description={description}
+      image={schemaImage}
+      type={type}
+      breadcrumbs={trail}
+      publishedTime={publishedTime}
+      modifiedTime={modifiedTime}
+      authors={authors}
+      keywords={keywords}
+      articleSection={articleSection}
     />
 
     <link rel="icon" href="/logos/OpenMined-Icon.svg" type="image/svg+xml" />

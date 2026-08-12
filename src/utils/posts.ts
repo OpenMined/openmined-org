@@ -4,6 +4,93 @@ import type { CollectionEntry } from 'astro:content';
 export const stripIndex = (id: string): string => id.replace(/\/index(\.mdx?)?$/, '');
 
 /**
+ * First-paragraph excerpt from a post's raw markdown body — the social blurb
+ * (og:/twitter:description) for the ~340 posts that set no `seo.description`.
+ *
+ * Why derive one at all: posts deliberately ship NO meta description (live
+ * parity — see @components/Seo.astro), but an EMPTY social card is a real
+ * regression, and live does emit an og:description built the same way. So this
+ * feeds the social tags only.
+ *
+ * Best-effort by design. It skips the block constructs that open a post but say
+ * nothing useful (headings, code fences, images, blockquotes, HTML, MDX imports,
+ * lists, tables), then flattens the inline markdown of the first real paragraph.
+ * A post whose body is entirely non-prose yields '' and simply falls back to the
+ * site default.
+ */
+export function postExcerpt(body: string | undefined, maxLength = 160): string {
+  if (!body) return '';
+
+  const lines = body.split('\n');
+  const paragraph: string[] = [];
+  let inFence = false;
+
+  for (const raw of lines) {
+    const line = raw.trim();
+
+    // Fenced code — track and skip wholesale (``` or ~~~, any info string).
+    if (/^(```|~~~)/.test(line)) {
+      inFence = !inFence;
+      continue;
+    }
+    if (inFence) continue;
+
+    if (!line) {
+      // Blank line ends the first paragraph once we've collected something.
+      if (paragraph.length) break;
+      continue;
+    }
+
+    // Non-prose openers: skip while we haven't started a paragraph yet.
+    const skippable =
+      /^#{1,6}\s/.test(line) || // heading
+      /^!\[/.test(line) || // standalone image
+      /^>/.test(line) || // blockquote
+      /^([-*_]\s*){3,}$/.test(line) || // thematic break
+      /^[-*+]\s/.test(line) || // bullet list
+      /^\d+\.\s/.test(line) || // ordered list
+      /^\|/.test(line) || // table row
+      /^</.test(line) || // raw HTML / JSX block
+      /^import\s/.test(line) || // MDX import
+      /^export\s/.test(line); // MDX export
+
+    if (skippable) {
+      if (paragraph.length) break;
+      continue;
+    }
+
+    paragraph.push(line);
+  }
+
+  const text = paragraph
+    .join(' ')
+    // Inline markdown → plain text. Links first: keep the label, drop the URL.
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/`([^`]*)`/g, '$1')
+    // Emphasis runs are UNBOUNDED on purpose. A `{1,3}` cap looks safe — nobody
+    // writes more than bold-italic — but converted WordPress bodies do: one post
+    // opens `****Introduction****`, and a capped pattern matches the inner run
+    // only, leaving stray asterisks in the blurb.
+    .replace(/\*+([^*]+)\*+/g, '$1')
+    // Underscore emphasis only when the run isn't inside a word, so snake_case
+    // identifiers in a technical post survive intact.
+    .replace(/(^|[^A-Za-z0-9])_+([^_]+)_+(?![A-Za-z0-9])/g, '$1$2')
+    // Any asterisk left is markup residue — it has no place in a prose blurb.
+    // (Underscores are deliberately NOT swept: they're legitimate in code names.)
+    .replace(/\*/g, '')
+    .replace(/<[^>]+>/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (text.length <= maxLength) return text;
+  // Truncate on a word boundary, never mid-word.
+  const cut = text.slice(0, maxLength);
+  const lastSpace = cut.lastIndexOf(' ');
+  return `${(lastSpace > 0 ? cut.slice(0, lastSpace) : cut).replace(/[,;:.\s]+$/, '')}…`;
+}
+
+/**
  * Canonical public slug for a blog post → `/blog/<slug>/`.
  *
  * Prefers the explicit `slug` frontmatter (the URL is authoritative in the

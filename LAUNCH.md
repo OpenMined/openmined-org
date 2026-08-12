@@ -17,6 +17,9 @@ a cache.
 
 ## 🔴 Blockers — cannot go live without these
 
+Section numbers are **stable, not sequential** — closed sections are removed
+without renumbering, so gaps are expected and cross-references stay valid.
+
 ### 1. Production deploy pipeline on the client account
 
 **Done on the client account (2026-08-12).** Manual deploy runs on the OpenMined
@@ -87,6 +90,63 @@ align the parallel default in `Seo.astro` so a component rendering `Seo` outside
 `Base` can't silently ship a `noindex`. Keep the guard **on** for any
 `*.workers.dev` test deploy; those hostnames are publicly crawlable.
 
+### 7. SEO surface parity — no downgrade at cutover
+
+Promoted out of Polish 2026-08-12: these are the places the rebuild would have
+read as an SEO *downgrade* against WordPress, which is a different class of risk
+from "nice to have before launch". Grounding is the 2026-08-10 SEO cutover
+readiness research (held outside this repo), **re-probed against live and
+against the built output on 2026-08-12** — several of its lines had already been
+closed by other work, and one of its premises about tracking was wrong (§4).
+
+**Closed 2026-08-12 — re-assert at cutover, don't re-open:**
+
+- **JSON-LD structured data.** The build shipped zero `application/ld+json`
+  while live emits a full Yoast graph — the one genuine rich-results regression.
+  Now emitted on every page from `@components/JsonLd.astro` (mounted in
+  `Base.astro` beside `Seo`), with the graph built in `@utils/schema.ts`. Node
+  set and `@id` idiom mirror live's Yoast output deliberately — see that file's
+  header for the conventions and the three places we improve on live
+  (`sameAs`, a real `/search/` SearchAction, no phantom comment nodes).
+  Verified against the built site: 681/682 pages carry exactly one graph, 373
+  Articles, 0 malformed, 0 dangling `@id` references. The one page without a
+  graph is `/blog/cards/`, the internal card-source route — correct.
+- **The identical default meta description on ~340 posts.** Live posts ship
+  **no** `<meta name="description">` at all and let Google compose the snippet;
+  ours shipped one boilerplate string on every post that set none, which is
+  worse than absent (duplicates are ignored *and* they suppress the
+  query-relevant snippet). Posts now emit none — the rule lives in `Seo.astro`
+  and keys off `type="article"` so a future post-like route can't forget it.
+  Built output: exactly 32 posts carry a description, matching the 32 with an
+  authored `seo.description`.
+  **og:description is deliberately NOT dropped with it** — live does emit one,
+  built from the post's first paragraph, and an empty social card is a real
+  regression where an absent meta description is not. `@utils/posts.ts →
+  postExcerpt` derives it from the raw body.
+- **The 7 Yoast child sitemaps.** Google fetches these directly and keeps
+  requesting them after the index moves, so the `/sitemap_index.xml` redirect
+  never covered them; all 7 404'd. Now 301 → `/sitemap-index.xml` in
+  `public/_redirects`. The list is exactly what live's index enumerates
+  (verified 2026-08-12), not a guess.
+
+**Still open:**
+
+- **One post ships ~12 `<h1>`s** — `encrypted-training-medical-text-syfertext`,
+  a markdown-converter artifact. (The research also named
+  `announcing-proof-of-concept-support-for-tff-in-pysyft-0-7`; re-checked
+  2026-08-12 and its only `# ` line is a Python comment inside a code fence, so
+  that half is already clean.)
+- **124 author archives in the sitemap** — live serves author pages but excludes
+  them from its sitemap; we include all 124, many thin. Keep, or exclude from
+  the sitemap filter while leaving them crawlable. Small either way, but it is
+  an open judgment call, not an oversight.
+- **Article images on coverless posts.** A post with no cover emits no
+  `ImageObject`, matching live. Google's Article guidance *recommends* an image,
+  so those posts are less rich-result eligible. Falling back to the generic
+  social card was rejected: it would claim a generic image as the page's
+  primary image on every coverless page. Worth revisiting only with real GSC
+  rich-result data after cutover.
+
 ---
 
 ## 🟡 Launch decisions — researched, awaiting the call
@@ -95,12 +155,54 @@ Grounding for §4–§6: the 2026-08-11 analytics/privacy/GDPR research, held
 outside this repo — ask the previous maintainer for it. Conclusions are
 restated below.
 
-### 4. Analytics install — Bennett's call between two coherent options
+### 4. Analytics install — ON HOLD pending investigation (2026-08-12)
 
-The build ships **zero analytics**; the WordPress site runs GA4 + Plausible +
-the HubSpot tracking code behind HubSpot's geo cookie banner. Install **before**
-cutover or the before/after story is unmeasurable — the story can be told
-entirely in Plausible, which would then run on both the old and new site.
+**Decided 2026-08-12:** parity with live on *features* (install what live
+actually runs), best practice on *implementation*. Then a live probe found the
+premise underneath the options below is wrong, so the work is **paused** — see
+"What the probe actually found".
+
+**What the probe actually found** (server HTML of `/`, `/contact/` on
+openmined.org, 2026-08-12). Correcting this section and §5, which both restated
+the 2026-08-11 research's claim that live runs "GA4 + Plausible + the HubSpot
+tracking code behind HubSpot's geo cookie banner":
+
+- **GA4 `G-X111NXDSGH`**, loaded via `gtag.js` **directly — not GTM**. (The
+  research said GTM + Site Kit.) A second Google tag, `GT-KF63LDRR`, loads
+  alongside it; what it is for is unknown and worth establishing before porting
+  either.
+- **Plausible, `data-domain="openmined.org"` — loaded TWICE**: `script.js` *and*
+  `plausible.outbound-links.js?ver=2.3.1` (the WP plugin). Two scripts, two
+  pageview beacons. Live's Plausible numbers are inflated, which matters because
+  Plausible is the intended before/after baseline. Ship **one** (the
+  outbound-links variant keeps the feature).
+- **The HubSpot tracking code does NOT load.** `js.hs-scripts.com/6487402.js`
+  is absent from both pages. The homepage *does* call
+  `_hsp.push(['showBanner'])`, but nothing consumes that queue — so **live has
+  no working cookie banner at all**, while GA4 sets cookies. Cross-checked
+  against the independent 2026-08-11 cold-load probe recorded in §5: 16 cookies
+  on live (GA4, Stripe, YouTube) and **no** `hubspotutk`/`__hstc`.
+- Caveat on all of the above: server HTML cannot see runtime injection, and
+  `GT-KF63LDRR` could in principle inject HubSpot. The absent HubSpot cookies
+  say it does not. Kyle recalls the HS banner rendering in the past and it no
+  longer appears for him — **that regression is the open question**, and it is
+  what this section is on hold for.
+
+**Why it blocks the build, not just the paperwork:** the consent decision taken
+on 2026-08-12 was "HubSpot banner gates GA4, revisit a dedicated CMP
+post-launch" — which assumed a HubSpot banner exists to gate it. It doesn't.
+Reproducing it means *adding* the HubSpot tracking code and its cookies, which
+is more tracking than live has, not parity. Settled regardless of how that
+resolves: **Plausible fires immediately, ungated** (cookieless, no consent
+required, so declining visitors still count and the cutover comparison stays
+whole).
+
+The original framing, kept because the trade-off is still the real one once the
+banner question is answered:
+
+The build ships **zero analytics**. Install **before** cutover or the
+before/after story is unmeasurable — the story can be told entirely in
+Plausible, which would then run on both the old and new site.
 
 1. **Banner-free (recommended):** Plausible snippet only — no GA4, no HubSpot
    tracking code. Legally defensible under legitimate interest (cookieless,
@@ -118,6 +220,11 @@ product-by-product across the logged-in surfaces, opt-in telemetry for SyftBox �
 rings, not one tool; the public site stays storage-free.
 
 ### 5. Cookie consent — resolves with §4
+
+> **Amended 2026-08-12:** the tracking code was never ported *and it does not
+> run on live either* — see §4. So "never ported" is parity, not a gap, and
+> live's own banner is dead code. The cookie evidence below is what confirmed
+> it independently.
 
 The forms embed (`Base.astro` → the HubSpot forms loader) does **not** set
 HubSpot's tracking cookies — those come from the tracking code
@@ -189,6 +296,21 @@ day.
   images, a post's screen recordings) were localized 2026-08-12 and
   `npm run audit:image-urls` now fails on any that return — so this is a
   re-assert against the deployed build, not an open task.
+- **GSC baseline exported BEFORE the repoint** — the one item here with an
+  unrecoverable deadline. Confirm a **domain property** for openmined.org exists
+  (it survives the platform swap; a URL-prefix property is weaker), then export
+  16 months of Performance data (top queries and pages) while WordPress is still
+  serving. After the repoint that history can't be re-created, and it is the
+  only baseline the "SEO didn't dip" claim can be measured against. Account-side
+  — Kyle/OpenMined, not code.
+- **Structured data still emitting** — spot-check a page and a post through
+  Google's Rich Results Test on the live origin, not just the built HTML (§7).
+  Then submit `/sitemap-index.xml` in GSC and watch Coverage for 404 spikes for
+  the first two weeks.
+- **The `*.workers.dev` test host is guarded** — once `noindex` flips in code,
+  any deploy to a workers.dev hostname becomes a fully indexable duplicate of
+  the whole site. Retire it, gate it, or serve `X-Robots-Tag: noindex` for that
+  host. Pairs with the "retire leftover dev/preview deploys" line below.
 - **Route parity** — diff the frozen pre-cutover capture of the WordPress
   `page-sitemap.xml` (in `reference/live-sitemap/`) against this build's routes
   plus its redirects. Every live URL must resolve, directly or via a 301.
@@ -339,11 +461,6 @@ account available".
 
 ## ⚪ Polish — non-blocking, best before launch
 
-- **JSON-LD structured data** — `Seo.astro` emits OG, Twitter, and canonical
-  tags but no `application/ld+json`; the WordPress site has a full Yoast graph.
-  Biggest SEO-parity gap.
-- **Per-post meta descriptions** — the large majority of posts share one default
-  description.
 - **`apple-touch-icon`, web manifest, `.ico` fallback** — the SVG favicon, OG
   default image, and `theme-color` are done.
 - **Lighthouse and cross-browser QA on the real deployed build** — the earlier
