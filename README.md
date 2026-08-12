@@ -64,11 +64,18 @@ npm run build
 wrangler deploy
 ```
 
+Bare `wrangler deploy` works from the repo root because the adapter writes
+`.wrangler/deploy/config.json`, redirecting wrangler to the augmented
+`dist/server/wrangler.json`. That directory is gitignored, so the redirect
+exists only after a local build — always build first, in the same working tree.
+
 The Worker-name drift trap: keep `wrangler.jsonc → name` identical to any
 `--name` override in deploy commands. On a mismatch, wrangler's
 non-interactive fallback answers "yes" and creates a second Worker instead of
-failing. The current name is a pre-handoff staging value; read the warning
-comment in `wrangler.jsonc` before renaming.
+failing. The safest form is the one above — no `--name` at all, so the config is
+the single place the name lives. `openmined-org` is the intended production
+name, not a placeholder; Cloudflare has no in-place rename, so treat it as
+settled (see the warning comment in `wrangler.jsonc`).
 
 After every deploy, run the smoke check (see "Verification kit"):
 

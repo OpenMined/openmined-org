@@ -19,23 +19,64 @@ a cache.
 
 ### 1. Production deploy pipeline on the client account
 
-The deploy shape is proven end-to-end on a test Worker: manual deploy, then
-push-to-deploy via Workers Builds, with donations working against a Stripe test
-key. What's missing is the same shape on the **client's** Cloudflare account
-against this repo, plus the cutover origin repoint.
+**Done on the client account (2026-08-12).** Manual deploy runs on the OpenMined
+Cloudflare account (`7c0f9f2c…`) from this repo: Worker `openmined-org` at
+`https://openmined-org.openmined.workers.dev`, its `SESSION` KV namespace
+auto-provisioned on first deploy, a Stripe **test** key set as a runtime secret,
+and the donate flow verified end-to-end — `npm run smoke` 15/15 and
+`npm run verify:donate` reaching a real `cs_test_…` Stripe Checkout session. The
+`public/_headers` security headers were confirmed arriving on Cloudflare's real
+edge at the same time.
 
-Production today is **WordPress on WP Engine**, with Cloudflare in front as
-DNS/proxy only. So cutover is a **WP-Engine→Worker origin repoint inside
-Cloudflare**, not a nameserver migration and not a Pages→Worker move.
+**Still missing, in order:**
+
+1. **Push this repo to GitHub.** Workers Builds deploys from the GitHub repo, and
+   `OpenMined/openmined-org` holds only the initial commit — everything else is
+   local. This gates the next item.
+2. **Push-to-deploy via Workers Builds** — see
+   [Wiring push-to-deploy](#wiring-push-to-deploy). Prerequisite is an OpenMined
+   GitHub **org owner** installing the Cloudflare GitHub App.
+3. **The cutover origin repoint**, which now also depends on the DNS zone
+   migration below.
+
+Production today is **WordPress on WP Engine**. An earlier version of this
+section assumed Cloudflare was already in front as DNS/proxy — **wrong**
+(verified against live DNS: 2026-08-12). The Cloudflare response headers on the
+live site come from *WP Engine's* Cloudflare-for-SaaS edge, not an OpenMined
+zone. Actual state: **DNS is hosted on AWS Route 53; the registrar is GoDaddy;
+no OpenMined-controlled Cloudflare zone exists.**
+
+Cutover therefore has a hard prerequisite: **migrate the DNS zone to the
+OpenMined Cloudflare account** (nameserver change at GoDaddy; registrar and
+domain ownership unchanged). This is unavoidable, not a preference — Workers
+Custom Domains require a zone on the same Cloudflare account; the partial
+(CNAME) zone setup is Business-plan-only and still can't reach Cloudflare from
+a Route 53 apex; and external DNS cannot point at a Worker (no stable IPs, and
+`*.workers.dev` can't be CNAMEd from a foreign hostname). A Free-plan zone
+suffices.
+
+Migration cautions, learned from live probes (2026-08-12): copy the zone from a
+real Route 53 export (`aws route53 list-resource-record-sets`), never a blind
+probe or Cloudflare's auto-scan — the zone carries MX/SPF for company email and
+~a dozen live subdomains, and Route 53 **ALIAS** records answer as bare A
+records whose real targets are only visible in the export. Import everything
+DNS-only (grey cloud) so the move is byte-identical, and leave the Route 53
+zone untouched as rollback. Route 53's 48-hour NS TTL means resolvers can hold
+the old delegation up to ~2 days after the flip, so WordPress must stay up
+through that window. The www→apex 301 is currently emitted by WordPress itself
+(`x-redirect-by: WordPress` — and `public/_redirects` can't match on host), so
+www needs a Cloudflare Redirect Rule at cutover.
 
 Everything needed to reproduce the proven setup is in
 [Client-account deploy reference](#client-account-deploy-reference) below.
 
 ### 2. Live `STRIPE_SECRET_KEY` on the production Worker
 
-The donation flow is proven end-to-end with a test key. At cutover, set the live
-key as a runtime secret on the client Worker — from a real interactive terminal
-or the Cloudflare dashboard, never a non-promptable shell (see
+The donation flow is proven end-to-end on the client Worker with a **test** key
+(2026-08-12): `verify:donate` drives the real modal to a live `cs_test_…` Stripe
+Checkout session. What remains is swapping in the **live** key at cutover — as a
+runtime secret on the same Worker, set from a real interactive terminal or the
+Cloudflare dashboard, never a non-promptable shell (see
 [trap 1](#wrangler-traps)). It's a runtime secret, so no rebuild or redeploy is
 needed and it persists across future deploys.
 
@@ -133,6 +174,14 @@ day.
 - **Analytics installed** per the §4 decision, before the repoint, so the
   before/after comparison has a baseline.
 - **Privacy policy** matches the shipped stack (§6).
+- **No WordPress hotlinks** — nothing loads an asset from
+  `https://openmined.org/wp-content/…`. These resolve only while that host is
+  still WordPress and break the instant the origin repoints, and
+  `public/_redirects` deliberately 404s `/wp-content/uploads/*` rather than
+  redirect an asset URL to an HTML page. The 18 that existed (a page's step
+  images, a post's screen recordings) were localized 2026-08-12 and
+  `npm run audit:image-urls` now fails on any that return — so this is a
+  re-assert against the deployed build, not an open task.
 - **Route parity** — diff the frozen pre-cutover capture of the WordPress
   `page-sitemap.xml` (in `reference/live-sitemap/`) against this build's routes
   plus its redirects. Every live URL must resolve, directly or via a 301.
@@ -159,38 +208,43 @@ day.
 
 ## Client-account deploy reference
 
-The setup proven on the test account, with everything that must be re-done on
-the client's. README covers the build and the deploy command themselves; this is
-the account-level work around them.
+The account-level setup on the OpenMined account: what is standing, and what is
+still to wire. README covers the build and deploy commands themselves; this is
+the work around them.
 
 ### Standing up the Worker
 
-0. **Set the production Worker name in `wrangler.jsonc`.** It still carries the
-   throwaway proving-ground name from the test round (see the ⚠ comment above
-   the `name` field). Do this before the first deploy — the name is inert until
-   then, and the first deploy claims it for real. Cloudflare has no in-place
-   rename: renaming later means creating a new Worker and deleting the old one,
-   re-provisioning its KV namespace and re-setting its secret. Once the config
-   name is correct, **do not also pass `--name`** on the deploy command — the
-   flag only existed to override a deliberately-wrong test name, and keeping it
-   preserves two places that can silently disagree (see
+0. **Worker name — settled, do not change it.** `wrangler.jsonc → name` is
+   `openmined-org`, and that is the intended production name (confirmed
+   2026-08-12; earlier revisions of this step wrongly called it a throwaway from
+   the test round). The first deploy claims it for real and Cloudflare has no
+   in-place rename — renaming later means creating a new Worker and deleting the
+   old one, re-provisioning its KV namespace and re-setting its secret. **Do not
+   pass `--name`** on any deploy command: the config is the single place the name
+   lives, and a second place can only silently disagree (see
    [trap 2](#wrangler-traps)).
-1. Authorize the OpenMined Cloudflare account — `wrangler login` and pick it
-   explicitly. An OpenMined account exists and the previous maintainer holds
-   delegated access, but the token used during testing was deliberately scoped
-   to a personal account, so it must be re-authorized.
-2. Deploy manually first, from the repo root, using the adapter's augmented
+Steps 1–4 are **done as of 2026-08-12** — kept as the record of how, and what to
+repeat if the Worker is ever rebuilt.
+
+1. ✅ Authorize the OpenMined Cloudflare account — `wrangler login`, picking it
+   explicitly. `wrangler whoami` must list `OpenMined` (`7c0f9f2c…`); the token
+   used during earlier testing was scoped to a personal account, and a deploy
+   under it silently creates the Worker in the wrong place. Verify before every
+   first-time-in-a-while deploy, not just once.
+2. ✅ Deploy manually first, from the repo root, using the adapter's augmented
    config (README → Deploy). Manual-first is deliberate: it stands the Worker up
-   and provisions its bindings before CI is wired, which is the sequence that
-   was proven.
-3. On first deploy the adapter's `SESSION` KV namespace is auto-provisioned.
-   This worked non-interactively during testing, but a *cold* CI deploy against
-   a Worker with no namespace was never exercised — which is why manual comes
-   first. If it ever balks, pre-create the namespace and pin its `id` in
-   `wrangler.jsonc`, or set the adapter's `sessionKVBindingName`.
-4. Smoke the `*.workers.dev` URL before attaching any domain. A Worker answers
-   only on its own hostname until a route or custom domain is explicitly
-   attached, so blast radius until then is nil.
+   and provisions its bindings before CI is wired.
+3. ✅ The adapter's `SESSION` KV namespace auto-provisions on first deploy. This
+   had never been exercised against a *cold* account; it worked, creating
+   `openmined-org-session` (`37e4541656df48d2…`) without prompting. The namespace
+   now exists, so a CI deploy no longer hits this path at all. If it ever balks
+   on a rebuild, pre-create the namespace and pin its `id` in `wrangler.jsonc`,
+   or set the adapter's `sessionKVBindingName`.
+4. ✅ Smoke the `*.workers.dev` URL before attaching any domain — 15/15 against
+   `https://openmined-org.openmined.workers.dev`. A Worker answers only on its
+   own hostname until a route or custom domain is attached, so blast radius until
+   then is nil. Keep the site-wide `noindex` on while it is reachable there
+   (§3): `workers.dev` hostnames are publicly crawlable.
 
 ### Wiring push-to-deploy
 
@@ -262,9 +316,12 @@ account available".
 
 ### Open account questions
 
-1. Which Cloudflare account holds the `openmined.org` **zone**, and who
-   administers it? (The zone is Cloudflare-proxied in front of a WP Engine
-   origin; whether it lives on the OpenMined account is unconfirmed.)
+1. ~~Which Cloudflare account holds the `openmined.org` zone?~~ **Answered
+   2026-08-12: none.** DNS is on AWS Route 53, registrar GoDaddy (see §1). The
+   live questions are now: who holds the AWS account with the Route 53 zone,
+   and which Cloudflare account owns the five `*-openmined-org.pages.dev`
+   projects (design/brand, internal, share, admin) — the zone should land on
+   that same account.
 2. Who owns the **WP Engine** account, does WordPress stay up read-only for a
    grace period, and are any WP-served paths — forms, redirects, uploads — still
    doing real work?
