@@ -1,15 +1,22 @@
 ---
 /**
  * 404 — served by static hosts for unmatched paths. Reuses SimpleHero so it
- * carries the standard site chrome + brand hero treatment. noindex (inherited
- * from Base's pre-launch default; a 404 should never be indexed regardless).
+ * carries the standard site chrome + brand hero treatment.
+ *
+ * noindex is EXPLICIT, not inherited from Base's pre-launch default: that
+ * default flips to false at launch (LAUNCH.md §3), which would have made this
+ * page indexable at cutover — the opposite of "a 404 should never be indexed",
+ * which is what this comment already claimed while relying on the default. The
+ * 404 HTTP status is the primary signal to a crawler; this is the belt-and-
+ * braces half, and it makes the page match LAUNCH.md §3, which already lists
+ * the 404 among the pages that opt themselves out.
  */
 import Page from '@layouts/Page.astro';
 import SimpleHero from '@components/sections/hero/SimpleHero.astro';
 import Button from '@ui/Button.astro';
 ---
 
-<Page title="Page not found" searchable={false}>
+<Page title="Page not found" searchable={false} noindex={true}>
   <SimpleHero
     eyebrow="404"
     heading="This page isn't here"

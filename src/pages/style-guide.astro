@@ -232,7 +232,16 @@ const logoGroups = [
 ];
 ---
 
-<Page title="Style Guide — OpenMined" ionicons searchable={false}>
+{/* noindex is EXPLICIT, not inherited: the site-wide default (Base.astro →
+    noindex) flips to false at launch, which would make this internal review
+    surface indexable at cutover. Being out of the sitemap (astro.config.mjs →
+    sitemap filter) doesn't cover it — that withholds a hint, it doesn't keep a
+    discovered URL out of an index. Same reasoning as /search/ and the summit
+    event pages, and it belongs on LAUNCH.md §3's "confirm each page that opts
+    itself out survived the flip" list. This is also the only page that loads
+    the third-party Ionicons CDN (`ionicons` below), so staying unindexed keeps
+    that origin off every page a search engine can surface. */}
+<Page title="Style Guide — OpenMined" ionicons searchable={false} noindex={true}>
   <div class="sg-layout" data-pagefind-ignore>
     <!-- Sidebar -->
     <aside class="sg-sidebar">
