@@ -46,7 +46,11 @@
 #   that line; that's the §13 project, not a one-line edit.
 #
 #   Strict-Transport-Security. Belongs at the Cloudflare edge (SSL/TLS → Edge
-#   Certificates → HSTS) so it can be toggled without a deploy. Hold off on
+#   Certificates → HSTS) so it can be toggled without a deploy — which means it
+#   is only settable once the openmined.org zone actually lands on the OpenMined
+#   Cloudflare account. It does not today: DNS is on AWS Route 53 and no
+#   OpenMined-controlled zone exists, so this waits on the zone migration that
+#   LAUNCH.md §1 makes a cutover prerequisite. Then hold off on
 #   `includeSubDomains` until every *.openmined.org subdomain is confirmed
 #   HTTPS-ready (blog., courses., design., syft.docs. all exist, and blog
 #   content still carries http:// links to slack.openmined.org), and treat

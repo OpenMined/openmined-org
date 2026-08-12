@@ -444,17 +444,18 @@ HubSpot form pages, and a live donate run before enforcing anything. Origins to 
 only). Fonts are self-hosted and Pagefind is same-origin, so neither needs an entry. Stripe
 needs none — Checkout is a top-level redirect.
 
-**Guard gap, cheaper than the CSP itself.** The adapter silently skips injecting its
-`/_astro/*` `Cache-Control` block if `public/_headers` ever sets `Cache-Control` on a rule
-matching `/_astro/*` — logged at debug level only, so a normal build looks clean while immutable
-asset caching disappears. This is **already asserted post-deploy**: `scripts/smoke-deploy.mjs`
-carries a `_headers: /_astro/* immutable` row. What's missing is a **build-time** check, because
-smoke needs a live host and so can't run in CI — the footgun therefore reaches a deploy before
-anything catches it. A static assertion over the built `dist/client/_headers` would close that,
-and would fit the CI guard set that already includes `audit:image-urls`.
+**Guard coverage — what is and isn't checked.** Both halves of the `_headers` footgun are now
+covered at build time by `npm run audit:headers` (in CI): the adapter's `/_astro/*`
+`Cache-Control` block surviving, nothing else setting `Cache-Control` on an `/_astro/*` path,
+comments at column 0, the security-header name floor, and Cloudflare's rule/line limits.
+`scripts/smoke-deploy.mjs` independently asserts the immutable asset rule post-deploy.
 
-Note also what smoke does **not** cover: the six security headers `public/_headers` actually
-ships. Its `_headers` row checks cache-control only.
+The one gap left is deliberate and belongs to **cutover, not this item**: nothing asserts that
+Cloudflare *applies* the file at runtime on the production account. `audit:headers` reads the
+built file, and smoke's `_headers` row checks cache-control only — not the six security headers.
+Since production will be a different Worker on a different Cloudflare account, "does this account
+apply `_headers`?" is worth one smoke row at cutover. Cheap: assert the header names are present
+on a page response, not their values.
 
 ---
 

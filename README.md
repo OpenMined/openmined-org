@@ -106,6 +106,34 @@ One footgun, quoting that header: never set `assets.run_worker_first: true`
 in wrangler config. It routes all traffic through the Worker before the
 asset layer and bypasses `_redirects` entirely.
 
+## Response headers
+
+`public/_headers` is the single source of static-asset response headers, and
+carries the site's baseline security headers. As with `_redirects`, the adapter
+merges into it at build — it prepends its own `/_astro/*` immutable
+`Cache-Control` block — so the built `dist/client/_headers` is that block plus
+this file. The file's own header documents the two traps it exists around: a
+`Cache-Control` line in a broad rule silently suppresses that injection, and
+comments must sit at column 0 or they parse as headers. Both are guarded by
+`npm run audit:headers`.
+
+Two limits on what it can do. It applies to **static assets only** — Cloudflare
+does not attach these to responses the Worker generates, so
+`src/pages/api/create-donation.ts` sets its own headers in its `json` helper,
+and anything added to `_headers` that should also cover the API has to be added
+there too. And `astro dev` does not process the file at all (it's a Cloudflare
+asset-layer feature), so **verify header changes under `wrangler dev`**, not the
+dev server:
+
+```sh
+npm run build
+npx wrangler dev -c dist/server/wrangler.json
+```
+
+A full `script-src`/`style-src` Content-Security-Policy is deliberately not
+shipped — Shiki emits per-token inline `style` attributes that CSP hashes cannot
+cover. See `BACKLOG.md` §13.
+
 ## Launch flip
 
 The site ships `noindex` by default: `src/layouts/Base.astro → noindex` prop
@@ -170,6 +198,22 @@ a 145px box, 28× oversampled and 3.86MB on the homepage. Exemptions go in the
 script's `ALLOW` map with a mandatory reason, since a binary can't carry an
 inline opt-out comment.
 
+### `npm run audit:headers -- [<dist-dir>]`
+
+Static check over the merged `dist/client/_headers` (needs a build first): the
+adapter's `/_astro/*` immutable `Cache-Control` block survived, nothing else sets
+`Cache-Control` on an `/_astro/*` path, every comment is at column 0, a floor of
+security header names covers all pages, and Cloudflare's limits (100 rules, 2,000
+chars per line) hold.
+
+It exists because every failure mode of that file is silent — a dropped header
+changes nothing on the page, and an indented comment parses as a malformed header
+rather than erroring. It asserts header **names**, never values: `public/_headers`
+owns the values, and pinning them here would fork that and go red on a deliberate
+change. Adding a header needs no edit here; removing one fails. It cannot check
+that Cloudflare actually *applies* the file — that's the `_headers` row in
+`smoke`, which needs a live host.
+
 ### `npm run audit:overflow -- [--base <url>] [--widths 390,1024] [--engine webkit]`
 
 Asserts that no page scrolls sideways at a ladder of viewport widths,
@@ -186,9 +230,9 @@ are encoded differently. Calls Stripe's API, so it needs network.
 
 ### CI
 
-`.github/workflows/ci.yml` runs `npm run check`, `npm run build`, and the three
+`.github/workflows/ci.yml` runs `npm run check`, `npm run build`, and the four
 guards that are deterministic and need neither a browser nor the network —
-`audit:images`, `audit:image-urls`, and `audit:assets`. The rest of the kit is
+`audit:images`, `audit:image-urls`, `audit:assets`, and `audit:headers`. The rest of the kit is
 deliberately left out so CI cannot flake: `audit:overflow` needs a browser and a
 running server,
 `audit:currencies` calls an external API, and `smoke` / `verify:donate` need a

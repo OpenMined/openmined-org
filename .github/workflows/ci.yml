@@ -51,3 +51,11 @@ jobs:
       # budget for its type.
       - name: Audit public assets
         run: npm run audit:assets
+
+      # Build-output guard: the merged _headers must stay parseable and complete.
+      # Every way that file breaks is silent — a dropped header changes nothing
+      # on the page, and an indented comment misparses without error. Also
+      # catches a Cache-Control in a broad rule suppressing the adapter's
+      # immutable-asset injection, which it only reports at debug level.
+      - name: Audit headers
+        run: npm run audit:headers
