@@ -22,8 +22,8 @@ Item numbers are **stable, not sequential** — closed items are deleted without
 the rest, so gaps are expected and existing references stay valid.
 
 **Scanning for what's actually open:** every heading carries its state, so `FIXED` entries are
-skippable at a glance. As of 2026-08-11 the open ones are **§2, §3, §4, §5(b/d), §6, §7, §7f,
-§10** plus the cleanup items **§7d, §7e, §8, §9, §12** — §1, §5(a/c), §7b, §7c and §7g are
+skippable at a glance. As of 2026-08-12 the open ones are **§2, §3, §4, §5(b/d), §7, §7f, §10**
+plus the cleanup items **§7d, §7e, §8, §9, §12, §13** — §1, §5(a/c), §6, §7b, §7c and §7g are
 records. §12 is deliberately gated on cutover.
 
 ---
@@ -58,7 +58,7 @@ pass, which preserved images but not descriptions.
 `TODO(content)` markers in posts, dominated by `giphy embed (verify)` — embeds carried over by
 the converter that were never eyeballed. Mechanical to sweep; each is a look-and-confirm.
 
-### 4. Token-mapping decisions — **16 `TODO(decision)` + 1 `TODO(asset)`** — `NEEDS HUMAN CALL`
+### 4. Token-mapping decisions — **16 `TODO(decision)`** — `NEEDS HUMAN CALL`
 
 The deliberate "unmappable value" flags the AGENTS.md convention asks for, concentrated in
 `components/layout/Footer.astro` (6), `sections/hero/HomeHero.astro` (4),
@@ -134,30 +134,41 @@ top-layer painting, focus containment and `Esc` for free — the same reasoning 
   argument is that top-layer painting would make the containing-block trap in (a) structurally
   impossible rather than merely fixed.
 
-### 6. Images still hotlinked from live WordPress — **18 refs in 2 files** — `READY` — found 2026-07-29
+### 6. Assets still hotlinked from live WordPress — **18 refs in 2 files** — **FIXED 2026-08-12** — found 2026-07-29
 
-Two files still load images straight off `https://openmined.org/wp-content/uploads/…`
-instead of a local asset:
+Two files loaded assets straight off `https://openmined.org/wp-content/uploads/…` instead of a
+local copy. They rendered only because live was still WordPress: at cutover that host stops being
+WordPress, `/wp-content/uploads/*` disappears, and `public/_redirects` deliberately does *not*
+redirect that path (redirecting an asset URL to an HTML page is worse than a 404). All 18 would
+have broken the moment the origin repointed.
 
-- `src/pages/pysyft.astro` — **7** refs (6 `img:` values in the Data Scientist / Data Owner
-  step arrays, plus one inline `<img src>` for the Syft icon)
-- `src/content/blog/tutorial-turn-any-llm-into-an-expert-assistant-with-federated-rag-part-1/index.md`
-  — **11** refs
+Two things about its shape are worth keeping:
 
-**Why this gates launch:** at cutover `openmined.org` stops being the WordPress host, so
-`/wp-content/uploads/*` disappears — and `public/_redirects` deliberately does *not* redirect
-that path (redirecting an `<img>` src to an HTML page is worse than a 404). Every one of these
-images breaks the moment DNS moves. They render fine today only because live is still up.
+- **11 of the 18 were videos, not images** — `.mov` screen recordings in one blog post, embedded
+  as raw `<video src>` in the markdown. The 2026-07-15 body-image pass swept `src/content/` for
+  *images* and walked straight past them, and never covered `src/pages/` at all. Two blind spots,
+  one symptom.
+- The count looks larger from outside than it is: `src/` still holds ~13 other `wp-content` URLs
+  across 8 domains, but they point at *other* organizations' WordPress sites (whitehouse.gov,
+  thedatasphere.org, creativecommons.org, ipc.on.ca…). Only `openmined.org/wp-content` was ours.
 
-- The 2026-07-15 body-image localization pass swept `src/content/` but evidently missed this
-  one post, and never covered `src/pages/` at all — which is why the page file has no marker.
-- Fix is the path the rest of the content already took: download each asset into the
-  post's own `media/` directory (or `src/assets/` for a page), then import it so Astro
-  processes it. Mechanical once the list is this short.
-- Surfaced incidentally by the global-search work: a page's Pagefind-autodetected `image`
-  meta came back as a live WordPress URL, which is what exposed the hotlink.
-- Worth a guard afterwards so this can't silently return: assert no `openmined.org/wp-content`
-  string survives anywhere in `src/`.
+How it was fixed — verify against the code, not this list:
+
+- `src/pages/pysyft.astro` — the 6 step images import from `src/assets/` and render through
+  `<Image>` (`widths` + `sizes`, one dimension constrained, so "resize never reshape" holds); the
+  Syft icon moved to `public/logos/`, closing the `TODO(asset:)` above it. Its `:global(img)`
+  rule and explicit `height: auto` are load-bearing — see the comments there.
+- The post's 11 recordings were transcoded to MP4 and put in `public/blog/<slug>/`, matching the
+  convention `ai-audit-part-1` already set. 11 files, 13.3MB measured.
+- **Guard, so it can't return silently:** `audit-image-urls.mjs` fails on any
+  `openmined.org/wp-content` URL in the built HTML, and it matches raw HTML rather than the
+  parsed image URLs — so it also catches a `poster`, an `<a href>` to a PDF, or whatever next
+  isn't an `<img>`. It is scoped to our host only, which is why the other 13 URLs above don't
+  trip it. Verified by reintroducing a hotlink into built HTML and watching it fail.
+- Surfaced incidentally by the global-search work: a page's Pagefind-autodetected `image` meta
+  came back as a live WordPress URL, which is what exposed it.
+- The standing cutover assertion is in `LAUNCH.md` → Cutover checklist ("No WordPress
+  hotlinks"); this entry is only the record of the fix.
 
 ### 7. Search excerpts pick up post chrome — `READY` — found 2026-07-29
 

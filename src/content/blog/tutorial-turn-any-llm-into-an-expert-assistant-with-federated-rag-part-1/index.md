@@ -222,7 +222,7 @@ print("Output length:", len(vector))
 print("First 5 values:", [round(v, 4) for v in vector[:5]])
 ```
 
-<figure class="wp-block-video"><video height="1160" style="aspect-ratio: 1478 / 1160;" width="1478" autoplay="" controls="" muted="" src="https://openmined.org/wp-content/uploads/2025/10/Screen-Recording-2025-10-06-at-03.20.05.mov" playsinline=""></video></figure>
+<figure class="wp-block-video"><video height="1160" style="aspect-ratio: 1478 / 1160;" width="1478" autoplay="" controls="" muted="" src="/blog/tutorial-turn-any-llm-into-an-expert-assistant-with-federated-rag-part-1/screen-recording-2025-10-06-at-03-20-05.mp4" playsinline=""></video></figure>
 
 [![Open In Colab](./media/colab-badge.svg)](https://colab.research.google.com/drive/1X3bUQ7U0Qp6WxOKd7J922TeNHcKhSb_C?usp=sharing)
 
@@ -267,7 +267,7 @@ print("First 5 values of doc1 embedding:",
       [round(v, 4) for v in node_local_index['doc1'][:5]])
 ```
 
-<figure class="wp-block-video"><video height="534" style="aspect-ratio: 1478 / 534;" width="1478" controls="" src="https://openmined.org/wp-content/uploads/2025/10/Screen-Recording-2025-10-06-at-03.27.33.mov"></video></figure>
+<figure class="wp-block-video"><video height="534" style="aspect-ratio: 1478 / 534;" width="1478" controls="" src="/blog/tutorial-turn-any-llm-into-an-expert-assistant-with-federated-rag-part-1/screen-recording-2025-10-06-at-03-27-33.mp4"></video></figure>
 
 [![Open In Colab](./media/colab-badge.svg)](https://colab.research.google.com/drive/1X3bUQ7U0Qp6WxOKd7J922TeNHcKhSb_C?usp=sharing)
 
@@ -317,7 +317,7 @@ for doc_id, score in results:
     print(f" - {doc_id}: {score:.4f}")
 ```
 
-<figure class="wp-block-video"><video height="662" style="aspect-ratio: 1478 / 662;" width="1478" autoplay="" controls="" muted="" src="https://openmined.org/wp-content/uploads/2025/10/Screen-Recording-2025-10-06-at-03.31.26.mov" playsinline=""></video></figure>
+<figure class="wp-block-video"><video height="662" style="aspect-ratio: 1478 / 662;" width="1478" autoplay="" controls="" muted="" src="/blog/tutorial-turn-any-llm-into-an-expert-assistant-with-federated-rag-part-1/screen-recording-2025-10-06-at-03-31-26.mp4" playsinline=""></video></figure>
 
 [![Open In Colab](./media/colab-badge.svg)](https://colab.research.google.com/drive/1X3bUQ7U0Qp6WxOKd7J922TeNHcKhSb_C?usp=sharing)
 
@@ -382,7 +382,7 @@ for q in ["How is AI used?", "What is quantum computing?", "How is federated lea
     print(f"\nQ: {q}\n→ Retrieved Contexts: {contexts}")
 ```
 
-<figure class="wp-block-video"><video height="662" style="aspect-ratio: 1478 / 662;" width="1478" autoplay="" controls="" muted="" src="https://openmined.org/wp-content/uploads/2025/10/Screen-Recording-2025-10-06-at-03.35.12.mov" playsinline=""></video></figure>
+<figure class="wp-block-video"><video height="662" style="aspect-ratio: 1478 / 662;" width="1478" autoplay="" controls="" muted="" src="/blog/tutorial-turn-any-llm-into-an-expert-assistant-with-federated-rag-part-1/screen-recording-2025-10-06-at-03-35-12.mp4" playsinline=""></video></figure>
 
 [![Open In Colab](./media/colab-badge.svg)](https://colab.research.google.com/drive/1X3bUQ7U0Qp6WxOKd7J922TeNHcKhSb_C?usp=sharing)
 
@@ -438,7 +438,7 @@ print(f"\nPrompt Sent to LLM:\n{'-'*60}\n{prompt}\n{'-'*60}")
 print(f"\nGenerated Answer:\n{answer}")
 ```
 
-<figure class="wp-block-video"><video height="1030" style="aspect-ratio: 1478 / 1030;" width="1478" autoplay="" controls="" muted="" src="https://openmined.org/wp-content/uploads/2025/10/Screen-Recording-2025-10-06-at-03.50.00.mov" playsinline=""></video></figure>
+<figure class="wp-block-video"><video height="1030" style="aspect-ratio: 1478 / 1030;" width="1478" autoplay="" controls="" muted="" src="/blog/tutorial-turn-any-llm-into-an-expert-assistant-with-federated-rag-part-1/screen-recording-2025-10-06-at-03-50-00.mp4" playsinline=""></video></figure>
 
 [![Open In Colab](./media/colab-badge.svg)](https://colab.research.google.com/drive/1X3bUQ7U0Qp6WxOKd7J922TeNHcKhSb_C?usp=sharing)
 
@@ -462,7 +462,7 @@ cl = Client()
 cl
 ```
 
-<figure class="wp-block-video"><video height="368" style="aspect-ratio: 1550 / 368;" width="1550" autoplay="" controls="" muted="" src="https://openmined.org/wp-content/uploads/2025/10/Screen-Recording-2025-10-24-at-22.16.01.mov" playsinline=""></video></figure>
+<figure class="wp-block-video"><video height="368" style="aspect-ratio: 1550 / 368;" width="1550" autoplay="" controls="" muted="" src="/blog/tutorial-turn-any-llm-into-an-expert-assistant-with-federated-rag-part-1/screen-recording-2025-10-24-at-22-16-01.mp4" playsinline=""></video></figure>
 
 [![Open In Colab](./media/colab-badge.svg)](https://colab.research.google.com/drive/1X3bUQ7U0Qp6WxOKd7J922TeNHcKhSb_C?usp=sharing)
 
@@ -484,7 +484,7 @@ github_source = cl.load_service("demo@openmined.org/github-trending")
 print("Data sources ready ✅")
 ```
 
-<figure class="wp-block-video"><video height="1174" style="aspect-ratio: 1482 / 1174;" width="1482" autoplay="" controls="" muted="" src="https://openmined.org/wp-content/uploads/2025/10/source_loading.mov" playsinline=""></video></figure>
+<figure class="wp-block-video"><video height="1174" style="aspect-ratio: 1482 / 1174;" width="1482" autoplay="" controls="" muted="" src="/blog/tutorial-turn-any-llm-into-an-expert-assistant-with-federated-rag-part-1/source_loading.mp4" playsinline=""></video></figure>
 
 [![Open In Colab](./media/colab-badge.svg)](https://colab.research.google.com/drive/1X3bUQ7U0Qp6WxOKd7J922TeNHcKhSb_C?usp=sharing)
 
@@ -501,7 +501,7 @@ claude_llm = cl.load("aggregator@openmined.org/claude-3.5-sonnet")
 print("Aggregator LLM loaded ✅")
 ```
 
-<figure class="wp-block-video"><video height="1174" style="aspect-ratio: 1482 / 1174;" width="1482" autoplay="" controls="" muted="" src="https://openmined.org/wp-content/uploads/2025/10/claude_loading.mov" playsinline=""></video></figure>
+<figure class="wp-block-video"><video height="1174" style="aspect-ratio: 1482 / 1174;" width="1482" autoplay="" controls="" muted="" src="/blog/tutorial-turn-any-llm-into-an-expert-assistant-with-federated-rag-part-1/claude_loading.mp4" playsinline=""></video></figure>
 
 [![Open In Colab](./media/colab-badge.svg)](https://colab.research.google.com/drive/1X3bUQ7U0Qp6WxOKd7J922TeNHcKhSb_C?usp=sharing)
 
@@ -519,7 +519,7 @@ pipeline = cl.pipeline(
 )
 ```
 
-<figure class="wp-block-video"><video height="1174" style="aspect-ratio: 1482 / 1174;" width="1482" autoplay="" controls="" muted="" src="https://openmined.org/wp-content/uploads/2025/10/pipeline-definition.mov" playsinline=""></video></figure>
+<figure class="wp-block-video"><video height="1174" style="aspect-ratio: 1482 / 1174;" width="1482" autoplay="" controls="" muted="" src="/blog/tutorial-turn-any-llm-into-an-expert-assistant-with-federated-rag-part-1/pipeline-definition.mp4" playsinline=""></video></figure>
 
 ```python
 query = "What methods can help improve context in LLM agents?"
@@ -530,7 +530,7 @@ print("Q:", query)
 print("A:", result)
 ```
 
-<figure class="wp-block-video"><video height="1174" style="aspect-ratio: 1482 / 1174;" width="1482" autoplay="" controls="" muted="" src="https://openmined.org/wp-content/uploads/2025/10/Screen-Recording-2025-10-06-at-00.34.27.mov" playsinline=""></video></figure>
+<figure class="wp-block-video"><video height="1174" style="aspect-ratio: 1482 / 1174;" width="1482" autoplay="" controls="" muted="" src="/blog/tutorial-turn-any-llm-into-an-expert-assistant-with-federated-rag-part-1/screen-recording-2025-10-06-at-00-34-27.mp4" playsinline=""></video></figure>
 
 [![Open In Colab](./media/colab-badge.svg)](https://colab.research.google.com/drive/1X3bUQ7U0Qp6WxOKd7J922TeNHcKhSb_C?usp=sharing)
 
@@ -546,7 +546,7 @@ What you get back here? A single, LLM-generated answer that gets the best out of
 -   **Explore more sources**: run `cl.show_services()` to see what other data services or models are available and try a new pipeline! [more here](https://syft-protocol.openmined
     .org/syft-sdk/api-client.html#service-discovery)
 
-<figure class="wp-block-video"><video height="1174" style="aspect-ratio: 1482 / 1174;" width="1482" controls="" src="https://openmined.org/wp-content/uploads/2025/10/Screen-Recording-2025-10-05-at-23.43.39.mov"></video></figure>
+<figure class="wp-block-video"><video height="1174" style="aspect-ratio: 1482 / 1174;" width="1482" controls="" src="/blog/tutorial-turn-any-llm-into-an-expert-assistant-with-federated-rag-part-1/screen-recording-2025-10-05-at-23-43-39.mp4"></video></figure>
 
 -   ****Discover SyftBox****: [Install](https://syft-protocol.openmined.org/syft-router/index.html) it, setup your first data source and start querying your own files!
 -   **Invite a friend** **to query your file**: after setting up your data source and added a test file, ask a friend to send you a query!

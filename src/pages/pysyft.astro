@@ -1,4 +1,5 @@
 ---
+import { Image } from 'astro:assets';
 import Page from '@layouts/Page.astro';
 import SimpleHero from '@components/sections/hero/SimpleHero.astro';
 import ContentSection from '@components/sections/ContentSection.astro';
@@ -9,6 +10,15 @@ import FormEmbed from '@elements/FormEmbed.astro';
 import Tabs from '@elements/Tabs.astro';
 import Accordion from '@ui/Accordion.astro';
 import Button from '@ui/Button.astro';
+import dsStep1 from '@assets/pysyft-ds-step-1.jpg';
+import dsStep2 from '@assets/pysyft-ds-step-2.jpg';
+import dsStep3 from '@assets/pysyft-ds-step-3.jpg';
+import doStep1 from '@assets/pysyft-do-step-1.jpg';
+import doStep2 from '@assets/pysyft-do-step-2.jpg';
+import doStep3 from '@assets/pysyft-do-step-3.jpg';
+
+/* Rendered at 756px in the 1080px container, full-bleed below 767px. */
+const stepSizes = '(max-width: 767px) 100vw, 756px';
 
 const pyFeatures = [
   {
@@ -29,17 +39,17 @@ const researcherSteps = [
   {
     title: '1. Find a Datasite',
     body: 'Browse available datasites or collaborate with a data owner to launch a new one.',
-    img: 'https://openmined.org/wp-content/uploads/2024/08/DS-Step-1@3x-1024x526.jpg',
+    img: dsStep1,
   },
   {
     title: '2. Submit a Proposal',
     body: 'Send your research code to the datasite owner for review.',
-    img: 'https://openmined.org/wp-content/uploads/2024/08/DS-Step-2@3x-1024x526.jpg',
+    img: dsStep2,
   },
   {
     title: '3. Download Results',
     body: 'Once approved by the datasite owner, download the results of your query.',
-    img: 'https://openmined.org/wp-content/uploads/2024/08/DS-Step-3@3x-1024x526.jpg',
+    img: dsStep3,
   },
 ];
 
@@ -47,17 +57,17 @@ const dataOwnerSteps = [
   {
     title: '1. Launch a Secure Datasite',
     body: 'Use Syft’s documentation to set up a datasite and load in your data.',
-    img: 'https://openmined.org/wp-content/uploads/2024/08/DO-Step-1@3x-1024x526.jpg',
+    img: doStep1,
   },
   {
     title: '2. Review Research Proposals',
     body: 'Evaluate research proposals submitted to your datasite ensuring no sensitive data is compromised.',
-    img: 'https://openmined.org/wp-content/uploads/2024/08/DO-Step-2@3x-1024x526.jpg',
+    img: doStep2,
   },
   {
     title: '3. Approve compliant projects',
     body: 'Approve the project once it meets your safety standards, allowing the researcher to access the results.',
-    img: 'https://openmined.org/wp-content/uploads/2024/08/DO-Step-3@3x-1024x526.jpg',
+    img: doStep3,
   },
 ];
 ---
@@ -78,11 +88,10 @@ const dataOwnerSteps = [
   <hr class="psy-divider" />
 
   <!-- § With PySyft, you can … (feature list + Syft icon graphic) -->
-  <!-- TODO(asset:) Syft-Icon.svg is served from WP CDN; download and move to public/logos/ -->
   <FeatureListGraphic heading="With PySyft, you can:" features={pyFeatures} width="col-8">
     <img
       slot="graphic"
-      src="https://openmined.org/wp-content/uploads/2025/03/Syft-Icon.svg"
+      src="/logos/Syft-Icon.svg"
       alt=""
       width="240"
       height="240"
@@ -115,7 +124,7 @@ const dataOwnerSteps = [
                 <p>{step.body}</p>
               </div>
               <div class="psy-how__step-media">
-                <img src={step.img} alt="" loading="lazy" data-fade />
+                <Image src={step.img} sizes={stepSizes} widths={[756, 1512]} alt="" loading="lazy" data-fade />
               </div>
             </div>
           ))}
@@ -130,7 +139,7 @@ const dataOwnerSteps = [
                 <p>{step.body}</p>
               </div>
               <div class="psy-how__step-media">
-                <img src={step.img} alt="" loading="lazy" data-fade />
+                <Image src={step.img} sizes={stepSizes} widths={[756, 1512]} alt="" loading="lazy" data-fade />
               </div>
             </div>
           ))}
@@ -254,9 +263,16 @@ const dataOwnerSteps = [
     margin: 0;
   }
 
-  .psy-how__step-media img {
+  /* :global() because the step media is an <Image>, and Astro does not propagate
+     the scoped cid onto astro:assets roots the way it does for local components —
+     a bare `img` selector compiles to `img[data-astro-cid-…]` and matches nothing. */
+  .psy-how__step-media :global(img) {
     display: block;
     width: 100%;
+    /* Required, not decorative: <Image> emits width/height attributes for CLS, and
+       base.css resets max-width but not height — so width:100% alone scales the
+       width and leaves the attribute height, stretching the image vertically. */
+    height: auto;
     border-radius: var(--border-radius-S); /* live: 6px */
   }
 

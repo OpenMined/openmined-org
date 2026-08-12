@@ -178,9 +178,17 @@ built HTML — `src`, each `srcset` candidate, and CSS `url(…)` — must resol
 a real file under `dist/client`. Needs a build first. It exists because the
 Cloudflare adapter's `imageService` default writes runtime `/_image?…` endpoint
 URLs instead of pre-generating variants; that shipped once across most of the
-site with the build green, the dev server fine, and nothing failing. The two
-failure classes report separately, since an unresolvable endpoint URL and an
-ordinary missing file mean different things.
+site with the build green, the dev server fine, and nothing failing.
+
+Three failure classes, reported separately because they mean different things: an
+unresolvable `/_image?…` endpoint URL, an ordinary missing file, and an asset
+still hotlinked from the live WordPress host. That last one is the cutover trap —
+`https://openmined.org/wp-content/…` resolves today only because live is still
+WordPress, and at cutover every such reference breaks at once while
+`public/_redirects` deliberately 404s the path. It is matched against the raw
+HTML rather than the parsed URL set, so it catches any attribute (a `poster`, an
+`<a href>` to a PDF), and it is scoped to our own host so citations of other
+organizations' WordPress sites don't trip it.
 
 ### `npm run audit:assets`
 
