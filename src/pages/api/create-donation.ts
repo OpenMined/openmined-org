@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { CURRENCIES, toStripeAmount } from '@data/donation.mjs';
+import { SITE_URL } from '@data/site.mjs';
 
 /**
  * POST /api/create-donation — creates a Stripe Checkout Session for a one-time
@@ -16,6 +17,11 @@ import { CURRENCIES, toStripeAmount } from '@data/donation.mjs';
  * move off Cloudflare, swap the adapter and the env access below is already
  * host-neutral.
  *
+ * On the AWS Amplify deployment this route does NOT run — its Lambda twin
+ * (`aws/create-donation/index.mjs`) serves the same path behind an Amplify
+ * rewrite. THIS file is the contract source: keep the twin's request/response
+ * behavior (and `safeOrigin`) in step with it.
+ *
  * Dormant until STRIPE_SECRET_KEY is set (Cloudflare secret in prod; a local
  * .dev.vars line for `astro dev`). Without it the endpoint returns 503 and the
  * modal surfaces a friendly error — nothing else in the build depends on it.
@@ -26,13 +32,13 @@ const STRIPE_API = 'https://api.stripe.com/v1/checkout/sessions';
 const CURRENCY_SET = new Set(CURRENCIES.map((c) => c.toUpperCase()));
 
 /**
- * The ONE host-specific seam. On Cloudflare (dev + prod) the runtime secret
- * binding is read from the `cloudflare:workers` virtual module; on
- * Node/Vercel/Netlify it comes from `import.meta.env` / `process.env`. The
- * dynamic import is guarded so the file stays host-neutral at the source level
- * — moving hosts touches only this helper.
+ * The ONE host-specific seam — runtime env reads. On Cloudflare (dev + prod)
+ * the runtime binding is read from the `cloudflare:workers` virtual module; on
+ * Node/Vercel/Netlify it comes from `process.env`. The dynamic import is
+ * guarded so the file stays host-neutral at the source level — moving hosts
+ * touches only this helper.
  */
-async function getStripeKey(): Promise<string | undefined> {
+async function readRuntimeEnv(name: string): Promise<string | undefined> {
   try {
     // On workerd this module IS the environment, so its `env` is authoritative:
     // return whatever it holds, INCLUDING undefined. Do not fall through — Vite
@@ -43,16 +49,41 @@ async function getStripeKey(): Promise<string | undefined> {
     // .dev.vars compiled to `return "PASTE_TEST_SECRET_KEY_HERE"` and was
     // deployed, making the dormant endpoint 502 against Stripe instead of 503.
     const mod: any = await import('cloudflare:workers');
-    return mod?.env?.STRIPE_SECRET_KEY;
+    return mod?.env?.[name];
   } catch {
     /* not running on a workerd runtime — fall through */
   }
-  // Deliberately NOT `import.meta.env.STRIPE_SECRET_KEY`: Vite resolves that at
-  // BUILD time and inlines the value as a string literal, so any local .dev.vars
-  // key would be embedded in the shipped bundle (dead code here, but still a
-  // secret sitting in a build artifact). `process.env` is read at RUNTIME and
-  // covers the same Node-ish hosts (Vercel/Netlify/node adapter).
-  return typeof process !== 'undefined' ? process.env?.STRIPE_SECRET_KEY : undefined;
+  // Deliberately NOT `import.meta.env[…]`: Vite resolves that at BUILD time and
+  // inlines the value as a string literal, so any local .dev.vars key would be
+  // embedded in the shipped bundle (dead code here, but still a secret sitting
+  // in a build artifact). `process.env` is read at RUNTIME and covers the same
+  // Node-ish hosts (Vercel/Netlify/node adapter).
+  return typeof process !== 'undefined' ? process.env?.[name] : undefined;
+}
+
+const getStripeKey = () => readRuntimeEnv('STRIPE_SECRET_KEY');
+
+/**
+ * Post-payment return origin: the browser's Origin header if it's one of ours —
+ * the canonical site, or an https host on/under APP_DOMAIN (the deploy's
+ * preview domain, e.g. the Amplify app domain) — else SITE_URL. Validated,
+ * never trusted: Origin is attacker-supplied and becomes the redirect target
+ * Stripe sends the donor (and the session_id) to. Mirrors the Lambda twin's
+ * `safeOrigin` — keep the two in step.
+ */
+function safeOrigin(request: Request, appDomain: string | undefined): string {
+  const origin = request.headers.get('origin') || '';
+  if (origin === SITE_URL) return origin;
+  if (appDomain) {
+    try {
+      const u = new URL(origin);
+      if (u.protocol === 'https:' && (u.host === appDomain || u.host.endsWith('.' + appDomain)))
+        return origin;
+    } catch {
+      /* malformed Origin — fall through */
+    }
+  }
+  return SITE_URL;
 }
 
 /**
@@ -101,7 +132,6 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ message: 'Unsupported currency.' }, 400);
   }
 
-  const origin = new URL(request.url).origin;
   const unitAmount = toStripeAmount(amount, currency);
 
   // Build the Checkout Session as form-encoded params (Stripe's REST contract).
@@ -120,6 +150,10 @@ export const POST: APIRoute = async ({ request }) => {
     // Shows a "Donate" button + donation framing on Stripe's hosted page.
     params.set('submit_type', 'donate');
   }
+  // Validated origin (see safeOrigin): staging/preview checkouts round-trip to
+  // the host they started on, anything untrusted falls back to the canonical
+  // site — never a raw Host/Origin value.
+  const origin = safeOrigin(request, await readRuntimeEnv('APP_DOMAIN'));
   params.set('success_url', `${origin}/donate/thank-you/?session_id={CHECKOUT_SESSION_ID}`);
   params.set('cancel_url', `${origin}/?donate=cancelled`);
   params.set('billing_address_collection', 'auto');
