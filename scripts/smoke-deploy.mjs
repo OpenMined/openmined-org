@@ -111,6 +111,15 @@ async function checkHost(base) {
     record(base, `200 ${path}`, res.status === 200, String(res.status) + (res._err ? ` (${res._err})` : ''));
   }
 
+  // Soft-404 guard: an unknown path must answer HTTP status 404 (serving the
+  // 404 page's content). A 200, or a redirect that lands on the 404 page, is a
+  // "soft 404" — crawlers score every vanished URL as alive, poisoning crawl
+  // data (HOSTING.md → Routing). `redirect: manual` in get() means a
+  // 302 → /404.html surfaces here as the 302 it is, not as the page it lands on.
+  const notFound = await get(base + '/smoke-probe-definitely-not-a-page/');
+  const nfLoc = notFound.headers.get('location');
+  record(base, 'unknown path → true 404', notFound.status === 404, String(notFound.status) + (nfLoc ? ` → ${nfLoc}` : ''));
+
   for (const { from, to, kind } of REDIRECTS) {
     const res = await get(base + from);
     // Hosts return absolute or relative Location values; compare paths so any
