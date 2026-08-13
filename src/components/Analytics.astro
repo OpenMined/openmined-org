@@ -1,0 +1,43 @@
+---
+/**
+ * Analytics — loads Plausible, and nothing else. Mounted once from Base.astro's
+ * <head>, so it is on every page.
+ *
+ * **Plausible-only is a deliberate decision, not an unfinished port** — no GA4,
+ * no HubSpot tracking code. The reasoning (and what live actually runs, which is
+ * messier) is in @data/analytics.mjs and LAUNCH.md §4. Consequence worth knowing
+ * before adding anything here: the site currently sets **zero cookies**, which is
+ * what makes it lawfully banner-free. Adding a tool that writes to the device
+ * forfeits that and drags a consent banner back in — so any addition is a
+ * privacy decision first and a measurement decision second.
+ *
+ * ── Why a script that injects a script ────────────────────────────────────────
+ * Plausible's normal install is a plain `<script defer data-domain>` tag. We
+ * can't use one, because it must NOT load on non-production hostnames
+ * (@data/analytics.mjs → ANALYTICS_HOSTS explains why), and
+ * `openmined-org.openmined.workers.dev` is served by the SAME Worker as
+ * production — so `import.meta.env` cannot tell them apart at build time. The
+ * hostname test has to happen at runtime.
+ *
+ * `is:inline` keeps this out of the bundle so it runs during head parsing.
+ * Dynamically-inserted scripts are async by spec, so `defer` is not set — which
+ * is fine, as Plausible depends on nothing in document order.
+ */
+import { PLAUSIBLE_DOMAIN, PLAUSIBLE_SRC, ANALYTICS_HOSTS } from '@data/analytics.mjs';
+---
+<script is:inline define:vars={{ PLAUSIBLE_DOMAIN, PLAUSIBLE_SRC, ANALYTICS_HOSTS }}>
+  (function () {
+    // Production hostnames only. `?analytics=force` overrides, for deliberate
+    // testing on a preview or localhost — note a forced hit is a REAL hit in the
+    // client's production Plausible, so use it sparingly.
+    var onProd = ANALYTICS_HOSTS.indexOf(window.location.hostname) !== -1;
+    var forced = new URLSearchParams(window.location.search).get('analytics') === 'force';
+    if (!onProd && !forced) return;
+
+    var s = document.createElement('script');
+    s.src = PLAUSIBLE_SRC;
+    s.async = true;
+    s.setAttribute('data-domain', PLAUSIBLE_DOMAIN);
+    document.head.appendChild(s);
+  })();
+</script>

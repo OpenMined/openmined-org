@@ -2,6 +2,7 @@
 import { Font } from 'astro:assets';
 import Seo from '@components/Seo.astro';
 import JsonLd from '@components/JsonLd.astro';
+import Analytics from '@components/Analytics.astro';
 import { SITE_URL, composeTitle } from '@data/site.mjs';
 import type { SchemaAuthor, Breadcrumb } from '@utils/schema';
 import DonateModal from '@components/layout/DonateModal.astro';
@@ -138,6 +139,11 @@ const trail = breadcrumbs ?? [
       keywords={keywords}
       articleSection={articleSection}
     />
+
+    {/* Plausible only — cookieless by design, which is what keeps this site
+        banner-free. Loads on production hostnames only. Read
+        @components/Analytics.astro before adding any other tool here. */}
+    <Analytics />
 
     <link rel="icon" href="/logos/OpenMined-Icon.svg" type="image/svg+xml" />
     <link rel="alternate" type="application/rss+xml" title="OpenMined Blog" href="/rss.xml" />

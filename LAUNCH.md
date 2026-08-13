@@ -33,9 +33,11 @@ edge at the same time.
 
 **Still missing, in order:**
 
-1. **Push this repo to GitHub.** Workers Builds deploys from the GitHub repo, and
-   `OpenMined/openmined-org` holds only the initial commit — everything else is
-   local. This gates the next item.
+1. ~~**Push this repo to GitHub.**~~ **Done — corrected 2026-08-13.** The claim
+   that `OpenMined/openmined-org` held only the initial commit is stale; it was
+   pushed 2026-08-12 and `origin/main` carries the full history. What remains is
+   only that local `main` runs ahead of it from time to time — re-check with
+   `git log origin/main..main` rather than trusting this line.
 2. **Push-to-deploy via Workers Builds** — see
    [Wiring push-to-deploy](#wiring-push-to-deploy). Prerequisite is an OpenMined
    GitHub **org owner** installing the Cloudflare GitHub App.
@@ -64,7 +66,18 @@ probe or Cloudflare's auto-scan — the zone carries MX/SPF for company email an
 ~a dozen live subdomains, and Route 53 **ALIAS** records answer as bare A
 records whose real targets are only visible in the export. Import everything
 DNS-only (grey cloud) so the move is byte-identical, and leave the Route 53
-zone untouched as rollback. Route 53's 48-hour NS TTL means resolvers can hold
+zone untouched as rollback.
+
+**One exception to the grey-cloud rule, found 2026-08-13 — check it before the
+bulk import.** Nine `openmined.org` subdomains (brand, design, internal, share,
+admin, cards, cv, go, tools) are Cloudflare **Pages** custom domains, and their
+Pages projects live on `7c0f9f2c…` — the same account the zone moves to. They
+work today as grey CNAMEs to `*.pages.dev` *because DNS is external*. Once the
+zone is same-account they become same-account records, and Pages normally
+manages those as **proxied** records it creates itself. Whether a hand-imported
+DNS-only CNAME still resolves is unverified. Test one subdomain before importing
+all nine; the blast radius includes the auth-gated `internal` and `share`
+surfaces. Route 53's 48-hour NS TTL means resolvers can hold
 the old delegation up to ~2 days after the flip, so WordPress must stay up
 through that window. The www→apex 301 is currently emitted by WordPress itself
 (`x-redirect-by: WordPress` — and `public/_redirects` can't match on host), so
@@ -149,118 +162,95 @@ closed by other work, and one of its premises about tracking was wrong (§4).
 
 ---
 
-## 🟡 Launch decisions — researched, awaiting the call
+## 🟡 Launch decisions — §4/§5 settled, §6 outstanding
 
-Grounding for §4–§6: the 2026-08-11 analytics/privacy/GDPR research, held
-outside this repo — ask the previous maintainer for it. Conclusions are
-restated below.
+Grounding for §4–§6: the 2026-08-11 analytics/privacy/GDPR research, in the
+palace at `clients/omd/research/2026-08-11-web-analytics-privacy-tracking.md`
+(**read its 2026-08-13 correction header** — its description of live's banner was
+wrong), alongside the 2026-08-13 HubSpot diagnosis. Conclusions restated below.
 
-### 4. Analytics install — ON HOLD pending investigation (2026-08-12)
+### 4. Analytics — DONE (Plausible only, 2026-08-13)
 
-**Decided 2026-08-12:** parity with live on *features* (install what live
-actually runs), best practice on *implementation*. Then a live probe found the
-premise underneath the options below is wrong, so the work is **paused** — see
-"What the probe actually found".
+**Shipped.** `@components/Analytics.astro` (mounted in `Base.astro`), ids and
+rationale in `@data/analytics.mjs`. Plausible's outbound-links build, loaded
+once, on production hostnames only.
 
-**What the probe actually found** (server HTML of `/`, `/contact/` on
-openmined.org, 2026-08-12). Correcting this section and §5, which both restated
-the 2026-08-11 research's claim that live runs "GA4 + Plausible + the HubSpot
-tracking code behind HubSpot's geo cookie banner":
+**The decision, Bennett's (2026-08-13):** *"lets go no cookies necessary for this
+update"* — plus confirmation that nothing depends on HubSpot web analytics today.
+So: **no GA4, no HubSpot tracking code.** This is option 1 of the 2026-08-11
+analytics/privacy research.
 
-- **GA4 `G-X111NXDSGH`**, loaded via `gtag.js` **directly — not GTM**. (The
-  research said GTM + Site Kit.) A second Google tag, `GT-KF63LDRR`, loads
-  alongside it; what it is for is unknown and worth establishing before porting
-  either.
-- **Plausible, `data-domain="openmined.org"` — loaded TWICE**: `script.js` *and*
-  `plausible.outbound-links.js?ver=2.3.1` (the WP plugin). Two scripts, two
-  pageview beacons. Live's Plausible numbers are inflated, which matters because
-  Plausible is the intended before/after baseline. Ship **one** (the
-  outbound-links variant keeps the feature).
-- **The HubSpot tracking code does NOT load.** `js.hs-scripts.com/6487402.js`
-  is absent from both pages. The homepage *does* call
-  `_hsp.push(['showBanner'])`, but nothing consumes that queue — so **live has
-  no working cookie banner at all**, while GA4 sets cookies. Cross-checked
-  against the independent 2026-08-11 cold-load probe recorded in §5: 16 cookies
-  on live (GA4, Stripe, YouTube) and **no** `hubspotutk`/`__hstc`.
-- Caveat on all of the above: server HTML cannot see runtime injection, and
-  `GT-KF63LDRR` could in principle inject HubSpot. The absent HubSpot cookies
-  say it does not. Kyle recalls the HS banner rendering in the past and it no
-  longer appears for him — **that regression is the open question**, and it is
-  what this section is on hold for.
+Why those two are out, in one line each:
 
-**Why it blocks the build, not just the paperwork:** the consent decision taken
-on 2026-08-12 was "HubSpot banner gates GA4, revisit a dedicated CMP
-post-launch" — which assumed a HubSpot banner exists to gate it. It doesn't.
-Reproducing it means *adding* the HubSpot tracking code and its cookies, which
-is more tracking than live has, not parity. Settled regardless of how that
-resolves: **Plausible fires immediately, ungated** (cookieless, no consent
-required, so declining visitors still count and the cutover comparison stays
-whole).
+- **GA4** sets non-essential cookies, so for EU visitors it requires prior
+  opt-in — keeping it means keeping a banner.
+- **HubSpot tracking** can't be consent-cured after the fact (CJEU *Planet49*),
+  so banner-free means it simply never loads. The **forms** embed is unaffected
+  and stays — it sets no cookies of its own.
 
-The original framing, kept because the trade-off is still the real one once the
-banner question is answered:
+**The site therefore sets zero cookies** (Plausible stores nothing on the
+device). That is what makes it lawfully banner-free, and it is a property to
+protect: anything added here that writes to the device drags a banner back in.
 
-The build ships **zero analytics**. Install **before** cutover or the
-before/after story is unmeasurable — the story can be told entirely in
-Plausible, which would then run on both the old and new site.
+**Implementation notes worth not re-deriving:** analytics loads only on
+`openmined.org` / `www` — the workers.dev URL is the *same Worker* as production,
+so a build-time flag can't separate them and the gate has to be a runtime
+hostname test. `?analytics=force` overrides it for deliberate testing (a forced
+hit is a real hit). Live also double-loads Plausible and runs two redundant
+Google tags; we ship one of each.
 
-1. **Banner-free (recommended):** Plausible snippet only — no GA4, no HubSpot
-   tracking code. Legally defensible under legitimate interest (cookieless,
-   EU-hosted, nothing stored on the device); the paperwork replacing the banner
-   is a privacy-policy disclosure plus a written legitimate-interest record.
-2. **Parity with the old site:** Plausible + GA4. GA4 sets non-essential
-   cookies, so EU visitors legally require a prior-consent banner (a CMP,
-   consent-gated tags). Defensible, but ships a banner the org will then want to
-   remove.
+**What live actually runs** — messier than any tracker previously claimed, and
+the record is in the palace note below, not here: GA4 ungated, Plausible twice,
+a legacy HubSpot embed whose banner never loads, and a dead "Cookie Settings"
+button. None of it is a pattern to port.
 
-Either way: enable HubSpot **GDPR form fields** on the portal (notice +
-consent-to-communicate checkboxes) so the marketing-contact legal basis is
-collected in-form. Longer-term, post-launch: PostHog EU rolled out
-product-by-product across the logged-in surfaces, opt-in telemetry for SyftBox —
-rings, not one tool; the public site stays storage-free.
+**Still to do, and neither is code:**
 
-### 5. Cookie consent — resolves with §4
+1. **Privacy policy** rewritten to match the shipped stack (§6).
+2. **HubSpot GDPR form fields** — portal-level enable, then a consent type chosen
+   **per form** (32 form ids are embedded here). Only forms that feed marketing
+   need an opt-in checkbox; inquiry forms need a notice. ⚠ Portal 6487402 is
+   **shared with live WordPress**, so enabling this changes live's forms the same
+   moment — timing is the client's call, and the rendered form markup grows
+   (consent notice / checkbox groups), which the `.hs-form` skin does not yet
+   style.
 
-> **Amended 2026-08-12:** the tracking code was never ported *and it does not
-> run on live either* — see §4. So "never ported" is parity, not a gap, and
-> live's own banner is dead code. The cookie evidence below is what confirmed
-> it independently.
+Full diagnosis of live's HubSpot state, the portal config, and the measurement
+traps: palace → `clients/omd/research/2026-08-13-web-hubspot-consent-diagnosis.md`.
 
-The forms embed (`Base.astro` → the HubSpot forms loader) does **not** set
-HubSpot's tracking cookies — those come from the tracking code
-(`js.hs-scripts.com/…`), which was never ported. **Verified empirically
-2026-08-11** by a cold-load probe of `/contact/` on a test deploy with the form
-fully rendered: **zero cookies on our domain, zero local/sessionStorage**. The
-only cookies anywhere were `__cf_bm` (Cloudflare bot defense, ~30 min) on
-HubSpot's *own* domains — third-party, strictly-necessary class; list them in
-the privacy policy. The same probe against the WordPress site returned 16
-cookies (GA4, a site-wide Stripe id, YouTube embeds).
+### 5. Cookie consent — resolved, no banner needed
 
-Submission-side behavior (a contact is created and deduped by email when no
-tracking cookie exists) is documented and staff-confirmed, not probe-tested —
-testing it would inject junk contacts.
+**No CMP, no banner.** Consent is triggered by device storage, and this site
+stores nothing non-essential, so there is nothing to consent to. This holds only
+while §4 holds.
 
-**The site is banner-free by construction today.** A CMP is needed only if §4
-option 2 (GA4) is chosen. Never add the HubSpot tracking snippet without one.
+**Verified empirically (2026-08-11)** by a cold-load probe of `/contact/` on a
+test deploy with the form fully rendered: **zero cookies on our domain, zero
+local/sessionStorage**. The only cookies anywhere were `__cf_bm` (Cloudflare bot
+defense, ~30 min) on HubSpot's *own* domains — third-party, strictly-necessary
+class; list them in the privacy policy. Submission-side behaviour (a contact is
+created and deduped by email when no tracking cookie exists) is documented and
+staff-confirmed, not probe-tested — testing it would inject junk contacts.
 
 - **Known leak, 4 pages:** four blog posts embed `youtube.com/embed` iframes,
   which set YouTube cookies on load. Fix by swapping to
-  `youtube-nocookie.com/embed` (privacy-enhanced mode — same player, no cookies
-  until the user presses play) or a click-to-load facade. Worth doing under
-  either §4 option. Footer and subscribe YouTube references are plain links —
-  fine. Find them with a search for `youtube.com/embed` under `src/content/`.
-- **Guard idea:** assert that no page sets cookies on a cold load, so
-  bannerlessness can't silently break.
-
+  `youtube-nocookie.com/embed` (same player, no cookies until play) or a
+  click-to-load facade. Find them with a search for `youtube.com/embed` under
+  `src/content/`. **This is now the only thing standing between the site and
+  genuinely zero cookies**, so it is worth doing before launch rather than after.
+- **Guard worth building:** assert that no page sets cookies on a cold load, so
+  bannerlessness can't silently break. Nothing checks this today.
 ### 6. Privacy-policy page rewrite
 
 `src/pages/privacy-policy.astro` still names Google Analytics,
-cookies-as-practice, and **WP Engine** as host — all wrong at cutover under
-either §4 option. Rewrite to match the shipped stack: hosting (Cloudflare
-Workers), analytics per §4 including the legitimate-interest disclosure if
-Plausible-only, cookie/storage disclosure (strictly-necessary only), HubSpot
-forms and the in-form consent basis. Worth an hour of EU counsel review against
-the research report.
+cookies-as-practice, and **WP Engine** as host — all wrong at cutover. Rewrite to
+match what actually ships (§4 is now settled, so this is no longer conditional):
+hosting on Cloudflare Workers, **Plausible as the sole analytics** plus the
+written legitimate-interest record that replaces a consent banner, a
+cookie/storage disclosure stating the site sets **no cookies of its own** (only
+third-party strictly-necessary `__cf_bm` on HubSpot's domains — and the YouTube
+embeds in §5 until those are fixed), HubSpot forms and the in-form consent basis.
+Worth an hour of EU counsel review against the research.
 
 **Also missing entirely, not just wrong: Stripe.** The site takes donations
 through Stripe Checkout (`src/pages/api/create-donation.ts`) and the policy names
@@ -285,8 +275,13 @@ day.
   out still does. Several do (search, the summit event pages, 404, the donation
   thank-you, the blog card feed); search `src/pages/` for `noindex` and confirm
   each survived the flip.
-- **Analytics installed** per the §4 decision, before the repoint, so the
-  before/after comparison has a baseline.
+- **Analytics reporting from the real origin** — Plausible ships (§4) but is
+  gated to `openmined.org`/`www`, so it has NEVER sent a hit from any test host by
+  design. First confirmation that it works in production can only happen once the
+  domain resolves to the Worker: check Plausible's realtime view immediately after
+  the repoint. The reason it had to ship before cutover still stands: Plausible
+  runs on the WordPress site too, so it is the one tool that can tell the
+  before/after story across the switch.
 - **Privacy policy** matches the shipped stack (§6).
 - **No WordPress hotlinks** — nothing loads an asset from
   `https://openmined.org/wp-content/…`. These resolve only while that host is
@@ -446,11 +441,19 @@ account available".
 ### Open account questions
 
 1. ~~Which Cloudflare account holds the `openmined.org` zone?~~ **Answered
-   2026-08-12: none.** DNS is on AWS Route 53, registrar GoDaddy (see §1). The
-   live questions are now: who holds the AWS account with the Route 53 zone,
-   and which Cloudflare account owns the five `*-openmined-org.pages.dev`
-   projects (design/brand, internal, share, admin) — the zone should land on
-   that same account.
+   2026-08-12: none.** DNS is on AWS Route 53, registrar GoDaddy (see §1).
+   ~~Which Cloudflare account owns the `*.pages.dev` projects?~~ **Answered
+   2026-08-13: `7c0f9f2c…` — the same OpenMined account this Worker deploys
+   to**, so the zone should land there. It is **eight** Pages projects, not
+   five, serving **nine** `openmined.org` hostnames: brand, design, internal,
+   share, admin, **cards**, **cv**, **go**, **tools** (the last four were in no
+   inventory). They resolve today as grey-cloud CNAMEs to `*.pages.dev` *from
+   external DNS*; once the zone is same-account that changes, and Pages
+   normally manages same-account custom domains as proxied records it creates
+   itself — **verify one subdomain before bulk-importing them DNS-only.**
+   The one still-live question here: **who holds the AWS account with the
+   Route 53 zone.** No AWS credentials exist on the maintainer's machine, so
+   the zone export is entirely people-blocked.
 2. Who owns the **WP Engine** account, does WordPress stay up read-only for a
    grace period, and are any WP-served paths — forms, redirects, uploads — still
    doing real work?
