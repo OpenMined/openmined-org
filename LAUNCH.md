@@ -271,9 +271,20 @@ repo ships a verification kit in `scripts/` (see README) that covers several of
 these; the rest are one-off checks best written fresh against the state of the
 day.
 
-- **Origin repoint** — `openmined.org` and `www` serve from the Worker, off WP
-  Engine (§1).
-- **Live Stripe key** set on the production Worker (§2).
+- **Origin repoint** — `openmined.org` and `www` serve from the production
+  deploy, off WP Engine (§1 records the Worker-era DNS story; on Amplify the
+  repoint is the domain-association change).
+- **Live Stripe key** set on the production dynamic tier — on AWS that's the
+  SSM parameter (`aws/create-donation/README.md`); §2 records the
+  Worker-secret mechanism.
+- **`www` → apex 301 preserved** — today WordPress emits it; the static file
+  set can't match on hostname, so the new host must (HOSTING.md → Routing).
+- **True 404 on the production origin** — unknown paths answer HTTP 404, not
+  a redirect onto the 404 page (the smoke `unknown path → true 404` row).
+  Soft-404s poison exactly the GSC Coverage data §7 says to watch.
+- **Host redirect rules recorded** — the app-level rule set (Amplify custom
+  rules) matches `public/_redirects` + `src/data/redirects.mjs` and is
+  exported back into the repo (HOSTING.md → Redirects).
 - **`noindex` flipped** in both files (§3) — and every page that opts *itself*
   out still does. Several do (search, the summit event pages, 404, the donation
   thank-you, the blog card feed); search `src/pages/` for `noindex` and confirm
@@ -317,10 +328,10 @@ day.
   post set changed since.
 - **Author archives** — same check for author archive URLs, including the
   redirect aliases; re-verify only if the author set changed.
-- **Smoke the production Worker** — static pages, feeds, both redirect layers
-  (host `_redirects` and the adapter-appended rules), the search index actually
-  being served, and `POST /api/create-donation` returning a real
-  `checkout_url`.
+- **Smoke the production origin** — static pages, feeds, both redirect
+  classes, the search index actually being served, and
+  `POST /api/create-donation` returning a real `checkout_url`
+  (`npm run smoke -- https://openmined.org`).
 - **Hold WordPress at a holdback hostname** until confidence is high, then
   retire it and any leftover dev/preview deploys.
 

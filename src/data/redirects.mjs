@@ -1,12 +1,15 @@
 /**
  * redirects.mjs — the site's redirect registry.
  *
- * Wired into `astro.config.mjs` as the `redirects` map. Two things emit from it
- * at build: (1) a tiny meta-refresh + `<link rel="canonical">` HTML page at each
- * OLD path — portable to any static host; (2) a true HTTP 301 line in the
- * Cloudflare `_redirects` file, which the @astrojs/cloudflare adapter generates
- * natively from this same map (no separate codegen script needed — the adapter
- * appends these onto `public/_redirects`; that file is the merged source).
+ * Wired into `astro.config.mjs` as the `redirects` map. What the build emits
+ * depends on the adapter: @astrojs/cloudflare CLAIMS these routes and writes
+ * each as a true HTTP 301 line appended onto the Cloudflare `_redirects` file
+ * (that file is the merged source; NO meta-refresh pages are generated), while
+ * an adapter-less build instead emits a tiny meta-refresh +
+ * `<link rel="canonical">` HTML page at each OLD path. A host that reads
+ * neither mechanism (AWS Amplify does not read `_redirects`) must mirror this
+ * registry as host-level rules — see HOSTING.md → Redirects. Verified against
+ * the built output 2026-08-13.
  *
  * This registry is for HUMAN-NAVIGABLE PAGE redirects only. Two other classes
  * live in `public/_redirects` because they can't/shouldn't be expressed here:

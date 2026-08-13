@@ -1,9 +1,12 @@
 # Hosting requirements — the host-portable contract
 
-What any host serving this site must provide. Written for the Cloudflare → AWS
-move (the AWS environment is provisioned by OpenMined platform engineering),
-but deliberately **target-agnostic**: every line here is a requirement of the
-*site*, and which mechanism satisfies it is the host's business.
+What any host serving this site must provide. Written during the Cloudflare →
+AWS move and deliberately **target-agnostic**: every line here is a requirement
+of the *site*, and which mechanism satisfies it is the host's business. The AWS
+host is now provisioned (**Amplify Hosting**; LAUNCH.md records the decision
+and cutover path), which makes this file the contract the deployed
+configuration is held to — Amplify's rules live in the console, out-of-band of
+the repo, so this contract plus `npm run smoke` are what catch drift.
 
 Doc rules apply (see `AGENTS.md`): this file references code by path + stable
 symbol and does not restate values that live in code. Where a measured fact is
@@ -26,13 +29,18 @@ sessions, no auth, no other server state. Measured off the build 2026-08-13:
 - `npm run build` produces everything, including the Pagefind search index —
   it's built by an integration (`integrations/pagefind.mjs`), so no build
   command can skip it. There is no separate index step to wire into CI.
-- **With the Cloudflare adapter removed** (the intended AWS state), the output
-  is a flat `dist/` of static files: pages as `<route>/index.html`, hashed
-  assets under `/_astro/`, the search index under `/pagefind/`, `404.html` at
-  the root, and `public/` copied through as-is. Verified by a no-adapter build
-  2026-08-13 — Pagefind, the 404, the sitemap, and all image variants build
-  identically; zero runtime `/_image?` URLs are emitted (images pre-generate
-  at build via sharp, Astro's default).
+- **The Cloudflare adapter stays in place** on the AWS deployment (the shipped
+  state, 2026-08-13): Amplify builds run `PRERENDER_ENV=node npm run build`
+  (`astro.config.mjs → prerenderEnvironment`; Amplify's containers can't boot
+  workerd, so prerendering runs in plain Node) and publish `dist/client` —
+  pages as `<route>/index.html`, hashed assets under `/_astro/`, the search
+  index under `/pagefind/`, `404.html` at the root, `public/` copied through
+  as-is. The on-demand route is NOT in that artifact; on AWS it runs as the
+  Lambda twin (`aws/create-donation/`). An adapter-less build also works and
+  was verified 2026-08-13 — Pagefind, the 404, the sitemap, and all image
+  variants build identically; zero runtime `/_image?` URLs are emitted (images
+  pre-generate at build via sharp, Astro's default) — but it changes the
+  page-redirect mechanism; see Redirects.
 - The repo builds on Node; the only secret (`STRIPE_SECRET_KEY`) is **not** a
   build input. A build with no secrets present is a complete, correct build.
 
@@ -43,16 +51,18 @@ sessions, no auth, no other server state. Measured off the build 2026-08-13:
   behind CloudFront this needs index-document resolution (e.g. a small
   viewer-request function); an S3 website endpoint does it natively. Either is
   fine — it just must hold for *nested* paths, not only the root.
-- **404**: unknown paths serve `404.html` with status 404 (on CloudFront, a
-  custom error response). Not 200-with-error-page — soft-404s poison crawl
-  data.
+- **404**: unknown paths serve `404.html` with status **404** (on CloudFront a
+  custom error response; on Amplify a `404` rewrite to `/404.html`). Not
+  200-with-error-page, and not a redirect that lands on the 404 page —
+  soft-404s poison crawl data. Asserted by the smoke
+  `unknown path → true 404` row.
 - **No host-added redirects** beyond the set below, with one exception: the
   `www` → apex 301 must exist at the host/DNS layer (today WordPress itself
   emits it; the static file set can't match on hostname).
 
 ## Redirects — two classes, verified 2026-08-13
 
-The no-adapter build resolves most of this on its own. Two classes:
+Two classes:
 
 1. **Must-301 (host config): the rules in `public/_redirects`.** Machine
    endpoints (WP feed URLs, Yoast sitemap URLs) plus one wildcard
@@ -62,16 +72,26 @@ The no-adapter build resolves most of this on its own. Two classes:
    Cloudflare's `_redirects` format: `from  to  status`, first match wins,
    one splat. Translate into whatever mechanism fits (CloudFront function,
    edge rules); the format is trivial to parse.
-2. **Page redirects (self-serving): the registry in `src/data/redirects.mjs`.**
-   Human-navigable moved/retired pages. With no adapter claiming them, Astro
-   emits each as a **static meta-refresh page** carrying `noindex` and a
-   `rel=canonical` to the target — portable to any static host with **zero
-   host config**. Verified 2026-08-13: all 21 emit, none leak into the sitemap
-   or the Pagefind index. Upgrading these to true 301s at the edge is optional
-   polish, not a requirement.
+2. **Page redirects: the registry in `src/data/redirects.mjs`.**
+   Human-navigable moved/retired pages. The mechanism depends on the build:
+   with the Cloudflare adapter in place (the shipped state) the adapter claims
+   them as 301 lines in the merged `_redirects` file — which Amplify does not
+   read, so on Amplify they are mirrored as **app-level custom rules** along
+   with class 1. An adapter-less build would instead emit each as a static
+   meta-refresh page carrying `noindex` and a `rel=canonical` to the target —
+   zero host config, verified 2026-08-13 (all 21 emit; none leak into the
+   sitemap or the Pagefind index). Either satisfies the contract; a true 301
+   is the preferred form and is what ships.
 
-(Under the Cloudflare adapter these were all HTTP 301s in one merged
-`_redirects` file — that's the *mechanism being retired*, not the contract.)
+**Host-entered rules must be recorded.** On Amplify the entire redirect set
+lives as app-level custom rules, out-of-band of the repo — nothing in the
+build pipeline pushes them (`amplify.yml` has no such step). So two standing
+requirements: any change to `src/data/redirects.mjs` or `public/_redirects`
+must be mirrored into the host's rules, and the live rule set must be
+exported back into the repo (e.g. `aws amplify get-app --query
+'app.customRules'`) so drift is diffable. `npm run smoke` asserts the
+behavior; the export records the mechanism. Verified on staging 2026-08-13:
+all 21 registry entries and all 13 `_redirects` rules answer as true 301s.
 
 ## Response headers
 
@@ -114,12 +134,18 @@ The no-adapter build resolves most of this on its own. Two classes:
   modal.
 - The code is host-neutral: Web-standard `fetch`/`Request`/`Response`,
   form-encoded Stripe REST, no SDK. The single host-specific seam is
-  `create-donation.ts → getStripeKey()`, which already falls back to
+  `create-donation.ts → readRuntimeEnv()`, which already falls back to
   `process.env` — a Node Lambda needs no change beyond having
-  `STRIPE_SECRET_KEY` in its environment.
-- `success_url`/`cancel_url` are pinned to `@data/site.mjs → SITE_URL`
-  (2026-08-13), so checkouts started from a staging host return donors to the
-  canonical site.
+  `STRIPE_SECRET_KEY` in its environment. On AWS the route in fact runs as a
+  purpose-built Lambda twin (`aws/create-donation/index.mjs`) with the secret
+  in SSM Parameter Store; the Astro route stays the contract source and the
+  two must not drift.
+- `success_url`/`cancel_url` derive from the browser's Origin header,
+  **validated** against `@data/site.mjs → SITE_URL` and the deploy's preview
+  domain (`APP_DOMAIN` env), falling back to `SITE_URL` (2026-08-13) — staging
+  and preview checkouts round-trip to the host they started on, and an
+  untrusted Origin can never become the post-payment redirect target. Both
+  implementations carry this as `safeOrigin` — keep them in step.
 - Until the secret is set the endpoint answers 503 and the modal shows a
   friendly message — a staging deploy with no secret is a valid state, and
   `smoke` scores it as "live but dormant".
