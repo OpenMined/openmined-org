@@ -1,0 +1,3 @@
+# deploy.sh regenerates both — the copy of src/data/donation.mjs and the bundle
+donation.mjs
+fn.zip
