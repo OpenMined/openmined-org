@@ -315,11 +315,13 @@ session — so this is abuse-resistance and hygiene, not a vulnerability:
 - **Stripe error text is forwarded to the browser** (the `!res.ok` branch). Stripe's
   authentication-failure messages include a partially-redacted key — an unnecessary information
   channel out of the one route holding the secret. Log server-side, return a fixed message.
-- ✅ **`success_url` / `cancel_url` — pinned to `SITE_URL` (closed 2026-08-13).** They were built
-  from the request's own origin, i.e. the Host header. Now built from `@data/site.mjs → SITE_URL`,
-  which removes the Host-dependent redirect target and the `session_id` leak path via test
-  hostnames — and stops a checkout started on any preview/staging host (workers.dev today, a
-  CloudFront domain after the AWS move) returning the donor there instead of the real site.
+- ✅ **`success_url` / `cancel_url` — validated origin (closed 2026-08-13).** They were built
+  from the request's own origin, i.e. the Host header — an attacker-influenced redirect target
+  and a `session_id` leak path via arbitrary hostnames. Now built via
+  `create-donation.ts → safeOrigin`: the browser's Origin only if it is `SITE_URL` or an https
+  host under the deploy's preview domain (`APP_DOMAIN` env), else `SITE_URL` — matching the
+  Lambda twin (`aws/create-donation/index.mjs`), so staging/preview checkouts still round-trip
+  for testing while untrusted origins get the canonical site.
 
 **Gating:** rate limiting is the one that bites hardest once the **live** key is in — cross-ref
 `LAUNCH.md` §2. The other three are code-quality and can follow.
