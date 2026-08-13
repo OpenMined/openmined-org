@@ -48,6 +48,13 @@ export default defineConfig({
   adapter: cloudflare({
     imageService: isDev ? 'passthrough' : 'compile',
     platformProxy: { enabled: true },
+    // Prerender normally runs under workerd (prod fidelity — see README
+    // "Rendering under workerd"). AWS Amplify's build containers can't boot
+    // workerd (miniflare dies with EPIPE at "prerendering static routes"), so
+    // amplify.yml builds with PRERENDER_ENV=node: prerender runs in plain Node
+    // there, as pre-adapter static builds did. Anywhere the var is unset
+    // (local, CI, Cloudflare) keeps the workerd default.
+    prerenderEnvironment: process.env.PRERENDER_ENV === 'node' ? 'node' : 'workerd',
   }),
   integrations: [
     mdx(),

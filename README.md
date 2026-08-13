@@ -100,9 +100,17 @@ The one secret is `STRIPE_SECRET_KEY`. It powers
 `src/pages/api/create-donation.ts`, the only on-demand route, which creates a
 Stripe Checkout Session for the donate modal.
 
-In production, set it with `wrangler secret put STRIPE_SECRET_KEY`. That is
-the Workers command; `wrangler pages secret put` targets a product this site
-doesn't use. For local dev, copy `.dev.vars.example` to `.dev.vars`
+Where to set/update it depends on the host:
+
+- **Cloudflare Workers:** `wrangler secret put STRIPE_SECRET_KEY`. That is
+  the Workers command; `wrangler pages secret put` targets a product this
+  site doesn't use.
+- **AWS Amplify:** the route runs as a Lambda that reads SSM Parameter Store
+  at request time — set/rotate with `aws ssm put-parameter`. Exact commands,
+  the rotation-refresh step, and the wiring record live in
+  `aws/create-donation/README.md`.
+
+For local dev (either host), copy `.dev.vars.example` to `.dev.vars`
 (gitignored) and fill it in.
 
 Until the secret exists, the endpoint stays deliberately dormant: it returns

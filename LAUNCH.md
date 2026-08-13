@@ -15,6 +15,56 @@ a cache.
 
 ---
 
+## Deploy target decision — AWS Amplify (2026-08-13)
+
+The production host is now **AWS Amplify Hosting** in the OpenMined AWS account
+(app `d1otfqlvqd3jby`, us-west-1), chosen because the DNS zone already lives on
+Route 53 in that account — which dissolves this file's hardest cutover
+prerequisite: **no DNS zone migration to Cloudflare is needed.** The
+Cloudflare-specific sections below stay as the record of the proven Workers
+setup (and the fallback path); read them as superseded wherever they assume the
+zone must move.
+
+**Standing infrastructure (verified 2026-08-13, smoke 15/15):**
+
+- `staging` is the repo **default branch**; PRs target it and get Amplify
+  **preview URLs** automatically (via the AWS Amplify GitHub App). Merging to
+  `staging` deploys `https://staging.openmined.org`. `main` is production and
+  deploys on merge from `staging`.
+- Build mechanics live in `amplify.yml` + `customHttp.yml` (see README
+  "Deploy"); the donate endpoint runs as a Lambda with its secret in SSM —
+  see `aws/create-donation/README.md` for the wiring and key rotation.
+- Redirects (including everything `public/_redirects` expresses) are
+  **app-level Amplify custom rules** — a Cloudflare-format change there must be
+  mirrored into the Amplify rules, they are not read from the repo.
+
+**Cutover day (Amplify path):**
+
+1. Merge `staging` → `main`; wait for the `main` build to go green.
+2. Arm the **live** Stripe key in SSM (`aws/create-donation/README.md`).
+3. Flip the site-wide `noindex` guard (section 3) and re-assert the SEO parity
+   checklist (section 7) — both unchanged by the host choice.
+4. Point the domain at `main` by adding root + www to the existing domain
+   association (today it maps only `staging`):
+
+   ```sh
+   aws amplify update-domain-association --app-id d1otfqlvqd3jby \
+     --region us-west-1 --domain-name openmined.org \
+     --no-enable-auto-sub-domain \
+     --sub-domain-settings prefix=,branchName=main prefix=www,branchName=main prefix=staging,branchName=staging
+   ```
+
+   Amplify rewrites the Route 53 records itself (same-account zone). Preserve
+   live's www→apex 301 (today emitted by WordPress) with a domain-qualified
+   custom rule: source `https://www.openmined.org` → `https://openmined.org`,
+   status 301, prepended to the app's custom rules.
+5. `npm run smoke -- https://openmined.org` — expect 15/15.
+6. **Rollback** is one Route 53 change: restore the root/www `A` records to the
+   WP Engine origin `141.193.213.10` / `141.193.213.11` (values re-verified in
+   the zone 2026-08-13). WordPress stays up through the window regardless.
+
+---
+
 ## 🔴 Blockers — cannot go live without these
 
 Section numbers are **stable, not sequential** — closed sections are removed
