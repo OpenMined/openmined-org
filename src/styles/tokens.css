@@ -256,7 +256,7 @@
   /* ── 9. BORDER RADIUS ───────────────────────────────────────────── */
   --border-radius-XS:   2px;
   --border-radius-S:    6px;   /* most-used: cards, inputs, buttons */
-  --border-radius-M:    8px;   /* defined but no confirmed component usage — U-7 */
+  --border-radius-M:    8px;   /* launch-subnet callout (live: 8px) */
   --border-radius-L:    16px;
   --border-radius-XL:   32px;
   --border-radius-full: 999px;

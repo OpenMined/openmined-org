@@ -203,7 +203,11 @@
    (the SVG's own stroke value only needs enough opacity to mask, since
    the visible color comes from background-color). */
 .hs-form .input:has(> select) { position: relative; }
-.hs-form select { appearance: none; }
+/* background-image: none — appearance:none kills the NATIVE arrow, but
+   HubSpot's injected CSS paints its own chevron as a select background-image,
+   doubling up with our ::after (live has the same doubling, near-coincident).
+   Ours is the keeper: the mask follows --text-body, so it themes. */
+.hs-form select { appearance: none; background-image: none; }
 .hs-form .input:has(> select)::after {
   content: "";
   position: absolute;

@@ -69,7 +69,10 @@ export default defineConfig({
         // sets noindex explicitly, since the site-wide noindex default flips at
         // launch and would otherwise make this route indexable at cutover.
         !page.includes('/search') &&
-        !page.includes('/events/india-ai-impact-summit-2026'),
+        !page.includes('/events/india-ai-impact-summit-2026') &&
+        // /launch-subnet/ is live but deliberately absent from live's Yoast
+        // page sitemap (a quiet campaign landing) — match that (parity).
+        !page.includes('/launch-subnet'),
     }),
     // Builds the Pagefind search index into the build output. Deliberately an
     // integration, not a chained npm script, so no build command can skip it
