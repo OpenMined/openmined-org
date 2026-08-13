@@ -1,0 +1,26 @@
+# amplify.yml — AWS Amplify Hosting build spec (static deploy of dist/client).
+#
+# This deploys the STATIC half of the build only. The one on-demand route
+# (src/pages/api/create-donation.ts) is a Cloudflare Worker entry that Amplify
+# cannot run — without it the donate modal degrades to its built-in error
+# message (fetch → HTML 404 → catch path). See README "Deploy" for the
+# Cloudflare story; headers are ported to customHttp.yml because Amplify does
+# not read the Cloudflare _headers file.
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        # CI builds on Node 22 (.github/workflows/ci.yml) — match it here.
+        - nvm use 22
+        - npm ci
+    build:
+      commands:
+        - npm run build
+  artifacts:
+    baseDirectory: dist/client
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*

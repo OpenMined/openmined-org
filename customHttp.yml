@@ -1,0 +1,28 @@
+# customHttp.yml — AWS Amplify Hosting response headers.
+#
+# Ported from public/_headers (the Cloudflare source file), which Amplify does
+# not read. Two blocks, same as the built dist/client/_headers:
+#   1. The site-wide security headers (source: public/_headers `/*` block).
+#   2. The immutable asset cache rule for /_astro/* that the @astrojs/cloudflare
+#      adapter injects at build on Cloudflare — replicated here by hand because
+#      no adapter runs on Amplify.
+# Keep this file in step with public/_headers when headers change.
+customHeaders:
+  - pattern: '**'
+    headers:
+      - key: X-Content-Type-Options
+        value: nosniff
+      - key: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - key: Content-Security-Policy
+        value: frame-ancestors 'none'
+      - key: X-Frame-Options
+        value: DENY
+      - key: Permissions-Policy
+        value: geolocation=(), microphone=(), camera=()
+      - key: Cross-Origin-Opener-Policy
+        value: same-origin-allow-popups
+  - pattern: '/_astro/*'
+    headers:
+      - key: Cache-Control
+        value: public, max-age=31536000, immutable
