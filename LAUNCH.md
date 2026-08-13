@@ -282,9 +282,10 @@ day.
 - **True 404 on the production origin** — unknown paths answer HTTP 404, not
   a redirect onto the 404 page (the smoke `unknown path → true 404` row).
   Soft-404s poison exactly the GSC Coverage data §7 says to watch.
-- **Host redirect rules recorded** — the app-level rule set (Amplify custom
-  rules) matches `public/_redirects` + `src/data/redirects.mjs` and is
-  exported back into the repo (HOSTING.md → Redirects).
+- **Host redirect rules syncing from `main`** — the redirect-sync gate in
+  `amplify.yml` is flipped from `staging` to `main`
+  (`scripts/sync-amplify-redirects.mjs`; HOSTING.md → Redirects), and the
+  first post-flip production build has run the sync once.
 - **`noindex` flipped** in both files (§3) — and every page that opts *itself*
   out still does. Several do (search, the summit event pages, 404, the donation
   thank-you, the blog card feed); search `src/pages/` for `noindex` and confirm

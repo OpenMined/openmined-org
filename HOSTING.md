@@ -83,15 +83,16 @@ Two classes:
    sitemap or the Pagefind index). Either satisfies the contract; a true 301
    is the preferred form and is what ships.
 
-**Host-entered rules must be recorded.** On Amplify the entire redirect set
-lives as app-level custom rules, out-of-band of the repo — nothing in the
-build pipeline pushes them (`amplify.yml` has no such step). So two standing
-requirements: any change to `src/data/redirects.mjs` or `public/_redirects`
-must be mirrored into the host's rules, and the live rule set must be
-exported back into the repo (e.g. `aws amplify get-app --query
-'app.customRules'`) so drift is diffable. `npm run smoke` asserts the
-behavior; the export records the mechanism. Verified on staging 2026-08-13:
-all 21 registry entries and all 13 `_redirects` rules answer as true 301s.
+**Host rules are synced from the build.** On Amplify the entire redirect set
+lives as app-level custom rules, and the repo pushes them itself:
+`scripts/sync-amplify-redirects.mjs` (wired in `amplify.yml → postBuild`,
+staging builds only — the gate flips to `main` at cutover, see LAUNCH.md)
+rebuilds the complete rule set from the built `dist/client/_redirects`, so
+`src/data/redirects.mjs` and `public/_redirects` stay the only authoring
+surfaces. The script is also the home of the two host-level rules with no
+repo source: the donate-Lambda 200-proxy and the true-404 catch-all.
+`npm run smoke` asserts the behavior. Verified on staging 2026-08-13: all 21
+registry entries and all 13 `_redirects` rules answer as true 301s.
 
 ## Response headers
 
