@@ -19,6 +19,17 @@ Two flags to note:
 - **No `node:fs` at render time.** Site pages render under workerd, which
   has no filesystem (see "Rendering under workerd").
 
+**`astro dev` runs as a background daemon** — `npm run dev` returns immediately
+and prints the pid. Manage it with `npx astro dev status|logs|stop` (the binary
+is a local devDependency, so bare `astro` is not on `PATH`).
+
+⚠ **Don't run `npm run build` while a dev server is alive.** They share
+`node_modules/.vite`, and the build regenerates it — the running server then
+serves **500s** on every request, complaining that a file in `deps_ssr/` "does
+not exist … which is in the optimize deps directory". Nothing is wrong with your
+code. Fix: `npx astro dev stop && rm -rf node_modules/.vite`, then start it
+again.
+
 ## Rendering under workerd
 
 The `@astrojs/cloudflare` adapter (v14) runs the dev server's SSR and the
