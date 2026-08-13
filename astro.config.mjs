@@ -72,7 +72,12 @@ export default defineConfig({
         !page.includes('/events/india-ai-impact-summit-2026') &&
         // /launch-subnet/ is live but deliberately absent from live's Yoast
         // page sitemap (a quiet campaign landing) — match that (parity).
-        !page.includes('/launch-subnet'),
+        !page.includes('/launch-subnet') &&
+        // Author archives (incl. their /page/N/ pagination) stay crawlable —
+        // linked from every post byline — but out of the sitemap: live serves
+        // them without sitemapping them (parity), and most are thin (59 of 114
+        // authors have a single post). Decision 2026-08-13, see LAUNCH.md.
+        !page.includes('/blog/author/'),
     }),
     // Builds the Pagefind search index into the build output. Deliberately an
     // integration, not a chained npm script, so no build command can skip it
