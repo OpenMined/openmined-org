@@ -16,7 +16,9 @@ frontend:
         - npm ci
     build:
       commands:
-        - npm run build
+        # PRERENDER_ENV=node: Amplify's build containers can't boot workerd —
+        # see the prerenderEnvironment note in astro.config.mjs.
+        - PRERENDER_ENV=node npm run build
   artifacts:
     baseDirectory: dist/client
     files:
