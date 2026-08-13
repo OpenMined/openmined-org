@@ -35,12 +35,18 @@ zone must move.
   "Deploy"); the donate endpoint runs as a Lambda with its secret in SSM —
   see `aws/create-donation/README.md` for the wiring and key rotation.
 - Redirects (including everything `public/_redirects` expresses) are
-  **app-level Amplify custom rules** — a Cloudflare-format change there must be
-  mirrored into the Amplify rules, they are not read from the repo.
+  **app-level Amplify custom rules**, kept in sync by the build itself:
+  `scripts/sync-amplify-redirects.mjs` runs postBuild on **staging** builds
+  (amplify.yml gate) and rebuilds the full rule set from the built
+  `dist/client/_redirects`. `redirects.mjs` and `public/_redirects` stay the
+  only places a redirect is authored.
 
 **Cutover day (Amplify path):**
 
-1. Merge `staging` → `main`; wait for the `main` build to go green.
+1. Merge `staging` → `main`; wait for the `main` build to go green. The
+   cutover PR must also flip the redirect-sync gate in `amplify.yml` from
+   `staging` to `main`, so post-cutover redirect changes keep flowing from
+   the production branch.
 2. Arm the **live** Stripe key in SSM (`aws/create-donation/README.md`).
 3. Flip the site-wide `noindex` guard (section 3) and re-assert the SEO parity
    checklist (section 7) — both unchanged by the host choice.
