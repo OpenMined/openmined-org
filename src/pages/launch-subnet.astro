@@ -1,0 +1,354 @@
+---
+import Page from '@layouts/Page.astro';
+import SimpleHero from '@components/sections/hero/SimpleHero.astro';
+import Icon from '@elements/Icon.astro';
+import FormEmbed from '@elements/FormEmbed.astro';
+
+/**
+ * /launch-subnet/ — "Start your Subnet" inquiry landing. Rebuilt verbatim from
+ * live https://openmined.org/launch-subnet/ (missed in the original crawl: the
+ * page is live but excluded from live's Yoast page sitemap; the home page's
+ * federated-network CTA links here).
+ *
+ * Layout matches live: centered hero (h1 + subtle h5 tagline), then a
+ * two-column band — copy left (Why / industry cards / numbered steps), a
+ * HubSpot form card right — stacking content-first on mobile. The industry
+ * cards reprise LinkCard's anatomy (icon + title + low-opacity sliding arrow)
+ * at h5 title size with a body line; the step badges reprise StepList's number
+ * chip. Live declares `position: sticky; top: 16px` on the form card, but it's
+ * inert — the card stretches to the full grid-row height — so it isn't ported.
+ *
+ * Live → token mapping (probed 2026-08-13; inspect JSON in the migration repo):
+ *   body grid            650px / 546px, gap 8%       → --col-6 / --col-5, space-between
+ *   section pad-bottom   88px                        → --spacing-full ✓
+ *   "Why" h4 mb          32px                        → --spacing-3XL ✓
+ *   why → subnets gap    88px (block pb)             → --spacing-full ✓
+ *   callout              pad 32, r8, #272532, #fff   → --spacing-3XL, --border-radius-M,
+ *                                                      data-section="invert" + semantic tokens
+ *   subnets h4 mb        40px                        → --spacing-4XL ✓
+ *   card grid            2-col, gap 16, mb 24        → 1fr 1fr, --spacing-L, --spacing-2XL ✓
+ *   card                 pad 32, r6, #f4f3f6         → --spacing-3XL, --border-radius-S,
+ *                                                      --surface-background-dim ✓
+ *   card icon↔text gap   16px                        → --spacing-L ✓
+ *   card arrow           themify 24px, opacity .3    → LinkCard's inline-SVG arrow idiom
+ *   note → rule → steps  76px / 88px                 → --spacing-full both (76 snapped)
+ *   steps h4→row / rows  48px flex gap               → --spacing-5XL ✓
+ *   step head gap        16px (badge ↔ h5)           → --spacing-L ✓
+ *   step card            pad 32, r6, dim, icon 24    → --spacing-3XL, --border-radius-S ✓
+ *   form card            pad 40, r16, #f1f0f4        → --spacing-4XL, --border-radius-L,
+ *                                                      --surface-foreground-low (as InquiryLanding)
+ *   form card gap        24px                        → --spacing-2XL ✓
+ *   privacy note         14px, #868394, centered     → --text-subtle (14px raw, as StepList badge)
+ *
+ * HubSpot formId probed off the live page (never guess):
+ * migration repo → migration/inspect/launch-subnet-form.json
+ */
+
+const subnetCards = [
+  {
+    href: '/for-publishers/',
+    icon: 'newspaper',
+    title: 'Publishers',
+    body: 'Media companies making archives AI-ready while retaining attribution and compensation rights',
+  },
+  {
+    href: '/for-biomedical-researchers/',
+    icon: 'dna',
+    title: 'Genomics',
+    body: 'Genomic and biomedical researchers collaborating without centralizing patient data',
+  },
+  {
+    href: '/for-creators/',
+    icon: 'users',
+    title: 'Creators',
+    body: 'An AI assistant that knows and understands your content archives',
+  },
+  {
+    href: '/for-ai-auditors/',
+    icon: 'search-check',
+    title: 'AI Auditors',
+    body: 'External researchers evaluating proprietary AI systems without direct access',
+  },
+];
+
+const steps = [
+  {
+    icon: 'message-circle',
+    title: 'Define your use case',
+    body: 'Using the form below, tell us what problem you’re solving and who needs to participate',
+  },
+  {
+    icon: 'settings',
+    title: 'Design governance',
+    body: 'We help you establish rules for membership, data access, and value distribution',
+  },
+  {
+    icon: 'network-discovery',
+    title: 'Deploy infrastructure',
+    body: 'Launch on open-source tooling with privacy guarantees',
+  },
+  {
+    icon: 'users',
+    title: 'Grow your network',
+    body: 'Onboard participants and start deriving insights',
+  },
+];
+---
+
+<Page
+  title="Start your Subnet – OpenMined"
+  description="Launch a federated subnet where your community can collaborate on and with AI — without surrendering data, control, or competitive advantage."
+>
+  <!-- § Hero — centered h1 + subtle tagline (live h5, #868394) -->
+  <SimpleHero
+    heading="Build a Private AI Network for Your Industry"
+    headingMeasure="13em"
+    subhead="Launch a federated subnet where your community can collaborate on and with AI—without surrendering data, control, or competitive advantage."
+    subheadAs="h5"
+    subheadMeasure="38em"
+  />
+
+  <!-- § Body — copy left, form card right -->
+  <section class="ls-body">
+    <div class="container ls-grid">
+      <div class="ls-content">
+        <!-- Why Launch a Subnet? -->
+        <div class="ls-why">
+          <h4>Why Launch a Subnet?</h4>
+          <p>Traditional research and AI collaboration forces an impossible choice: share your data to unlock insights, or protect your data and go it alone.</p>
+          <p>Subnets on the federated AI network change this equation. Your network participants keep sensitive data on their own infrastructure while contributing to shared intelligence. You set the governance rules, control who joins and decide how value flows.</p>
+          <p class="ls-callout" data-section="invert">Whether you’re coordinating research across institutions, enabling secure data partnerships, or building AI tools for a regulated industry—a subnet gives you the infrastructure to do it without compromise.</p>
+        </div>
+
+        <!-- Subnets Already in Motion -->
+        <div class="ls-subnets">
+          <h4>Subnets Already in Motion</h4>
+          <div class="ls-cards">
+            {subnetCards.map((card) => (
+              <a class="ls-card card-float" href={card.href}>
+                <span class="ls-card__lead">
+                  <Icon name={card.icon} size={32} class="ls-card__icon" />
+                  <span class="ls-card__content">
+                    <h5 class="ls-card__title">{card.title}</h5>
+                    <span class="ls-card__body">{card.body}</span>
+                  </span>
+                </span>
+                <svg class="ls-card__arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </a>
+            ))}
+          </div>
+          <p class="ls-subnets__note">We want to help add your industry to this list.</p>
+        </div>
+
+        <hr class="section-divider ls-rule" />
+
+        <!-- How it works -->
+        <div class="ls-how">
+          <h4>How it works: From Idea to Live Network</h4>
+          <ol class="ls-steps">
+            {steps.map((step, i) => (
+              <li class="ls-step">
+                <div class="ls-step__head">
+                  <span class="ls-step__num" aria-hidden="true">{i + 1}</span>
+                  <h5 class="ls-step__title">{step.title}</h5>
+                </div>
+                <div class="ls-step__card">
+                  <Icon name={step.icon} size={24} class="ls-step__icon" />
+                  <p class="ls-step__body">{step.body}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
+
+      <!-- Form card — themes off --surface-foreground-low (as InquiryLanding) -->
+      <div class="ls-form">
+        <h4 class="ls-form__heading">Let's Explore</h4>
+        <p class="ls-form__intro measure" style="--measure: 25em">We’re selectively partnering with organizations ready to launch subnets. Tell us about your vision—we’ll see how we can help.</p>
+        <FormEmbed formId="71368167-75be-4a99-a842-839203e62f3e" />
+        <p class="ls-form__note">Requesting confirms you agree with our <a href="/privacy-policy/">privacy policy</a>.</p>
+      </div>
+    </div>
+  </section>
+</Page>
+
+<style>
+  .ls-body {
+    padding-bottom: var(--spacing-full); /* live: 88px ✓ */
+  }
+
+  .ls-grid {
+    display: grid;
+    /* Live grid is 650px / 546px with an 8% gutter. Map onto the column grid:
+       650 ≈ --col-6 (copy), 546 ≈ --col-5 (form — the token file's own
+       "form-card measure" span); the leftover track is the gutter via
+       space-between. minmax(0,…) lets both shrink before the 991px stack. */
+    grid-template-columns: minmax(0, var(--col-6)) minmax(0, var(--col-5));
+    justify-content: space-between;
+    /* items stretch (default): the form card fills the row height, as live */
+  }
+
+  /* ── Why Launch a Subnet? ─────────────────────────────────────────── */
+  .ls-why {
+    margin-bottom: var(--spacing-full); /* live: block pb 88px ✓ */
+  }
+  .ls-why h4 {
+    margin-bottom: var(--spacing-3XL); /* live: 32px ✓ */
+  }
+  /* Dark callout — live `.color-invert` on #272532. data-section="invert"
+     remaps the semantic tokens, so this flips with the page theme. */
+  .ls-callout {
+    margin-top: var(--spacing-3XL); /* live: 32px above the callout */
+    padding: var(--spacing-3XL);    /* live: 32px ✓ */
+    border-radius: var(--border-radius-M); /* live: 8px ✓ */
+    background-color: var(--surface-background-default);
+  }
+
+  /* ── Subnets Already in Motion ────────────────────────────────────── */
+  .ls-subnets h4 {
+    margin-bottom: var(--spacing-4XL); /* live: 40px ✓ */
+  }
+  .ls-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;   /* live: 317px 317px */
+    gap: var(--spacing-L);            /* live: 16px ✓ */
+    margin-bottom: var(--spacing-2XL); /* live: 24px ✓ */
+  }
+  .ls-card {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--spacing-L);
+    padding: var(--spacing-3XL);           /* live: 32px ✓ */
+    border-radius: var(--border-radius-S); /* live: 6px ✓ */
+    background-color: var(--surface-background-dim); /* live: #f4f3f6 */
+    color: var(--text-body); /* drives currentColor on icon + arrow */
+    text-decoration: none;
+  }
+  .ls-card__lead {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-L); /* live icon↔text: 16px ✓ */
+  }
+  .ls-card__icon { flex-shrink: 0; }
+  .ls-card__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-M);
+  }
+  .ls-card__title { margin: 0; }
+  /* low-opacity trailing arrow, top-aligned (live), slides on hover/focus —
+     same idiom as LinkCard, whose arrow centers instead */
+  .ls-card__arrow {
+    flex-shrink: 0;
+    opacity: 0.3; /* live ✓ */
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .ls-card:hover .ls-card__arrow,
+  .ls-card:focus-visible .ls-card__arrow {
+    opacity: 1;
+    transform: translateX(4px);
+  }
+  .ls-subnets__note { margin: 0; }
+
+  .ls-rule {
+    margin-block: var(--spacing-full); /* live: 76px above (snap) / 88px below */
+  }
+
+  /* ── How it works ─────────────────────────────────────────────────── */
+  .ls-how {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-5XL); /* live: 48px heading→step and step↔step ✓ */
+  }
+  .ls-how h4 { margin: 0; } /* the flex gap owns the rhythm */
+  .ls-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-5XL); /* live: 48px ✓ */
+  }
+  .ls-step {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-L); /* live: 16px head→card ✓ */
+  }
+  .ls-step__head {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-L); /* live: 16px ✓ */
+  }
+  /* number chip — same mapping as StepList's badge (auto-themes) */
+  .ls-step__num {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-2XS) var(--spacing-L);
+    border-radius: var(--border-radius-XS);
+    background-color: var(--text-headline);
+    color: var(--surface-background-bright);
+    font-size: 14px; /* badge glyph — between caption(11) and body(16), no token */
+    line-height: 1.5;
+  }
+  .ls-step__title { margin: 0; }
+  .ls-step__card {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-L);                 /* live icon↔text: 16px ✓ */
+    padding: var(--spacing-3XL);           /* live: 32px ✓ */
+    border-radius: var(--border-radius-S);
+    background-color: var(--surface-background-dim);
+  }
+  .ls-step__icon { flex-shrink: 0; }
+  .ls-step__body { margin: 0; }
+
+  /* ── Form card ────────────────────────────────────────────────────── */
+  /* No data-section: themes off --surface-foreground-low, as InquiryLanding. */
+  .ls-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2XL);               /* live: 24px ✓ */
+    padding: var(--spacing-4XL);           /* live: 40px ✓ */
+    border-radius: var(--border-radius-L); /* live: 16px ✓ */
+    background-color: var(--surface-foreground-low); /* live: #f1f0f4 */
+  }
+  .ls-form__heading {
+    margin: 0;
+    text-align: center;
+  }
+  .ls-form__intro {
+    margin: 0;
+    margin-inline: auto;
+    text-align: center;
+  }
+  .ls-form__note {
+    margin: 0;
+    font-size: 14px; /* live ✓ — no token (matches the badge glyph size) */
+    color: var(--text-subtle); /* live: #868394 ✓ */
+    text-align: center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ls-card__arrow { transition: none; }
+    .ls-card:hover .ls-card__arrow,
+    .ls-card:focus-visible .ls-card__arrow { transform: none; }
+  }
+
+  /* ── Stacks ───────────────────────────────────────────────────────── */
+  @media (max-width: 991px) {
+    .ls-grid {
+      grid-template-columns: 1fr; /* content first, form below (as live mobile) */
+      gap: var(--spacing-5XL);
+    }
+  }
+  @media (max-width: 767px) {
+    .ls-cards {
+      grid-template-columns: 1fr; /* live mobile: single column */
+    }
+  }
+</style>

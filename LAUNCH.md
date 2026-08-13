@@ -191,6 +191,13 @@ closed by other work, and one of its premises about tracking was wrong (§4).
   never covered them; all 7 404'd. Now 301 → `/sitemap-index.xml` in
   `public/_redirects`. The list is exactly what live's index enumerates
   (verified 2026-08-12), not a guess.
+- **Author archives out of the sitemap** (decided 2026-08-13). Live serves
+  author pages but excludes them from its Yoast sitemap; we were sitemapping
+  all 124 (114 authors + pagination), 59 of them single-post. Now excluded via
+  the `astro.config.mjs` sitemap filter (`/blog/author/`, which also catches
+  `/page/N/`) — matching live, and not volunteering thin archives as canonical
+  the moment the site goes indexable. The pages themselves stay crawlable and
+  linked from every post byline; reversing is deleting one filter line.
 
 **Still open:**
 
@@ -199,10 +206,6 @@ closed by other work, and one of its premises about tracking was wrong (§4).
   `announcing-proof-of-concept-support-for-tff-in-pysyft-0-7`; re-checked
   2026-08-12 and its only `# ` line is a Python comment inside a code fence, so
   that half is already clean.)
-- **124 author archives in the sitemap** — live serves author pages but excludes
-  them from its sitemap; we include all 124, many thin. Keep, or exclude from
-  the sitemap filter while leaving them crawlable. Small either way, but it is
-  an open judgment call, not an oversight.
 - **Article images on coverless posts.** A post with no cover emits no
   `ImageObject`, matching live. Google's Article guidance *recommends* an image,
   so those posts are less rich-result eligible. Falling back to the generic

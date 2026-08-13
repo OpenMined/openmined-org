@@ -8,8 +8,11 @@
  * #brxe-1254b5, folded in here). Measured off the live page.
  *
  * Press items are section-local content (not registry data): each references an
- * org by `id` for the logo; href + headline are local. Hrefs are the live
- * blog/article URLs — repoint here when real endpoints change.
+ * org by `id` for the logo; the headline is local (it's the press outlet's
+ * headline, not our post title). Items link to our own blog by `post` (public
+ * slug, validated at build via `@utils/posts → postHref`) so the URL stays
+ * relative and in sync with the post; `href` is only for genuinely external
+ * destinations, which LogoCard opens in a new tab.
  *
  * Cards are `always-light` (per design): logos always sit on a light surface,
  * so each renders in its natural color (no theme flip) and dark text stays
@@ -32,43 +35,49 @@ import LogoCard from '@elements/LogoCard.astro';
 import Button from '@ui/Button.astro';
 import Text from '@ui/Text.astro';
 import { getCollection } from 'astro:content';
+import { postHref } from '@utils/posts';
 
-interface PressItem {
-  orgId: string;
-  href: string;
-  title: string;
-}
+type PressItem = { orgId: string; title: string } & ({ post: string } | { href: string });
 
 const press: PressItem[] = [
-  { orgId: 'anthropic', href: 'https://openmined.org/blog/secure-enclaves-for-ai-evaluation/', title: 'Secure Enclaves for AI Evaluation' },
-  { orgId: 'aisi', href: 'https://openmined.org/blog/uk-frontier-ai-taskforce-partners-with-openmined-to-advance-ai-safety-research/', title: 'Frontier AI Taskforce: second progress report' },
-  { orgId: 'royal-society', href: 'https://openmined.org/blog/from-privacy-to-partnership-the-royal-society-makes-the-case-for-pets-powered-collaboration/', title: 'From privacy to partnership: The role of PETs in data governance and collaborative analysis' },
-  { orgId: 'uk-dsit', href: 'https://openmined.org/blog/pysyft-featured-in-uk-dsit-portfolio-of-ai-assurance-techniques/', title: 'Privacy-preserving third-party audits on Unreleased Digital Assets with PySyft' },
-  { orgId: 'us-nist', href: 'https://openmined.org/blog/openmined-deepmined-announced-as-a-winner-in-the-uk-us-pets-prize-challenge/', title: 'Winners Announced in First Phase of UK-US PETs Prize Challenges' },
-  { orgId: 'us-white-house', href: 'https://openmined.org/blog/openmined-participates-in-white-house-event-on-opportunities-at-the-frontier-of-ai-research/', title: 'OSTP-NSF-PCAST Event on Opportunities at the AI Research Frontier' },
-  { orgId: 'us-senate', href: 'https://openmined.org/blog/openmineds-contributions-to-ai-transparency-and-explainability-in-u-s-senate-ai-policy-roadmap/', title: 'Driving US Innovation in AI: A Roadmap for AI Policy in the US Senate' },
-  { orgId: 'us-executive-office', href: 'https://openmined.org/blog/pysyft-recognized-in-the-us-national-strategy-to-advance-privacy-preserving-data-sharing-and-analytics/', title: 'National Strategy to Advance Privacy-Preserving Data Sharing and Analytics' },
-  { orgId: 'us-nsf', href: 'https://openmined.org/blog/openmined-joins-as-launch-partner-for-the-nairr-pilot-democratizing-access-to-ai-resources-in-the-us/', title: 'Democratizing the future of AI R&D: NSF to launch National AI Research Resource pilot' },
-  { orgId: 'us-census', href: 'https://openmined.org/blog/bridging-borders-protecting-privacy-how-pysyft-is-revolutionizing-international-statistical-collaboration/', title: 'A New Model for International, Privacy-Preserving Data Science' },
+  { orgId: 'anthropic', post: 'secure-enclaves-for-ai-evaluation', title: 'Secure Enclaves for AI Evaluation' },
+  { orgId: 'aisi', post: 'uk-frontier-ai-taskforce-partners-with-openmined-to-advance-ai-safety-research', title: 'Frontier AI Taskforce: second progress report' },
+  { orgId: 'royal-society', post: 'from-privacy-to-partnership-the-royal-society-makes-the-case-for-pets-powered-collaboration', title: 'From privacy to partnership: The role of PETs in data governance and collaborative analysis' },
+  { orgId: 'uk-dsit', post: 'pysyft-featured-in-uk-dsit-portfolio-of-ai-assurance-techniques', title: 'Privacy-preserving third-party audits on Unreleased Digital Assets with PySyft' },
+  { orgId: 'us-nist', post: 'openmined-deepmined-announced-as-a-winner-in-the-uk-us-pets-prize-challenge', title: 'Winners Announced in First Phase of UK-US PETs Prize Challenges' },
+  { orgId: 'us-white-house', post: 'openmined-participates-in-white-house-event-on-opportunities-at-the-frontier-of-ai-research', title: 'OSTP-NSF-PCAST Event on Opportunities at the AI Research Frontier' },
+  { orgId: 'us-senate', post: 'openmineds-contributions-to-ai-transparency-and-explainability-in-u-s-senate-ai-policy-roadmap', title: 'Driving US Innovation in AI: A Roadmap for AI Policy in the US Senate' },
+  { orgId: 'us-executive-office', post: 'pysyft-recognized-in-the-us-national-strategy-to-advance-privacy-preserving-data-sharing-and-analytics', title: 'National Strategy to Advance Privacy-Preserving Data Sharing and Analytics' },
+  { orgId: 'us-nsf', post: 'openmined-joins-as-launch-partner-for-the-nairr-pilot-democratizing-access-to-ai-resources-in-the-us', title: 'Democratizing the future of AI R&D: NSF to launch National AI Research Resource pilot' },
+  { orgId: 'us-census', post: 'bridging-borders-protecting-privacy-how-pysyft-is-revolutionizing-international-statistical-collaboration', title: 'A New Model for International, Privacy-Preserving Data Science' },
   { orgId: 'us-ntia', href: 'https://www.ntia.gov/sites/default/files/publications/ntia-ai-report-final.pdf', title: 'AI Accountability Policy Report' },
-  { orgId: 'christchurch-call', href: 'https://openmined.org/blog/new-research-shows-promise-for-safe-secure-private-auditing-of-social-media-algorithms/', title: 'Christchurch Call Initiative on Algorithmic Outcomes' },
-  { orgId: 'microsoft', href: 'https://openmined.org/blog/openmined-partners-with-microsoft-to-advance-privacy-preserving-ai-research-for-the-christchurch-call/', title: 'Expanding our commitments to countering violent extremism online' },
-  { orgId: 'x', href: 'https://openmined.org/blog/announcing-our-partnership-with-twitter-to-advance-algorithmic-transparency/', title: 'Investing in privacy enhancing tech to advance transparency in ML' },
-  { orgId: 'reddit', href: 'https://openmined.org/blog/announcing-our-partnership-with-reddit-to-expand-privacy-preserving-researcher-access/', title: 'Introducing a New Subreddit for Researchers' },
-  { orgId: 'meta', href: 'https://openmined.org/blog/facebook-partners-with-openmined-to-advance-privacy-preserving-ai/', title: 'Privacy and Machine Learning Courses' },
-  { orgId: 'google', href: 'https://openmined.org/blog/announcing-pipelinedp-an-api-for-applying-differential-privacy-in-production/', title: 'Partnering with Google to make differential privacy more widely accessible' },
-  { orgId: 'pytorch', href: 'https://openmined.org/blog/openmined-and-pytorch-join-forces-to-advance-privacy-preserving-machine-learning/', title: 'OpenMined and PyTorch partner to launch fellowship funding for privacy-preserving ML community' },
-  { orgId: 'un-big-data', href: 'https://openmined.org/blog/syft-featured-in-guide-on-pets-in-official-statistics/', title: 'The PET Guide' },
-  { orgId: 'technologists-public-good', href: 'https://openmined.org/blog/facilitating-access-to-non-public-data-a-world-in-which-all-data-is-open/', title: 'Facilitating Access to Non-Public Data: A World in Which All Data is “Open”' },
-  { orgId: 'stanford-ssir', href: 'https://openmined.org/blog/openmined-recognized-in-stanford-social-innovation-review-for-advancing-ai-transparency/', title: 'Reimagining Our High-Tech World' },
+  { orgId: 'christchurch-call', post: 'new-research-shows-promise-for-safe-secure-private-auditing-of-social-media-algorithms', title: 'Christchurch Call Initiative on Algorithmic Outcomes' },
+  { orgId: 'microsoft', post: 'openmined-partners-with-microsoft-to-advance-privacy-preserving-ai-research-for-the-christchurch-call', title: 'Expanding our commitments to countering violent extremism online' },
+  { orgId: 'x', post: 'announcing-our-partnership-with-twitter-to-advance-algorithmic-transparency', title: 'Investing in privacy enhancing tech to advance transparency in ML' },
+  { orgId: 'reddit', post: 'announcing-our-partnership-with-reddit-to-expand-privacy-preserving-researcher-access', title: 'Introducing a New Subreddit for Researchers' },
+  { orgId: 'meta', post: 'facebook-partners-with-openmined-to-advance-privacy-preserving-ai', title: 'Privacy and Machine Learning Courses' },
+  { orgId: 'google', post: 'announcing-pipelinedp-an-api-for-applying-differential-privacy-in-production', title: 'Partnering with Google to make differential privacy more widely accessible' },
+  { orgId: 'pytorch', post: 'openmined-and-pytorch-join-forces-to-advance-privacy-preserving-machine-learning', title: 'OpenMined and PyTorch partner to launch fellowship funding for privacy-preserving ML community' },
+  { orgId: 'un-big-data', post: 'syft-featured-in-guide-on-pets-in-official-statistics', title: 'The PET Guide' },
+  { orgId: 'technologists-public-good', post: 'facilitating-access-to-non-public-data-a-world-in-which-all-data-is-open', title: 'Facilitating Access to Non-Public Data: A World in Which All Data is “Open”' },
+  { orgId: 'stanford-ssir', post: 'openmined-recognized-in-stanford-social-innovation-review-for-advancing-ai-transparency', title: 'Reimagining Our High-Tech World' },
 ];
 
 const allOrgs = await getCollection('organizations');
 const orgById = Object.fromEntries(allOrgs.map(e => [e.id, e.data]));
 
-// Resolve each item's org; drop any that don't resolve (defensive).
+// Same draft filter as the blog routes, so a link can't outrun its post.
+const includeDrafts = import.meta.env.DEV;
+const posts = await getCollection('blog', ({ data }) => includeDrafts || !data.draft);
+
+// Resolve each item's org; drop any that don't resolve (defensive). Post
+// references resolve through postHref, which throws on an unknown slug.
 const cards = press
-  .map((item) => ({ ...item, org: orgById[item.orgId] }))
+  .map((item) => ({
+    ...item,
+    org: orgById[item.orgId],
+    href: 'post' in item ? postHref(posts, item.post) : item.href,
+  }))
   .filter((c) => c.org !== undefined);
 ---
 
