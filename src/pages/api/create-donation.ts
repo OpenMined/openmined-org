@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { CURRENCIES, toStripeAmount } from '@data/donation.mjs';
+import { SITE_URL } from '@data/site.mjs';
 
 /**
  * POST /api/create-donation — creates a Stripe Checkout Session for a one-time
@@ -101,7 +102,6 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ message: 'Unsupported currency.' }, 400);
   }
 
-  const origin = new URL(request.url).origin;
   const unitAmount = toStripeAmount(amount, currency);
 
   // Build the Checkout Session as form-encoded params (Stripe's REST contract).
@@ -120,8 +120,12 @@ export const POST: APIRoute = async ({ request }) => {
     // Shows a "Donate" button + donation framing on Stripe's hosted page.
     params.set('submit_type', 'donate');
   }
-  params.set('success_url', `${origin}/donate/thank-you/?session_id={CHECKOUT_SESSION_ID}`);
-  params.set('cancel_url', `${origin}/?donate=cancelled`);
+  // Pinned to the canonical origin, never the request's own Host header: a
+  // checkout started on a test/preview hostname (workers.dev, a CloudFront
+  // domain) must still return the donor — and the session_id in the URL — to
+  // the production site, and a Host-derived value is attacker-influenced.
+  params.set('success_url', `${SITE_URL}/donate/thank-you/?session_id={CHECKOUT_SESSION_ID}`);
+  params.set('cancel_url', `${SITE_URL}/?donate=cancelled`);
   params.set('billing_address_collection', 'auto');
 
   const res = await fetch(STRIPE_API, {

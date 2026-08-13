@@ -297,10 +297,11 @@ eyebrows). It is static, and measures **3.25–4.07:1** on every surface we pain
 
 ---
 
-### 14. Donation endpoint hardening — **4 items, one file** — `READY` — found 2026-08-12
+### 14. Donation endpoint hardening — **3 open items, one file** — `READY` — found 2026-08-12
 
 `src/pages/api/create-donation.ts` is the only server-side code the site ships, so it is the
-whole server attack surface. It works and is verified end-to-end, but four things are missing.
+whole server attack surface. It works and is verified end-to-end, but three things are missing
+(a fourth, the `success_url`/`cancel_url` pinning, closed 2026-08-13 — see below).
 None is exploitable for theft — the secret key never leaves the Worker and Stripe validates the
 session — so this is abuse-resistance and hygiene, not a vulnerability:
 
@@ -314,10 +315,11 @@ session — so this is abuse-resistance and hygiene, not a vulnerability:
 - **Stripe error text is forwarded to the browser** (the `!res.ok` branch). Stripe's
   authentication-failure messages include a partially-redacted key — an unnecessary information
   channel out of the one route holding the secret. Log server-side, return a fixed message.
-- **`success_url` / `cancel_url` are built from the request's own origin**, i.e. the Host header,
-  rather than `@data/site.mjs → SITE_URL`, which already exists. Workers constrains the reachable
-  hostnames so severity is low, but pinning removes a Host-dependent redirect target and the
-  `session_id` leak path via `*.workers.dev`.
+- ✅ **`success_url` / `cancel_url` — pinned to `SITE_URL` (closed 2026-08-13).** They were built
+  from the request's own origin, i.e. the Host header. Now built from `@data/site.mjs → SITE_URL`,
+  which removes the Host-dependent redirect target and the `session_id` leak path via test
+  hostnames — and stops a checkout started on any preview/staging host (workers.dev today, a
+  CloudFront domain after the AWS move) returning the donor there instead of the real site.
 
 **Gating:** rate limiting is the one that bites hardest once the **live** key is in — cross-ref
 `LAUNCH.md` §2. The other three are code-quality and can follow.
