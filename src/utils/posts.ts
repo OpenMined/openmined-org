@@ -104,6 +104,21 @@ export const postSlug = (entry: CollectionEntry<'blog'>): string =>
   entry.data.slug ?? stripIndex(entry.id);
 
 /**
+ * Validated internal href for a post named by public slug — for curated lists
+ * that reference posts editorially (home Press Room, for-ai-auditors grid).
+ * Throws at build if the slug doesn't resolve in the given pool, so a typo'd or
+ * unpublished reference fails the build instead of shipping a dead card. Pass
+ * the draft-filtered collection the page already fetches; the returned path is
+ * relative, which is what keeps same-site links out of LogoCard's
+ * external/new-tab branch.
+ */
+export function postHref(posts: CollectionEntry<'blog'>[], slug: string): string {
+  if (!posts.some((p) => postSlug(p) === slug))
+    throw new Error(`postHref: no post with slug "${slug}" — typo, or the post is a draft?`);
+  return `/blog/${slug}/`;
+}
+
+/**
  * Resolve a listing's featured post. Featuring is a property of the LISTING (the
  * main blog config or a category), not the post — each listing names its pick by
  * public slug, and a listing that names nothing has **no featured post**.

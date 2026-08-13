@@ -18,21 +18,29 @@ import CtaSection from '@components/sections/cta/CtaSection.astro';
 import FormEmbed from '@elements/FormEmbed.astro';
 import Button from '@ui/Button.astro';
 import { getCollection } from 'astro:content';
+import { postHref } from '@utils/posts';
 
 // "Learn about our AI auditing work with…" — org logo + blog headline per card.
+// Cards link to our own posts by public slug (validated at build via
+// `@utils/posts → postHref`); the title is the outlet's headline, kept local.
 const auditing = [
-  { orgId: 'aisi', href: 'https://openmined.org/blog/uk-frontier-ai-taskforce-partners-with-openmined-to-advance-ai-safety-research/', title: 'Frontier AI Taskforce: second progress report' },
-  { orgId: 'christchurch-call', href: 'https://openmined.org/blog/new-research-shows-promise-for-safe-secure-private-auditing-of-social-media-algorithms/', title: 'Christchurch Call Initiative on Algorithmic Outcomes' },
-  { orgId: 'microsoft', href: 'https://openmined.org/blog/openmined-partners-with-microsoft-to-advance-privacy-preserving-ai-research-for-the-christchurch-call/', title: 'Expanding our commitments to countering violent extremism online' },
-  { orgId: 'x', href: 'https://openmined.org/blog/announcing-our-partnership-with-twitter-to-advance-algorithmic-transparency/', title: 'Investing in privacy enhancing tech to advance transparency in ML' },
-  { orgId: 'reddit', href: 'https://openmined.org/blog/announcing-our-partnership-with-reddit-to-expand-privacy-preserving-researcher-access/', title: 'Introducing a New Subreddit for Researchers' },
-  { orgId: 'anthropic', href: 'https://openmined.org/blog/secure-enclaves-for-ai-evaluation/', title: 'Secure Enclaves for AI Evaluation' },
+  { orgId: 'aisi', post: 'uk-frontier-ai-taskforce-partners-with-openmined-to-advance-ai-safety-research', title: 'Frontier AI Taskforce: second progress report' },
+  { orgId: 'christchurch-call', post: 'new-research-shows-promise-for-safe-secure-private-auditing-of-social-media-algorithms', title: 'Christchurch Call Initiative on Algorithmic Outcomes' },
+  { orgId: 'microsoft', post: 'openmined-partners-with-microsoft-to-advance-privacy-preserving-ai-research-for-the-christchurch-call', title: 'Expanding our commitments to countering violent extremism online' },
+  { orgId: 'x', post: 'announcing-our-partnership-with-twitter-to-advance-algorithmic-transparency', title: 'Investing in privacy enhancing tech to advance transparency in ML' },
+  { orgId: 'reddit', post: 'announcing-our-partnership-with-reddit-to-expand-privacy-preserving-researcher-access', title: 'Introducing a New Subreddit for Researchers' },
+  { orgId: 'anthropic', post: 'secure-enclaves-for-ai-evaluation', title: 'Secure Enclaves for AI Evaluation' },
 ];
 
 const allOrgs = await getCollection('organizations');
 const orgById = Object.fromEntries(allOrgs.map((e) => [e.id, e.data]));
+
+// Same draft filter as the blog routes, so a link can't outrun its post.
+const includeDrafts = import.meta.env.DEV;
+const posts = await getCollection('blog', ({ data }) => includeDrafts || !data.draft);
+
 const cards = auditing
-  .map((item) => ({ ...item, org: orgById[item.orgId] }))
+  .map((item) => ({ ...item, org: orgById[item.orgId], href: postHref(posts, item.post) }))
   .filter((c) => c.org !== undefined);
 ---
 
