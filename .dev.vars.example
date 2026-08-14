@@ -1,11 +1,6 @@
-# Local secrets for `astro dev` (read via the Cloudflare adapter's platformProxy)
-# and `wrangler dev`. Copy to `.dev.vars` (gitignored) and fill in.
-#
-# In PRODUCTION, set this as a Cloudflare Worker secret:
-#   wrangler secret put STRIPE_SECRET_KEY
-# (or via the Cloudflare dashboard → Workers & Pages → the Worker → Settings →
-# Variables and Secrets). NOTE: this is a Workers build (@astrojs/cloudflare v14),
-# so it's `wrangler secret put`, NOT `wrangler pages secret put`.
+# Local secrets for `astro dev` (read via the Cloudflare adapter's platformProxy).
+# Copy to `.dev.vars` (gitignored) and fill in. LOCAL DEV ONLY — production
+# reads the key from SSM Parameter Store; see aws/create-donation/README.md.
 # Until it is set, /api/create-donation returns 503 and the donate modal shows
 # a friendly "not available right now" message — the rest of the site is fine.
 

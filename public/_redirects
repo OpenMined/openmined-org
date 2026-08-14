@@ -1,20 +1,16 @@
-# _redirects — host-level (Cloudflare) 301s that do NOT belong in redirects.mjs.
+# _redirects — host-level 301s that do NOT belong in redirects.mjs.
 #
 # The @astrojs/cloudflare adapter reads this file at build and APPENDS the
 # redirects.mjs-derived 301s after it (see the adapter's `astro:build:done`), so
 # this stays the single _redirects source — redirects.mjs is not a separate list,
-# it's merged in. Cloudflare matches top-to-bottom, first match wins.
+# it's merged in. Matching is top-to-bottom, first match wins.
 #
-# Works on BOTH Cloudflare Pages and Workers Static Assets (this build is Workers
-# — @astrojs/cloudflare v14 is Workers-only). On Workers, _redirects is a
-# first-class feature: evaluated at the asset layer BEFORE the Worker runs, so
-# these fire ahead of the on-demand /api/* routes with no conflict. Limits are
-# 2,000 static + 100 dynamic (we use a handful). Query-string matching is NOT
-# supported on either platform — that's why /?p= shortlinks can't live here.
-#   ⚠ MIGRATION FOOTGUN: this depends on the assets-first default. Do NOT set
-#   `assets.run_worker_first: true` in wrangler — that routes all traffic through
-#   the Worker first and BYPASSES _redirects entirely (redirects would then have
-#   to move into the Worker/Astro middleware layer).
+# The HOST does not read this file: scripts/sync-amplify-redirects.mjs parses
+# the merged dist/client/_redirects after each build and pushes the complete
+# rule set to Amplify as app-level custom rules. Author redirects HERE (or in
+# redirects.mjs), never in the AWS console — the sync overwrites console edits.
+# Query-string matching is NOT supported by this format — that's why /?p=
+# shortlinks can't live here.
 #
 # This file is the home for the two redirect classes redirects.mjs can't/shouldn't
 # express:
@@ -34,8 +30,7 @@
 #                              permalink, so they're rarely the canonical inbound
 #                              link. Generatable later from each post's legacyId
 #                              frontmatter (the WP post ID) if analytics show real
-#                              hits. (Cloudflare query matching is also
-#                              unreliable.)
+#                              hits.
 
 # --- WordPress feed endpoints → the single Astro RSS feed (/rss.xml) ---
 # Live serves these 200 today; feed readers follow the 301 and update their URL.

@@ -14,10 +14,9 @@
  * ── Why a script that injects a script ────────────────────────────────────────
  * Plausible's normal install is a plain `<script defer data-domain>` tag. We
  * can't use one, because it must NOT load on non-production hostnames
- * (@data/analytics.mjs → ANALYTICS_HOSTS explains why), and
- * `openmined-org.openmined.workers.dev` is served by the SAME Worker as
- * production — so `import.meta.env` cannot tell them apart at build time. The
- * hostname test has to happen at runtime.
+ * (@data/analytics.mjs → ANALYTICS_HOSTS explains why), and staging + preview
+ * hosts serve the SAME build as production — so `import.meta.env` cannot tell
+ * them apart at build time. The hostname test has to happen at runtime.
  *
  * `is:inline` keeps this out of the bundle so it runs during head parsing.
  * Dynamically-inserted scripts are async by spec, so `defer` is not set — which

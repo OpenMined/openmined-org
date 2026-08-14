@@ -2,7 +2,7 @@
  * verify-donate.mjs — drives the real donate modal in a browser.
  *
  * Defaults to localhost; pass a base URL to run it against a deployed host:
- *   node scripts/verify-donate.mjs https://<worker>.workers.dev
+ *   node scripts/verify-donate.mjs https://staging.openmined.org
  * Screenshots land in scripts/screenshots/ (gitignored).
  *
  * The submit assertion is adaptive, because both outcomes are legitimate

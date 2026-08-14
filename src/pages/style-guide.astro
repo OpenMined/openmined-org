@@ -1177,8 +1177,8 @@ model.fit(dataset.features, dataset.labels)`}</CodeBlock>
           Donate buttons, the get-involved card). A native <code>&lt;dialog&gt;</code>
           (top-layer, <code>::backdrop</code>, Esc-to-close). It stays the light
           "dim panel" treatment in both themes (<code>data-section="always-light"</code>),
-          faithful to live. Submit POSTs to <code>/api/create-donation</code> (an
-          on-demand route on Cloudflare Workers) which creates a Stripe Checkout Session and
+          faithful to live. Submit POSTs to <code>/api/create-donation</code> (the
+          site's one on-demand API route) which creates a Stripe Checkout Session and
           redirects; dormant until <code>STRIPE_SECRET_KEY</code> is set. Open it to
           check tabs, presets, custom amount, and the currency symbol swap.
         </p>

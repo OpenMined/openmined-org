@@ -54,10 +54,10 @@ const PAGES = ['/', '/blog/', '/syftbox/', '/style-guide/'];
 const FEEDS = ['/rss.xml', '/sitemap-index.xml', '/pagefind/pagefind.js'];
 /**
  * Redirects, split by REQUIREMENT CLASS — a break in one class is a different
- * diagnosis than a break in the other. (These map onto emitting layers on any
- * given host — on Cloudflare, `must-301` rows come from public/_redirects and
- * `page` rows from the adapter-appended registry — but the class is the
- * portable fact; the layer is the host's implementation detail.)
+ * diagnosis than a break in the other. (These map onto the two authoring
+ * surfaces — `must-301` rows come from public/_redirects and `page` rows from
+ * the redirects.mjs registry — but the class is the portable fact; how a host
+ * serves them is its implementation detail.)
  *
  *   must-301 = machine endpoints (feeds, sitemaps) + wildcards. Consumers
  *              follow the HTTP status and ignore HTML, so only a true 301
@@ -141,10 +141,10 @@ async function checkHost(base) {
     record(base, `redirect ${from} → ${to}  [${kind}]`, ok, detail);
   }
 
-  // The pre-launch guard. Test/preview hostnames (*.workers.dev, CloudFront
+  // The pre-launch guard. Test/preview hostnames (*.amplifyapp.com, CloudFront
   // domains, …) are publicly crawlable, so noindex staying ON is a requirement
   // of the test, not an oversight. After the launch flip this row is EXPECTED
-  // to flag on the production host (see README → Launch flip).
+  // to flag on the production host (the flip is tracked in LAUNCH.md).
   const home = await get(base + '/');
   const html = await home.text();
   const robots = html.match(/<meta\s+name=["']robots["']\s+content=["']([^"']+)["']/i)?.[1] ?? '';
@@ -163,8 +163,8 @@ async function checkHost(base) {
 
   // Hashed-asset caching: /_astro/* filenames are content-hashed, so serving
   // them without a long-lived immutable Cache-Control wastes every repeat
-  // visit. On Cloudflare the adapter's _headers block provides this; any other
-  // host must provide it its own way — the requirement is host-agnostic.
+  // visit. On Amplify customHttp.yml provides this; any host must provide it
+  // its own way — the requirement is host-agnostic.
   // Pull a real hashed asset out of the homepage rather than guessing a filename.
   const assetPath = html.match(/\/_astro\/[A-Za-z0-9._-]+\.(?:css|js)/)?.[0];
   if (assetPath) {

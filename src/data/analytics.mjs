@@ -39,13 +39,13 @@ export const PLAUSIBLE_DOMAIN = 'openmined.org';
 export const PLAUSIBLE_SRC = 'https://plausible.io/js/script.outbound-links.js';
 
 /**
- * Hostnames allowed to report. Everything else — `*.workers.dev`, localhost,
- * preview branches — sends nothing.
+ * Hostnames allowed to report. Everything else — staging.openmined.org,
+ * `*.amplifyapp.com` PR previews, localhost — sends nothing.
  *
  * This is NOT a parity deviation: dev and preview are not visitor-facing, so
  * production behaviour is unchanged. It exists because Plausible points at the
- * client's PRODUCTION site, and the workers.dev URL is served by the same Worker
- * as production — so a build-time flag cannot separate them. Plausible does not
+ * client's PRODUCTION site, and staging/preview hosts serve the same build as
+ * production — so a build-time flag cannot separate them. Plausible does not
  * validate the requesting origin, so without this gate every local page load
  * would land in the client's real stats.
  *

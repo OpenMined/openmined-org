@@ -19,17 +19,16 @@ export default defineConfig({
   // Canonical production origin — required for correct canonical URLs, the
   // sitemap, and the RSS feed. Single source of truth in src/data/site.mjs.
   site: SITE_URL,
-  // Output stays 'static' (the default): every page is prerendered to HTML as
-  // before. The Cloudflare adapter only exists to run the handful of routes that
-  // opt OUT of prerender (`export const prerender = false`) as on-demand Worker
-  // invocations — currently just src/pages/api/create-donation.ts (the Stripe
-  // Checkout Session creator, which needs the secret key server-side). Deploy
-  // target: Cloudflare Workers (@astrojs/cloudflare v14 is Workers-only — it
-  // emits a Worker entry + static-asset binding, NOT Pages Functions). To move
-  // hosts, swap this one adapter import; the endpoint itself uses only
-  // Web-standard fetch/Request/Response.
-  // platformProxy exposes Cloudflare runtime bindings (incl. secrets from a
-  // local .dev.vars) to `astro dev`, so the endpoint is testable locally.
+  // Output stays 'static' (the default): every page is prerendered to HTML.
+  // The Cloudflare adapter is the BUILD TOOLCHAIN here, not the host: it runs
+  // dev SSR + prerender under workerd and claims redirects.mjs into the merged
+  // _redirects file (HOSTING.md records what removing it would change). The one
+  // route that opts OUT of prerender (`export const prerender = false`) —
+  // src/pages/api/create-donation.ts — is served in production by its Lambda
+  // twin (aws/create-donation/); this route is the contract source and what
+  // `astro dev` serves.
+  // platformProxy exposes runtime bindings (incl. secrets from a local
+  // .dev.vars) to `astro dev`, so the endpoint is testable locally.
   // `imageService: 'compile'` is NOT optional here. The adapter's default is
   // 'cloudflare-binding', which transforms images at RUNTIME through the
   // Cloudflare Images binding — a paid product we don't have bound. Under that
@@ -53,7 +52,7 @@ export default defineConfig({
     // workerd (miniflare dies with EPIPE at "prerendering static routes"), so
     // amplify.yml builds with PRERENDER_ENV=node: prerender runs in plain Node
     // there, as pre-adapter static builds did. Anywhere the var is unset
-    // (local, CI, Cloudflare) keeps the workerd default.
+    // (local, CI) keeps the workerd default.
     prerenderEnvironment: process.env.PRERENDER_ENV === 'node' ? 'node' : 'workerd',
   }),
   integrations: [
