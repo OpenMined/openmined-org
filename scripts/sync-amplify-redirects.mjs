@@ -16,16 +16,19 @@
  * Cloudflare splats (`*` → `<*>`), and rebuilds the COMPLETE rule set
  * deterministically:
  *
- *   1. the /api/create-donation 200-proxy (the Lambda dynamic tier — see
+ *   1. the www → apex 301 (domain-qualified; inert until cutover maps www)
+ *   2. the /api/create-donation 200-proxy (the Lambda dynamic tier — see
  *      aws/create-donation/README.md; this script is the rule's home)
- *   2. every parsed redirect, file order preserved (first match wins on both
+ *   3. every parsed redirect, file order preserved (first match wins on both
  *      platforms)
- *   3. the /404.html catch-all, always last
+ *   4. the /404.html catch-all (`404-200` = in-place true 404), always last
  *
- * Idempotent: no-ops when the stored rules already match. Only the staging
- * branch build runs it (amplify.yml gate — flip to main at cutover, see
- * LAUNCH.md): Amplify custom rules are app-wide, so a PR preview build must
- * never rewrite them.
+ * Idempotent: no-ops when the stored rules already match. Runs from
+ * .github/workflows/sync-redirects.yml on pushes to staging (flip to main at
+ * cutover, see LAUNCH.md) — NOT from the Amplify build: builds only get AWS
+ * credentials via an app service role, whose mere presence silently disables
+ * PR preview creation (verified 2026-08-14). Rules are app-wide, so nothing
+ * PR-triggered may ever run this.
  *
  * Local run (needs OpenMined-account AWS creds + a fresh `npm run build`):
  *   node scripts/sync-amplify-redirects.mjs
@@ -38,12 +41,26 @@ import { join } from 'node:path';
 const APP_ID = process.env.AWS_APP_ID || 'd1otfqlvqd3jby';
 const REGION = process.env.AWS_REGION || 'us-west-1';
 
+// www → apex 301, path-preserving (live parity: WordPress emits this today —
+// HOSTING.md → Routing). Domain-qualified, so it is INERT until cutover maps
+// the www subdomain to this app; wired now so the rule can't be forgotten on
+// cutover day and survives every rule rebuild.
+const WWW_REDIRECT = {
+  source: 'https://www.openmined.org/<*>',
+  target: 'https://openmined.org/<*>',
+  status: '301',
+};
 const DONATE_PROXY = {
   source: '/api/create-donation',
   target: 'https://fsjjiho8ec.execute-api.us-west-1.amazonaws.com/api/create-donation',
   status: '200',
 };
-const CATCH_ALL = { source: '/<*>', target: '/404.html', status: '404' };
+// Status '404-200' is Amplify's IN-PLACE variant: serve the target's content
+// at the requested URL with a true HTTP 404 — exactly the HOSTING.md routing
+// contract. Plain '404' is NOT that: it 301s to /404.html which then answers
+// 200 — the soft-404 the smoke `unknown path → true 404` row exists to catch.
+// Both verified empirically against the live app 2026-08-14.
+const CATCH_ALL = { source: '/<*>', target: '/404.html', status: '404-200' };
 
 const redirectsFile = new URL('../dist/client/_redirects', import.meta.url);
 let text;
@@ -54,8 +71,8 @@ try {
   process.exit(1);
 }
 
-const rules = [DONATE_PROXY];
-const seen = new Set([DONATE_PROXY.source]);
+const rules = [WWW_REDIRECT, DONATE_PROXY];
+const seen = new Set([WWW_REDIRECT.source, DONATE_PROXY.source]);
 for (const raw of text.split('\n')) {
   const line = raw.trim();
   if (!line || line.startsWith('#')) continue;

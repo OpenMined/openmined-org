@@ -123,12 +123,16 @@ the `_redirects` header. At build, the adapter merges both into
 `dist/client/_redirects`.
 
 Amplify doesn't read that file — on the host, a redirect exists only as an
-app-level custom rule. `scripts/sync-amplify-redirects.mjs` closes that gap: it
-runs postBuild (`amplify.yml`, gated to one branch because rules are app-wide
-and PR previews must never rewrite them) and rebuilds the complete rule set
-from the built `_redirects`, plus the two rules with no repo source: the
-donation-endpoint 200-proxy and the 404 catch-all. Merging a redirect is
-enough; nothing is ported by hand.
+app-level custom rule. `scripts/sync-amplify-redirects.mjs` closes that gap: a
+GitHub Actions job (`.github/workflows/sync-redirects.yml`, pushes to the
+deploying branch only, AWS access via OIDC) rebuilds the complete rule set
+from the built `_redirects`, plus the three rules with no repo source: the
+www→apex 301 (inert until cutover), the donation-endpoint 200-proxy, and the
+404 catch-all. Merging a redirect is enough; nothing is ported by hand.
+
+The sync deliberately does not run inside the Amplify build: builds only get
+AWS credentials from an app service role, and a service role's presence
+silently disables PR preview creation — never attach one to this app.
 
 ## Response headers
 
