@@ -1,7 +1,7 @@
 # openmined.org
 
 Contributor guidelines for the openmined.org website — an Astro site with a
-custom brand system, deployed to Cloudflare Workers.
+custom brand system, hosted on AWS Amplify.
 
 Written for humans and AI tools alike, and kept model-independent on purpose:
 this is plain markdown any agent can read. `CLAUDE.md` exists only to point
@@ -297,23 +297,27 @@ Esc and backdrop close), colormode-aware, and reviewed on `/style-guide`
 ## Server endpoints and the workerd constraint
 
 `output` stays `static` (every page prerenders) and only routes that set
-`export const prerender = false` run on-demand via `@astrojs/cloudflare`
-(**Workers** target — v14 is Workers-only, not Pages). See README for the deploy
-and secrets story.
+`export const prerender = false` run on-demand. In production the one on-demand
+route is served by its Lambda twin (`aws/create-donation/`);
+`src/pages/api/create-donation.ts` stays the contract source and serves dev —
+the two must not drift. See README for the deploy and secrets story.
 
 - Read runtime secrets through the endpoint's own accessor seam
-  (`import('cloudflare:workers') → env`), **not** `import.meta.env` — which
-  bakes values into the bundle at build — and not `Astro.locals.runtime.env`,
-  removed in Astro 7.
+  (`create-donation.ts → readRuntimeEnv`, which falls back to `process.env`),
+  **not** `import.meta.env` — which bakes values into the bundle at build —
+  and not `Astro.locals.runtime.env`, removed in Astro 7.
 - Use direct `fetch` to third parties, not their Node SDK, so routes stay
-  workerd-portable.
+  portable across runtimes (workerd in dev, Node on the Lambda).
 
-**workerd render constraint:** with the Cloudflare adapter, dev and prerender
-both run under **workerd**, so at render time **never use Node filesystem APIs
-or Node-only globals**. Read files through Vite (`import.meta.glob('…',
-{query:'?raw'})`) as `@components/media/OrgLogo.astro` and `@elements/Icon` do —
-never `node:fs`. `wrangler.jsonc` sets `nodejs_compat` (which provides
-`process`); `node:fs` is still unavailable, because workerd has no filesystem.
+**workerd render constraint:** dev and (by default) prerender run under
+**workerd**, Cloudflare's runtime — the `@astrojs/cloudflare` adapter is the
+build toolchain here, not a hosting choice. Amplify builds prerender in plain
+Node (`PRERENDER_ENV=node`), but dev always renders under workerd, so at render
+time **never use Node filesystem APIs or Node-only globals**. Read files
+through Vite (`import.meta.glob('…', {query:'?raw'})`) as
+`@components/media/OrgLogo.astro` and `@elements/Icon` do — never `node:fs`.
+`wrangler.jsonc` sets `nodejs_compat` (which provides `process`); `node:fs` is
+still unavailable, because workerd has no filesystem.
 
 ## Images: resize, never reshape
 

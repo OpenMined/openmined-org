@@ -426,9 +426,11 @@ repeat if the Worker is ever rebuilt.
    used during earlier testing was scoped to a personal account, and a deploy
    under it silently creates the Worker in the wrong place. Verify before every
    first-time-in-a-while deploy, not just once.
-2. ✅ Deploy manually first, from the repo root, using the adapter's augmented
-   config (README → Deploy). Manual-first is deliberate: it stands the Worker up
-   and provisions its bindings before CI is wired.
+2. ✅ Deploy manually first: `npm run build`, then bare `wrangler deploy` from
+   the repo root in the same tree — the build writes `.wrangler/deploy/config.json`
+   (gitignored), redirecting wrangler to the adapter's augmented
+   `dist/server/wrangler.json`. Manual-first is deliberate: it stands the Worker
+   up and provisions its bindings before CI is wired.
 3. ✅ The adapter's `SESSION` KV namespace auto-provisions on first deploy. This
    had never been exercised against a *cold* account; it worked, creating
    `openmined-org-session` (`37e4541656df48d2…`) without prompting. The namespace
@@ -449,10 +451,12 @@ usually the long pole.
 
 - Root directory `/`; production branch `main`; previews on for non-production
   branches (useful for reviewing content changes).
-- The build command must be the npm script, so the Pagefind search index is
-  built. The deploy command **must** override Cloudflare's default so it points
-  at the adapter's augmented config — the default won't find it. Both commands
-  are in README.
+- The build command must be the npm script (`npm run build`), so the Pagefind
+  search index is built. The deploy command **must** override Cloudflare's
+  default so it points at the adapter's augmented config — the default won't
+  find it: `npx wrangler deploy`, run in the same tree as the build (which
+  writes the `.wrangler/deploy/config.json` redirect to
+  `dist/server/wrangler.json`).
 - `STRIPE_SECRET_KEY` is **not** a build variable — it lives on the Worker.
 - Workers Builds *is* managed wrangler-in-CI: it runs the same deploy command on
   every push. The git connection replaces the *manual* CLI, not wrangler.

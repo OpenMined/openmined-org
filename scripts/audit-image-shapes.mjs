@@ -4,7 +4,7 @@
  *   node scripts/audit-image-shapes.mjs
  *
  * Fails when a build-time image call forces a non-native aspect ratio, i.e.
- * constrains BOTH width and height (or asks for a `fit`). See README.md →
+ * constrains BOTH width and height (or asks for a `fit`). See AGENTS.md →
  * "Images: resize, never reshape".
  *
  * Why this exists rather than a code-review habit: the failure is SILENT. Ask
@@ -99,7 +99,7 @@ if (findings.length === 0) {
   process.exit(0);
 }
 
-console.error(`✗ ${findings.length} forced-aspect image call(s) — see README.md → "Images: resize, never reshape"\n`);
+console.error(`✗ ${findings.length} forced-aspect image call(s) — see AGENTS.md → "Images: resize, never reshape"\n`);
 for (const f of findings) {
   console.error(`  ${relative(ROOT, f.file)}:${f.line}  ${f.label}`);
   console.error(`    ${f.why}`);

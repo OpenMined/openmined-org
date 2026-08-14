@@ -1,9 +1,12 @@
 # openmined.org on Astro
 
 The openmined.org website: Astro, static output plus one on-demand API route,
-deployed to Cloudflare Workers. Built on the OpenMined Design System — the
-brand tokens and UI primitives live in this repo (`src/styles/`,
-`src/components/ui/`) and track design.openmined.org.
+hosted on AWS Amplify. Built on the OpenMined Design System — the brand tokens
+and UI primitives live in this repo (`src/styles/`, `src/components/ui/`) and
+track design.openmined.org.
+
+This file is how to run, build, deploy, and verify the site. `AGENTS.md` holds
+the contributor conventions; `HOSTING.md` holds the hosting requirements.
 
 ## Quickstart
 
@@ -15,13 +18,17 @@ npm run check    # astro check, the type gate CI runs on every push
 
 Two flags to note:
 
-- **Workers, not Pages.** Use `wrangler …` instead of `wrangler pages …` (see "Deploy").
-- **No `node:fs` at render time.** Site pages render under workerd, which
+- **Deploys are git-driven.** Nobody runs a deploy command — merging is the
+  deploy (see "Deploy").
+- **No `node:fs` at render time.** In dev, pages render under workerd, which
   has no filesystem (see "Rendering under workerd").
 
-**`astro dev` runs as a background daemon** — `npm run dev` returns immediately
-and prints the pid. Manage it with `npx astro dev status|logs|stop` (the binary
-is a local devDependency, so bare `astro` is not on `PATH`).
+**`astro dev` backgrounds itself for AI agents** — Astro detects an agent
+session and adds `--background` automatically, so `npm run dev` returns
+immediately and prints the pid; manage the daemon with
+`npx astro dev status|logs|stop`. In a human terminal it runs in the foreground
+as usual. (The binary is a local devDependency, so bare `astro` is not on
+`PATH` — hence `npx`.)
 
 ⚠ **Don't run `npm run build` while a dev server is alive.** They share
 `node_modules/.vite`, and the build regenerates it — the running server then
@@ -32,257 +39,149 @@ again.
 
 ## Rendering under workerd
 
-The `@astrojs/cloudflare` adapter (v14) runs the dev server's SSR and the
-build-time prerender under workerd, Cloudflare's runtime, which is the same
-engine that serves the on-demand route in production. The upside is
-fidelity: a page that renders in dev renders identically in production, and
-Cloudflare bindings (secrets, `env`) work locally.
+The `@astrojs/cloudflare` adapter runs the dev server's SSR and the build-time
+prerender under **workerd**, Cloudflare's runtime. The adapter is part of the
+build toolchain here, not a hosting choice — `HOSTING.md` records what removing
+it would change.
 
-The constraint: workerd has no filesystem, so `node:fs` and the other Node
-fs APIs must never run at render time. Build-time file reads go through Vite
-instead (`import.meta.glob`; see `src/components/media/OrgLogo.astro` and
-`src/components/elements/Icon.astro`). `wrangler.jsonc` enables
-`nodejs_compat`, which provides `process` and other Node globals, but still
-no filesystem. A violation fails fast on `npm run dev`; when you hit it,
-it's this platform boundary, not your code.
+workerd has no filesystem, so `node:fs` and the other Node fs APIs must never
+run at render time. Build-time file reads go through Vite instead
+(`import.meta.glob`; see `src/components/media/OrgLogo.astro` and
+`src/components/elements/Icon.astro`). A violation fails fast on `npm run dev`.
+
+One seam: Amplify's build containers can't boot workerd, so hosted builds
+prerender in plain Node — `amplify.yml` sets `PRERENDER_ENV=node`, read by
+`astro.config.mjs → prerenderEnvironment`. Local dev and CI leave it unset and
+keep the workerd default, which is why render-time code must stay workerd-clean
+even though the hosted build runs Node.
 
 ## Build
 
-`npm run build` is plain `astro build`. The Pagefind search index is built by
-an integration (`integrations/pagefind.mjs`), so **any** build command produces
-it — `astro build`, `npm run build`, or whatever a CI or hosting dashboard is
-configured to run. If indexing fails the build fails with it; there is no way
-to ship a site whose search silently returns nothing.
+`npm run build` produces everything, including the Pagefind search index — it's
+built by an integration (`integrations/pagefind.mjs`), so no build command can
+skip it, and if indexing fails the build fails with it.
 
-It was a chained npm script until 2026-08-11, and a deploy that ran bare
-`astro build` shipped exactly that broken state — search returning nothing on
-every query, with no error anywhere. That's why it moved into the build.
-
-Output lands in two places: `dist/client` holds the static assets and
-`dist/server` holds the Worker entry. At build, the adapter generates
-`dist/server/wrangler.json` from the source `wrangler.jsonc`.
+`dist/client` is the deployable site: pages as `<route>/index.html`, hashed
+assets under `/_astro/`, the search index under `/pagefind/`, `public/` copied
+through as-is. The build also emits `dist/server` (an artifact of the adapter);
+it is not deployed — the API route production serves is the Lambda in
+`aws/create-donation/`.
 
 ## Deploy
 
-This is a Workers build: `@astrojs/cloudflare` v14 deploys to Cloudflare
-Workers only, with no Pages support. Cloudflare's Pages product has
-near-identical tooling and most older Astro-on-Cloudflare guides assume it,
-so treat any `wrangler pages …` command you find as wrong for this repo. It
-is plain `wrangler deploy`, `wrangler secret put`, and so on.
+Hosting is **AWS Amplify** (app `d1otfqlvqd3jby`, us-west-1). Deploys are
+git-driven; no contributor runs a build or holds cloud credentials to publish:
+
+- **Pull requests** target `staging` (the default branch) and each get their
+  own preview URL, posted on the PR by the Amplify bot.
+- **Merging to `staging`** deploys <https://staging.openmined.org>.
+- **Merging to `main`** deploys production, <https://openmined.org>.
+
+The build spec is `amplify.yml`: Node 22 (matching CI), `npm ci`,
+`PRERENDER_ENV=node npm run build`, publish `dist/client`. Response headers are
+served from `customHttp.yml` (see "Response headers"), and redirect rules are
+synced to the app by the build itself (see "Redirects").
+
+After a deploy, smoke-check it (see "Verification kit"):
 
 ```sh
-npm run build
-wrangler deploy
+npm run smoke -- https://staging.openmined.org
 ```
 
-Bare `wrangler deploy` works from the repo root because the adapter writes
-`.wrangler/deploy/config.json`, redirecting wrangler to the augmented
-`dist/server/wrangler.json`. That directory is gitignored, so the redirect
-exists only after a local build — always build first, in the same working tree.
-
-The Worker-name drift trap: keep `wrangler.jsonc → name` identical to any
-`--name` override in deploy commands. On a mismatch, wrangler's
-non-interactive fallback answers "yes" and creates a second Worker instead of
-failing. The safest form is the one above — no `--name` at all, so the config is
-the single place the name lives. `openmined-org` is the intended production
-name, not a placeholder; Cloudflare has no in-place rename, so treat it as
-settled (see the warning comment in `wrangler.jsonc`).
-
-After every deploy, run the smoke check (see "Verification kit"):
-
-```sh
-npm run smoke -- https://<the-deployed-host>
-```
+`HOSTING.md` is the host-portable contract — what any host serving this site
+must provide, with `npm run smoke` as its executable form.
 
 ## Secrets
 
-The one secret is `STRIPE_SECRET_KEY`. It powers
-`src/pages/api/create-donation.ts`, the only on-demand route, which creates a
-Stripe Checkout Session for the donate modal.
+The one secret is `STRIPE_SECRET_KEY`. It powers the donation endpoint,
+`POST /api/create-donation`, which creates a Stripe Checkout Session for the
+donate modal.
 
-Where to set/update it depends on the host:
+The endpoint has two implementations that must not drift:
+`src/pages/api/create-donation.ts` is the contract source and serves local dev;
+its Lambda twin (`aws/create-donation/index.mjs`) is what production serves,
+reached through an Amplify rewrite so the browser stays same-origin.
 
-- **Cloudflare Workers:** `wrangler secret put STRIPE_SECRET_KEY`. That is
-  the Workers command; `wrangler pages secret put` targets a product this
-  site doesn't use.
-- **AWS Amplify:** the route runs as a Lambda that reads SSM Parameter Store
-  at request time — set/rotate with `aws ssm put-parameter`. Exact commands,
-  the rotation-refresh step, and the wiring record live in
-  `aws/create-donation/README.md`.
+In production the key lives in SSM Parameter Store, read by the Lambda at
+request time — set or rotate it with `aws ssm put-parameter`; exact commands
+and the wiring record are in `aws/create-donation/README.md`. The key is never
+a build input and never lands in an artifact. For local dev, copy
+`.dev.vars.example` to `.dev.vars` (gitignored) and fill it in. Never read a
+secret via `import.meta.env`, which bakes the value into the bundle at build.
 
-For local dev (either host), copy `.dev.vars.example` to `.dev.vars`
-(gitignored) and fill it in.
-
-Until the secret exists, the endpoint stays deliberately dormant: it returns
-503 and the donate modal shows a friendly "not available" message. The rest
-of the site is unaffected.
-
-Secrets are read at request time through `create-donation.ts → getStripeKey`
-(the `cloudflare:workers` env). Never read them via `import.meta.env`, which
-bakes the value into the bundle at build.
+Until the key is set, the endpoint stays deliberately dormant: it returns 503
+and the donate modal shows a friendly "not available" message. The rest of the
+site is unaffected.
 
 ## Redirects
 
-`public/_redirects` is the single source of host-level 301s. At build, the
-adapter appends the page-redirect entries derived from
-`src/data/redirects.mjs`, so the two are one merged list; which class of
-redirect belongs where is documented in the `_redirects` header.
+Redirects are authored in exactly two places: `public/_redirects` holds the
+hand-written host-level 301s (machine endpoints — feeds, sitemap URLs — plus
+the `/author/*` wildcard), and `src/data/redirects.mjs` holds the page-redirect
+registry (moved or retired pages). Which class belongs where is documented in
+the `_redirects` header. At build, the adapter merges both into
+`dist/client/_redirects`.
 
-One footgun, quoting that header: never set `assets.run_worker_first: true`
-in wrangler config. It routes all traffic through the Worker before the
-asset layer and bypasses `_redirects` entirely.
+Amplify doesn't read that file — on the host, a redirect exists only as an
+app-level custom rule. `scripts/sync-amplify-redirects.mjs` closes that gap: it
+runs postBuild (`amplify.yml`, gated to one branch because rules are app-wide
+and PR previews must never rewrite them) and rebuilds the complete rule set
+from the built `_redirects`, plus the two rules with no repo source: the
+donation-endpoint 200-proxy and the 404 catch-all. Merging a redirect is
+enough; nothing is ported by hand.
 
 ## Response headers
 
-`public/_headers` is the single source of static-asset response headers, and
-carries the site's baseline security headers. As with `_redirects`, the adapter
-merges into it at build — it prepends its own `/_astro/*` immutable
-`Cache-Control` block — so the built `dist/client/_headers` is that block plus
-this file. The file's own header documents the two traps it exists around: a
-`Cache-Control` line in a broad rule silently suppresses that injection, and
-comments must sit at column 0 or they parse as headers. Both are guarded by
-`npm run audit:headers`.
+`public/_headers` is the source of truth for the site's response headers,
+including the security baseline. Amplify doesn't read it — the serving copy is
+`customHttp.yml`, ported by hand — so **a change in `public/_headers` must be
+mirrored into `customHttp.yml`**. `npm run audit:headers` validates the source
+file; the smoke check's security-headers row catches the two drifting on a
+live host.
 
-Two limits on what it can do. It applies to **static assets only** — Cloudflare
-does not attach these to responses the Worker generates, so
-`src/pages/api/create-donation.ts` sets its own headers in its `json` helper,
-and anything added to `_headers` that should also cover the API has to be added
-there too. And `astro dev` does not process the file at all (it's a Cloudflare
-asset-layer feature), so **verify header changes under `wrangler dev`**, not the
-dev server:
-
-```sh
-npm run build
-npx wrangler dev -c dist/server/wrangler.json
-```
+The API route sets its own headers (`create-donation.ts → json`); a header that
+should also cover the API is added there and in the Lambda twin.
 
 A full `script-src`/`style-src` Content-Security-Policy is deliberately not
-shipped — Shiki emits per-token inline `style` attributes that CSP hashes cannot
-cover. See `BACKLOG.md` §13.
-
-## Launch flip
-
-The site ships `noindex` by default: `src/layouts/Base.astro → noindex` prop
-(default `true`, forwarded to `src/components/Seo.astro`, which writes the
-robots meta). At cutover, flip that default, then verify that `/search/` and
-the unlisted event pages still set their own per-page `noindex`. The smoke
-script's "noindex guard" row asserts the pre-launch state, so after the flip
-it is expected to flag on the production host.
+shipped — Shiki emits per-token inline `style` attributes that CSP hashes
+cannot cover. See `BACKLOG.md` §13.
 
 ## Verification kit
 
-Browser-driven scripts use Playwright (a devDependency). On a fresh machine,
-run `npx playwright install chromium` once.
+Post-change and post-deploy guards. Each script's header comment carries its
+full rationale; this is the map. Browser-driven scripts use Playwright (a
+devDependency) — on a fresh machine, run `npx playwright install chromium`
+once.
 
-### `npm run smoke -- <base-url> [<base-url>]`
-
-Post-deploy assertion table, read-only over HTTP: key pages and feeds return
-200, the Pagefind index exists (catches a deploy serving a stale or
-index-less build), redirects fire (split by which layer emits them), the noindex guard,
-`/_astro/*` cache headers, and the donation endpoint. With two URLs it prints
-the hosts side by side. Reading the donation row: 503 means the dynamic tier
-is live but dormant (no secret), 200 means fully live, and 404/405 means the
-host has no dynamic tier at all.
-
-### `npm run verify:donate -- [<base-url>]`
-
-Drives the real donate modal in a headless browser (defaults to
-`http://localhost:4321`): open, tabs, currency sync, and submit to the
-endpoint, adapting to a dormant endpoint (friendly error) or a live one
-(lands on Stripe Checkout). Screenshots go to `scripts/screenshots/`
-(gitignored).
-
-### `npm run audit:images`
-
-Static scan enforcing "Images: resize, never reshape" (below). No build or
-server needed; run it any time, and in review whenever image code changes.
-
-### `npm run audit:image-urls -- [<dist-dir>]`
-
-The build-output counterpart to `audit:images`: every root-relative URL in the
-built HTML — `src`, each `srcset` candidate, and CSS `url(…)` — must resolve to
-a real file under `dist/client`. Needs a build first. It exists because the
-Cloudflare adapter's `imageService` default writes runtime `/_image?…` endpoint
-URLs instead of pre-generating variants; that shipped once across most of the
-site with the build green, the dev server fine, and nothing failing.
-
-Three failure classes, reported separately because they mean different things: an
-unresolvable `/_image?…` endpoint URL, an ordinary missing file, and an asset
-still hotlinked from the live WordPress host. That last one is the cutover trap —
-`https://openmined.org/wp-content/…` resolves today only because live is still
-WordPress, and at cutover every such reference breaks at once while
-`public/_redirects` deliberately 404s the path. It is matched against the raw
-HTML rather than the parsed URL set, so it catches any attribute (a `poster`, an
-`<a href>` to a PDF), and it is scoped to our own host so citations of other
-organizations' WordPress sites don't trip it.
-
-### `npm run audit:assets`
-
-Guards `public/`, which is served byte-for-byte — Astro never opens, resizes, or
-warns about anything in it, so neither image guard above can see a problem
-there. Two checks: an SVG whose embedded bitmap is far larger than the box it
-declares, and any file over the size budget for its type (budgets are
-per-extension, since video is honestly megabytes and a logo is not).
-
-Embedding a raster in an SVG is legitimate — a gradient mesh has no SVG 1.1
-equivalent, and 2× embeds are correct for retina — so the test is the
-oversampling *ratio*, not the presence of a payload. The threshold clears 3×
-DPR with room to spare; the case that prompted the guard was a 4096px raster in
-a 145px box, 28× oversampled and 3.86MB on the homepage. Exemptions go in the
-script's `ALLOW` map with a mandatory reason, since a binary can't carry an
-inline opt-out comment.
-
-### `npm run audit:headers -- [<dist-dir>]`
-
-Static check over the merged `dist/client/_headers` (needs a build first): the
-adapter's `/_astro/*` immutable `Cache-Control` block survived, nothing else sets
-`Cache-Control` on an `/_astro/*` path, every comment is at column 0, a floor of
-security header names covers all pages, and Cloudflare's limits (100 rules, 2,000
-chars per line) hold.
-
-It exists because every failure mode of that file is silent — a dropped header
-changes nothing on the page, and an indented comment parses as a malformed header
-rather than erroring. It asserts header **names**, never values: `public/_headers`
-owns the values, and pinning them here would fork that and go red on a deliberate
-change. Adding a header needs no edit here; removing one fails. It cannot check
-that Cloudflare actually *applies* the file — that's the `_headers` row in
-`smoke`, which needs a live host.
-
-### `npm run audit:overflow -- [--base <url>] [--widths 390,1024] [--engine webkit]`
-
-Asserts that no page scrolls sideways at a ladder of viewport widths,
-measured on load, after scrolling, and with the nav menu open; each of those
-states has caught a real bug the others missed. Defaults to
-`http://localhost:4321`, so have a dev server running or point `--base` at a
-deployed host. Run it as a regression gate after layout or chrome changes.
-
-### `npm run audit:currencies`
-
-Checks the donation currency list (`@data/donation.mjs → CURRENCIES`) against
-Stripe's own country spec, including the zero-decimal currencies whose amounts
-are encoded differently. Calls Stripe's API, so it needs network.
+- **`npm run smoke -- <base-url> [<base-url>]`** — post-deploy assertion table
+  over HTTP: key pages and feeds respond, the Pagefind index exists, both
+  redirect classes fire, unknown paths return a true 404, security headers
+  arrive on pages, `/_astro/*` is cached immutable, and the donation endpoint
+  answers (200 live, 503 live-but-dormant, 404/405 no dynamic tier). With two
+  URLs it prints the hosts side by side.
+- **`npm run verify:donate -- [<base-url>]`** — drives the real donate modal in
+  a headless browser through to the endpoint: Stripe Checkout when live, the
+  friendly error when dormant. Defaults to `http://localhost:4321`.
+- **`npm run audit:images`** — no image call may constrain both dimensions or
+  pass `fit` (AGENTS.md → "Images: resize, never reshape"). Static scan, run
+  any time.
+- **`npm run audit:image-urls -- [<dist-dir>]`** — every root-relative asset
+  URL in the built HTML resolves to a real file under `dist/client`. Needs a
+  build first.
+- **`npm run audit:assets`** — size and oversampling budgets for `public/`,
+  which ships byte-for-byte and is invisible to the other image guards.
+- **`npm run audit:headers -- [<dist-dir>]`** — the built `_headers` parses
+  cleanly, keeps its `/_astro/*` immutable block, and covers the
+  security-header floor. Needs a build first.
+- **`npm run audit:overflow -- [--base <url>] [--widths 390,1024]`** — no page
+  scrolls sideways at a ladder of widths, on load, after scrolling, and with
+  the nav open. Needs a running dev server, or `--base` a deployed host.
+- **`npm run audit:currencies`** — the donation currency list
+  (`@data/donation.mjs`) matches Stripe's country spec. Calls Stripe's API.
 
 ### CI
 
 `.github/workflows/ci.yml` runs `npm run check`, `npm run build`, and the four
-guards that are deterministic and need neither a browser nor the network —
-`audit:images`, `audit:image-urls`, `audit:assets`, and `audit:headers`. The rest of the kit is
-deliberately left out so CI cannot flake: `audit:overflow` needs a browser and a
-running server,
-`audit:currencies` calls an external API, and `smoke` / `verify:donate` need a
-live deployment. Run those locally, or against a deploy.
-
-The workflow is staged: GitHub only reads workflows from the repository root's
-`.github/`, so it activates automatically when this folder becomes a repo root.
-
-## Images: resize, never reshape
-
-The rule `audit:images` enforces: an image call (`<Image>`, `<Picture>`,
-`getImage`) must never constrain both width and height, and must never pass
-`fit`. Astro's image service pads the source into the requested box instead
-of cropping (`fit: 'cover'` is not honored), producing a file with exactly
-the requested dimensions and an opaque letterbox baked in. Nothing errors and
-every dimension check passes, which is why this is an audit and not a review
-habit. Constrain one dimension and do any shaping in CSS (`object-fit:
-cover`, `aspect-ratio` on the box). Legitimate exceptions opt out with a
-comment on the preceding line: `// audit-image-shapes: allow — <reason>`.
+deterministic guards — `audit:images`, `audit:image-urls`, `audit:assets`,
+`audit:headers`. The rest need a browser, the network, or a live deployment;
+run those locally or against a deploy.
