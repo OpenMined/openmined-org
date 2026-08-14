@@ -126,9 +126,9 @@ Amplify doesn't read that file — on the host, a redirect exists only as an
 app-level custom rule. `scripts/sync-amplify-redirects.mjs` closes that gap: it
 runs postBuild (`amplify.yml`, gated to one branch because rules are app-wide
 and PR previews must never rewrite them) and rebuilds the complete rule set
-from the built `_redirects`, plus the two rules with no repo source: the
-donation-endpoint 200-proxy and the 404 catch-all. Merging a redirect is
-enough; nothing is ported by hand.
+from the built `_redirects`, plus the three rules with no repo source: the
+www→apex 301 (inert until cutover), the donation-endpoint 200-proxy, and the
+404 catch-all. Merging a redirect is enough; nothing is ported by hand.
 
 ## Response headers
 

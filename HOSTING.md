@@ -52,13 +52,18 @@ sessions, no auth, no other server state. Measured off the build 2026-08-13:
   viewer-request function); an S3 website endpoint does it natively. Either is
   fine — it just must hold for *nested* paths, not only the root.
 - **404**: unknown paths serve `404.html` with status **404** (on CloudFront a
-  custom error response; on Amplify a `404` rewrite to `/404.html`). Not
-  200-with-error-page, and not a redirect that lands on the 404 page —
+  custom error response; on Amplify a **`404-200`** rule to `/404.html` — that
+  status string is Amplify's in-place variant; a plain `404` rule is a
+  *redirect* that lands on the 404 page answering 200, verified 2026-08-14).
+  Not 200-with-error-page, and not a redirect that lands on the 404 page —
   soft-404s poison crawl data. Asserted by the smoke
   `unknown path → true 404` row.
 - **No host-added redirects** beyond the set below, with one exception: the
   `www` → apex 301 must exist at the host/DNS layer (today WordPress itself
-  emits it; the static file set can't match on hostname).
+  emits it; the static file set can't match on hostname). On Amplify it is
+  pre-wired: `sync-amplify-redirects.mjs` emits a domain-qualified,
+  path-preserving 301 that stays inert until cutover maps the `www`
+  subdomain to the app.
 
 ## Redirects — two classes, verified 2026-08-13
 
@@ -89,8 +94,9 @@ lives as app-level custom rules, and the repo pushes them itself:
 staging builds only — the gate flips to `main` at cutover, see LAUNCH.md)
 rebuilds the complete rule set from the built `dist/client/_redirects`, so
 `src/data/redirects.mjs` and `public/_redirects` stay the only authoring
-surfaces. The script is also the home of the two host-level rules with no
-repo source: the donate-Lambda 200-proxy and the true-404 catch-all.
+surfaces. The script is also the home of the three host-level rules with no
+repo source: the www→apex 301, the donate-Lambda 200-proxy, and the
+true-404 catch-all.
 `npm run smoke` asserts the behavior. Verified on staging 2026-08-13: all 21
 registry entries and all 13 `_redirects` rules answer as true 301s.
 

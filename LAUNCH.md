@@ -60,10 +60,10 @@ zone must move.
      --sub-domain-settings prefix=,branchName=main prefix=www,branchName=main prefix=staging,branchName=staging
    ```
 
-   Amplify rewrites the Route 53 records itself (same-account zone). Preserve
-   live's www→apex 301 (today emitted by WordPress) with a domain-qualified
-   custom rule: source `https://www.openmined.org` → `https://openmined.org`,
-   status 301, prepended to the app's custom rules.
+   Amplify rewrites the Route 53 records itself (same-account zone). Live's
+   www→apex 301 (today emitted by WordPress) needs no cutover step: the
+   sync script already emits it as a domain-qualified, path-preserving rule
+   that activates the moment `www` maps to the app.
 5. `npm run smoke -- https://openmined.org` — expect 15/15.
 6. **Rollback** is one Route 53 change: restore the root/www `A` records to the
    WP Engine origin `141.193.213.10` / `141.193.213.11` (values re-verified in
