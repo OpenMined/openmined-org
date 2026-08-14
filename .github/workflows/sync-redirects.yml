@@ -1,0 +1,40 @@
+# Sync Amplify redirect rules on every push to the deploying branch.
+#
+# This job lives OUTSIDE the Amplify build on purpose. The only way an Amplify
+# build gets AWS credentials is an IAM service role attached to the app — and a
+# service role's mere presence silently disables PR preview creation (Amplify
+# switches previews into per-PR-backend mode; verified by A/B toggling the
+# role, 2026-08-14). Never attach one. GitHub OIDC gives this job short-lived
+# credentials instead: role `openmined-org-redirect-sync` trusts exactly this
+# repo's `staging` and `main` branches (both pre-authorized, so cutover needs
+# no IAM change — only the branch filter below).
+#
+# The build step exists because the script reads the BUILT dist/client/_redirects
+# (the adapter-merged file) — that keeps the sync drift-proof against how the
+# adapter derives rules from redirects.mjs. Idempotent: no-op when rules match.
+name: Sync Amplify redirects
+
+on:
+  push:
+    branches: [staging] # flip to [main] at cutover — LAUNCH.md cutover step 1
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: PRERENDER_ENV=node npm run build
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::273848247695:role/openmined-org-redirect-sync
+          aws-region: us-west-1
+      - run: node scripts/sync-amplify-redirects.mjs

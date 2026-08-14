@@ -23,10 +23,12 @@
  *      platforms)
  *   4. the /404.html catch-all (`404-200` = in-place true 404), always last
  *
- * Idempotent: no-ops when the stored rules already match. Only the staging
- * branch build runs it (amplify.yml gate — flip to main at cutover, see
- * LAUNCH.md): Amplify custom rules are app-wide, so a PR preview build must
- * never rewrite them.
+ * Idempotent: no-ops when the stored rules already match. Runs from
+ * .github/workflows/sync-redirects.yml on pushes to staging (flip to main at
+ * cutover, see LAUNCH.md) — NOT from the Amplify build: builds only get AWS
+ * credentials via an app service role, whose mere presence silently disables
+ * PR preview creation (verified 2026-08-14). Rules are app-wide, so nothing
+ * PR-triggered may ever run this.
  *
  * Local run (needs OpenMined-account AWS creds + a fresh `npm run build`):
  *   node scripts/sync-amplify-redirects.mjs

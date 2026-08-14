@@ -35,18 +35,22 @@ zone must move.
   "Deploy"); the donate endpoint runs as a Lambda with its secret in SSM —
   see `aws/create-donation/README.md` for the wiring and key rotation.
 - Redirects (including everything `public/_redirects` expresses) are
-  **app-level Amplify custom rules**, kept in sync by the build itself:
-  `scripts/sync-amplify-redirects.mjs` runs postBuild on **staging** builds
-  (amplify.yml gate) and rebuilds the full rule set from the built
-  `dist/client/_redirects`. `redirects.mjs` and `public/_redirects` stay the
-  only places a redirect is authored.
+  **app-level Amplify custom rules**, kept in sync by CI:
+  `scripts/sync-amplify-redirects.mjs` runs from
+  `.github/workflows/sync-redirects.yml` on pushes to **staging** (OIDC role
+  `openmined-org-redirect-sync`, pre-trusted for both staging and main) and
+  rebuilds the full rule set from the built `dist/client/_redirects`.
+  `redirects.mjs` and `public/_redirects` stay the only places a redirect is
+  authored. ⚠ Never attach an IAM service role to the Amplify app — its
+  presence silently disables PR preview creation (verified 2026-08-14).
 
 **Cutover day (Amplify path):**
 
 1. Merge `staging` → `main`; wait for the `main` build to go green. The
-   cutover PR must also flip the redirect-sync gate in `amplify.yml` from
-   `staging` to `main`, so post-cutover redirect changes keep flowing from
-   the production branch.
+   cutover PR must also flip the branch filter in
+   `.github/workflows/sync-redirects.yml` from `staging` to `main`, so
+   post-cutover redirect changes keep flowing from the production branch
+   (the OIDC role already trusts both branches; no IAM change).
 2. Arm the **live** Stripe key in SSM (`aws/create-donation/README.md`).
 3. Flip the site-wide `noindex` guard (section 3) and re-assert the SEO parity
    checklist (section 7) — both unchanged by the host choice.
@@ -338,10 +342,10 @@ day.
 - **True 404 on the production origin** — unknown paths answer HTTP 404, not
   a redirect onto the 404 page (the smoke `unknown path → true 404` row).
   Soft-404s poison exactly the GSC Coverage data §7 says to watch.
-- **Host redirect rules syncing from `main`** — the redirect-sync gate in
-  `amplify.yml` is flipped from `staging` to `main`
+- **Host redirect rules syncing from `main`** — the branch filter in
+  `.github/workflows/sync-redirects.yml` is flipped from `staging` to `main`
   (`scripts/sync-amplify-redirects.mjs`; HOSTING.md → Redirects), and the
-  first post-flip production build has run the sync once.
+  first post-flip push to `main` has run the sync once.
 - **`noindex` flipped** in both files (§3) — and every page that opts *itself*
   out still does. Several do (search, the summit event pages, 404, the donation
   thank-you, the blog card feed); search `src/pages/` for `noindex` and confirm

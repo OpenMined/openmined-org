@@ -90,8 +90,11 @@ Two classes:
 
 **Host rules are synced from the build.** On Amplify the entire redirect set
 lives as app-level custom rules, and the repo pushes them itself:
-`scripts/sync-amplify-redirects.mjs` (wired in `amplify.yml → postBuild`,
-staging builds only — the gate flips to `main` at cutover, see LAUNCH.md)
+`scripts/sync-amplify-redirects.mjs` (run by
+`.github/workflows/sync-redirects.yml` on pushes to staging, AWS access via
+OIDC — the branch filter flips to `main` at cutover, see LAUNCH.md; never via
+the Amplify build, because the service role a build would need silently
+disables PR preview creation)
 rebuilds the complete rule set from the built `dist/client/_redirects`, so
 `src/data/redirects.mjs` and `public/_redirects` stay the only authoring
 surfaces. The script is also the home of the three host-level rules with no

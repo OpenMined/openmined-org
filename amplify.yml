@@ -19,13 +19,10 @@ frontend:
         # PRERENDER_ENV=node: Amplify's build containers can't boot workerd —
         # see the prerenderEnvironment note in astro.config.mjs.
         - PRERENDER_ENV=node npm run build
-    postBuild:
-      commands:
-        # Redirect sync — Amplify doesn't read _redirects, so the built rule
-        # set is pushed as app-level custom rules (see the script header).
-        # Staging-branch builds ONLY: rules are app-wide, so PR previews must
-        # never rewrite them. Flip the gate to "main" at cutover (LAUNCH.md).
-        - if [ "$AWS_BRANCH" = "staging" ]; then node scripts/sync-amplify-redirects.mjs; fi
+  # NO postBuild redirect sync here, and no AWS calls at all: builds only get
+  # AWS credentials via an app service role, and a service role's presence
+  # silently disables PR preview creation (verified 2026-08-14). The sync runs
+  # from .github/workflows/sync-redirects.yml instead.
   artifacts:
     baseDirectory: dist/client
     files:
