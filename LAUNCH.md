@@ -79,51 +79,50 @@ changed from here**. Every cutover step that touches AWS is Stephen's to run.
 
 **Cutover day:**
 
-1. Merge `staging` → `main`; wait for the `main` build to go green. The cutover
-   PR must also flip the branch filter in
-   `.github/workflows/sync-redirects.yml` from `staging` to `main`, so
-   post-cutover redirect changes keep flowing from the production branch (the
-   OIDC role already trusts both branches; no IAM change). After the flip,
-   pushes to `staging` no longer sync rules — intended, since the rules are
-   app-wide and production owns them.
-   ⚠ **`main` is connected in Amplify but has never deployed this site.**
-   Measured 2026-08-17: `https://main.d1otfqlvqd3jby.amplifyapp.com/` answers 200
-   with a 1.4 KB page titled "Welcome" — Amplify's placeholder — and **every real
-   route 404s**, including `/blog/`, `/syftbox/`, `/sitemap-index.xml`,
-   `/pagefind/pagefind.js` and `robots.txt`, all of which exist in `main`'s tree.
-   The cause is visible in the tree: `amplify.yml` and `customHttp.yml` landed in
-   `21ad75e` (2026-08-13), which is on `staging` only, so the branch has been
-   building with Amplify's auto-detected settings and publishing the wrong
-   directory.
+Steps 1 and 3 are **done**. What remains is Stephen's — the live Stripe key, the
+domain association, and the redirect-sync branch filter (a repo edit, but in his
+file and dependent on his IAM). None of it needs both people at once, so the
+handoff can be async.
 
-   **This makes step 1 the single most dangerous step of the cutover**: if the
-   domain is pointed at `main` before a green build of the merged tree,
-   `openmined.org` serves an Amplify placeholder. Do not treat "the branch
-   exists" as "the branch works" — require a successful build **and** a
-   `npm run smoke` pass against `main.d1otfqlvqd3jby.amplifyapp.com` before
-   touching the domain association. The merge brings `amplify.yml` across, so the
-   build is expected to start working at that point; verify, don't assume. The
-   merge itself is a clean fast-forward (`main` has no divergent commits).
+1. ✅ **`main` is current and deploying** (2026-08-17). Fast-forwarded to
+   `staging` and verified: the Amplify placeholder is gone, `npm run smoke`
+   against `main.d1otfqlvqd3jby.amplifyapp.com` reads 17/17, and the build
+   reports `x-build-branch: main`. This was the riskiest step — a domain repoint
+   onto a branch that had never built would have served `openmined.org` an
+   Amplify "Welcome" page — and it is now closed. The standing rule survives it:
+   **never treat "the branch exists" as "the branch works"**; require a green
+   build and a smoke pass against the branch domain before touching the domain
+   association.
 
-   **Headers and redirect rules are NOT waiting on the merge** — they already
-   behave app-wide. Measured 2026-08-17: `main`'s branch domain serves all 6
-   security headers and fires both `/feed/ → 301` and `unknown → 404` despite
-   having no `customHttp.yml` in its tree. So the merge's job is the build spec
-   alone.
+   ⚠ **Still open, and deliberately left to Stephen:** the redirect-sync branch
+   filter in `.github/workflows/sync-redirects.yml` is still `[staging]`. It has
+   to become `[main]` so authority follows production — otherwise a redirect
+   merged to `main` never reaches the host (silently), while `staging` keeps
+   rewriting production's rules. That file is Stephen's, and the AWS half of the
+   move is his anyway: the OIDC role has to trust `main`, which his own comment
+   says was pre-authorized, but which cannot be verified without AWS access. The
+   first sync run on `main` is the first exercise of that trust — **a red run
+   there means IAM, not the script**, and it fails before touching any rule, so
+   the existing rules survive untouched.
 
-   **Two console checks the merge cannot substitute for.** Both need AWS access,
-   so both are Stephen's, and both are quick:
-
-   - **Is auto-build enabled on the `main` branch?** `main` has never produced a
-     successful deploy, and from outside there is no distinguishing "builds ran
-     and failed" from "no build ever ran". If it is the latter, pushing the merge
-     triggers nothing and the placeholder simply stays up.
-   - **Is there a branch-level build-spec override?** A repo-root `amplify.yml`
-     should take precedence; confirm nothing in the console competes with it.
+   No urgency beyond cutover: `main` and `staging` are identical, so the rules
+   already live are correct for production either way.
 2. Arm the **live** Stripe key in SSM (`aws/create-donation/README.md`), and see
-   §2 for the one hardening fix that should ride along with it.
-3. Flip the site-wide `noindex` guard (section 3) and re-assert the SEO parity
-   checklist (section 7) — both unchanged by the host choice.
+   §2 for the one hardening fix worth riding along with it. **Stephen's** — the
+   key was handed to him 2026-08-17.
+3. ✅ **`noindex` flipped** (2026-08-17): `@data/indexing.mjs → INDEXING_ENABLED`
+   is `true`, so `main` is indexable and `staging`, previews and dev are not.
+
+   **Deliberately done BEFORE the domain change, and the order matters.** Flipping
+   afterwards would mean `openmined.org` serves the new site telling Googlebot
+   `noindex` for however long the gap runs — on a domain with years of history
+   and live rankings, that invites exactly the deindexing §7 exists to prevent,
+   and it recovers slowly. Doing it first costs only that `main`'s branch domain
+   goes indexable early, which is the §3 residual that exists after launch
+   anyway. Bad-direction risk on an unlinked `amplifyapp.com` host beats
+   bad-direction risk on the real domain.
+
+   Still to re-assert at cutover: the SEO parity checklist (§7).
 4. Point the domain at `main` by adding root + www to the existing domain
    association (today it maps only `staging`):
 
@@ -143,7 +142,14 @@ changed from here**. Every cutover step that touches AWS is Stephen's to run.
    Test the **bare root** (`https://www.openmined.org/`, empty splat) as well as
    a deep path: the rule's source is a splat pattern, and if it doesn't match the
    empty path then the commonest inbound www URL of all falls through it.
-5. `npm run smoke -- https://openmined.org` — expect 17/17.
+5. `npm run smoke -- https://openmined.org` — expect 17/17, with the
+   indexability row now reading **`indexable (production, launched)`** rather
+   than `noindex guard on`. That row is direction-aware: it derives what to
+   expect from `INDEXING_ENABLED` and the host, so production must be indexable
+   while every other host must not be. ⚠ Re-smoking
+   `main.d1otfqlvqd3jby.amplifyapp.com` after the flip gives **16/17** by design
+   — it serves the production build on a non-production host, which is the §3
+   residual; the row says so in its detail column.
 6. **Rollback** is one Route 53 change: restore the root/www `A` records to the
    WP Engine origin `141.193.213.10` / `141.193.213.11` (values re-verified in
    the zone 2026-08-13). WordPress stays up through the window regardless.
@@ -218,12 +224,17 @@ a fixed message and log server-side. Both implementations
 (`src/pages/api/create-donation.ts` and `aws/create-donation/index.mjs`) —
 BACKLOG §14 holds the full item.
 
-### 3. Flip the site-wide `noindex` guard — one constant
+### 3. Site-wide `noindex` guard — FLIPPED 2026-08-17
 
-**Set `@data/indexing.mjs → INDEXING_ENABLED` to `true`.** That is the whole
-flip: one line, one file. It used to be a hand-edit of the `noindex` prop
-default in both `Base.astro` and `Seo.astro`; both now derive from that module,
-so they need no edit and cannot drift apart.
+**Done: `@data/indexing.mjs → INDEXING_ENABLED` is `true`.** The whole flip was
+one line in one file. It used to be a hand-edit of the `noindex` prop default in
+both `Base.astro` and `Seo.astro`; both derive from that module now, so they
+needed no edit and cannot drift apart. Setting it back to `false` is equally the
+one-line way to pull the site out of search if that is ever wanted.
+
+Flipped **before** the domain association, deliberately — the reasoning is in
+cutover step 3. Consequence to expect in the meantime: `main`'s branch domain is
+already indexable while `openmined.org` still serves WordPress.
 
 Indexability requires **two** conditions, which is the point of the indirection:
 `INDEXING_ENABLED` *and* the build being the production branch. So flipping the

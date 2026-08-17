@@ -58,10 +58,14 @@
 export const PRODUCTION_BRANCH = 'main';
 
 /**
- * The launch flip. `false` = nothing anywhere is indexable, which is the
- * pre-launch state. Flip to `true` in the cutover PR — see LAUNCH.md §3.
+ * The launch flip, `true` since 2026-08-17. Combined with the branch condition
+ * below, this makes **production and only production** indexable; `staging`,
+ * every PR preview, and local dev stay `noindex` permanently.
+ *
+ * Setting it back to `false` is the one-line way to pull the whole site out of
+ * search — the pre-launch state — if that is ever needed.
  */
-export const INDEXING_ENABLED = false;
+export const INDEXING_ENABLED = true;
 
 /**
  * The branch this build came from. Amplify sets `AWS_BRANCH` on every build it

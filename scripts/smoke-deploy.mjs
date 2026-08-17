@@ -31,6 +31,8 @@
  *   200     → fully live (secret set, real checkout_url)
  */
 import { writeFile } from 'node:fs/promises';
+import { SITE_URL } from '../src/data/site.mjs';
+import { INDEXING_ENABLED } from '../src/data/indexing.mjs';
 
 const jsonFlag = process.argv.indexOf('--json');
 const jsonOut = jsonFlag !== -1 ? process.argv[jsonFlag + 1] : null;
@@ -141,14 +143,47 @@ async function checkHost(base) {
     record(base, `redirect ${from} → ${to}  [${kind}]`, ok, detail);
   }
 
-  // The pre-launch guard. Test/preview hostnames (*.amplifyapp.com, CloudFront
-  // domains, …) are publicly crawlable, so noindex staying ON is a requirement
-  // of the test, not an oversight. After the launch flip this row is EXPECTED
-  // to flag on the production host (the flip is tracked in LAUNCH.md).
+  // Indexability, asserted in whichever DIRECTION this host is supposed to go.
+  //
+  // Production must be indexable once launched; every other host must NOT be,
+  // permanently — `staging.openmined.org`, the `*.amplifyapp.com` branch and
+  // preview domains, and any CloudFront domain are all publicly crawlable, so
+  // a stray `index, follow` there is a duplicate of the whole site.
+  //
+  // The expectation is derived from `@data/indexing.mjs → INDEXING_ENABLED`,
+  // the same constant the site builds from, so this row cannot drift out of
+  // step with the launch flip. Earlier this row asserted `noindex`
+  // unconditionally, which meant it was designed to FAIL on production the
+  // moment the site went live — a phantom failure at exactly the moment clean
+  // signal matters most.
+  //
+  // ⚠ It reads the constant from THIS checkout, not from the deployed build.
+  //   Smoking a host built from a different commit compares the host against
+  //   what this working tree expects, which is usually what you want and is
+  //   worth knowing when it disagrees.
   const home = await get(base + '/');
   const html = await home.text();
   const robots = html.match(/<meta\s+name=["']robots["']\s+content=["']([^"']+)["']/i)?.[1] ?? '';
-  record(base, 'noindex guard still on', /noindex/i.test(robots), robots || 'no robots meta');
+  const host = new URL(base).hostname;
+  const prodHost = new URL(SITE_URL).hostname;
+  const isProdHost = host === prodHost || host === `www.${prodHost}`;
+  const shouldIndex = INDEXING_ENABLED && isProdHost;
+  const hasNoindex = /noindex/i.test(robots);
+  // A non-production host serving `index, follow` is the known residual, not a
+  // mystery: `main`'s own branch domain runs the production build, so it goes
+  // indexable with the apex. Say so in the row rather than leaving a bare fail
+  // for someone to decode mid-cutover. LAUNCH.md §3 holds the options.
+  const indexDetail = robots
+    ? !shouldIndex && !hasNoindex
+      ? `${robots} — non-production host is indexable (see LAUNCH.md §3)`
+      : robots
+    : 'no robots meta';
+  record(
+    base,
+    shouldIndex ? 'indexable (production, launched)' : 'noindex guard on',
+    shouldIndex ? !hasNoindex : hasNoindex,
+    indexDetail,
+  );
 
   // Security headers on page responses — names only; public/_headers owns the
   // values. Every failure mode here is silent (the page renders identically
