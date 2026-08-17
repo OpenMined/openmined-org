@@ -130,15 +130,13 @@ handoff can be async.
      --sub-domain-settings prefix=,branchName=main prefix=www,branchName=main prefix=staging,branchName=staging
    ```
 
-   Amplify rewrites the Route 53 records itself (same-account zone). Live's
-   www→apex 301 (today emitted by WordPress) needs no cutover step: the sync
-   script already emits it as a domain-qualified, path-preserving rule that
-   activates the moment `www` maps to the app.
-   ⚠ **That rule has never been observed working** — being domain-qualified, it
-   is inert until `www` resolves to the app, so it cannot be tested in advance.
-   Test the **bare root** (`https://www.openmined.org/`, empty splat) as well as
-   a deep path: the rule's source is a splat pattern, and if it doesn't match the
-   empty path then the commonest inbound www URL of all falls through it.
+   ⚠ Amplify did NOT rewrite the pre-existing Route 53 root/www records at
+   cutover — its auto-DNS only creates missing records. The actual flip was an
+   explicit Route 53 UPSERT of both records to the app's CloudFront domain
+   (ALIAS on the apex), with the WP Engine A values in the change comment as
+   the rollback.
+   The www→apex rule itself proved out — 301, path-preserving, root and deep
+   paths — after a ~1-hour propagation delay; see the assertion list.
 5. `npm run smoke -- https://openmined.org` — expect 17/17, with the
    indexability row now reading **`indexable (production, launched)`** rather
    than `noindex guard on`. That row is direction-aware: it derives what to
@@ -296,13 +294,15 @@ reason. Three ways to close it, in rough order of cost:
    custom domain is attached — needs AWS access, and Amplify offers no obvious
    per-domain header control, so treat this as a question rather than a plan.
 
-**Decided 2026-08-17 — option 3, answered:** Amplify *can* redirect a default
-domain, with a domain-qualified custom rule (same mechanism as the www→apex
-301). `scripts/sync-amplify-redirects.mjs` now emits
-`https://main.<app>.amplifyapp.com/<*>` → `https://openmined.org/<*>` 301; it
-applies on the first main-push sync, i.e. at cutover, which also ends the
-window where `main`'s domain answers `index, follow`. Option 1's GSC Coverage
-glance in the first weeks stays worth doing as the check on this.
+**Decided 2026-08-17 — option 3, answered and VERIFIED at cutover:** Amplify
+*can* redirect a default domain. `scripts/sync-amplify-redirects.mjs` emits
+`https://main.<app>.amplifyapp.com/<*>` → `https://openmined.org/<*>` 301 (and
+a www twin); both verified live — 301, path preserved — closing this
+residual: `main`'s domain no longer serves indexable content at all. One
+measurement for posterity: domain-qualified rules took ~an hour to propagate
+(CloudFront distribution cycle) versus seconds for path rules — a window in
+which they look broken. Option 1's GSC Coverage glance in the first weeks
+stays worth doing as the backstop.
 
 Note **branch access control cannot be the answer here**: it applies per branch,
 so locking `main`'s default domain would lock `openmined.org` with it.
@@ -572,9 +572,14 @@ day.
   deploy, off WP Engine (the domain-association change in the cutover sequence).
 - **Live Stripe key** in the SSM parameter
   (`aws/create-donation/README.md`), with §2's error-text fix alongside it.
-- **`www` → apex 301 preserved** — pre-wired in the sync script and inert until
-  `www` maps to the app, so cutover is the **first** time it can be observed.
-  Test the bare root as well as a deep path (see cutover step 4).
+- ✅ **`www` → apex 301 preserved — verified at cutover 2026-08-17**: bare root
+  and deep path both 301 to the apex with path preserved, from the sync
+  script's splat rule. (`main`'s branch domain 301 verified the same way —
+  §3's residual is closed for real.) One trap for posterity: the rules took
+  ~an hour to propagate (CloudFront distribution cycle) while path rules
+  apply in seconds — during that window www served 200 and looked broken.
+  Distinguish propagation from matching with a same-update path probe *plus
+  patience*.
 - **True 404 on the production origin** — unknown paths answer HTTP 404, not
   a redirect onto the 404 page (the smoke `unknown path → true 404` row).
   Soft-404s poison exactly the GSC Coverage data §7 says to watch.

@@ -59,11 +59,15 @@ sessions, no auth, no other server state. Measured off the build 2026-08-13:
   soft-404s poison crawl data. Asserted by the smoke
   `unknown path → true 404` row.
 - **No host-added redirects** beyond the set below, with one exception: the
-  `www` → apex 301 must exist at the host/DNS layer (today WordPress itself
-  emits it; the static file set can't match on hostname). On Amplify it is
-  pre-wired: `sync-amplify-redirects.mjs` emits a domain-qualified,
-  path-preserving 301 that stays inert until cutover maps the `www`
-  subdomain to the app.
+  `www` → apex 301 must exist at the host/DNS layer (the static file set can't
+  match on hostname). On Amplify it comes from `sync-amplify-redirects.mjs`'s
+  domain-qualified splat rule — **verified live at cutover 2026-08-17**: root
+  and deep paths both 301 to the apex, path preserved. ⚠ Propagation trap
+  worth knowing: domain-qualified rules take up to ~an hour to reach the edge
+  (a CloudFront distribution cycle), while path rules apply in seconds — a
+  same-update path probe firing while a domain rule still 200s means *wait*,
+  not *broken*. Measured: the rules were live ~an hour after the first
+  main-push sync applied them.
 
 ## Redirects — two classes, verified 2026-08-13
 
