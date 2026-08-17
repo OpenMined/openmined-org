@@ -17,11 +17,13 @@
  * deterministically:
  *
  *   1. the www → apex 301 (domain-qualified; inert until cutover maps www)
- *   2. the /api/create-donation 200-proxy (the Lambda dynamic tier — see
+ *   2. the main-default-domain → apex 301 (closes LAUNCH.md §3's duplicate-
+ *      host residual; applies on the first main-push sync = cutover)
+ *   3. the /api/create-donation 200-proxy (the Lambda dynamic tier — see
  *      aws/create-donation/README.md; this script is the rule's home)
- *   3. every parsed redirect, file order preserved (first match wins on both
+ *   4. every parsed redirect, file order preserved (first match wins on both
  *      platforms)
- *   4. the /404.html catch-all (`404-200` = in-place true 404), always last
+ *   5. the /404.html catch-all (`404-200` = in-place true 404), always last
  *
  * Idempotent: no-ops when the stored rules already match. Runs from
  * .github/workflows/sync-redirects.yml on pushes to staging (flip to main at
@@ -50,6 +52,18 @@ const WWW_REDIRECT = {
   target: 'https://openmined.org/<*>',
   status: '301',
 };
+// main's own default domain serves the same artifact as openmined.org and
+// would otherwise be an indexable full-site duplicate once INDEXING_ENABLED
+// is true (LAUNCH.md §3's residual — this rule is that section's "option 3",
+// answered: Amplify CAN redirect a default domain, with a domain-qualified
+// rule like the www one). 301 everything to the canonical origin. Applies on
+// the first main-push sync, i.e. at cutover; staging and pr-N subdomains are
+// different hosts and unaffected.
+const MAIN_DOMAIN_REDIRECT = {
+  source: 'https://main.d1otfqlvqd3jby.amplifyapp.com/<*>',
+  target: 'https://openmined.org/<*>',
+  status: '301',
+};
 const DONATE_PROXY = {
   source: '/api/create-donation',
   target: 'https://fsjjiho8ec.execute-api.us-west-1.amazonaws.com/api/create-donation',
@@ -71,8 +85,8 @@ try {
   process.exit(1);
 }
 
-const rules = [WWW_REDIRECT, DONATE_PROXY];
-const seen = new Set([WWW_REDIRECT.source, DONATE_PROXY.source]);
+const rules = [WWW_REDIRECT, MAIN_DOMAIN_REDIRECT, DONATE_PROXY];
+const seen = new Set([WWW_REDIRECT.source, MAIN_DOMAIN_REDIRECT.source, DONATE_PROXY.source]);
 for (const raw of text.split('\n')) {
   const line = raw.trim();
   if (!line || line.startsWith('#')) continue;

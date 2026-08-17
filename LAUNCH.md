@@ -94,19 +94,16 @@ handoff can be async.
    build and a smoke pass against the branch domain before touching the domain
    association.
 
-   ⚠ **Still open, and deliberately left to Stephen:** the redirect-sync branch
-   filter in `.github/workflows/sync-redirects.yml` is still `[staging]`. It has
-   to become `[main]` so authority follows production — otherwise a redirect
-   merged to `main` never reaches the host (silently), while `staging` keeps
-   rewriting production's rules. That file is Stephen's, and the AWS half of the
-   move is his anyway: the OIDC role has to trust `main`, which his own comment
-   says was pre-authorized, but which cannot be verified without AWS access. The
-   first sync run on `main` is the first exercise of that trust — **a red run
-   there means IAM, not the script**, and it fails before touching any rule, so
-   the existing rules survive untouched.
-
-   No urgency beyond cutover: `main` and `staging` are identical, so the rules
-   already live are correct for production either way.
+   ✅ **Redirect-sync authority moved to `main`** (2026-08-17): the branch
+   filter in `.github/workflows/sync-redirects.yml` is `[main]`, and the OIDC
+   role's trust for `main` is **verified against IAM** (both classic and
+   ID-stamped subject forms present), not just claimed. Staging pushes no
+   longer sync — intended; rules are app-wide and production owns them. The
+   first push to `main` is still the first live exercise of that trust — **a
+   red sync run there means IAM, not the script**, and it fails before touching
+   any rule. That same first sync also applies the main-default-domain → apex
+   301 (§3's residual, closed — see the constant in
+   `scripts/sync-amplify-redirects.mjs`).
 2. Arm the **live** Stripe key in SSM (`aws/create-donation/README.md`), and see
    §2 for the one hardening fix worth riding along with it. **Stephen's** — the
    key was handed to him 2026-08-17.
@@ -299,6 +296,14 @@ reason. Three ways to close it, in rough order of cost:
 3. **Ask whether the default domain can be disabled or redirected** once the
    custom domain is attached — needs AWS access, and Amplify offers no obvious
    per-domain header control, so treat this as a question rather than a plan.
+
+**Decided 2026-08-17 — option 3, answered:** Amplify *can* redirect a default
+domain, with a domain-qualified custom rule (same mechanism as the www→apex
+301). `scripts/sync-amplify-redirects.mjs` now emits
+`https://main.<app>.amplifyapp.com/<*>` → `https://openmined.org/<*>` 301; it
+applies on the first main-push sync, i.e. at cutover, which also ends the
+window where `main`'s domain answers `index, follow`. Option 1's GSC Coverage
+glance in the first weeks stays worth doing as the check on this.
 
 Note **branch access control cannot be the answer here**: it applies per branch,
 so locking `main`'s default domain would lock `openmined.org` with it.
