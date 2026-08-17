@@ -19,7 +19,10 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    # Both deploying branches: a merge commit can differ from what the PR's CI
+    # built (semantic conflicts land only in the merge), so the branch that
+    # actually deploys needs its own run — staging today, main from cutover.
+    branches: [main, staging]
   pull_request:
 
 jobs:
