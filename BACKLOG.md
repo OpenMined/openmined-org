@@ -105,7 +105,11 @@ the session); this is abuse-resistance and hygiene:
 - **Stripe error text is forwarded to the browser** (the `!res.ok` branch).
   Stripe's auth-failure messages include a partially-redacted key — an
   unnecessary information channel out of the route holding the secret. Log
-  server-side, return a fixed message.
+  server-side, return a fixed message. Confirmed live on the deployed Lambda
+  2026-08-17: an over-large amount returns 502 carrying Stripe's own message.
+  ⏱ **Land this one with the live-key swap, not after** — the moment the key
+  changes is the moment an auth failure is most likely, and that is the variant
+  that leaks a partially-redacted key (cross-ref `LAUNCH.md` §2).
 
 ### 15. CTA icon squashed out of its aspect ratio — `READY`
 
@@ -125,10 +129,39 @@ serves HTTPS before replacing.
 
 ### 17. CI actions target a deprecated Node runtime — `READY`
 
-`actions/checkout@v4` and `actions/setup-node@v4` in
-`.github/workflows/ci.yml` run on a GitHub compatibility shim that will be
-dropped — bump both to `@v5`. (This is the actions' own runtime, unrelated to
-the workflow's `node-version: 22`.)
+`actions/checkout@v4` and `actions/setup-node@v4` run on a GitHub compatibility
+shim that will be dropped — bump both to `@v5`. Now **two** workflows, not one:
+`.github/workflows/ci.yml` and `.github/workflows/sync-redirects.yml`. (This is
+the actions' own runtime, unrelated to the workflows' `node-version: 22`.)
+
+### 19. Unclosed `<pre>` swallows article content — 2 posts left — `READY`
+
+A blank line inside a converter-emitted raw-HTML `<figure><pre><code>` block
+**terminates the HTML block** (CommonMark ends one at a blank line), so the
+opening tags ship with no closing tags and the browser nests the rest of the
+article inside the `<pre>` — rendering body copy in monospace and turning `#`
+code comments into real headings. It is a regression against live, which renders
+these posts correctly.
+
+Three severe cases were fixed 2026-08-17 by deleting the blank lines inside
+those blocks (which also closed LAUNCH §7's multi-`<h1>` item). Two milder ones
+remain — `announcing-proof-of-concept-support-for-tff-in-pysyft-0-7` (~13% of
+body, and the source of its 2 spurious `<h1>`s) and `randomized-response-in-privacy`
+(~9%) — where the swallow recovers before the end of the article.
+
+Two things worth doing with them:
+
+- **The better fix is converting those raw blocks to fenced code blocks**, which
+  both posts already use elsewhere. That preserves the blank lines the minimal
+  fix deletes and gains Shiki highlighting; the care needed is re-emitting the
+  `<figcaption>` and **decoding the HTML entities** (`&gt;`, `&nbsp;`) that are
+  correct inside raw HTML and wrong inside a fence.
+- **No guard covers this.** `astro check` and the build don't validate HTML
+  nesting, which is how it survived to a deployed site. Note the cheap check is
+  *not* counting `<pre>`/`</pre>` in the HTML text — that produces false
+  positives and false negatives (it flagged a page the DOM shows as clean).
+  Assert it in a real DOM instead: no `<p>` or heading inside an `article` may
+  have a `<pre>` ancestor. That form found exactly 5 pages in 645.
 
 ## Cleanup — not urgent
 
@@ -202,6 +235,35 @@ caches separately), so each view revalidates per asset — most visible on the
 blog post carrying 11 MP4s. Raising it is a `customHttp.yml` rule; decide the
 value knowing these files are slug-addressed, not content-hashed, so an
 aggressive max-age makes replacing one awkward.
+
+### 20. `/pagefind/*` caching doesn't match the contract — `NEEDS DECISION`
+
+`HOSTING.md` → Caching asks for long-lived immutable `Cache-Control` on
+`/pagefind/` *except* `pagefind-entry.json`, the index's mutable entrypoint.
+Neither header file implements it: `public/_headers` and `customHttp.yml` carry
+an `/_astro/*` rule and nothing for `/pagefind/`, so every index chunk serves
+`max-age=0` with only a shared (CDN) TTL and browsers revalidate each one on a
+repeat search (measured on the AWS host 2026-08-17).
+
+The chunks are content-addressed, so a long browser TTL is safe. Decide between
+adding the rule in **both** files (the two are ported by hand — README →
+Response headers) and amending the contract line to match what ships. Same shape
+as §18, and worth settling with it.
+
+### 21. `amplify.yml`'s header comment describes a stack we don't run — `READY`
+
+The build spec's own header comment still says this deploys "the STATIC half of
+the build only", that the on-demand donate route "is a Cloudflare Worker entry
+that Amplify cannot run", and that without it "the donate modal degrades to its
+built-in error message" — then points at README for "the Cloudflare story".
+
+All of that is false: the route runs as the Lambda twin behind an Amplify proxy
+rule, and donations complete end-to-end (re-verified against staging
+2026-08-17). Flagged to Stephen 2026-08-13 and still standing. It is only a
+comment, which is why it sits here — but it is the *first* thing a reader of the
+build spec sees, and it tells them the opposite of the truth. Rewrite it to
+describe the Amplify + Lambda arrangement, keeping the two notes below it
+(`PRERENDER_ENV=node`, and never attaching a service role) as they are.
 
 ## Tracked elsewhere — do not duplicate here
 
