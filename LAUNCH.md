@@ -4,28 +4,27 @@ Everything still standing between this build and it serving `openmined.org`.
 
 Split of responsibilities — an item lives in exactly **one** tracker:
 
-- **This file** — launch blockers, launch decisions, the cutover checklist, and
-  the client-account deploy reference.
+- **This file** — launch blockers, launch decisions, and the cutover checklist.
 - **`BACKLOG.md`** — site features and polish that outlast launch.
 - **`README.md`** — how the project builds and deploys in the general case. This
   file adds only what is *cutover-specific*; it doesn't restate the mechanics.
+- **`HOSTING.md`** — the host-portable contract the deployed config is held to.
 
 Re-derive any "current state" against the code before trusting it — a tracker is
 a cache.
 
 ---
 
-## Deploy target decision — AWS Amplify (2026-08-13)
+## Deploy target — AWS Amplify (decided 2026-08-13)
 
-The production host is now **AWS Amplify Hosting** in the OpenMined AWS account
-(app `d1otfqlvqd3jby`, us-west-1), chosen because the DNS zone already lives on
-Route 53 in that account — which dissolves this file's hardest cutover
-prerequisite: **no DNS zone migration to Cloudflare is needed.** The
-Cloudflare-specific sections below stay as the record of the proven Workers
-setup (and the fallback path); read them as superseded wherever they assume the
-zone must move.
+The production host is **AWS Amplify Hosting** in the OpenMined AWS account (app
+`d1otfqlvqd3jby`, us-west-1). The DNS zone already lives on Route 53 in that
+account, so **no DNS zone migration is needed** — that dissolves what used to be
+this file's hardest cutover prerequisite. The Cloudflare Workers path this site
+was originally built for is **abandoned**, and its setup record is deleted from
+this file; git history and the palace hold it if it is ever wanted.
 
-**Standing infrastructure (verified 2026-08-13, smoke 15/15):**
+**Standing infrastructure:**
 
 - `staging` is the repo **default branch**; PRs target it and get Amplify
   **preview URLs** automatically (via the AWS Amplify GitHub App). Merging to
@@ -44,14 +43,81 @@ zone must move.
   authored. ⚠ Never attach an IAM service role to the Amplify app — its
   presence silently disables PR preview creation (verified 2026-08-14).
 
-**Cutover day (Amplify path):**
+### Staging verification — 2026-08-17
 
-1. Merge `staging` → `main`; wait for the `main` build to go green. The
-   cutover PR must also flip the branch filter in
+A full pre-launch audit of `https://staging.openmined.org`, at commit `0344167`.
+Everything below was measured, not assumed; re-run rather than trust it.
+
+| Check | Result |
+|---|---|
+| `npm run smoke` | 17/17 |
+| Every page in the build, swept individually | 683/683 → 200 |
+| Every authored redirect (13 `_redirects` + 21 registry) | 34/34 true 301s, landing on target |
+| Route parity vs `reference/live-sitemap/` | 452/453 (447 direct, 5 via 301) |
+| Live HTML vs a local build of the same commit | identical — no CDN staleness, no deploy drift |
+| Security headers | all 6 on pages **and** on `/_astro/` assets |
+| `audit:headers` / `image-urls` / `images` / `assets` | clean |
+| `audit:overflow`, 8 widths | clean |
+| `verify:donate` | all pass → real `cs_test_…` checkout, thank-you 200 |
+| Routing detail | nested dir URLs 200; bare path 301→slash; http→https 301; true in-place 404 with the branded body; Brotli on HTML; Range 206 on `public/` media |
+| Analytics gate | correct — `Analytics.astro` injects Plausible only for `ANALYTICS_HOSTS`, so staging reports nothing |
+
+Two live-vs-build diffs turned up and are both benign: one post's date renders a
+day earlier when the build machine is in CDT rather than UTC, and
+`/style-guide/` mints random tab ids per build.
+
+**The one gap: `/blog/resource_type/video-on-demand/` 404s** — see §7.
+
+**⚠ Everything above is HTTP-level.** There are no AWS credentials and no `aws`
+CLI on the maintainer's machine, so the Amplify app's own configuration — branch
+list, domain association, custom-rule set, Lambda env — **cannot be read or
+changed from here**. Every cutover step that touches AWS is Stephen's to run.
+
+**Cutover day:**
+
+1. Merge `staging` → `main`; wait for the `main` build to go green. The cutover
+   PR must also flip the branch filter in
    `.github/workflows/sync-redirects.yml` from `staging` to `main`, so
-   post-cutover redirect changes keep flowing from the production branch
-   (the OIDC role already trusts both branches; no IAM change).
-2. Arm the **live** Stripe key in SSM (`aws/create-donation/README.md`).
+   post-cutover redirect changes keep flowing from the production branch (the
+   OIDC role already trusts both branches; no IAM change). After the flip,
+   pushes to `staging` no longer sync rules — intended, since the rules are
+   app-wide and production owns them.
+   ⚠ **`main` is connected in Amplify but has never deployed this site.**
+   Measured 2026-08-17: `https://main.d1otfqlvqd3jby.amplifyapp.com/` answers 200
+   with a 1.4 KB page titled "Welcome" — Amplify's placeholder — and **every real
+   route 404s**, including `/blog/`, `/syftbox/`, `/sitemap-index.xml`,
+   `/pagefind/pagefind.js` and `robots.txt`, all of which exist in `main`'s tree.
+   The cause is visible in the tree: `amplify.yml` and `customHttp.yml` landed in
+   `21ad75e` (2026-08-13), which is on `staging` only, so the branch has been
+   building with Amplify's auto-detected settings and publishing the wrong
+   directory.
+
+   **This makes step 1 the single most dangerous step of the cutover**: if the
+   domain is pointed at `main` before a green build of the merged tree,
+   `openmined.org` serves an Amplify placeholder. Do not treat "the branch
+   exists" as "the branch works" — require a successful build **and** a
+   `npm run smoke` pass against `main.d1otfqlvqd3jby.amplifyapp.com` before
+   touching the domain association. The merge brings `amplify.yml` across, so the
+   build is expected to start working at that point; verify, don't assume. The
+   merge itself is a clean fast-forward (`main` has no divergent commits).
+
+   **Headers and redirect rules are NOT waiting on the merge** — they already
+   behave app-wide. Measured 2026-08-17: `main`'s branch domain serves all 6
+   security headers and fires both `/feed/ → 301` and `unknown → 404` despite
+   having no `customHttp.yml` in its tree. So the merge's job is the build spec
+   alone.
+
+   **Two console checks the merge cannot substitute for.** Both need AWS access,
+   so both are Stephen's, and both are quick:
+
+   - **Is auto-build enabled on the `main` branch?** `main` has never produced a
+     successful deploy, and from outside there is no distinguishing "builds ran
+     and failed" from "no build ever ran". If it is the latter, pushing the merge
+     triggers nothing and the placeholder simply stays up.
+   - **Is there a branch-level build-spec override?** A repo-root `amplify.yml`
+     should take precedence; confirm nothing in the console competes with it.
+2. Arm the **live** Stripe key in SSM (`aws/create-donation/README.md`), and see
+   §2 for the one hardening fix that should ride along with it.
 3. Flip the site-wide `noindex` guard (section 3) and re-assert the SEO parity
    checklist (section 7) — both unchanged by the host choice.
 4. Point the domain at `main` by adding root + www to the existing domain
@@ -65,10 +131,15 @@ zone must move.
    ```
 
    Amplify rewrites the Route 53 records itself (same-account zone). Live's
-   www→apex 301 (today emitted by WordPress) needs no cutover step: the
-   sync script already emits it as a domain-qualified, path-preserving rule
-   that activates the moment `www` maps to the app.
-5. `npm run smoke -- https://openmined.org` — expect 15/15.
+   www→apex 301 (today emitted by WordPress) needs no cutover step: the sync
+   script already emits it as a domain-qualified, path-preserving rule that
+   activates the moment `www` maps to the app.
+   ⚠ **That rule has never been observed working** — being domain-qualified, it
+   is inert until `www` resolves to the app, so it cannot be tested in advance.
+   Test the **bare root** (`https://www.openmined.org/`, empty splat) as well as
+   a deep path: the rule's source is a splat pattern, and if it doesn't match the
+   empty path then the commonest inbound www URL of all falls through it.
+5. `npm run smoke -- https://openmined.org` — expect 17/17.
 6. **Rollback** is one Route 53 change: restore the root/www `A` records to the
    WP Engine origin `141.193.213.10` / `141.193.213.11` (values re-verified in
    the zone 2026-08-13). WordPress stays up through the window regardless.
@@ -80,88 +151,137 @@ zone must move.
 Section numbers are **stable, not sequential** — closed sections are removed
 without renumbering, so gaps are expected and cross-references stay valid.
 
-### 1. Production deploy pipeline on the client account
+### 1. Production deploy pipeline — DONE
 
-**Done on the client account (2026-08-12).** Manual deploy runs on the OpenMined
-Cloudflare account (`7c0f9f2c…`) from this repo: Worker `openmined-org` at
-`https://openmined-org.openmined.workers.dev`, its `SESSION` KV namespace
-auto-provisioned on first deploy, a Stripe **test** key set as a runtime secret,
-and the donate flow verified end-to-end — `npm run smoke` 15/15 and
-`npm run verify:donate` reaching a real `cs_test_…` Stripe Checkout session. The
-`public/_headers` security headers were confirmed arriving on Cloudflare's real
-edge at the same time.
+**Push-to-deploy is live on the client's AWS account.** Merging to `staging`
+builds and deploys `https://staging.openmined.org`; PRs get Amplify preview
+URLs; CI runs the type gate, the build, and the four deterministic audits on
+pushes to both deploying branches. Nobody runs a build or holds cloud
+credentials to publish, which is the load-bearing requirement (HOSTING.md →
+Deploy workflow).
 
-**Still missing, in order:**
+Production today is still **WordPress on WP Engine**; §1's remaining work is the
+origin repoint, which is the cutover-day sequence above.
 
-1. ~~**Push this repo to GitHub.**~~ **Done — corrected 2026-08-13.** The claim
-   that `OpenMined/openmined-org` held only the initial commit is stale; it was
-   pushed 2026-08-12 and `origin/main` carries the full history. What remains is
-   only that local `main` runs ahead of it from time to time — re-check with
-   `git log origin/main..main` rather than trusting this line.
-2. **Push-to-deploy via Workers Builds** — see
-   [Wiring push-to-deploy](#wiring-push-to-deploy). Prerequisite is an OpenMined
-   GitHub **org owner** installing the Cloudflare GitHub App.
-3. **The cutover origin repoint**, which now also depends on the DNS zone
-   migration below.
+**Questions still open, all needing someone with AWS or account access:**
 
-Production today is **WordPress on WP Engine**. An earlier version of this
-section assumed Cloudflare was already in front as DNS/proxy — **wrong**
-(verified against live DNS: 2026-08-12). The Cloudflare response headers on the
-live site come from *WP Engine's* Cloudflare-for-SaaS edge, not an OpenMined
-zone. Actual state: **DNS is hosted on AWS Route 53; the registrar is GoDaddy;
-no OpenMined-controlled Cloudflare zone exists.**
+1. Who owns the **WP Engine** account, does WordPress stay up read-only for a
+   grace period, and are any WP-served paths — forms, redirects, uploads — still
+   doing real work?
+2. Who provisions the **live Stripe key**, and does staging keep the test key?
+3. **Where do the served response headers actually come from — `customHttp.yml`,
+   or a console setting?** `main`'s branch domain serves all 6 security headers
+   while having no `customHttp.yml` in its tree (measured 2026-08-17), so the
+   config is held app-wide; what can't be seen from outside is whether the repo
+   file is its source or whether someone entered the headers in the console.
+   **This matters beyond curiosity:** if the console is the real source, then
+   edits to `customHttp.yml` silently do nothing, and the file is decorative.
+   `public/_headers` → `customHttp.yml` is already a hand-porting step (README →
+   Response headers); a third, invisible copy in the console would make header
+   changes untrustworthy — including BACKLOG §20's pagefind rule. Confirm by
+   changing one header value in the repo and checking whether the deployed
+   response follows.
 
-Cutover therefore has a hard prerequisite: **migrate the DNS zone to the
-OpenMined Cloudflare account** (nameserver change at GoDaddy; registrar and
-domain ownership unchanged). This is unavoidable, not a preference — Workers
-Custom Domains require a zone on the same Cloudflare account; the partial
-(CNAME) zone setup is Business-plan-only and still can't reach Cloudflare from
-a Route 53 apex; and external DNS cannot point at a Worker (no stable IPs, and
-`*.workers.dev` can't be CNAMEd from a foreign hostname). A Free-plan zone
-suffices.
+### 2. Live `STRIPE_SECRET_KEY` in SSM
 
-Migration cautions, learned from live probes (2026-08-12): copy the zone from a
-real Route 53 export (`aws route53 list-resource-record-sets`), never a blind
-probe or Cloudflare's auto-scan — the zone carries MX/SPF for company email and
-~a dozen live subdomains, and Route 53 **ALIAS** records answer as bare A
-records whose real targets are only visible in the export. Import everything
-DNS-only (grey cloud) so the move is byte-identical, and leave the Route 53
-zone untouched as rollback.
+The donation flow is proven end-to-end on staging with a **test** key
+(re-verified 2026-08-17): `verify:donate` drives the real modal to a live
+`cs_test_…` Stripe Checkout session and the thank-you page answers 200. What
+remains is putting the **live** key in SSM Parameter Store, read by the Lambda
+at request time — commands in `aws/create-donation/README.md`. It is a runtime
+read, so no rebuild or redeploy is needed.
 
-**One exception to the grey-cloud rule, found 2026-08-13 — check it before the
-bulk import.** Nine `openmined.org` subdomains (brand, design, internal, share,
-admin, cards, cv, go, tools) are Cloudflare **Pages** custom domains, and their
-Pages projects live on `7c0f9f2c…` — the same account the zone moves to. They
-work today as grey CNAMEs to `*.pages.dev` *because DNS is external*. Once the
-zone is same-account they become same-account records, and Pages normally
-manages those as **proxied** records it creates itself. Whether a hand-imported
-DNS-only CNAME still resolves is unverified. Test one subdomain before importing
-all nine; the blast radius includes the auth-gated `internal` and `share`
-surfaces. Route 53's 48-hour NS TTL means resolvers can hold
-the old delegation up to ~2 days after the flip, so WordPress must stay up
-through that window. The www→apex 301 is currently emitted by WordPress itself
-(`x-redirect-by: WordPress` — and `public/_redirects` can't match on host), so
-www needs a Cloudflare Redirect Rule at cutover.
+**Land one hardening fix with the key swap, not after it.** The route forwards
+Stripe's own error text to the browser (`!res.ok` branch; confirmed live on the
+deployed Lambda 2026-08-17 — an over-large amount returns 502 carrying Stripe's
+message). Stripe's *auth-failure* messages include a partially-redacted key, and
+the moment the key changes is the moment an auth failure is most likely. Return
+a fixed message and log server-side. Both implementations
+(`src/pages/api/create-donation.ts` and `aws/create-donation/index.mjs`) —
+BACKLOG §14 holds the full item.
 
-Everything needed to reproduce the proven setup is in
-[Client-account deploy reference](#client-account-deploy-reference) below.
+### 3. Flip the site-wide `noindex` guard — one constant
 
-### 2. Live `STRIPE_SECRET_KEY` on the production Worker
+**Set `@data/indexing.mjs → INDEXING_ENABLED` to `true`.** That is the whole
+flip: one line, one file. It used to be a hand-edit of the `noindex` prop
+default in both `Base.astro` and `Seo.astro`; both now derive from that module,
+so they need no edit and cannot drift apart.
 
-The donation flow is proven end-to-end on the client Worker with a **test** key
-(2026-08-12): `verify:donate` drives the real modal to a live `cs_test_…` Stripe
-Checkout session. What remains is swapping in the **live** key at cutover — as a
-runtime secret on the same Worker, set from a real interactive terminal or the
-Cloudflare dashboard, never a non-promptable shell (see
-[trap 1](#wrangler-traps)). It's a runtime secret, so no rebuild or redeploy is
-needed and it persists across future deploys.
+Indexability requires **two** conditions, which is the point of the indirection:
+`INDEXING_ENABLED` *and* the build being the production branch. So flipping the
+constant makes `main` indexable and leaves `staging`, every PR preview, and local
+dev permanently noindex — the exposure below is closed by construction rather
+than by remembering. The gate **fails closed**: an unset or unrecognised branch
+resolves to noindex, verified across the branch matrix 2026-08-17, including a
+wrong-case `Main`.
 
-### 3. Flip the site-wide `noindex` guard
+Verified by simulating both builds (2026-08-17): pre-launch, all 683 pages
+noindex; post-launch on `main`, 677 indexable with all seven self-excluding
+routes still `noindex, nofollow`.
 
-`Base.astro` Props → `noindex` default `true → false`. **Two files, not one** —
-align the parallel default in `Seo.astro` so a component rendering `Seo` outside
-`Base` can't silently ship a `noindex`. Keep the guard **on** for any
-`*.workers.dev` test deploy; those hostnames are publicly crawlable.
+**`AWS_BRANCH` is populated — confirmed on real Amplify infrastructure
+2026-08-17.** PR #8's preview shipped `<meta name="x-build-branch"
+content="pr-8">`, so the gate reads a real value rather than falling through to
+its fail-closed path. Note what that value *is*: on a preview, `AWS_BRANCH` is the
+**preview slug** (`pr-8`), not the source branch — which is the safer of the two,
+since a preview can never coincidentally equal `PRODUCTION_BRANCH`.
+
+Non-indexable builds emit that meta and indexable ones never do, so it stays the
+cheap way to check the gate from outside: a staging or preview page carrying **no**
+such tag means the variable went missing and the gate is fail-closed — which would
+leave production noindex after the flip.
+
+⚠ **Still unproven: that a `main` build sets `AWS_BRANCH=main`.** Branch builds
+should use the branch name where previews use a slug, but only a `main` build can
+show it, and `main` has never built (see cutover step 1). The next `staging`
+deploy is the cheap tell — it should report `x-build-branch: staging`. Until a
+`main` build is observed, treat the launch flip as verified-by-inference and lean
+on the smoke `noindex guard` row against the production origin.
+
+**Seven pages opt themselves out and must survive the flip** (verified
+2026-08-17): `404`, `blog/cards`, `donate/thank-you`, both
+`events/india-ai-impact-summit-2026/` registration pages, `search`, and
+`style-guide`. Every page in the build carries `noindex` today, so the flip is
+also the moment that count becomes meaningful — re-derive it with a grep of
+`src/pages/`, don't trust this list to age.
+
+**Why the branch condition exists — the measured exposure it closes.** Before
+the gate, the `noindex` on staging was **not** a staging rule; it was the same
+build-time default that ships to production, byte-identical to a local build of
+the same commit. Measured 2026-08-17, across every host:
+
+| Host | Reachable | `X-Robots-Tag` | `robots.txt` | Access control |
+|---|---|---|---|---|
+| `staging.openmined.org` | 200 | none | 200, `Allow: /` | none |
+| `staging.<app>.amplifyapp.com` | 200 | none | 200 | none |
+| `main.<app>.amplifyapp.com` | 200 | none | 404 | none |
+| `pr-N.<app>.amplifyapp.com` | per PR | none | — | none |
+
+**Amplify does not add its own `noindex` to `*.amplifyapp.com`** — checked on
+both branch domains, no such header. So without the branch condition, flip day
+would turn all of these into fully indexable duplicates of the whole site.
+
+Two partial mitigations exist and neither would have been sufficient alone: every
+non-production page carries a `rel=canonical` and `og:url` pointing at
+`https://openmined.org/…` (a hint, not a directive — it does not stop crawling),
+and the sitemap lists production URLs only (`astro.config.mjs → site`), so
+staging never volunteers its own URLs.
+
+**What does NOT work, so nobody re-proposes it:**
+
+- **`X-Robots-Tag` in `customHttp.yml`** — that file is app-wide, so it cannot
+  distinguish branches; it would noindex production too.
+- **`Disallow: /` in `robots.txt` for the non-production hosts.** A disallowed
+  URL is never fetched, so the `noindex` is never read — and such a URL can still
+  be indexed, without a snippet, on inbound links alone. Allowing the crawl is
+  precisely what makes the `noindex` effective; `public/robots.txt` says so in
+  its own header. This is a trap, not an oversight.
+
+**A stronger guarantee, if wanted:** Amplify **branch access control** (basic
+auth) on `staging` and previews stops crawlers fetching at all. Per-branch console
+toggle, so it needs AWS access, and it puts a password in front of the preview
+flow that exists for a non-developer to review work. The build-time gate is the
+cheaper 95%; this is the belt to its braces, not a replacement.
 
 ### 7. SEO surface parity — no downgrade at cutover
 
@@ -208,14 +328,23 @@ closed by other work, and one of its premises about tracking was wrong (§4).
   `/page/N/`) — matching live, and not volunteering thin archives as canonical
   the moment the site goes indexable. The pages themselves stay crawlable and
   linked from every post byline; reversing is deleting one filter line.
+- **Multi-`<h1>` posts** (closed 2026-08-17). The one post carrying ~12 extra
+  `<h1>`s now carries exactly one. The cause was never a stray heading: it was
+  an unclosed `<pre>` swallowing the article (see below), and fixing that fixed
+  the headings. ⚠ The 2026-08-10 research's claim that
+  `announcing-proof-of-concept-support-for-tff-in-pysyft-0-7` was already clean
+  is **wrong** — re-measured 2026-08-17, it still emits 2 spurious `<h1>`s from
+  the same cause. BACKLOG holds the remainder.
 
 **Still open:**
 
-- **One post ships ~12 `<h1>`s** — `encrypted-training-medical-text-syfertext`,
-  a markdown-converter artifact. (The research also named
-  `announcing-proof-of-concept-support-for-tff-in-pysyft-0-7`; re-checked
-  2026-08-12 and its only `# ` line is a Python comment inside a code fence, so
-  that half is already clean.)
+- **One live URL does not resolve: `/blog/resource_type/video-on-demand/`.**
+  The only gap in a 453-URL parity sweep of `reference/live-sitemap/`
+  (2026-08-17). Live serves it 200 ("Video – On-Demand Archives") and it sits in
+  Yoast's sitemap, so Google has it on file and will keep requesting it. Fix is
+  one `editorialRedirects` entry in `src/data/redirects.mjs` → `/`, matching how
+  the two existing `/resources/…` entries were handled. Cheap, and it wants
+  doing before the origin repoints rather than after.
 - **Article images on coverless posts.** A post with no cover emits no
   `ImageObject`, matching live. Google's Article guidance *recommends* an image,
   so those posts are less rich-result eligible. Falling back to the generic
@@ -255,16 +384,17 @@ Why those two are out, in one line each:
 device). That is what makes it lawfully banner-free, and it is a property to
 protect: anything added here that writes to the device drags a banner back in.
 
-**Implementation notes worth not re-deriving:** analytics loads only on
-`openmined.org` / `www` — the workers.dev URL is the *same Worker* as production,
-so a build-time flag can't separate them and the gate has to be a runtime
-hostname test. `?analytics=force` overrides it for deliberate testing (a forced
-hit is a real hit). Live also double-loads Plausible and runs two redundant
-Google tags; we ship one of each.
+**Implementation notes worth not re-deriving:** the gate is a **runtime hostname
+test**, not a build-time flag — staging and preview hosts serve the same build as
+production, so nothing at build time can tell them apart. Verified against the
+deployed staging host 2026-08-17: the script tag is injected only for
+`ANALYTICS_HOSTS`, so staging reports nothing. `?analytics=force` overrides it
+for deliberate testing (a forced hit is a real hit). Live also double-loads
+Plausible and runs two redundant Google tags; we ship one of each.
 
 **What live actually runs** — messier than any tracker previously claimed, and
-the record is in the palace note below, not here: GA4 ungated, Plausible twice,
-a legacy HubSpot embed whose banner never loads, and a dead "Cookie Settings"
+the record is in the palace note, not here: GA4 ungated, Plausible twice, a
+legacy HubSpot embed whose banner never loads, and a dead "Cookie Settings"
 button. None of it is a pattern to port.
 
 **Still to do, and neither is code:**
@@ -289,38 +419,76 @@ while §4 holds.
 
 **Verified empirically (2026-08-11)** by a cold-load probe of `/contact/` on a
 test deploy with the form fully rendered: **zero cookies on our domain, zero
-local/sessionStorage**. The only cookies anywhere were `__cf_bm` (Cloudflare bot
-defense, ~30 min) on HubSpot's *own* domains — third-party, strictly-necessary
-class; list them in the privacy policy. Submission-side behaviour (a contact is
-created and deduped by email when no tracking cookie exists) is documented and
+local/sessionStorage**. The only cookies anywhere were `__cf_bm` (bot defense,
+~30 min) on HubSpot's *own* domains — third-party, strictly-necessary class;
+list them in the privacy policy. Submission-side behaviour (a contact is created
+and deduped by email when no tracking cookie exists) is documented and
 staff-confirmed, not probe-tested — testing it would inject junk contacts.
 
-- **Known leak, 4 pages:** four blog posts embed `youtube.com/embed` iframes,
-  which set YouTube cookies on load. Fix by swapping to
-  `youtube-nocookie.com/embed` (same player, no cookies until play) or a
-  click-to-load facade. Find them with a search for `youtube.com/embed` under
-  `src/content/`. **This is now the only thing standing between the site and
-  genuinely zero cookies**, so it is worth doing before launch rather than after.
+- **Known leak, 4 posts** (re-confirmed 2026-08-17: 4 posts embed
+  `youtube.com/embed`, none on `youtube-nocookie`). Those iframes set YouTube
+  cookies on load. Fix by swapping to `youtube-nocookie.com/embed` (same player,
+  no cookies until play) or a click-to-load facade. Find them with a search for
+  `youtube.com/embed` under `src/content/`. **This is the only thing standing
+  between the site and genuinely zero cookies** — and while it stands, the
+  zero-cookie sentence above is not literally true, which matters because it is
+  the basis for shipping without a banner. Worth doing before launch.
+- **⚠ The homepage loads a Google-hosted webfont** (found 2026-08-17). Not a
+  cookie — so the "zero cookies" sentence above survives literally — but a
+  request to `fonts.googleapis.com` / `fonts.gstatic.com` hands the visitor's IP
+  address to Google on every load, with no consent, which is the exposure a
+  German court found actionable (LG München I, Jan 2022) and is squarely against
+  the stance the rest of this section takes.
+
+  It is **our code, not HubSpot's**: `@components/graphics/DiamondEmbed.astro →
+  ensureFont()` injects two preconnects and a Google Fonts stylesheet for
+  **Sometype Mono**, the embed's own label font. It fires on exactly the two
+  pages carrying the embed — `/` (via `HomeHero.astro`) and `/style-guide/` —
+  and Sometype Mono is referenced nowhere else in the codebase. Verified by
+  request-level capture: blog posts and `/contact/` request no Google origin
+  despite loading the same HubSpot form, so the form is not the source.
+
+  This also makes two docs wrong: `public/_headers` states "Fonts are
+  self-hosted", and BACKLOG §13's CSP origin inventory omits the Google origins.
+
+  **Fix:** self-host Sometype Mono through the pipeline the other families
+  already use (`astro.config.mjs → fonts` + the hand-authored `@font-face` rules
+  in `global.css → typography`), then delete `ensureFont()`. Small, and it
+  removes a third-party render-blocking stylesheet from the homepage as a bonus.
+  If it is *not* fixed before launch, §6 must name Google as a recipient of
+  visitor IP addresses.
 - **Guard worth building:** assert that no page sets cookies on a cold load, so
-  bannerlessness can't silently break. Nothing checks this today.
+  bannerlessness can't silently break. Nothing checks this today. Worth widening
+  to third-party *requests* rather than cookies alone — a cookie-only assertion
+  would not have caught the Google Fonts call above.
+
 ### 6. Privacy-policy page rewrite
 
-`src/pages/privacy-policy.astro` still names Google Analytics,
-cookies-as-practice, and **WP Engine** as host — all wrong at cutover. Rewrite to
-match what actually ships (§4 is now settled, so this is no longer conditional):
-hosting on Cloudflare Workers, **Plausible as the sole analytics** plus the
-written legitimate-interest record that replaces a consent banner, a
-cookie/storage disclosure stating the site sets **no cookies of its own** (only
-third-party strictly-necessary `__cf_bm` on HubSpot's domains — and the YouTube
-embeds in §5 until those are fixed), HubSpot forms and the in-form consent basis.
+`src/pages/privacy-policy.astro` still names **Google Analytics** and **WP
+Engine** as host, and treats cookies as current practice — all wrong at cutover
+(re-confirmed 2026-08-17). Rewrite to match what actually ships (§4 is settled,
+so this is no longer conditional):
+
+- **hosting on AWS** — Amplify Hosting fronted by CloudFront, in the OpenMined
+  AWS account;
+- **Plausible as the sole analytics**, plus the written legitimate-interest
+  record that replaces a consent banner;
+- a **cookie/storage disclosure** stating the site sets no cookies of its own —
+  only third-party strictly-necessary `__cf_bm` on HubSpot's domains, and the
+  YouTube embeds in §5 until those are fixed;
+- **Google**, as a recipient of visitor IP addresses, *if* the homepage's
+  Google-hosted webfont (§5) is still shipping at launch — the cleaner outcome is
+  to self-host it and have nothing to disclose;
+- **HubSpot forms** and the in-form consent basis;
+- **Workable** for job applications.
+
 Worth an hour of EU counsel review against the research.
 
 **Also missing entirely, not just wrong: Stripe.** The site takes donations
-through Stripe Checkout (`src/pages/api/create-donation.ts`) and the policy names
-no payment processor at all. Add Stripe, plus Cloudflare as host/CDN and Workable
-for job applications, and the YouTube third-party cookies noted in §5. The policy
-currently *over*claims analytics (it lists GA and Plausible, neither of which
-ships) and *under*claims payments — the second is the one that matters legally.
+through Stripe Checkout and the policy names no payment processor at all. The
+policy currently *over*claims analytics (it lists Google Analytics and Plausible,
+and only one ships) and *under*claims payments — **the second is the one that
+matters legally**, so if only one thing gets fixed, fix that.
 
 ---
 
@@ -332,13 +500,12 @@ these; the rest are one-off checks best written fresh against the state of the
 day.
 
 - **Origin repoint** — `openmined.org` and `www` serve from the production
-  deploy, off WP Engine (§1 records the Worker-era DNS story; on Amplify the
-  repoint is the domain-association change).
-- **Live Stripe key** set on the production dynamic tier — on AWS that's the
-  SSM parameter (`aws/create-donation/README.md`); §2 records the
-  Worker-secret mechanism.
-- **`www` → apex 301 preserved** — today WordPress emits it; the static file
-  set can't match on hostname, so the new host must (HOSTING.md → Routing).
+  deploy, off WP Engine (the domain-association change in the cutover sequence).
+- **Live Stripe key** in the SSM parameter
+  (`aws/create-donation/README.md`), with §2's error-text fix alongside it.
+- **`www` → apex 301 preserved** — pre-wired in the sync script and inert until
+  `www` maps to the app, so cutover is the **first** time it can be observed.
+  Test the bare root as well as a deep path (see cutover step 4).
 - **True 404 on the production origin** — unknown paths answer HTTP 404, not
   a redirect onto the 404 page (the smoke `unknown path → true 404` row).
   Soft-404s poison exactly the GSC Coverage data §7 says to watch.
@@ -346,26 +513,35 @@ day.
   `.github/workflows/sync-redirects.yml` is flipped from `staging` to `main`
   (`scripts/sync-amplify-redirects.mjs`; HOSTING.md → Redirects), and the
   first post-flip push to `main` has run the sync once.
-- **`noindex` flipped** in both files (§3) — and every page that opts *itself*
-  out still does. Several do (search, the summit event pages, 404, the donation
-  thank-you, the blog card feed); search `src/pages/` for `noindex` and confirm
-  each survived the flip.
+- **HTML cache invalidated by the deploy.** HTML serves `max-age=0` with a
+  one-year **shared** TTL, so correctness depends entirely on the deploy
+  invalidating the edge. It is working today (live HTML matched a local build of
+  the same commit, 2026-08-17), but a silent invalidation failure post-cutover
+  would serve stale pages for a year. One cache-busted spot check right after
+  the repoint is enough to know.
+- **`noindex` flipped** — `@data/indexing.mjs → INDEXING_ENABLED` is `true` (§3),
+  the production origin answers `index, follow`, and each of the seven
+  self-excluding pages still opts out. **Then check the inverse on every
+  non-production host**: `staging.openmined.org` and the `*.amplifyapp.com`
+  branch/preview domains must still answer `noindex`. The branch condition should
+  make that automatic — this line is to confirm it did, since the failure is
+  invisible from the production side and slow to undo.
 - **Analytics reporting from the real origin** — Plausible ships (§4) but is
   gated to `openmined.org`/`www`, so it has NEVER sent a hit from any test host by
-  design. First confirmation that it works in production can only happen once the
-  domain resolves to the Worker: check Plausible's realtime view immediately after
-  the repoint. The reason it had to ship before cutover still stands: Plausible
-  runs on the WordPress site too, so it is the one tool that can tell the
-  before/after story across the switch.
+  design. First confirmation can only happen once the domain resolves to the new
+  host: check Plausible's realtime view immediately after the repoint. The reason
+  it had to ship before cutover still stands — Plausible runs on the WordPress
+  site too, so it is the one tool that can tell the before/after story across the
+  switch.
 - **Privacy policy** matches the shipped stack (§6).
 - **No WordPress hotlinks** — nothing loads an asset from
   `https://openmined.org/wp-content/…`. These resolve only while that host is
   still WordPress and break the instant the origin repoints, and
   `public/_redirects` deliberately 404s `/wp-content/uploads/*` rather than
-  redirect an asset URL to an HTML page. The 18 that existed (a page's step
-  images, a post's screen recordings) were localized 2026-08-12 and
-  `npm run audit:image-urls` now fails on any that return — so this is a
-  re-assert against the deployed build, not an open task.
+  redirect an asset URL to an HTML page. The 18 that existed were localized
+  2026-08-12 and `npm run audit:image-urls` now fails on any that return — so
+  this is a re-assert against the deployed build, not an open task (clean
+  2026-08-17).
 - **GSC baseline exported BEFORE the repoint** — the one item here with an
   unrecoverable deadline. Confirm a **domain property** for openmined.org exists
   (it survives the platform swap; a URL-prefix property is weaker), then export
@@ -377,24 +553,20 @@ day.
   Google's Rich Results Test on the live origin, not just the built HTML (§7).
   Then submit `/sitemap-index.xml` in GSC and watch Coverage for 404 spikes for
   the first two weeks.
-- **The `*.workers.dev` test host is guarded** — once `noindex` flips in code,
-  any deploy to a workers.dev hostname becomes a fully indexable duplicate of
-  the whole site. Retire it, gate it, or serve `X-Robots-Tag: noindex` for that
-  host. Pairs with the "retire leftover dev/preview deploys" line below.
-- **Route parity** — diff the frozen pre-cutover capture of the WordPress
-  `page-sitemap.xml` (in `reference/live-sitemap/`) against this build's routes
-  plus its redirects. Every live URL must resolve, directly or via a 301.
+- **Route parity** — every URL in `reference/live-sitemap/` resolves, directly or
+  via a 301. Swept 2026-08-17 against staging: **452/453**, the one gap being the
+  `resource_type` archive in §7. Re-run against the production origin after the
+  repoint; delete the reference directory once it passes.
 - **Blog permalinks** — every migrated post resolves at its WordPress URL. This
-  matched 371/371 when last audited (2026-07-22); re-verify only if the live
-  post set changed since.
+  matched 371/371 when last audited (2026-07-22), and the 2026-08-17 parity
+  sweep re-confirmed all 368 sitemapped posts; re-verify only if the live post
+  set changed since.
 - **Author archives** — same check for author archive URLs, including the
   redirect aliases; re-verify only if the author set changed.
-- **Smoke the production origin** — static pages, feeds, both redirect
-  classes, the search index actually being served, and
-  `POST /api/create-donation` returning a real `checkout_url`
-  (`npm run smoke -- https://openmined.org`).
+- **Smoke the production origin** — `npm run smoke -- https://openmined.org`,
+  expecting 17/17.
 - **Hold WordPress at a holdback hostname** until confidence is high, then
-  retire it and any leftover dev/preview deploys.
+  retire it and any leftover preview deploys.
 
 > ⏱ **Allow ~1 minute after any deploy or secret change before testing.** New
 > versions propagate across the edge progressively, so requests in that window
@@ -403,141 +575,28 @@ day.
 > worked, and a just-removed route that still answered 200 and then 404'd.
 > Re-test before diagnosing.
 
+**PR previews — verified working 2026-08-17.** They had been dead from PR #2
+through #3 (the IAM service role), and the 08-14 fix rested on a single
+unreproducible observation. PR #8 built and served a preview twice, smoke 17/17
+against the preview host. Latency is worth knowing for the review flow it exists
+to serve: the first build took **~39 minutes** during GitHub's webhook
+degradation, the second **~160 seconds** once that recovered. Treat minutes as
+normal and tens of minutes as a symptom of something upstream, not of Amplify.
+
+**Closed 2026-08-17 — the retired Cloudflare Worker.** This checklist used to
+carry a line about gating the `*.workers.dev` host, which would have become a
+fully indexable duplicate of the whole site the moment `noindex` flipped.
+`https://openmined-org.openmined.workers.dev/` now answers Cloudflare error 1042
+and serves nothing. Not verified as *deleted* (no Cloudflare access in that
+session) — but it is no longer serving the site, which is what the line was for.
+
 ---
 
-## Client-account deploy reference
+## Standing footgun
 
-The account-level setup on the OpenMined account: what is standing, and what is
-still to wire. README covers the build and deploy commands themselves; this is
-the work around them.
-
-### Standing up the Worker
-
-0. **Worker name — settled, do not change it.** `wrangler.jsonc → name` is
-   `openmined-org`, and that is the intended production name (confirmed
-   2026-08-12; earlier revisions of this step wrongly called it a throwaway from
-   the test round). The first deploy claims it for real and Cloudflare has no
-   in-place rename — renaming later means creating a new Worker and deleting the
-   old one, re-provisioning its KV namespace and re-setting its secret. **Do not
-   pass `--name`** on any deploy command: the config is the single place the name
-   lives, and a second place can only silently disagree (see
-   [trap 2](#wrangler-traps)).
-Steps 1–4 are **done as of 2026-08-12** — kept as the record of how, and what to
-repeat if the Worker is ever rebuilt.
-
-1. ✅ Authorize the OpenMined Cloudflare account — `wrangler login`, picking it
-   explicitly. `wrangler whoami` must list `OpenMined` (`7c0f9f2c…`); the token
-   used during earlier testing was scoped to a personal account, and a deploy
-   under it silently creates the Worker in the wrong place. Verify before every
-   first-time-in-a-while deploy, not just once.
-2. ✅ Deploy manually first: `npm run build`, then bare `wrangler deploy` from
-   the repo root in the same tree — the build writes `.wrangler/deploy/config.json`
-   (gitignored), redirecting wrangler to the adapter's augmented
-   `dist/server/wrangler.json`. Manual-first is deliberate: it stands the Worker
-   up and provisions its bindings before CI is wired.
-3. ✅ The adapter's `SESSION` KV namespace auto-provisions on first deploy. This
-   had never been exercised against a *cold* account; it worked, creating
-   `openmined-org-session` (`37e4541656df48d2…`) without prompting. The namespace
-   now exists, so a CI deploy no longer hits this path at all. If it ever balks
-   on a rebuild, pre-create the namespace and pin its `id` in `wrangler.jsonc`,
-   or set the adapter's `sessionKVBindingName`.
-4. ✅ Smoke the `*.workers.dev` URL before attaching any domain — 15/15 against
-   `https://openmined-org.openmined.workers.dev`. A Worker answers only on its
-   own hostname until a route or custom domain is attached, so blast radius until
-   then is nil. Keep the site-wide `noindex` on while it is reachable there
-   (§3): `workers.dev` hostnames are publicly crawlable.
-
-### Wiring push-to-deploy
-
-Cloudflare **Workers Builds**, connected to this repo on the client account.
-Prerequisite: an OpenMined **org owner** installs the Cloudflare GitHub App —
-usually the long pole.
-
-- Root directory `/`; production branch `main`; previews on for non-production
-  branches (useful for reviewing content changes).
-- The build command must be the npm script (`npm run build`), so the Pagefind
-  search index is built. The deploy command **must** override Cloudflare's
-  default so it points at the adapter's augmented config — the default won't
-  find it: `npx wrangler deploy`, run in the same tree as the build (which
-  writes the `.wrangler/deploy/config.json` redirect to
-  `dist/server/wrangler.json`).
-- `STRIPE_SECRET_KEY` is **not** a build variable — it lives on the Worker.
-- Workers Builds *is* managed wrangler-in-CI: it runs the same deploy command on
-  every push. The git connection replaces the *manual* CLI, not wrangler.
-  Secrets and any KV provisioning stay out-of-band CLI or dashboard steps — the
-  git flow deploys code only, never secrets.
-
-*Alternative, if Workers Builds is ever outgrown:* GitHub Actions with
-`cloudflare/wrangler-action` and repo secrets for a Workers-deploy-scoped API
-token and the account id. More control — easy to add typecheck, link-check, or
-Lighthouse gates — but you own token rotation and DIY preview URLs. Start with
-Workers Builds; move only if a gate demands it.
-
-*Hardening, optional:* wrangler is an implicit peer dependency, pinned by the
-lockfile. CI is reproducible today, but the version can float on an adapter bump
-or a lockfile regen. Declaring it an explicit `devDependency` makes the
-deploy-tool version an intentional, visible choice.
-
-### wrangler traps
-
-**Wrangler's non-interactive fallback answers `yes`, and it does not fail
-loudly.** Any shell that can't prompt — CI, a piped command, an agent's command
-runner — hits these. All three were hit during testing and all three recur on
-the client account.
-
-1. **`secret put` stores an EMPTY value and prints success.** It can't prompt
-   for the value, so it writes a blank. The binding then *exists* — it shows in
-   `secret list` — but its value is `""`, which is falsy, so the donation
-   endpoint correctly stays dormant. Symptom to recognize: **secret listed,
-   endpoint still 503.** Set secrets from the **Cloudflare dashboard** (Worker →
-   Settings → Variables and Secrets) or a real interactive terminal. Never pipe
-   the key in from `echo` — that puts it in shell history and logs.
-2. **A name mismatch silently CREATES a Worker.** A wrangler command whose
-   target name doesn't match an existing Worker auto-answers *yes* and creates a
-   new one — during testing this produced a stray Worker holding the secret
-   while the real one got nothing. Keep `wrangler.jsonc → name` and any `--name`
-   override identical. This is also a hazard in CI: a build that loses its
-   `--name` quietly stands up a *second* Worker instead of failing.
-3. **`wrangler delete` can't remove a secrets-only Worker.** One created by trap
-   2 has no deployed script version, so the CLI fails claiming it doesn't exist.
-   Delete it from the dashboard.
-
-Related: with several account memberships resolving, non-interactive wrangler
-commands need `CLOUDFLARE_ACCOUNT_ID` pinned or they abort with "More than one
-account available".
-
-### Two standing footguns
-
-- **Never set `assets.run_worker_first: true`.** It routes traffic through the
-  Worker ahead of the asset layer and bypasses `public/_redirects` entirely —
-  silently killing every WordPress-infra and editorial 301. This is why the
-  smoke assertions include redirect rows from both emitting layers.
 - **Never share or archive `dist/`.** The build copies `.dev.vars` into the
-  server output. It is gitignored and never uploaded — the Worker declares no
-  `vars` binding and only modules ship — but a real key sitting there in plain
-  text is worth not handing around.
-
-### Open account questions
-
-1. ~~Which Cloudflare account holds the `openmined.org` zone?~~ **Answered
-   2026-08-12: none.** DNS is on AWS Route 53, registrar GoDaddy (see §1).
-   ~~Which Cloudflare account owns the `*.pages.dev` projects?~~ **Answered
-   2026-08-13: `7c0f9f2c…` — the same OpenMined account this Worker deploys
-   to**, so the zone should land there. It is **eight** Pages projects, not
-   five, serving **nine** `openmined.org` hostnames: brand, design, internal,
-   share, admin, **cards**, **cv**, **go**, **tools** (the last four were in no
-   inventory). They resolve today as grey-cloud CNAMEs to `*.pages.dev` *from
-   external DNS*; once the zone is same-account that changes, and Pages
-   normally manages same-account custom domains as proxied records it creates
-   itself — **verify one subdomain before bulk-importing them DNS-only.**
-   The one still-live question here: **who holds the AWS account with the
-   Route 53 zone.** No AWS credentials exist on the maintainer's machine, so
-   the zone export is entirely people-blocked.
-2. Who owns the **WP Engine** account, does WordPress stay up read-only for a
-   grace period, and are any WP-served paths — forms, redirects, uploads — still
-   doing real work?
-3. Who can install the Cloudflare **GitHub App** on the OpenMined org?
-4. Who provisions the **live Stripe key**, and does staging keep the test key?
+  server output. It is gitignored and never uploaded, but a real key sitting
+  there in plain text is worth not handing around.
 
 ---
 
@@ -547,16 +606,14 @@ account available".
   default image, and `theme-color` are done.
 - **Lighthouse and cross-browser QA on the real deployed build** — the earlier
   a11y pass ran on a sample of pages, not the full set on real hosting.
-- **Extend CI coverage.** The two deterministic guards (`audit:images`,
-  `audit:image-urls`) already gate every push. What's still manual is anything
-  needing a browser, the network, or a deployment — the overflow audit, the
-  currency check, and the post-deploy smoke suite — plus the cold-load cookie
-  assertion from §5, which doesn't exist yet. Running the smoke suite against
-  the production Worker on a schedule would also close the monitoring gap noted
-  below.
-- **No uptime or error monitoring exists.** No health check, no alerting, and
-  Workers `observability` is not enabled. Worth deciding before the site is the
-  org's front door.
+- **Extend CI coverage.** The four deterministic guards already gate every push
+  to both deploying branches. What's still manual is anything needing a browser,
+  the network, or a deployment — the overflow audit, the currency check, and the
+  post-deploy smoke suite — plus the cold-load cookie assertion from §5, which
+  doesn't exist yet. Running the smoke suite against production on a schedule
+  would also close the monitoring gap below.
+- **No uptime or error monitoring exists.** No health check and no alerting.
+  Worth deciding before the site is the org's front door.
 
 ---
 

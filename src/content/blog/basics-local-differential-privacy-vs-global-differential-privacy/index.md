@@ -81,16 +81,11 @@ def create_db(num_entries):
 ```
 
 <figure class=""><pre><code class="language-python">def query(db):
-
     true_result = torch.mean(db.float())
-    
     first_coin_flip = (torch.rand(len(db)) &gt; 0.5).float()
     second_coin_flip = (torch.rand(len(db)) &gt; 0.5).float()
-
     augmented_database = db.float() * first_coin_flip + (1 - first_coin_flip) * second_coin_flip
-
     db_result = torch.mean(augmented_database.float()) * 2 - 0.5
-    
     return db_result, true_result</code></pre><figcaption>Adding noise to each datapoint individually</figcaption></figure>
 
 ```python

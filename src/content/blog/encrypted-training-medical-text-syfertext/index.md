@@ -70,30 +70,23 @@ The dataset will be downloaded in a folder called `data` in the root directory. 
 -   `vocab.txt`: Vocabulary text file generated using the [Systematized Nomenclature of Medicine International (SNMI)](https://bioportal.bioontology.org/ontologies/SNMI) data.
 
 <figure class=""><pre><code class="language-python">import sys
-
 # see repos mentioned above
 sys.path.append('../scripts')
-
 from util import download_dataset
 </code></pre><figcaption>Importing helper script for dataset downloading</figcaption></figure>
 
 <figure class=""><pre><code class="language-python"># The URL template to all dataset files
 url_template = 'https://raw.githubusercontent.com/socd06/medical-nlp/master/data/%s'
-
 # File names to be downloaded from the using the URL template above
 files = ['classes.csv','train.csv','test.csv', 'clinical-stopwords.txt', 'vocab.txt']
-
 # Construct the list of urls
 urls = [url_template % file for file in files]
-
 # The dataset name and its root folder
 dataset_name = 'data'
 root_path = '../data'
-
 # Create the dataset folder if it is not already there
 if not os.path.exists('../data'):
     os.mkdir('../data')
-
 # Start downloading
 download_dataset(dataset_name = dataset_name, 
                  urls = urls, 
@@ -213,33 +206,25 @@ We simulate two private datasets owned by two clients (Bob and Alice):
 
 <figure class=""><pre><code class="language-python"># Create two datasets, one for Bob and another one for Alice
 dataset_bob, dataset_alice = train_test_split(dataset_local[:25000], train_size = 0.5)
-
 # Now create a validation set for Bob and another one for Alice
 train_bob, val_bob = train_test_split(dataset_bob, train_size = 0.9)
 train_alice, val_alice = train_test_split(dataset_alice, train_size = 0.9)
-
 # Make a function that sends the content of each split to a remote worker
 def make_remote_dataset(dataset, worker):
-
     # Got through each example in the dataset
     for example in dataset:
-        
         # Send each transcription text
         example['text'] = example['text'].send(worker)
-                       
         # Send each label as a one-hot-encoded vector
         one_hot_label = torch.zeros(2).scatter(0, torch.Tensor([example['label']]).long(), 1)
-        
         # print for debugging purposes
         # print("mapping",example['label']," to ",one_hot_label)
-        
         # Send the transcription label
         example['label'] = one_hot_label.send(worker)</code></pre><figcaption>Every label corresponds to a 2-digit tensor of binary values (<code>[1,0]</code> or <code>[0,1]</code></figcaption></figure>
 
 <figure class=""><pre><code class="language-python"># Bob's remote dataset
 make_remote_dataset(train_bob, bob)
 make_remote_dataset(val_bob, bob)
-
 # Alice's remote dataset
 make_remote_dataset(train_alice, alice)
 make_remote_dataset(val_alice, alice)</code></pre><figcaption>Converting the data into a remote dataset</figcaption></figure>
@@ -303,7 +288,6 @@ if use_stop_tagger:
 <figure class=""><pre><code class="language-python">## Load list of vocab words                
 with open('../data/vocab.txt', 'r') as f:
     vocab_words = f.read().splitlines()  
-
 # Create a simple tagger object to tag stop words
 vocab_tagger = SimpleTagger(attribute = 'is_vocab',
                            lookups = vocab_words,
@@ -311,15 +295,12 @@ vocab_tagger = SimpleTagger(attribute = 'is_vocab',
                            default_tag = False,
                            case_sensitive = False
                           )
-
 if use_vocab_tagger:
-
     # Add the stop word to the pipeline
     nlp.add_pipe(name = 'vocab tagger',
                  component = vocab_tagger,
                  remote = True
                 )
-
     # Tokens with 'is_vocab' = False are
     # not going to be used when creating the 
     # Doc vector
@@ -475,12 +456,10 @@ BATCH_SIZE = 128 # chunks of data to be passed through the network
 LEARNING_RATE = 0.001
 EPOCHS = 3 # Complete passes of the entire data
 NUN_CLASS = 2 # 2 classes since its a binary classifier 
-
 # Instantiate the DataLoader object for the training set
 trainloader = DataLoader(trainset, shuffle = True,
                          batch_size = batch_size, num_workers = 0, 
                          collate_fn = trainset.collate_fn)
-
 # Instantiate the DataLoader object for the validation set
 valloader = DataLoader(valset, shuffle = True,
                        batch_size = batch_size, num_workers = 0, 
@@ -491,22 +470,16 @@ valloader = DataLoader(valset, shuffle = True,
 The classifier we will use is a simple neural network of 3 fully connected layers with `300` input features, which is the size of the embedding vectors computed previously by SyferText. The network is a binary classifier that outputs a label for surgical specialties and another one for every other type of specialty.
 
 <figure class=""><pre><code class="language-Python">class Classifier(torch.nn.Module):
-    
     def __init__(self, in_features, out_features):
         super(Classifier, self).__init__()
-        
         self.fc1 = torch.nn.Linear(in_features, 64)
         self.fc2 = torch.nn.Linear(64, 32)
         self.fc3 = torch.nn.Linear(32, out_features)
-                
     def forward(self, inputs):
         x = F.relu(self.fc1(inputs.squeeze(1)))
         x = F.relu(self.fc2(x))
-       
         logits = self.fc3(x)
-        
         probs = F.relu(logits)
-        
         return probs, logits</code></pre><figcaption>Neural Network Architecture</figcaption></figure>
 
 Next, we initialize and encrypt the classifier. The encryption here must use the same workers that hold the share and the same primitives used to encrypt the document vectors.
@@ -527,7 +500,6 @@ The last thing to do before training is creating an optimizer. The optimizer doe
 
 <figure class=""><pre><code class="language-python">optimizer = optim.SGD(params = model.parameters(),
                   lr = LEARNING_RATE, momentum=0.3)
-
 optimizer = optimizer.fix_precision()</code></pre><figcaption>Initialize stochastic gradient descent (SGD) optimizer&nbsp;</figcaption></figure>
 
 ## Model Training and Tensorboard

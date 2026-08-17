@@ -15,6 +15,7 @@
  * Modeled on the live site's head (verified against openmined.org: 2026-07-15).
  */
 import { SITE_NAME, SITE_URL, DEFAULT_DESCRIPTION, DEFAULT_OG_IMAGE, composeTitle } from '@data/site.mjs';
+import { SITE_INDEXABLE, BUILD_BRANCH } from '@data/indexing.mjs';
 import type { SchemaAuthor } from '@utils/schema';
 
 interface Props {
@@ -57,7 +58,7 @@ const {
   imageAlt = '',
   canonicalPath,
   type = 'website',
-  noindex = true,
+  noindex = !SITE_INDEXABLE,
   publishedTime,
   modifiedTime,
   authors = [],
@@ -110,6 +111,15 @@ const socialDesc = socialDescription?.trim() || description?.trim() || DEFAULT_D
 {metaDescription && <meta name="description" content={metaDescription} />}
 <link rel="canonical" href={canonical} />
 <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow'} />
+{/*
+  Which branch built this, on non-indexable builds only — so it never reaches
+  production, where it would be pure noise. It exists because the branch gate in
+  @data/indexing.mjs depends on Amplify populating AWS_BRANCH, and this is the
+  only way to confirm that from outside the build (no AWS console access). If a
+  staging or preview page shows no build-branch meta, the variable is missing and
+  the gate is running on its fail-closed path.
+*/}
+{!SITE_INDEXABLE && BUILD_BRANCH && <meta name="x-build-branch" content={BUILD_BRANCH} />}
 
 {/* Open Graph */}
 <meta property="og:type" content={type} />

@@ -121,15 +121,12 @@ Operations like multiplication where SPDZ manages to maintain the encrypted numb
     b = random.randrange(Q)
     a_mul_b = (a * b) % Q
     return encrypt(a), encrypt(b), encrypt(a_mul_b)
-    
 #we also assume that the crypto provider distributes the shares</code></pre><figcaption><strong>a</strong> and <strong>b</strong> are random ints smaller than Q and <strong>a_mul_b</strong> is their product modulo Q</figcaption></figure>
 
 <figure class=""><pre><code class="language-python">def mul(x, y):
     a, b, a_mul_b = generate_mul_triple()
-    
     alpha = decrypt(x - a)&lt;-x remains hidden because a is random 
     beta  = decrypt(y - b)&lt;-y remains hidden because b is random 
-    
     #local re-combination
     return alpha.mul(beta) + alpha.mul(b) + a.mul(beta) + a_mul_b</code></pre><figcaption>Simplest version of the multiplication function for 2 SPDZ-shared numbers</figcaption></figure>
 
