@@ -1,7 +1,14 @@
 # OpenMined — crawl policy.
-# NOTE: pre-launch, every page also carries <meta name="robots" content="noindex">
-# (Base.astro → noindex default). Crawling is allowed so engines can READ the
-# noindex; nothing gets indexed until that default is flipped at launch.
+#
+# Crawling is allowed on EVERY host, deliberately. Whether a page may be indexed
+# is decided by its <meta name="robots"> tag, which src/data/indexing.mjs derives
+# from the launch switch and the build's branch — so pre-launch, and on staging
+# and PR previews forever, every page says noindex while still being fetchable.
+#
+# ⚠ Do NOT add `Disallow: /` here for the non-production hosts, tempting as the
+#   symmetry looks. A disallowed URL is never fetched, so the noindex is never
+#   READ — and a URL blocked that way can still be indexed (without a snippet) on
+#   inbound links alone. Allowing the crawl is what makes the noindex effective.
 User-agent: *
 Allow: /
 

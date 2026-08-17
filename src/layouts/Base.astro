@@ -4,6 +4,7 @@ import Seo from '@components/Seo.astro';
 import JsonLd from '@components/JsonLd.astro';
 import Analytics from '@components/Analytics.astro';
 import { SITE_URL, composeTitle } from '@data/site.mjs';
+import { SITE_INDEXABLE } from '@data/indexing.mjs';
 import type { SchemaAuthor, Breadcrumb } from '@utils/schema';
 import DonateModal from '@components/layout/DonateModal.astro';
 import SearchModal from '@components/layout/SearchModal.astro';
@@ -30,8 +31,11 @@ interface Props {
   keywords?: string[];
   articleSection?: string[];
   /**
-   * Keep the page out of search indexes. Defaults TRUE as a pre-launch guard.
-   * AT LAUNCH: flip this default to false to make the whole site indexable.
+   * Keep the page out of search indexes. The default is DERIVED, not literal —
+   * `@data/indexing.mjs` decides it from the launch switch and the build's
+   * branch, so non-production builds stay noindex after launch instead of
+   * needing a second edit here. Pass it explicitly to opt a single route out
+   * permanently (several do).
    */
   noindex?: boolean;
   /** article:* metadata — used by BlogPost (type="article"). */
@@ -59,7 +63,7 @@ const {
   image,
   imageAlt,
   type,
-  noindex = true,
+  noindex = !SITE_INDEXABLE,
   breadcrumbs,
   keywords,
   articleSection,

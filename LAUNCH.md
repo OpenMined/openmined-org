@@ -200,11 +200,32 @@ a fixed message and log server-side. Both implementations
 (`src/pages/api/create-donation.ts` and `aws/create-donation/index.mjs`) —
 BACKLOG §14 holds the full item.
 
-### 3. Flip the site-wide `noindex` guard — and gate it by branch first
+### 3. Flip the site-wide `noindex` guard — one constant
 
-`Base.astro` Props → `noindex` default `true → false`. **Two files, not one** —
-align the parallel default in `Seo.astro` so a component rendering `Seo` outside
-`Base` can't silently ship a `noindex`.
+**Set `@data/indexing.mjs → INDEXING_ENABLED` to `true`.** That is the whole
+flip: one line, one file. It used to be a hand-edit of the `noindex` prop
+default in both `Base.astro` and `Seo.astro`; both now derive from that module,
+so they need no edit and cannot drift apart.
+
+Indexability requires **two** conditions, which is the point of the indirection:
+`INDEXING_ENABLED` *and* the build being the production branch. So flipping the
+constant makes `main` indexable and leaves `staging`, every PR preview, and local
+dev permanently noindex — the exposure below is closed by construction rather
+than by remembering. The gate **fails closed**: an unset or unrecognised branch
+resolves to noindex, verified across the branch matrix 2026-08-17, including a
+wrong-case `Main`.
+
+Verified by simulating both builds (2026-08-17): pre-launch, all 683 pages
+noindex; post-launch on `main`, 677 indexable with all seven self-excluding
+routes still `noindex, nofollow`.
+
+⚠ **The gate assumes Amplify populates `AWS_BRANCH`**, which cannot be confirmed
+without AWS access. Non-indexable builds therefore emit
+`<meta name="x-build-branch">` (never present on an indexable build): if a
+staging or preview page carries **no** such tag, the variable is missing and the
+gate is running on its fail-closed path — which would mean production stays
+noindex after the flip. The smoke suite's `noindex guard` row is what catches
+that on the origin.
 
 **Seven pages opt themselves out and must survive the flip** (verified
 2026-08-17): `404`, `blog/cards`, `donate/thank-you`, both
@@ -213,10 +234,10 @@ align the parallel default in `Seo.astro` so a component rendering `Seo` outside
 also the moment that count becomes meaningful — re-derive it with a grep of
 `src/pages/`, don't trust this list to age.
 
-**⚠ Flipping the default bare-naked exposes every non-production host.** The
-`noindex` on staging is **not** a staging rule — it is this same build-time
-default, byte-identical to a local build of the same commit. Measured
-2026-08-17, across every host:
+**Why the branch condition exists — the measured exposure it closes.** Before
+the gate, the `noindex` on staging was **not** a staging rule; it was the same
+build-time default that ships to production, byte-identical to a local build of
+the same commit. Measured 2026-08-17, across every host:
 
 | Host | Reachable | `X-Robots-Tag` | `robots.txt` | Access control |
 |---|---|---|---|---|
@@ -226,35 +247,30 @@ default, byte-identical to a local build of the same commit. Measured
 | `pr-N.<app>.amplifyapp.com` | per PR | none | — | none |
 
 **Amplify does not add its own `noindex` to `*.amplifyapp.com`** — checked on
-both branch domains, no such header. So on flip day all of these become fully
-indexable duplicates of the whole site.
+both branch domains, no such header. So without the branch condition, flip day
+would turn all of these into fully indexable duplicates of the whole site.
 
-Two partial mitigations already exist and neither is sufficient: every staging
-page carries a `rel=canonical` and `og:url` pointing at `https://openmined.org/…`
-(a hint, not a directive — it does not stop crawling), and the sitemap lists
-production URLs only (`astro.config.mjs → site`), so staging never volunteers its
-own URLs.
+Two partial mitigations exist and neither would have been sufficient alone: every
+non-production page carries a `rel=canonical` and `og:url` pointing at
+`https://openmined.org/…` (a hint, not a directive — it does not stop crawling),
+and the sitemap lists production URLs only (`astro.config.mjs → site`), so
+staging never volunteers its own URLs.
 
-**The fix is a build-time branch gate, and it is newly possible.** The reason the
-analytics gate had to be a *runtime* hostname test (§4) was that on Cloudflare
-Workers staging and production were the **same deployment**, so nothing at build
-time could tell them apart. On Amplify each branch is its own build, and the
-branch is available to it — so the `noindex` default can be derived rather than
-hard-coded, and the launch flip becomes a change of condition instead of a change
-of constant. Design it to **fail closed**: unknown or missing branch ⇒ `noindex`,
-so a misconfigured build is invisible rather than indexed.
+**What does NOT work, so nobody re-proposes it:**
 
-Note `robots.txt` needs the same treatment and is a **static file**
-(`public/robots.txt`) — a per-branch `Disallow: /` means generating it from a
-route instead of shipping it static. And note what will *not* work:
-`customHttp.yml` is app-wide, so an `X-Robots-Tag` rule there cannot distinguish
-branches — it would noindex production too.
+- **`X-Robots-Tag` in `customHttp.yml`** — that file is app-wide, so it cannot
+  distinguish branches; it would noindex production too.
+- **`Disallow: /` in `robots.txt` for the non-production hosts.** A disallowed
+  URL is never fetched, so the `noindex` is never read — and such a URL can still
+  be indexed, without a snippet, on inbound links alone. Allowing the crawl is
+  precisely what makes the `noindex` effective; `public/robots.txt` says so in
+  its own header. This is a trap, not an oversight.
 
-The alternative, if a stronger guarantee is wanted: **Amplify branch access
-control** (basic auth) on `staging` and previews, which stops crawlers fetching
-at all. It is a per-branch console toggle, so it needs AWS access, and it puts a
-password in front of the preview flow that exists for a non-developer to review
-work.
+**A stronger guarantee, if wanted:** Amplify **branch access control** (basic
+auth) on `staging` and previews stops crawlers fetching at all. Per-branch console
+toggle, so it needs AWS access, and it puts a password in front of the preview
+flow that exists for a non-developer to review work. The build-time gate is the
+cheaper 95%; this is the belt to its braces, not a replacement.
 
 ### 7. SEO surface parity — no downgrade at cutover
 
@@ -492,12 +508,13 @@ day.
   the same commit, 2026-08-17), but a silent invalidation failure post-cutover
   would serve stale pages for a year. One cache-busted spot check right after
   the repoint is enough to know.
-- **`noindex` flipped** in both files (§3) — and each of the seven
-  self-excluding pages still opts out. **Then re-assert the inverse on every
+- **`noindex` flipped** — `@data/indexing.mjs → INDEXING_ENABLED` is `true` (§3),
+  the production origin answers `index, follow`, and each of the seven
+  self-excluding pages still opts out. **Then check the inverse on every
   non-production host**: `staging.openmined.org` and the `*.amplifyapp.com`
-  branch/preview domains must still answer `noindex`, or they are indexable
-  duplicates of the entire site (§3 has the measured exposure table). This is
-  the one flip that makes something *worse* elsewhere, so check both directions.
+  branch/preview domains must still answer `noindex`. The branch condition should
+  make that automatic — this line is to confirm it did, since the failure is
+  invisible from the production side and slow to undo.
 - **Analytics reporting from the real origin** — Plausible ships (§4) but is
   gated to `openmined.org`/`www`, so it has NEVER sent a hit from any test host by
   design. First confirmation can only happen once the domain resolves to the new
