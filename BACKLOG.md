@@ -91,9 +91,22 @@ the author bios took).
 
 Every fix must land in **both** implementations:
 `src/pages/api/create-donation.ts` (the contract source; serves dev) and
-`aws/create-donation/index.mjs` (what production runs). Three opens — none
+`aws/create-donation/index.mjs` (what production runs). Four opens — none
 exploitable for theft (the secret never leaves the Lambda and Stripe validates
 the session); this is abuse-resistance and hygiene:
+
+- **Staging and previews share production's key.** One SSM parameter and one
+  Lambda serve every host, reached through an app-wide Amplify proxy rule, so
+  once the live key is armed `POST /api/create-donation` on
+  `staging.openmined.org` and on any `pr-N.*.amplifyapp.com` hits the live Stripe
+  account (both measured answering 200 with a real checkout URL, 2026-08-17).
+  **Accepted, not blocking — Kyle's call 2026-08-17.** The reasoning it rests on,
+  worth not re-litigating: funds land in OpenMined's account either way, the
+  session's `success_url` resolves to production via `safeOrigin`'s `SITE_URL`
+  fallback so a donor still reaches the right thank-you page, and the endpoint is
+  equally unauthenticated on production — so non-production hosts add dashboard
+  noise rather than new attack surface. Fixing it properly means a second
+  Lambda + parameter or a host check in the existing one; not worth it for that.
 
 - **No rate limiting.** An unauthenticated POST creates a Stripe Checkout
   Session per request, spending Stripe write-rate and polluting the dashboard.

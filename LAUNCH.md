@@ -172,10 +172,10 @@ origin repoint, which is the cutover-day sequence above.
 1. Who owns the **WP Engine** account, does WordPress stay up read-only for a
    grace period, and are any WP-served paths — forms, redirects, uploads — still
    doing real work?
-2. ~~Who provisions the **live Stripe key**?~~ **Answered 2026-08-17: shared with
-   Stephen**, who arms it in SSM. The live half of the question stands and is
-   now architectural, not administrative: **staging cannot keep the test key**
-   while one Lambda and one SSM parameter serve every host — see §2.
+2. ~~Who provisions the **live Stripe key**, and does staging keep the test
+   key?~~ **Both answered 2026-08-17.** The key is with Stephen, who arms it in
+   SSM; staging does not keep a test key, because one Lambda and one SSM
+   parameter serve every host — accepted rather than fixed (BACKLOG §14).
 3. **Where do the served response headers actually come from — `customHttp.yml`,
    or a console setting?** `main`'s branch domain serves all 6 security headers
    while having no `customHttp.yml` in its tree (measured 2026-08-17), so the
@@ -199,21 +199,15 @@ at request time — commands in `aws/create-donation/README.md`. It is a runtime
 read, so no rebuild or redeploy is needed.
 
 **The live key is with Stephen as of 2026-08-17.** Arming it in SSM is his step,
-since it needs AWS access. Two things to settle *before* it is armed rather than
-after:
+since it needs AWS access.
 
-- **There is one SSM parameter and one Lambda, reached through an app-wide
-  Amplify proxy rule — so staging and every PR preview share whichever key is in
-  it.** Measured 2026-08-17: `POST /api/create-donation` answers 200 with a real
-  checkout URL on `staging.openmined.org` *and* on a `pr-N` preview host. Arming
-  the live key therefore points those public, unauthenticated hosts at the live
-  Stripe account; the question "does staging keep the test key?" cannot be
-  answered yes without a second Lambda + parameter, or a host check inside the
-  existing one. Decide which, or accept it knowingly.
-- **The error-text fix should land in the same change** (BACKLOG §14): the route
-  forwards Stripe's own error text, and the auth-failure variant carries a
-  partially-redacted key — the failure most likely at exactly the moment a key
-  changes.
+One thing worth landing in the same change (BACKLOG §14): the route forwards
+Stripe's own error text, and the auth-failure variant carries a partially-redacted
+key — the failure most likely at exactly the moment a key changes.
+
+Not a blocker, decided 2026-08-17: staging and previews will share the live key,
+because one Lambda and one SSM parameter serve every host. Reasoning and what a
+real fix would cost are in BACKLOG §14 — don't re-open it here.
 
 **Land one hardening fix with the key swap, not after it.** The route forwards
 Stripe's own error text to the browser (`!res.ok` branch; confirmed live on the
@@ -272,6 +266,31 @@ one: if `main` reported something unexpected, production would come up `noindex`
 rather than a non-production host coming up indexable — caught by the smoke
 `noindex guard` row against the production origin, which the checklist already
 requires.
+
+**⚠ Residual the branch gate does NOT close: `main`'s own default domain.** The
+gate keys on the **branch**, but one build serves **two hostnames** — after the
+flip, `main.<app>.amplifyapp.com` serves the same artifact as `openmined.org` and
+will therefore also answer `index, follow`. That is an indexable duplicate of the
+entire site, mitigated only by the `rel=canonical` every page carries pointing at
+`openmined.org` — a hint Google usually honours, not a directive.
+
+Build time cannot fix this, and that is the whole point: at build time there is
+one artifact and no request, so nothing can distinguish which hostname will serve
+it. Only a **runtime hostname check** can — the same shape as
+`@data/analytics.mjs → ANALYTICS_HOSTS`, which exists for the mirror-image
+reason. Three ways to close it, in rough order of cost:
+
+1. **Accept it and watch GSC** — rely on the canonical, and check Coverage for
+   `amplifyapp.com` URLs in the first weeks. Zero work, non-zero risk.
+2. **Add a runtime host check** that forces `noindex` when
+   `location.hostname` is not a production host. Cheap and complete, but
+   JS-dependent, so it is weaker than the build-time directive it supplements.
+3. **Ask whether the default domain can be disabled or redirected** once the
+   custom domain is attached — needs AWS access, and Amplify offers no obvious
+   per-domain header control, so treat this as a question rather than a plan.
+
+Note **branch access control cannot be the answer here**: it applies per branch,
+so locking `main`'s default domain would lock `openmined.org` with it.
 
 **Seven pages opt themselves out and must survive the flip** (verified
 2026-08-17): `404`, `blog/cards`, `donate/thank-you`, both
@@ -560,7 +579,10 @@ day.
   non-production host**: `staging.openmined.org` and the `*.amplifyapp.com`
   branch/preview domains must still answer `noindex`. The branch condition should
   make that automatic — this line is to confirm it did, since the failure is
-  invisible from the production side and slow to undo.
+  invisible from the production side and slow to undo. **`main`'s own default
+  domain is the known exception** and will answer `index, follow` alongside the
+  apex; §3 records the three options for it. Decide which before launch rather
+  than discovering it in GSC.
 - **Analytics reporting from the real origin** — Plausible ships (§4) but is
   gated to `openmined.org`/`www`, so it has NEVER sent a hit from any test host by
   design. First confirmation can only happen once the domain resolves to the new
