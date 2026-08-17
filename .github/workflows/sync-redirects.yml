@@ -16,7 +16,10 @@ name: Sync Amplify redirects
 
 on:
   push:
-    branches: [staging] # flip to [main] at cutover — LAUNCH.md cutover step 1
+    # Authority follows production: only main pushes sync rules (flipped from
+    # [staging] 2026-08-17, ahead of cutover — safe because main and staging
+    # are identical and rules are app-wide). Staging pushes no longer sync.
+    branches: [main]
 
 permissions:
   id-token: write
