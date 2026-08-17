@@ -165,8 +165,12 @@ export const POST: APIRoute = async ({ request }) => {
 
   const data: any = await res.json();
   if (!res.ok || !data?.url) {
-    const message = data?.error?.message || 'Could not start checkout. Please try again.';
-    return json({ message }, 502);
+    // Log Stripe's own error server-side only — NEVER forward it to the
+    // browser: Stripe's auth-failure messages embed a partially-redacted API
+    // key, and a key mismatch is likeliest at exactly the moment the key is
+    // rotated (LAUNCH.md §2 / BACKLOG §14).
+    console.error('create-donation: Stripe error', res.status, data?.error?.type, data?.error?.message);
+    return json({ message: 'Could not start checkout. Please try again.' }, 502);
   }
 
   return json({ checkout_url: data.url });
