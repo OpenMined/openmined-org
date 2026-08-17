@@ -34,23 +34,34 @@ const SITE_URL = process.env.SITE_URL || 'https://openmined.org';
 // The Amplify app's default domain (e.g. dXXXX.amplifyapp.com) — branch and PR
 // preview origins are subdomains of it.
 const APP_DOMAIN = process.env.APP_DOMAIN || '';
+const STAGING_URL = process.env.STAGING_URL || 'https://staging.openmined.org';
+// Two parameters, one per Stripe mode. One Lambda serves every host through
+// the app-wide proxy rule, so WHICH key answers is decided per request from
+// the validated origin (see the handler): exactly the production origin →
+// live; staging and previews → test. Unknown/absent Origin falls back to
+// SITE_URL and therefore the live key — the same public behavior the
+// production origin exposes anyway. Supersedes the shared-key acceptance in
+// BACKLOG §14 (Stephen's direction, 2026-08-17).
 const SSM_PARAM = process.env.SSM_PARAM || '/openmined-org/STRIPE_SECRET_KEY';
+const SSM_PARAM_TEST = process.env.SSM_PARAM_TEST || '/openmined-org/STRIPE_SECRET_KEY_TEST';
 
 const ssm = new SSMClient({});
-let cachedKey; // warm-invocation cache; undefined = not yet fetched
+const cachedKeys = new Map(); // per-parameter warm-invocation cache
 
-async function getStripeKey() {
-  if (cachedKey !== undefined) return cachedKey;
+async function getStripeKey(paramName) {
+  if (cachedKeys.has(paramName)) return cachedKeys.get(paramName);
+  let key;
   try {
-    const res = await ssm.send(new GetParameterCommand({ Name: SSM_PARAM, WithDecryption: true }));
-    cachedKey = res.Parameter?.Value || null;
+    const res = await ssm.send(new GetParameterCommand({ Name: paramName, WithDecryption: true }));
+    key = res.Parameter?.Value || null;
   } catch {
     // ParameterNotFound (dormant state) or transient SSM failure — treat both
-    // as "no key": the modal shows the friendly 503 message either way. Do not
-    // cache null on transient errors forever; a fresh cold start retries.
-    cachedKey = null;
+    // as "no key": the modal shows the friendly 503 message either way. A
+    // fresh cold start retries after transient errors.
+    key = null;
   }
-  return cachedKey;
+  cachedKeys.set(paramName, key);
+  return key;
 }
 
 /** Same shape + security headers as the Astro route's json() helper. */
@@ -65,10 +76,10 @@ const json = (data, status = 200) => ({
   body: JSON.stringify(data),
 });
 
-/** Origin header if it's one of ours (site, branch, or PR preview); else SITE_URL. */
+/** Origin header if it's one of ours (site, staging, or PR preview); else SITE_URL. */
 function safeOrigin(headers) {
   const origin = headers?.origin || '';
-  if (origin === SITE_URL) return origin;
+  if (origin === SITE_URL || origin === STAGING_URL) return origin;
   if (APP_DOMAIN) {
     try {
       const u = new URL(origin);
@@ -86,7 +97,9 @@ export const handler = async (event) => {
     return json({ message: 'Method not allowed.' }, 405);
   }
 
-  const secretKey = await getStripeKey();
+  // Origin decides the key: live only for the production origin itself.
+  const origin = safeOrigin(event.headers);
+  const secretKey = await getStripeKey(origin === SITE_URL ? SSM_PARAM : SSM_PARAM_TEST);
   if (!secretKey) {
     return json({ message: 'Donations are not available right now. Please try again later.' }, 503);
   }
@@ -112,7 +125,6 @@ export const handler = async (event) => {
     return json({ message: 'Unsupported currency.' }, 400);
   }
 
-  const origin = safeOrigin(event.headers);
   const unitAmount = toStripeAmount(amount, currency);
 
   const params = new URLSearchParams();

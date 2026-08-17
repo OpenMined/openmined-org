@@ -57,7 +57,12 @@ async function readRuntimeEnv(name: string): Promise<string | undefined> {
   return typeof process !== 'undefined' ? process.env?.[name] : undefined;
 }
 
-const getStripeKey = () => readRuntimeEnv('STRIPE_SECRET_KEY');
+// Which key answers is decided per request from the validated origin (see the
+// handler): exactly the production origin → STRIPE_SECRET_KEY (live); staging
+// and previews → STRIPE_SECRET_KEY_TEST. Mirrors the Lambda twin's two-SSM-
+// parameter split (BACKLOG §14 shared-key acceptance superseded, 2026-08-17).
+// In dev the browser origin is localhost, which falls back to SITE_URL, so dev
+// keeps reading STRIPE_SECRET_KEY from .dev.vars unchanged.
 
 /**
  * Post-payment return origin: the browser's Origin header if it's one of ours —
@@ -67,9 +72,9 @@ const getStripeKey = () => readRuntimeEnv('STRIPE_SECRET_KEY');
  * Stripe sends the donor (and the session_id) to. Mirrors the Lambda twin's
  * `safeOrigin` — keep the two in step.
  */
-function safeOrigin(request: Request, appDomain: string | undefined): string {
+function safeOrigin(request: Request, appDomain: string | undefined, stagingUrl?: string): string {
   const origin = request.headers.get('origin') || '';
-  if (origin === SITE_URL) return origin;
+  if (origin === SITE_URL || (stagingUrl && origin === stagingUrl)) return origin;
   if (appDomain) {
     try {
       const u = new URL(origin);
@@ -104,7 +109,17 @@ const json = (data: unknown, status = 200) =>
   });
 
 export const POST: APIRoute = async ({ request }) => {
-  const secretKey = await getStripeKey();
+  // Validated origin (see safeOrigin): staging/preview checkouts round-trip to
+  // the host they started on, anything untrusted falls back to the canonical
+  // site — never a raw Host/Origin value. Also decides the key (comment above).
+  const origin = safeOrigin(
+    request,
+    await readRuntimeEnv('APP_DOMAIN'),
+    (await readRuntimeEnv('STAGING_URL')) || 'https://staging.openmined.org',
+  );
+  const secretKey = await readRuntimeEnv(
+    origin === SITE_URL ? 'STRIPE_SECRET_KEY' : 'STRIPE_SECRET_KEY_TEST',
+  );
   if (!secretKey) {
     // Not configured yet — the build ships this way until the secret is added.
     return json({ message: 'Donations are not available right now. Please try again later.' }, 503);
@@ -146,10 +161,6 @@ export const POST: APIRoute = async ({ request }) => {
     // Shows a "Donate" button + donation framing on Stripe's hosted page.
     params.set('submit_type', 'donate');
   }
-  // Validated origin (see safeOrigin): staging/preview checkouts round-trip to
-  // the host they started on, anything untrusted falls back to the canonical
-  // site — never a raw Host/Origin value.
-  const origin = safeOrigin(request, await readRuntimeEnv('APP_DOMAIN'));
   params.set('success_url', `${origin}/donate/thank-you/?session_id={CHECKOUT_SESSION_ID}`);
   params.set('cancel_url', `${origin}/?donate=cancelled`);
   params.set('billing_address_collection', 'auto');
