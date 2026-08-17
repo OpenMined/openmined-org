@@ -43,13 +43,24 @@ import { join } from 'node:path';
 const APP_ID = process.env.AWS_APP_ID || 'd1otfqlvqd3jby';
 const REGION = process.env.AWS_REGION || 'us-west-1';
 
-// www → apex 301, path-preserving (live parity: WordPress emits this today —
-// HOSTING.md → Routing). Domain-qualified, so it is INERT until cutover maps
-// the www subdomain to this app; wired now so the rule can't be forgotten on
-// cutover day and survives every rule rebuild.
+// www → apex 301 (live parity: WordPress emitted this before cutover —
+// HOSTING.md → Routing).
+//
+// ⚠ SOURCE FORM MATTERS, and this is measured rather than assumed. The
+// original `https://www.openmined.org/<*>` form never matched: after cutover
+// both this rule and MAIN_DOMAIN_REDIRECT were pushed and both hosts answered
+// 200, while every PATH-sourced rule in the same set fired correctly on those
+// same hosts. The bare-origin form below was then proved on the main branch
+// domain (2026-08-17, sync 6f6c019): it fires, and Amplify preserves the path
+// AND query string on its own, so nothing is lost by dropping the splat.
+//
+// The two hosts are not identical cases — main's is a branch DEFAULT domain
+// and this is a custom-domain subdomain mapped to a branch — so if www still
+// answers 200 after this, that difference is the next thing to look at, not
+// the source form.
 const WWW_REDIRECT = {
-  source: 'https://www.openmined.org/<*>',
-  target: 'https://openmined.org/<*>',
+  source: 'https://www.openmined.org',
+  target: 'https://openmined.org',
   status: '301',
 };
 // main's own default domain serves the same artifact as openmined.org and
@@ -57,25 +68,21 @@ const WWW_REDIRECT = {
 // is true (LAUNCH.md §3's residual). 301 everything to the canonical origin;
 // staging and pr-N are different hosts and unaffected.
 //
-// ⚠ SOURCE FORM IS UNDER TEST (2026-08-17). The previous
-// `https://<host>/<*>` form did NOT fire: measured after the cutover sync,
-// this host and www both answered 200 while every PATH-sourced rule in the
-// same set — DONATE_PROXY below, and all 13 parsed out of _redirects —
-// fired correctly on those same hosts, and cache-busted URLs behaved
-// identically. That isolates the fault to the scheme+host source form rather
-// than the sync, the domain association, or caching.
+// ⚠ SOURCE FORM PROVED HERE (2026-08-17, sync 6f6c019). The previous
+// `https://<host>/<*>` form did NOT fire; the bare-origin form below does.
+// Measured on this host first precisely because it was already broken,
+// already meant to redirect, and nothing links to it — so the experiment
+// could not hurt www or the apex. Result:
 //
-// This is the bare-origin form AWS documents for a domain redirect, no path
-// and no splat. It is being proved HERE first, deliberately: this host is
-// already broken, already meant to redirect, and nobody depends on it — so
-// the experiment cannot hurt www or the apex. If it fires, WWW_REDIRECT gets
-// the same treatment; if it does not, the source form was not the cause and
-// nothing user-facing changed.
+//   main.d1otfqlvqd3jby.amplifyapp.com/blog/ → 301 → openmined.org/blog/
 //
-// Known cost of the bare form: no path preservation, so deep links to this
-// host land on the apex root rather than the matching path. Acceptable for a
-// host nothing should be linking to; NOT obviously acceptable for www, which
-// is why www is not being changed in the same step.
+// **Amplify preserves the path and query string itself**, so the splat was
+// not buying anything — an earlier note here claiming the bare form gives up
+// path preservation was wrong, and this line replaces it.
+//
+// The clean control: only this constant changed in that sync, and only this
+// host started redirecting; www kept the `/<*>` form and kept answering 200.
+// Same app, same rule set, same run, one variable.
 const MAIN_DOMAIN_REDIRECT = {
   source: 'https://main.d1otfqlvqd3jby.amplifyapp.com',
   target: 'https://openmined.org',
