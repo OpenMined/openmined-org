@@ -66,6 +66,10 @@ Two live-vs-build diffs turned up and are both benign: one post's date renders a
 day earlier when the build machine is in CDT rather than UTC, and
 `/style-guide/` mints random tab ids per build.
 
+Re-verified after `b2f7602` merged (the audit's own fixes plus the indexing gate):
+smoke still 17/17, and the three repaired posts serve with no article content left
+inside a `<pre>`.
+
 **The one gap: `/blog/resource_type/video-on-demand/` 404s** — see §7.
 
 **⚠ Everything above is HTTP-level.** There are no AWS credentials and no `aws`
@@ -168,7 +172,10 @@ origin repoint, which is the cutover-day sequence above.
 1. Who owns the **WP Engine** account, does WordPress stay up read-only for a
    grace period, and are any WP-served paths — forms, redirects, uploads — still
    doing real work?
-2. Who provisions the **live Stripe key**, and does staging keep the test key?
+2. ~~Who provisions the **live Stripe key**?~~ **Answered 2026-08-17: shared with
+   Stephen**, who arms it in SSM. The live half of the question stands and is
+   now architectural, not administrative: **staging cannot keep the test key**
+   while one Lambda and one SSM parameter serve every host — see §2.
 3. **Where do the served response headers actually come from — `customHttp.yml`,
    or a console setting?** `main`'s branch domain serves all 6 security headers
    while having no `customHttp.yml` in its tree (measured 2026-08-17), so the
@@ -190,6 +197,23 @@ The donation flow is proven end-to-end on staging with a **test** key
 remains is putting the **live** key in SSM Parameter Store, read by the Lambda
 at request time — commands in `aws/create-donation/README.md`. It is a runtime
 read, so no rebuild or redeploy is needed.
+
+**The live key is with Stephen as of 2026-08-17.** Arming it in SSM is his step,
+since it needs AWS access. Two things to settle *before* it is armed rather than
+after:
+
+- **There is one SSM parameter and one Lambda, reached through an app-wide
+  Amplify proxy rule — so staging and every PR preview share whichever key is in
+  it.** Measured 2026-08-17: `POST /api/create-donation` answers 200 with a real
+  checkout URL on `staging.openmined.org` *and* on a `pr-N` preview host. Arming
+  the live key therefore points those public, unauthenticated hosts at the live
+  Stripe account; the question "does staging keep the test key?" cannot be
+  answered yes without a second Lambda + parameter, or a host check inside the
+  existing one. Decide which, or accept it knowingly.
+- **The error-text fix should land in the same change** (BACKLOG §14): the route
+  forwards Stripe's own error text, and the auth-failure variant carries a
+  partially-redacted key — the failure most likely at exactly the moment a key
+  changes.
 
 **Land one hardening fix with the key swap, not after it.** The route forwards
 Stripe's own error text to the browser (`!res.ok` branch; confirmed live on the
@@ -231,12 +255,23 @@ cheap way to check the gate from outside: a staging or preview page carrying **n
 such tag means the variable went missing and the gate is fail-closed — which would
 leave production noindex after the flip.
 
-⚠ **Still unproven: that a `main` build sets `AWS_BRANCH=main`.** Branch builds
-should use the branch name where previews use a slug, but only a `main` build can
-show it, and `main` has never built (see cutover step 1). The next `staging`
-deploy is the cheap tell — it should report `x-build-branch: staging`. Until a
-`main` build is observed, treat the launch flip as verified-by-inference and lean
-on the smoke `noindex guard` row against the production origin.
+**Branch builds report their branch name — confirmed 2026-08-17.** The staging
+deploy of `b2f7602` came back with `x-build-branch: staging`, so the two build
+kinds differ as hoped: a *branch* build reports its branch, a *preview* reports a
+slug. Verified across all three cases the app produces:
+
+| Build | `AWS_BRANCH` | Indexable once `INDEXING_ENABLED` is true |
+|---|---|---|
+| PR preview | `pr-8` — a slug | no; can never equal `main` |
+| `staging` branch | `staging` | no |
+| `main` branch | `main` — inferred from the two above | yes |
+
+Only the last row is inference rather than measurement, and it cannot be measured
+until `main` builds at all (cutover step 1). The failure direction is the safe
+one: if `main` reported something unexpected, production would come up `noindex`
+rather than a non-production host coming up indexable — caught by the smoke
+`noindex guard` row against the production origin, which the checklist already
+requires.
 
 **Seven pages opt themselves out and must survive the flip** (verified
 2026-08-17): `404`, `blog/cards`, `donate/thank-you`, both
