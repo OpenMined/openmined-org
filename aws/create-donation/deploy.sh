@@ -30,6 +30,6 @@ else
   aws lambda create-function --function-name "$FN" --region "$REGION" \
     --runtime nodejs22.x --handler index.handler --role "$ROLE_ARN" \
     --timeout 15 --memory-size 256 --zip-file fileb://fn.zip \
-    --environment "Variables={SITE_URL=https://openmined.org,APP_DOMAIN=d1otfqlvqd3jby.amplifyapp.com,SSM_PARAM=/openmined-org/STRIPE_SECRET_KEY}" \
+    --environment "Variables={SITE_URL=https://openmined.org,APP_DOMAIN=d1otfqlvqd3jby.amplifyapp.com,STAGING_URL=https://staging.openmined.org,SSM_PARAM=/openmined-org/STRIPE_SECRET_KEY,SSM_PARAM_TEST=/openmined-org/STRIPE_SECRET_KEY_TEST}" \
     --query FunctionArn --output text
 fi

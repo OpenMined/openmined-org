@@ -208,18 +208,17 @@ One thing worth landing in the same change (BACKLOG §14): the route forwards
 Stripe's own error text, and the auth-failure variant carries a partially-redacted
 key — the failure most likely at exactly the moment a key changes.
 
-Not a blocker, decided 2026-08-17: staging and previews will share the live key,
-because one Lambda and one SSM parameter serve every host. Reasoning and what a
-real fix would cost are in BACKLOG §14 — don't re-open it here.
+~~Not a blocker, decided 2026-08-17: staging and previews will share the live
+key.~~ **Superseded same day at Stephen's direction — the split is
+implemented**: two SSM parameters (live + `_TEST`), the Lambda selecting per
+request from the validated origin, so staging and previews can never spend the
+live key. Loading the live key into `…/STRIPE_SECRET_KEY` is now safe by
+construction. Parameters and rotation: `aws/create-donation/README.md`;
+closure record: BACKLOG §14.
 
-**Land one hardening fix with the key swap, not after it.** The route forwards
-Stripe's own error text to the browser (`!res.ok` branch; confirmed live on the
-deployed Lambda 2026-08-17 — an over-large amount returns 502 carrying Stripe's
-message). Stripe's *auth-failure* messages include a partially-redacted key, and
-the moment the key changes is the moment an auth failure is most likely. Return
-a fixed message and log server-side. Both implementations
-(`src/pages/api/create-donation.ts` and `aws/create-donation/index.mjs`) —
-BACKLOG §14 holds the full item.
+✅ **The ride-along hardening fix is landed and deployed** (2026-08-17, ahead
+of the key swap as required): Stripe error text no longer reaches the browser —
+fixed message client-side, real error to the server log. Both implementations.
 
 ### 3. Site-wide `noindex` guard — FLIPPED 2026-08-17
 

@@ -7,22 +7,29 @@ the browser stays same-origin. `index.mjs` is the Lambda twin of
 dormant-until-secret behavior; the header comment there records the two
 proxy-imposed differences (secret source, origin derivation).
 
-## Where the secret lives
+## Where the secrets live
 
-SSM Parameter Store (us-west-1), SecureString:
+SSM Parameter Store (us-west-1), SecureString — **two parameters, one per
+Stripe mode**:
 
 ```
-/openmined-org/STRIPE_SECRET_KEY
+/openmined-org/STRIPE_SECRET_KEY        ← live key; answers ONLY the production origin
+/openmined-org/STRIPE_SECRET_KEY_TEST   ← test key; answers staging + PR previews
 ```
 
-Encrypted at rest with the AWS-managed KMS key; readable ONLY by the Lambda's
-role (`openmined-org-create-donation`, inline policy `read-stripe-param`). It
-is read at runtime and cached per warm instance — never present at build time,
-never in any artifact. Until the parameter exists the endpoint returns the
-dormant 503 and the donate modal shows its friendly message (same contract as
-the Cloudflare deploy before `wrangler secret put`).
+One Lambda serves every host, so which parameter answers is decided per
+request from the validated origin (`index.mjs` — exactly `SITE_URL` → live,
+everything else → test). Staging and previews therefore can never spend the
+live key. This supersedes BACKLOG §14's shared-key acceptance (2026-08-17).
 
-Arm or rotate it (run by a human, never an agent):
+Both are encrypted at rest with the AWS-managed KMS key; readable ONLY by the
+Lambda's role (`openmined-org-create-donation`, inline policy
+`read-stripe-param`). Read at runtime and cached per warm instance — never
+present at build time, never in any artifact. A missing parameter means the
+dormant 503 for the hosts it serves; the other hosts are unaffected.
+
+Arm or rotate either one (run by a human, never an agent — swap the name for
+the `_TEST` parameter):
 
 ```sh
 aws ssm put-parameter --region us-west-1 \
