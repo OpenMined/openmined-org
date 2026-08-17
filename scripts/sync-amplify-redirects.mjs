@@ -54,14 +54,31 @@ const WWW_REDIRECT = {
 };
 // main's own default domain serves the same artifact as openmined.org and
 // would otherwise be an indexable full-site duplicate once INDEXING_ENABLED
-// is true (LAUNCH.md §3's residual — this rule is that section's "option 3",
-// answered: Amplify CAN redirect a default domain, with a domain-qualified
-// rule like the www one). 301 everything to the canonical origin. Applies on
-// the first main-push sync, i.e. at cutover; staging and pr-N subdomains are
-// different hosts and unaffected.
+// is true (LAUNCH.md §3's residual). 301 everything to the canonical origin;
+// staging and pr-N are different hosts and unaffected.
+//
+// ⚠ SOURCE FORM IS UNDER TEST (2026-08-17). The previous
+// `https://<host>/<*>` form did NOT fire: measured after the cutover sync,
+// this host and www both answered 200 while every PATH-sourced rule in the
+// same set — DONATE_PROXY below, and all 13 parsed out of _redirects —
+// fired correctly on those same hosts, and cache-busted URLs behaved
+// identically. That isolates the fault to the scheme+host source form rather
+// than the sync, the domain association, or caching.
+//
+// This is the bare-origin form AWS documents for a domain redirect, no path
+// and no splat. It is being proved HERE first, deliberately: this host is
+// already broken, already meant to redirect, and nobody depends on it — so
+// the experiment cannot hurt www or the apex. If it fires, WWW_REDIRECT gets
+// the same treatment; if it does not, the source form was not the cause and
+// nothing user-facing changed.
+//
+// Known cost of the bare form: no path preservation, so deep links to this
+// host land on the apex root rather than the matching path. Acceptable for a
+// host nothing should be linking to; NOT obviously acceptable for www, which
+// is why www is not being changed in the same step.
 const MAIN_DOMAIN_REDIRECT = {
-  source: 'https://main.d1otfqlvqd3jby.amplifyapp.com/<*>',
-  target: 'https://openmined.org/<*>',
+  source: 'https://main.d1otfqlvqd3jby.amplifyapp.com',
+  target: 'https://openmined.org',
   status: '301',
 };
 const DONATE_PROXY = {
