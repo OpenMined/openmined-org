@@ -130,15 +130,14 @@ handoff can be async.
      --sub-domain-settings prefix=,branchName=main prefix=www,branchName=main prefix=staging,branchName=staging
    ```
 
-   Amplify rewrites the Route 53 records itself (same-account zone). Live's
-   www→apex 301 (today emitted by WordPress) needs no cutover step: the sync
-   script already emits it as a domain-qualified, path-preserving rule that
-   activates the moment `www` maps to the app.
-   ⚠ **That rule has never been observed working** — being domain-qualified, it
-   is inert until `www` resolves to the app, so it cannot be tested in advance.
-   Test the **bare root** (`https://www.openmined.org/`, empty splat) as well as
-   a deep path: the rule's source is a splat pattern, and if it doesn't match the
-   empty path then the commonest inbound www URL of all falls through it.
+   ⚠ Amplify did NOT rewrite the pre-existing Route 53 root/www records at
+   cutover — its auto-DNS only creates missing records. The actual flip was an
+   explicit Route 53 UPSERT of both records to the app's CloudFront domain
+   (ALIAS on the apex), with the WP Engine A values in the change comment as
+   the rollback.
+   The suspicion recorded here earlier was right: **the domain-qualified
+   www→apex rule does not work** — see the assertion list below for the
+   measurement and mitigations.
 5. `npm run smoke -- https://openmined.org` — expect 17/17, with the
    indexability row now reading **`indexable (production, launched)`** rather
    than `noindex guard on`. That row is direction-aware: it derives what to
@@ -296,13 +295,18 @@ reason. Three ways to close it, in rough order of cost:
    custom domain is attached — needs AWS access, and Amplify offers no obvious
    per-domain header control, so treat this as a question rather than a plan.
 
-**Decided 2026-08-17 — option 3, answered:** Amplify *can* redirect a default
-domain, with a domain-qualified custom rule (same mechanism as the www→apex
-301). `scripts/sync-amplify-redirects.mjs` now emits
-`https://main.<app>.amplifyapp.com/<*>` → `https://openmined.org/<*>` 301; it
-applies on the first main-push sync, i.e. at cutover, which also ends the
-window where `main`'s domain answers `index, follow`. Option 1's GSC Coverage
-glance in the first weeks stays worth doing as the check on this.
+**Re-decided at cutover 2026-08-17 — option 3 attempted and REFUTED, option 1
+in force:** `scripts/sync-amplify-redirects.mjs` emits
+`https://main.<app>.amplifyapp.com/<*>` → `https://openmined.org/<*>` 301 (and
+a www twin), but **Amplify does not honor domain-qualified custom rules for
+branch-mapped hosts** — measured live: both documented rule forms, a
+same-update path rule firing in seconds while the domain rules never matched.
+The constants stay in the script (they are the documented AWS form and would
+self-activate if the platform ever honors them) but the operative mitigation
+is option 1: per-page canonicals to the apex, plus the GSC Coverage watch for
+`www`/`amplifyapp.com` URLs in the first weeks. The console's
+domain-management redirect toggle (evidently a different mechanism) is the
+untried lead.
 
 Note **branch access control cannot be the answer here**: it applies per branch,
 so locking `main`'s default domain would lock `openmined.org` with it.
@@ -572,9 +576,14 @@ day.
   deploy, off WP Engine (the domain-association change in the cutover sequence).
 - **Live Stripe key** in the SSM parameter
   (`aws/create-donation/README.md`), with §2's error-text fix alongside it.
-- **`www` → apex 301 preserved** — pre-wired in the sync script and inert until
-  `www` maps to the app, so cutover is the **first** time it can be observed.
-  Test the bare root as well as a deep path (see cutover step 4).
+- ❌ **`www` → apex 301 — FAILED at cutover, open item** (measured 2026-08-17):
+  Amplify does not honor domain-qualified custom rules for branch-mapped hosts
+  — both documented rule forms tested; a path rule in the same update fired in
+  seconds, the domain rules never matched. `www` (and `main`'s branch domain)
+  serve the site 200 instead of 301ing. Mitigations: every page's canonical
+  points at the apex; watch GSC Coverage for `www`/`amplifyapp.com` URLs.
+  Next attempt: the console's domain-management redirect toggle (different
+  mechanism than custom rules) — needs AWS console access.
 - **True 404 on the production origin** — unknown paths answer HTTP 404, not
   a redirect onto the 404 page (the smoke `unknown path → true 404` row).
   Soft-404s poison exactly the GSC Coverage data §7 says to watch.

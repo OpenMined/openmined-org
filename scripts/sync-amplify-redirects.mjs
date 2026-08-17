@@ -16,9 +16,10 @@
  * Cloudflare splats (`*` → `<*>`), and rebuilds the COMPLETE rule set
  * deterministically:
  *
- *   1. the www → apex 301 (domain-qualified; inert until cutover maps www)
+ *   1. the www → apex 301 (domain-qualified; see the not-honored caveat at
+ *      the constant)
  *   2. the main-default-domain → apex 301 (closes LAUNCH.md §3's duplicate-
- *      host residual; applies on the first main-push sync = cutover)
+ *      host residual; same not-honored caveat)
  *   3. the /api/create-donation 200-proxy (the Lambda dynamic tier — see
  *      aws/create-donation/README.md; this script is the rule's home)
  *   4. every parsed redirect, file order preserved (first match wins on both
@@ -43,22 +44,26 @@ import { join } from 'node:path';
 const APP_ID = process.env.AWS_APP_ID || 'd1otfqlvqd3jby';
 const REGION = process.env.AWS_REGION || 'us-west-1';
 
-// www → apex 301, path-preserving (live parity: WordPress emits this today —
-// HOSTING.md → Routing). Domain-qualified, so it is INERT until cutover maps
-// the www subdomain to this app; wired now so the rule can't be forgotten on
-// cutover day and survives every rule rebuild.
+// ⚠ The two domain-qualified rules below are emitted but NOT currently
+// honored: Amplify does not match domain-qualified custom rules for
+// branch-mapped hosts (measured at cutover 2026-08-17 — both documented rule
+// forms tested; a path rule in the same update fired in seconds while these
+// never matched; www and main's branch domain serve 200). Kept because they
+// are the documented AWS form and self-activate if the platform ever honors
+// them. Operative mitigations: per-page canonicals to the apex + the GSC
+// watch; untried lead: the console's domain-management redirect toggle.
+// HOSTING.md → Routing and LAUNCH.md §3 hold the full record.
+//
+// www → apex 301, path-preserving (live parity: WordPress emitted this).
 const WWW_REDIRECT = {
   source: 'https://www.openmined.org/<*>',
   target: 'https://openmined.org/<*>',
   status: '301',
 };
-// main's own default domain serves the same artifact as openmined.org and
-// would otherwise be an indexable full-site duplicate once INDEXING_ENABLED
-// is true (LAUNCH.md §3's residual — this rule is that section's "option 3",
-// answered: Amplify CAN redirect a default domain, with a domain-qualified
-// rule like the www one). 301 everything to the canonical origin. Applies on
-// the first main-push sync, i.e. at cutover; staging and pr-N subdomains are
-// different hosts and unaffected.
+// main's own default domain serves the same artifact as openmined.org — an
+// indexable full-site duplicate (LAUNCH.md §3's residual). Same not-honored
+// caveat as above; staging and pr-N subdomains are different hosts and would
+// be unaffected either way.
 const MAIN_DOMAIN_REDIRECT = {
   source: 'https://main.d1otfqlvqd3jby.amplifyapp.com/<*>',
   target: 'https://openmined.org/<*>',

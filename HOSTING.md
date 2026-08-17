@@ -59,11 +59,16 @@ sessions, no auth, no other server state. Measured off the build 2026-08-13:
   soft-404s poison crawl data. Asserted by the smoke
   `unknown path → true 404` row.
 - **No host-added redirects** beyond the set below, with one exception: the
-  `www` → apex 301 must exist at the host/DNS layer (today WordPress itself
-  emits it; the static file set can't match on hostname). On Amplify it is
-  pre-wired: `sync-amplify-redirects.mjs` emits a domain-qualified,
-  path-preserving 301 that stays inert until cutover maps the `www`
-  subdomain to the app.
+  `www` → apex 301 must exist at the host/DNS layer (the static file set can't
+  match on hostname). ⚠ **On Amplify this is OPEN — measured at cutover
+  2026-08-17: Amplify does not honor domain-qualified custom rules for
+  branch-mapped hosts.** `sync-amplify-redirects.mjs` emits the rule (both
+  documented forms were tested; a path rule applied in the same update fired
+  in seconds while the domain rules never matched), but `www.openmined.org`
+  serves the site 200 instead of redirecting. Mitigation until closed: every
+  page's `rel=canonical` points at the apex. Candidate fix: the console's
+  domain-management redirect toggle, which evidently uses a different
+  mechanism than custom rules.
 
 ## Redirects — two classes, verified 2026-08-13
 
