@@ -219,13 +219,24 @@ Verified by simulating both builds (2026-08-17): pre-launch, all 683 pages
 noindex; post-launch on `main`, 677 indexable with all seven self-excluding
 routes still `noindex, nofollow`.
 
-⚠ **The gate assumes Amplify populates `AWS_BRANCH`**, which cannot be confirmed
-without AWS access. Non-indexable builds therefore emit
-`<meta name="x-build-branch">` (never present on an indexable build): if a
-staging or preview page carries **no** such tag, the variable is missing and the
-gate is running on its fail-closed path — which would mean production stays
-noindex after the flip. The smoke suite's `noindex guard` row is what catches
-that on the origin.
+**`AWS_BRANCH` is populated — confirmed on real Amplify infrastructure
+2026-08-17.** PR #8's preview shipped `<meta name="x-build-branch"
+content="pr-8">`, so the gate reads a real value rather than falling through to
+its fail-closed path. Note what that value *is*: on a preview, `AWS_BRANCH` is the
+**preview slug** (`pr-8`), not the source branch — which is the safer of the two,
+since a preview can never coincidentally equal `PRODUCTION_BRANCH`.
+
+Non-indexable builds emit that meta and indexable ones never do, so it stays the
+cheap way to check the gate from outside: a staging or preview page carrying **no**
+such tag means the variable went missing and the gate is fail-closed — which would
+leave production noindex after the flip.
+
+⚠ **Still unproven: that a `main` build sets `AWS_BRANCH=main`.** Branch builds
+should use the branch name where previews use a slug, but only a `main` build can
+show it, and `main` has never built (see cutover step 1). The next `staging`
+deploy is the cheap tell — it should report `x-build-branch: staging`. Until a
+`main` build is observed, treat the launch flip as verified-by-inference and lean
+on the smoke `noindex guard` row against the production origin.
 
 **Seven pages opt themselves out and must survive the flip** (verified
 2026-08-17): `404`, `blog/cards`, `donate/thank-you`, both
@@ -563,6 +574,14 @@ day.
 > a batch of donation POSTs that 503'd moments after a secret was saved and then
 > worked, and a just-removed route that still answered 200 and then 404'd.
 > Re-test before diagnosing.
+
+**PR previews — verified working 2026-08-17.** They had been dead from PR #2
+through #3 (the IAM service role), and the 08-14 fix rested on a single
+unreproducible observation. PR #8 built and served a preview twice, smoke 17/17
+against the preview host. Latency is worth knowing for the review flow it exists
+to serve: the first build took **~39 minutes** during GitHub's webhook
+degradation, the second **~160 seconds** once that recovered. Treat minutes as
+normal and tens of minutes as a symptom of something upstream, not of Amplify.
 
 **Closed 2026-08-17 — the retired Cloudflare Worker.** This checklist used to
 carry a line about gating the `*.workers.dev` host, which would have become a
