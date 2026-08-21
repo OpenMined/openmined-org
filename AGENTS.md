@@ -335,6 +335,28 @@ form loads also removes the shift, and is not worth considering — HubSpot's
 domains are widely blocked, so a blocked script would leave real content
 permanently hidden. That trades an availability failure for a cosmetic metric.
 
+**The embed loads on first engagement, not at parse time.** `Base.astro`'s loader
+waits for a gesture (`scroll`/`wheel`/`touchstart`/`pointerdown`/`keydown`) or an
+IntersectionObserver backstop, whichever comes first — HubSpot's `v2.js` and its
+telemetry pixels set a third-party `__cf_bm` cookie, which was the only thing
+failing Best Practices site-wide (78 → 100 once deferred). Two rules that keep it
+working, both measured and both easy to undo by accident:
+
+- **Never add an idle-timeout fallback.** It would load inside Lighthouse's run
+  window and forfeit the win on every page, for no user benefit.
+- **Gesture events are not interchangeable with `rootMargin`.** The form needs
+  ~1600ms to render on Slow 4G, so a trigger must buy `scrollSpeed x 1.6s` of
+  runway; proximity alone took `/careers/` from CLS 0 to 0.135 at a normal scroll.
+  Gestures fire before the scroll position moves and buy the whole journey down
+  the page.
+
+**Above-the-fold forms load immediately and keep Best Practices ~79. That is
+accepted, not an open item.** Their marker is in view at load, so no deferral can
+help. A click-to-load facade would close it and is **rejected** — `/contact/`,
+`/get-involved/` and `/subscribe/` are the site's highest-intent forms, and a
+click of friction in front of them to move a lab metric is the wrong trade. Do
+not re-propose it.
+
 Guarded by `npm run audit:form-cls`, which measures CLS under Lighthouse's own
 throttled-mobile conditions; its header carries the measurements and the
 reasoning. It **discovers** its own page set rather than trusting a list, and that

@@ -598,7 +598,7 @@ disclose, so drafting before they land means drafting twice. One is done:
   **landed 2026-08-21.** The Google Fonts request is gone, and with it the "Google
   as a recipient of visitor IP addresses" clause this section used to condition on
   §5. One input down.
-- `BACKLOG.md` §23 defers the HubSpot embed, which changes *when* `__cf_bm` is
+- The HubSpot embed is now deferred (`AGENTS.md → Forms`), which changes *when* `__cf_bm` is
   set (only once a visitor reaches a form) rather than whether it is.
 
 The YouTube embeds in §5 are the third input and are still open. Draft once the
