@@ -162,14 +162,41 @@ const NET = {
   uploadThroughput: (750 * 1024) / 8,
 };
 
-/** Sitemap → every path carrying a REAL marker (attributes, not the class name). */
+/**
+ * A tag that IS a marker: an element carrying both the `hs-form-embed` class and
+ * a `data-form-id`, in either attribute order. Anchored inside one HTML tag
+ * (`<x …>`, no `>` in between) so it cannot match `Base.astro`'s inline-JS
+ * selector string `'.hs-form-embed[data-form-id]'`, which ships on every page —
+ * the trap that once made a naive grep "find" a form on all 553 pages.
+ */
+const MARKER_RE =
+  /<[a-zA-Z][^>]*class="[^"]*\bhs-form-embed\b[^"]*"[^>]*\bdata-form-id=|<[a-zA-Z][^>]*\bdata-form-id=[^>]*class="[^"]*\bhs-form-embed\b/;
+
+/** Sitemap → every path carrying a REAL marker (see MARKER_RE). */
 async function discover() {
-  const idx = await (await fetch(`${base}/sitemap-index.xml`)).text();
-  const children = [...idx.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
+  // ⚠ Every <loc> in the sitemap is ABSOLUTE on the production origin —
+  // @astrojs/sitemap writes the configured site URL even into a local build's
+  // sitemap. Rewrite each one onto `base` before fetching, or a
+  // `--base http://localhost:4321` run silently discovers from PRODUCTION: a
+  // new local page is then never discovered and never checked (a false pass, at
+  // exactly the pre-merge moment this guard exists for), and marker detection
+  // reflects the deployed HTML instead of the build under test.
+  const onBase = (loc) => base + new URL(loc).pathname;
+  let idx;
+  try {
+    idx = await (await fetch(`${base}/sitemap-index.xml`)).text();
+  } catch {
+    console.error(
+      `Cannot reach ${base}/sitemap-index.xml — is the server running?\n` +
+        `(local: npm run build && npm run preview)`,
+    );
+    process.exit(2);
+  }
+  const children = [...idx.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => onBase(m[1]));
   const urls = [];
   for (const child of children) {
     const xml = await (await fetch(child)).text();
-    urls.push(...[...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]));
+    urls.push(...[...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => onBase(m[1])));
   }
   const hits = [];
   let cursor = 0;
@@ -179,7 +206,7 @@ async function discover() {
         const url = urls[cursor++];
         try {
           const html = await (await fetch(url)).text();
-          if (/class="hs-form-embed[^"]*"\s+data-form-id/.test(html)) hits.push(url);
+          if (MARKER_RE.test(html)) hits.push(url);
         } catch {
           /* a page that will not fetch is the smoke test's problem, not ours */
         }
@@ -220,6 +247,12 @@ const readMarkers = () =>
       // `/subscribe/` at 1440x900 flagged `a.subs__link` 26px below the marker
       // in the sibling column, which a growing form never moves.
       if (r.right <= box.left || r.left >= box.right) continue;
+      // …and IN FLOW. A `position: fixed` element is viewport-anchored — the
+      // form growing never moves it — so counting it would false-flag every
+      // page the moment the site gains e.g. a fixed bottom bar. `sticky` stays
+      // pushable: it is in-flow until pinned. Checked only for candidates that
+      // survive the geometry above, so the cost stays near zero.
+      if (getComputedStyle(node).position === 'fixed') continue;
       if (!pushed || nodeTop < pushed.top) {
         const cls = node.className ? '.' + String(node.className).split(' ').filter(Boolean)[0] : '';
         pushed = { top: nodeTop, what: node.tagName.toLowerCase() + cls };
