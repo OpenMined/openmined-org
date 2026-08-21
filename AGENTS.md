@@ -344,6 +344,38 @@ Reference `BlogPost.astro → searchThumb` (height-only, cropped by `search.astr
 → .search-result__tile`) and `PostCard.astro` (`widths` only, cropped by
 `object-fit: cover`). Guarded by `npm run audit:images`.
 
+## WebGL embeds
+
+Two components ship WebGL — `components/graphics/DiamondEmbed.astro` and
+`StreamEmbed.astro`, both only on `/` (via `HomeHero.astro`) and `/style-guide/`.
+Their scripts are `is:inline` and cannot import, so the guards below exist as two
+hand-synced copies; DiamondEmbed's comments carry the measurements.
+
+Two rules, both learned from PageSpeed Insights scoring the homepage **41** while
+local Lighthouse scored 98 (measured 2026-08-21, `--use-angle=swiftshader` at 4×
+CPU throttling):
+
+- **Never create a GL context before the page has painted.** On a software
+  renderer — no GPU, which is PSI's headless Chromium, plus blocklisted drivers
+  and VMs — `getContext('webgl')` on an in-document canvas is a synchronous wait
+  on a compositor busy rasterizing the page in software: **1,972ms inside the
+  first-paint phase against 6ms after it.** A *detached* probe canvas pays it too,
+  so there is no cheap way to check the renderer up front and no timing shortcut:
+  `load` fires before first paint on a fast connection, and FCP alone still lands
+  in the raster tail. Both embeds gate init on FCP **plus** two on-time animation
+  frames (`afterPagePainted`), and each canvas fades in on its first drawn frame.
+  Layout stays eager — the container's aspect-ratio and sizing must never wait on
+  a context, or the page shifts when the graphic arrives.
+- **Never animate on a software renderer.** A per-pixel shader rasterizes on the
+  CPU and blocks the main thread every frame. Read `WEBGL_debug_renderer_info`
+  once the context exists and draw **one** static frame instead of starting the
+  rAF loop — the same treatment `prefers-reduced-motion` gets.
+
+Verify with the flagged Lighthouse run in `LAUNCH.md`'s Lighthouse QA line, and
+the mechanism under that flag with Playwright: count rAF callbacks (0 on the
+static path, ~360 in 3s animating) and time `getContext`. Measure a median of
+five runs — single runs of this swing by seconds.
+
 ## Layering and overflow
 
 **Site chrome always beats page chrome.** The header owns `--z-sticky`; anything

@@ -159,13 +159,17 @@ const trail = breadcrumbs ?? [
     <!--
       Self-hosted fonts (Astro Fonts API — config in astro.config.mjs → fonts).
       Emits the @font-face + :root CSS var + preload links; no third-party CDN.
-      Both families are VARIABLE fonts from Google, so every weight of a given
+      All three are VARIABLE fonts from Google, so every weight of a given
       style+subset collapses into one woff2 — we preload the render-critical
-      latin/normal file of each (Inter body+UI, Rubik hero headings), which covers
-      all their weights. Preload is filtered by style+subset only (NOT weight): a
-      variable file's preload candidate is keyed to its first weight, so a
-      per-weight filter would miss it. Italic + latin-ext self-host and load on
-      demand. Semantic aliases (--font-primary / --font-secondary) live in tokens.css.
+      latin/normal file of the two page fonts (Inter body+UI, Rubik hero headings),
+      which covers all their weights. Preload is filtered by style+subset only
+      (NOT weight): a variable file's preload candidate is keyed to its first
+      weight, so a per-weight filter would miss it. Italic + latin-ext self-host and load on
+      demand. Sometype Mono is deliberately NOT preloaded — only the DiamondEmbed
+      graphic's labels use it (/ and /style-guide), so its @font-face rides along
+      everywhere while the file is fetched only where a rule matches.
+      Semantic aliases (--font-primary / --font-secondary / --font-mono) live in
+      tokens.css.
     -->
     <Font
       cssVariable="--font-inter"
@@ -175,6 +179,7 @@ const trail = breadcrumbs ?? [
       cssVariable="--font-rubik"
       preload={[{ style: 'normal', subset: 'latin' }]}
     />
+    <Font cssVariable="--font-sometype-mono" />
   </head>
   <body>
     <slot />

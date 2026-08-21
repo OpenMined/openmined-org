@@ -172,41 +172,6 @@ Two things worth doing with them:
   Assert it in a real DOM instead: no `<p>` or heading inside an `article` may
   have a `<pre>` ancestor. That form found exactly 5 pages in 645.
 
-### 22. WebGL embeds animate on software rendering — kills PSI score — `READY`
-
-pagespeed.web.dev scored the homepage 53 on mobile (2026-08-17, day of launch)
-with TBT 24,990ms, while the same page scores 98 under local
-Lighthouse with identical mobile throttling. The difference is the diamond hero:
-PSI's HeadlessChromium has no GPU, so WebGL falls back to SwiftShader and the
-per-pixel simplex-noise shader rasterizes on the CPU, blocking the main thread
-every frame. Reproduce locally with
-`npx lighthouse https://openmined.org/ --only-categories=performance
---chrome-flags="--headless=new --use-angle=swiftshader"` → re-measured against
-production 2026-08-20: **41 with the flag, 98 without**, TBT 70ms → 4,500ms. The
-gap is stable and reproduces on demand; it is the flag, not the run. Real phones
-have GPUs, so actual visitors are mostly unaffected — the
-real-user exposure is the software-rendering tail (blocklisted GPU drivers,
-VMs, battery saver), plus the lab score itself misleading anyone who runs PSI.
-
-Fix: after `getContext('webgl')`, read the renderer string
-(`WEBGL_debug_renderer_info`); on SwiftShader/software, draw one static frame
-and skip the animation loop. Respect `prefers-reduced-motion` the same way.
-Both `DiamondEmbed.astro → _start` and `StreamEmbed.astro` (same rAF pattern,
-same missing guards). Cross-ref the Lighthouse QA line in `LAUNCH.md`.
-
-⚠ **Wider than the diamond.** `HeroSwoop.astro` *wraps* `StreamEmbed`, and
-`SimpleHero` renders it through its `swoop` slot — so the unguarded rAF runs on
-every page passing that slot, not just `/`. Re-derive the set rather than
-trusting a list here: `grep -rl 'HeroSwoop' src --include='*.astro'`, then check
-which callers actually fill `swoop` (`SimpleHero.astro → hasSwoop`). The diamond
-is the only TBT catastrophe — StreamEmbed's shader is cheap enough that those
-pages hold TBT under 250ms even on SwiftShader — but the guard belongs in both.
-
-**Ships with `LAUNCH.md` §5's Sometype Mono self-host.** That fix deletes
-`DiamondEmbed.astro → ensureFont()` — the same file this item edits, and the
-homepage's only third-party render-blocking stylesheet. One commit, two items;
-the privacy half stays recorded in `LAUNCH.md` per the one-item-one-tracker rule.
-
 ### 23. HubSpot embed loads eagerly into an unreserved box — `READY`
 
 `Base.astro`'s forms loader injects HubSpot's `v2.js` as soon as a

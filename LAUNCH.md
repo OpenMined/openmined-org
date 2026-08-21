@@ -531,30 +531,29 @@ staff-confirmed, not probe-tested — testing it would inject junk contacts.
   between the site and genuinely zero cookies** — and while it stands, the
   zero-cookie sentence above is not literally true, which matters because it is
   the basis for shipping without a banner. Worth doing before launch.
-- **⚠ The homepage loads a Google-hosted webfont** (found 2026-08-17). Not a
-  cookie — so the "zero cookies" sentence above survives literally — but a
-  request to `fonts.googleapis.com` / `fonts.gstatic.com` hands the visitor's IP
-  address to Google on every load, with no consent, which is the exposure a
-  German court found actionable (LG München I, Jan 2022) and is squarely against
-  the stance the rest of this section takes.
+- **The homepage's Google-hosted webfont — fixed 2026-08-21.** `DiamondEmbed.astro`
+  used to inject two preconnects and a Google Fonts stylesheet at runtime for
+  **Sometype Mono**, its label font, on the two pages carrying the embed (`/` via
+  `HomeHero.astro`, and `/style-guide/`). No cookie — so the zero-cookie sentence
+  above always held — but a request to `fonts.googleapis.com` / `fonts.gstatic.com`
+  hands the visitor's IP to Google on every load with no consent, which is the
+  exposure LG München I found actionable (Jan 2022) and squarely against this
+  section's stance.
 
-  It is **our code, not HubSpot's**: `@components/graphics/DiamondEmbed.astro →
-  ensureFont()` injects two preconnects and a Google Fonts stylesheet for
-  **Sometype Mono**, the embed's own label font. It fires on exactly the two
-  pages carrying the embed — `/` (via `HomeHero.astro`) and `/style-guide/` —
-  and Sometype Mono is referenced nowhere else in the codebase. Verified by
-  request-level capture: blog posts and `/contact/` request no Google origin
-  despite loading the same HubSpot form, so the form is not the source.
+  The family now goes through the Astro Fonts API like Inter and Rubik
+  (`astro.config.mjs → fonts`, emitted by `<Font>` in `Base.astro`, aliased in
+  `tokens.css → FONT FAMILIES` as `--font-mono`, which the embed's injected label
+  rule reads). `fontProviders.google()` fetches at **build** time and self-hosts
+  the result, so no font binaries enter the repo and no visitor-facing request to
+  Google survives: verified against the built output 2026-08-21 —
+  `grep -rl 'fonts.googleapis.com\|fonts.gstatic.com' dist/` returns nothing, and
+  a headless load resolves the label to the self-hosted face.
 
-  This also makes two docs wrong: `public/_headers` states "Fonts are
-  self-hosted", and BACKLOG §13's CSP origin inventory omits the Google origins.
-
-  **Fix:** self-host Sometype Mono through the pipeline the other families
-  already use (`astro.config.mjs → fonts` + the hand-authored `@font-face` rules
-  in `global.css → typography`), then delete `ensureFont()`. Small, and it
-  removes a third-party render-blocking stylesheet from the homepage as a bonus.
-  If it is *not* fixed before launch, §6 must name Google as a recipient of
-  visitor IP addresses.
+  **The property to protect:** no page now reaches a third-party origin for its
+  *own* rendering. What remains is deliberate and page-scoped — HubSpot's embed on
+  form-bearing pages, the YouTube iframes in the bullet above, and the `/style-guide`
+  icon CDN (`BACKLOG.md` §13) — so anything added here that quietly reaches for a
+  CDN font, icon set, or script reopens exactly this.
 - **Guard worth building:** assert that no page sets cookies on a cold load, so
   bannerlessness can't silently break. Nothing checks this today. Worth widening
   to third-party *requests* rather than cookies alone — a cookie-only assertion
@@ -574,9 +573,9 @@ so this is no longer conditional):
 - a **cookie/storage disclosure** stating the site sets no cookies of its own —
   only third-party strictly-necessary `__cf_bm` on HubSpot's domains, and the
   YouTube embeds in §5 until those are fixed;
-- **Google**, as a recipient of visitor IP addresses, *if* the homepage's
-  Google-hosted webfont (§5) is still shipping at launch — the cleaner outcome is
-  to self-host it and have nothing to disclose;
+- **no Google clause** — the homepage's Google-hosted webfont was self-hosted
+  2026-08-21 (§5), so Google receives nothing and the policy should name it
+  nowhere;
 - **HubSpot forms** and the in-form consent basis;
 - **Workable** for job applications.
 
@@ -592,17 +591,18 @@ matters legally**, so if only one thing gets fixed, fix that.
 `https://openmined.org/privacy-policy/`, 2026-08-20): the page still names Google
 Analytics and WP Engine, and mentions Stripe and Workable zero times each.
 
-**Sequencing — draft this last.** Two in-flight fixes change what the policy has
-to disclose, so drafting before they land means drafting twice:
+**Sequencing — draft this last.** Three fixes change what the policy has to
+disclose, so drafting before they land means drafting twice. One is done:
 
-- `BACKLOG.md` §22's commit deletes `DiamondEmbed.astro → ensureFont()`, which
-  removes the Google Fonts request — and with it the "Google as a recipient of
-  visitor IP addresses" clause this section conditions on §5.
+- ~~`BACKLOG.md` §22's commit deletes `DiamondEmbed.astro → ensureFont()`~~ —
+  **landed 2026-08-21.** The Google Fonts request is gone, and with it the "Google
+  as a recipient of visitor IP addresses" clause this section used to condition on
+  §5. One input down.
 - `BACKLOG.md` §23 defers the HubSpot embed, which changes *when* `__cf_bm` is
   set (only once a visitor reaches a form) rather than whether it is.
 
-The YouTube embeds in §5 are the third input and are still open. Draft once those
-three are settled; the disclosure list is stable after that.
+The YouTube embeds in §5 are the third input and are still open. Draft once the
+two remaining ones are settled; the disclosure list is stable after that.
 
 ---
 
@@ -724,7 +724,17 @@ session) — but it is no longer serving the site, which is what the line was fo
 - **`apple-touch-icon`, web manifest, `.ico` fallback** — the SVG favicon, OG
   default image, and `theme-color` are done.
 - **Lighthouse and cross-browser QA on the real deployed build** — the earlier
-  a11y pass ran on a sample of pages, not the full set on real hosting.
+  a11y pass ran on a sample of pages, not the full set on real hosting. To
+  reproduce what **PageSpeed Insights** measures rather than what a local run
+  does, force software rendering — its headless Chromium has no GPU:
+  `npx lighthouse https://openmined.org/ --only-categories=performance
+  --chrome-flags="--headless=new --use-angle=swiftshader"`. Take a median of five
+  runs; single runs of this swing by thousands of ms of TBT. The 2026-08-21 WebGL
+  fix closed the gap the flag used to expose — TBT scores 100 under it now (5-run
+  median 41ms against 3,156ms before, same local build and server). What still
+  separates a software run from a GPU one is page-wide paint speed (LCP, Speed
+  Index), which is the software rasterizer, not our script — so expect the flagged
+  score to sit below the unflagged one and stop treating that as a defect.
 - **Extend CI coverage.** The four deterministic guards already gate every push
   to both deploying branches. What's still manual is anything needing a browser,
   the network, or a deployment — the overflow audit, the currency check, and the

@@ -319,13 +319,17 @@
 
   /* ── 14. FONT FAMILIES ───────────────────────────────────────────── */
   /* Semantic role aliases over the Astro Fonts API vars (--font-inter /
-     --font-rubik, emitted by <Font> in Base.astro — see astro.config.mjs → fonts).
+     --font-rubik / --font-sometype-mono, emitted by <Font> in Base.astro — see
+     astro.config.mjs → fonts).
      Those vars already carry the family + fallback stack, so usages reference
      only the role token, never a literal name or fallback. To swap a typeface,
      change the config + the alias here; to reassign a role (e.g. headings to
      Inter), change only the alias — no component edits. */
   --font-primary:   var(--font-inter);   /* Inter — body, UI, h5/h6, prose, code */
   --font-secondary: var(--font-rubik);   /* Rubik — display headings h1–h4 */
+  --font-mono:      var(--font-sometype-mono); /* Sometype Mono — graphic labels
+                                            (DiamondEmbed). Code blocks keep the
+                                            system stack in global.css → code. */
 
   /* ── 15. TYPE SCALE ──────────────────────────────────────────────── */
   /* min = mobile floor (≤767px); max = desktop ceiling.
