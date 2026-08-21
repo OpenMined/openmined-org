@@ -13,6 +13,15 @@
  * component nor the class, so they're auto-width by default already). `class`
  * passes through the other live authoring modifiers (`form-button-center`,
  * `form-no-shadow`, `form-surface-background-bright|dim`).
+ *
+ * ⚠ This div renders at ZERO height — HubSpot fills it later, so everything after
+ * it in document order is pushed down when the form lands. If the marker sits
+ * ABOVE THE FOLD, that costs a large CLS hit, and the surface must reserve space
+ * by setting `--hs-form-top` (see `global.css → .hs-form-embed`). Do not reason
+ * about whether the form is last in its container — the `<footer>` always follows
+ * it, and pages whose form was last still measured 0.24–0.30. Below the fold,
+ * nothing visible moves and no reservation is needed. `AGENTS.md → Forms` holds
+ * the rule; `npm run audit:form-cls` measures it and carries the numbers.
  */
 interface Props {
   formId: string;

@@ -86,6 +86,12 @@ const { heading, tagline, formId, tone } = Astro.props;
   }
 
   .inq__form {
+    /* The footer follows this form, so a late-arriving form shoves it up the
+       page — reserve past the fold (global.css → .hs-form-embed). NOT in a media
+       query: the form sits beside the copy on desktop (measured shift 0.085–0.101
+       at 1440x900) and below it when stacked, so it is above the fold either way.
+       These inquiry forms are tall, so the reservation rarely binds. */
+    --hs-form-top: 210px;
     position: relative; /* stacking + positioning context for the breakout blob */
     background-color: var(--surface-foreground-low);
     border-radius: var(--border-radius-L);

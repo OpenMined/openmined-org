@@ -91,9 +91,10 @@ the author bios took).
 
 Every fix must land in **both** implementations:
 `src/pages/api/create-donation.ts` (the contract source; serves dev) and
-`aws/create-donation/index.mjs` (what production runs). Four opens — none
-exploitable for theft (the secret never leaves the Lambda and Stripe validates
-the session); this is abuse-resistance and hygiene:
+`aws/create-donation/index.mjs` (what production runs). **Two open**, both
+abuse-resistance rather than exposure — the secret never leaves the Lambda and
+Stripe validates the session. Two others closed at cutover and are kept struck
+through, because both were decided rather than merely done:
 
 - ~~**Staging and previews share production's key.**~~ **Closed 2026-08-17 —
   superseded at Stephen's direction** (it had been accepted-not-blocking,
@@ -113,14 +114,11 @@ the session); this is abuse-resistance and hygiene:
 - **No maximum amount.** `< 1` is rejected with no ceiling; very large values
   stringify to exponential notation in `unit_amount` and 502 with Stripe's
   own error text.
-- **Stripe error text is forwarded to the browser** (the `!res.ok` branch).
-  Stripe's auth-failure messages include a partially-redacted key — an
-  unnecessary information channel out of the route holding the secret. Log
-  server-side, return a fixed message. Confirmed live on the deployed Lambda
-  2026-08-17: an over-large amount returns 502 carrying Stripe's own message.
-  ⏱ **Land this one with the live-key swap, not after** — the moment the key
-  changes is the moment an auth failure is most likely, and that is the variant
-  that leaks a partially-redacted key (cross-ref `LAUNCH.md` §2).
+- ~~**Stripe error text is forwarded to the browser.**~~ **Closed 2026-08-17**
+  by Stephen, ahead of the live-key swap as this item asked. The `!res.ok`
+  branch no longer passes Stripe's message through; verified against production
+  after cutover — an over-large amount returns the fixed
+  `Could not start checkout. Please try again.` with a 502.
 
 ### 15. CTA icon squashed out of its aspect ratio — `READY`
 
@@ -173,6 +171,34 @@ Two things worth doing with them:
   positives and false negatives (it flagged a page the DOM shows as clean).
   Assert it in a real DOM instead: no `<p>` or heading inside an `article` may
   have a `<pre>` ancestor. That form found exactly 5 pages in 645.
+
+### 24. Non-form layout shift on `/` and `/careers/` — `NEEDS DECISION`
+
+Surfaced as the control pages in `audit-form-cls`, so they are measured but
+unowned. Throttled, 2026-08-21: `/` **0.044** at 900x1000 from `div.de1` /
+`canvas.de-webgl` (the diamond embed sizing itself after load), and `/careers/`
+**0.055** at 360x640 from `p` / `div.simple-hero__actions`. Both sit under the
+guard's 0.1 threshold, so nothing fails today — but they are the floor that
+stops the threshold being tightened. Decide whether either is worth reserving
+for; the diamond one wants checking against whatever `DiamondEmbed`'s static-draw
+path now does at first paint.
+
+### 25. Anchor landings shift the page — `READY`
+
+Landing mid-page via a fragment produces a large shift, and it is **not** caused
+by the form deferral — it is worse without it. Measured 2026-08-21, throttled
+mobile, `/careers/#open-positions` (a real in-page anchor, ~930px above the form):
+production's eager build **0.604**, the deferred build **0.316**. The shifting
+node is `section.cta`, landing right after the form renders.
+
+The reservation in `global.css → .hs-form-embed` cannot express this case: it is
+sized from the document top, so it computes to zero at an arbitrary scroll
+position. Whatever fixes it has to reason about the viewport at landing time, not
+at page load. Reproduce with `audit-form-cls --measure` extended to a fragment
+URL, or the one-off in this item's commit.
+
+Worth checking whether browser scroll restoration on back-navigation lands the
+same way — it takes the same no-gesture path.
 
 ## Cleanup — not urgent
 

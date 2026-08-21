@@ -114,6 +114,12 @@ import HelpWays from '@elements/HelpWays.astro';
     color: var(--text-subtle);
   }
 
+  /* `.gi__fineprint` sits directly under the form in the same column at EVERY
+     width, so the layout-shift reservation is not stacked-only (global.css →
+     .hs-form-embed). Value is the smallest marker top across the viewport
+     matrix — 461px stacked, 494px on desktop. */
+  .gi__col { --hs-form-top: 440px; }
+
   @media (max-width: 991px) {
     .gi__grid { grid-template-columns: 1fr; gap: var(--spacing-5XL); }
   }

@@ -114,10 +114,10 @@ handoff can be async.
    afterwards would mean `openmined.org` serves the new site telling Googlebot
    `noindex` for however long the gap runs — on a domain with years of history
    and live rankings, that invites exactly the deindexing §7 exists to prevent,
-   and it recovers slowly. Doing it first costs only that `main`'s branch domain
-   goes indexable early, which is the §3 residual that exists after launch
-   anyway. Bad-direction risk on an unlinked `amplifyapp.com` host beats
-   bad-direction risk on the real domain.
+   and it recovers slowly. Doing it first cost only a window where `main`'s
+   branch domain was indexable, on an unlinked `amplifyapp.com` host that has
+   since been 301'd to the apex (§3). Bad-direction risk there beat
+   bad-direction risk on the real domain, and the trade paid off.
 
    Still to re-assert at cutover: the SEO parity checklist (§7).
 4. Point the domain at `main` by adding root + www to the existing domain
@@ -130,23 +130,35 @@ handoff can be async.
      --sub-domain-settings prefix=,branchName=main prefix=www,branchName=main prefix=staging,branchName=staging
    ```
 
-   Amplify rewrites the Route 53 records itself (same-account zone). Live's
-   www→apex 301 (today emitted by WordPress) needs no cutover step: the sync
-   script already emits it as a domain-qualified, path-preserving rule that
-   activates the moment `www` maps to the app.
-   ⚠ **That rule has never been observed working** — being domain-qualified, it
-   is inert until `www` resolves to the app, so it cannot be tested in advance.
-   Test the **bare root** (`https://www.openmined.org/`, empty splat) as well as
-   a deep path: the rule's source is a splat pattern, and if it doesn't match the
-   empty path then the commonest inbound www URL of all falls through it.
+   Amplify rewrites the Route 53 records itself — **except where a record
+   already exists**: auto-DNS will not overwrite one, so the flip was an explicit
+   `UPSERT` (Stephen, 2026-08-17; rollback values recorded in the change
+   comment).
+
+   ✅ **www → apex 301 works**, verified live after cutover, path and query
+   preserved. It did **not** work on the first try, and the reason is the trap
+   worth carrying forward: **a domain-qualified rule must use a bare origin as
+   its source, with no path and no splat.**
+
+   ```
+   source: 'https://www.openmined.org'        ✅ fires
+   source: 'https://www.openmined.org/<*>'    ❌ never matches
+   ```
+
+   Amplify preserves the path and query itself, so the splat buys nothing and
+   costs everything. Both domain rules shipped in the splat form and both sat
+   inert while every path-sourced rule in the same set fired within seconds. The
+   isolating measurement, if it ever needs re-deriving: with no sync in between,
+   both hosts answered 200 for 70 minutes on the splat form; changing one rule to
+   the bare form had that host redirecting ~60 seconds later while the other,
+   untouched, was still 200 at 72 minutes. It tracks the form, not elapsed time.
 5. `npm run smoke -- https://openmined.org` — expect 17/17, with the
    indexability row now reading **`indexable (production, launched)`** rather
    than `noindex guard on`. That row is direction-aware: it derives what to
    expect from `INDEXING_ENABLED` and the host, so production must be indexable
-   while every other host must not be. ⚠ Re-smoking
-   `main.d1otfqlvqd3jby.amplifyapp.com` after the flip gives **16/17** by design
-   — it serves the production build on a non-production host, which is the §3
-   residual; the row says so in its detail column.
+   while every other host must not be. Note the branch domains now **301 to the
+   apex**, so smoking them no longer exercises the site at all — smoke the apex
+   and `staging.openmined.org`, which are the two hosts that serve.
 6. **Rollback** is one Route 53 change: restore the root/www `A` records to the
    WP Engine origin `141.193.213.10` / `141.193.213.11` (values re-verified in
    the zone 2026-08-13). WordPress stays up through the window regardless.
@@ -287,22 +299,29 @@ it. Only a **runtime hostname check** can — the same shape as
 `@data/analytics.mjs → ANALYTICS_HOSTS`, which exists for the mirror-image
 reason. Three ways to close it, in rough order of cost:
 
-1. **Accept it and watch GSC** — rely on the canonical, and check Coverage for
-   `amplifyapp.com` URLs in the first weeks. Zero work, non-zero risk.
-2. **Add a runtime host check** that forces `noindex` when
-   `location.hostname` is not a production host. Cheap and complete, but
-   JS-dependent, so it is weaker than the build-time directive it supplements.
-3. **Ask whether the default domain can be disabled or redirected** once the
-   custom domain is attached — needs AWS access, and Amplify offers no obvious
-   per-domain header control, so treat this as a question rather than a plan.
+**CLOSED 2026-08-17 by redirecting the host**, verified live:
 
-**Decided 2026-08-17 — option 3, answered:** Amplify *can* redirect a default
-domain, with a domain-qualified custom rule (same mechanism as the www→apex
-301). `scripts/sync-amplify-redirects.mjs` now emits
-`https://main.<app>.amplifyapp.com/<*>` → `https://openmined.org/<*>` 301; it
-applies on the first main-push sync, i.e. at cutover, which also ends the
-window where `main`'s domain answers `index, follow`. Option 1's GSC Coverage
-glance in the first weeks stays worth doing as the check on this.
+```
+main.d1otfqlvqd3jby.amplifyapp.com/blog/  301 → openmined.org/blog/
+```
+
+`scripts/sync-amplify-redirects.mjs → MAIN_DOMAIN_REDIRECT` emits it, and
+Amplify preserves path and query itself. A 301 serves no HTML, so there is
+nothing on that host left to index — the duplicate is gone rather than merely
+discouraged. The GSC Coverage glance in the first weeks is still the cheap check
+that it held.
+
+⚠ **The redirect closes the symptom, not the design.** The gate in
+`@data/indexing.mjs` keys on **branch**, and one build serves several hosts, so
+*any* host serving a `main` build still reports `index, follow` — that is why
+`www` and this domain both did. Today both are redirected, so it doesn't bite.
+It would bite again on a new alias or custom domain pointed at `main`, and the
+only complete answer is a **runtime host check** (the shape
+`@data/analytics.mjs → ANALYTICS_HOSTS` uses), which build time cannot do
+because at build time there is one artifact and no request. Left undone
+deliberately: a runtime check is JS-dependent and therefore weaker than the
+build-time directive, and with both hosts redirecting there is nothing for it to
+catch right now.
 
 Note **branch access control cannot be the answer here**: it applies per branch,
 so locking `main`'s default domain would lock `openmined.org` with it.
@@ -407,13 +426,23 @@ closed by other work, and one of its premises about tracking was wrong (§4).
 
 **Still open:**
 
-- **One live URL does not resolve: `/blog/resource_type/video-on-demand/`.**
-  The only gap in a 453-URL parity sweep of `reference/live-sitemap/`
-  (2026-08-17). Live serves it 200 ("Video – On-Demand Archives") and it sits in
-  Yoast's sitemap, so Google has it on file and will keep requesting it. Fix is
-  one `editorialRedirects` entry in `src/data/redirects.mjs` → `/`, matching how
-  the two existing `/resources/…` entries were handled. Cheap, and it wants
-  doing before the origin repoints rather than after.
+- **One live URL does not resolve: `/blog/resource_type/video-on-demand/`** —
+  **fix committed locally, awaiting `main`.** The sole gap in the parity sweep of
+  `reference/live-sitemap/`, re-run against the production origin 2026-08-20.
+  Live served it 200 ("Video – On-Demand Archives") and it sits in Yoast's
+  sitemap, so Google has it on file and keeps requesting it.
+
+  Shipped as a **splat in `public/_redirects`** (`/blog/resource_type/*` → `/`)
+  rather than the `redirects.mjs → editorialRedirects` entry this item first
+  proposed. Why the shape changed: the sitemap records one term, but the taxonomy
+  could have carried others that were never sitemapped, and live is off the
+  origin now — so the term set can no longer be enumerated. One rule retires the
+  whole namespace instead of the single URL we happen to know. Same shape and
+  reasoning as the `/author/*` rule above it.
+
+  ⚠ **Not previewable.** `.github/workflows/sync-redirects.yml` filters to
+  `main`, so the rule only reaches Amplify on a main push — verification is a
+  `curl` against production after merge, not a PR preview.
 - **Article images on coverless posts.** A post with no cover emits no
   `ImageObject`, matching live. Google's Article guidance *recommends* an image,
   so those posts are less rich-result eligible. Falling back to the generic
@@ -502,30 +531,29 @@ staff-confirmed, not probe-tested — testing it would inject junk contacts.
   between the site and genuinely zero cookies** — and while it stands, the
   zero-cookie sentence above is not literally true, which matters because it is
   the basis for shipping without a banner. Worth doing before launch.
-- **⚠ The homepage loads a Google-hosted webfont** (found 2026-08-17). Not a
-  cookie — so the "zero cookies" sentence above survives literally — but a
-  request to `fonts.googleapis.com` / `fonts.gstatic.com` hands the visitor's IP
-  address to Google on every load, with no consent, which is the exposure a
-  German court found actionable (LG München I, Jan 2022) and is squarely against
-  the stance the rest of this section takes.
+- **The homepage's Google-hosted webfont — fixed 2026-08-21.** `DiamondEmbed.astro`
+  used to inject two preconnects and a Google Fonts stylesheet at runtime for
+  **Sometype Mono**, its label font, on the two pages carrying the embed (`/` via
+  `HomeHero.astro`, and `/style-guide/`). No cookie — so the zero-cookie sentence
+  above always held — but a request to `fonts.googleapis.com` / `fonts.gstatic.com`
+  hands the visitor's IP to Google on every load with no consent, which is the
+  exposure LG München I found actionable (Jan 2022) and squarely against this
+  section's stance.
 
-  It is **our code, not HubSpot's**: `@components/graphics/DiamondEmbed.astro →
-  ensureFont()` injects two preconnects and a Google Fonts stylesheet for
-  **Sometype Mono**, the embed's own label font. It fires on exactly the two
-  pages carrying the embed — `/` (via `HomeHero.astro`) and `/style-guide/` —
-  and Sometype Mono is referenced nowhere else in the codebase. Verified by
-  request-level capture: blog posts and `/contact/` request no Google origin
-  despite loading the same HubSpot form, so the form is not the source.
+  The family now goes through the Astro Fonts API like Inter and Rubik
+  (`astro.config.mjs → fonts`, emitted by `<Font>` in `Base.astro`, aliased in
+  `tokens.css → FONT FAMILIES` as `--font-mono`, which the embed's injected label
+  rule reads). `fontProviders.google()` fetches at **build** time and self-hosts
+  the result, so no font binaries enter the repo and no visitor-facing request to
+  Google survives: verified against the built output 2026-08-21 —
+  `grep -rl 'fonts.googleapis.com\|fonts.gstatic.com' dist/` returns nothing, and
+  a headless load resolves the label to the self-hosted face.
 
-  This also makes two docs wrong: `public/_headers` states "Fonts are
-  self-hosted", and BACKLOG §13's CSP origin inventory omits the Google origins.
-
-  **Fix:** self-host Sometype Mono through the pipeline the other families
-  already use (`astro.config.mjs → fonts` + the hand-authored `@font-face` rules
-  in `global.css → typography`), then delete `ensureFont()`. Small, and it
-  removes a third-party render-blocking stylesheet from the homepage as a bonus.
-  If it is *not* fixed before launch, §6 must name Google as a recipient of
-  visitor IP addresses.
+  **The property to protect:** no page now reaches a third-party origin for its
+  *own* rendering. What remains is deliberate and page-scoped — HubSpot's embed on
+  form-bearing pages, the YouTube iframes in the bullet above, and the `/style-guide`
+  icon CDN (`BACKLOG.md` §13) — so anything added here that quietly reaches for a
+  CDN font, icon set, or script reopens exactly this.
 - **Guard worth building:** assert that no page sets cookies on a cold load, so
   bannerlessness can't silently break. Nothing checks this today. Worth widening
   to third-party *requests* rather than cookies alone — a cookie-only assertion
@@ -545,9 +573,9 @@ so this is no longer conditional):
 - a **cookie/storage disclosure** stating the site sets no cookies of its own —
   only third-party strictly-necessary `__cf_bm` on HubSpot's domains, and the
   YouTube embeds in §5 until those are fixed;
-- **Google**, as a recipient of visitor IP addresses, *if* the homepage's
-  Google-hosted webfont (§5) is still shipping at launch — the cleaner outcome is
-  to self-host it and have nothing to disclose;
+- **no Google clause** — the homepage's Google-hosted webfont was self-hosted
+  2026-08-21 (§5), so Google receives nothing and the policy should name it
+  nowhere;
 - **HubSpot forms** and the in-form consent basis;
 - **Workable** for job applications.
 
@@ -558,6 +586,23 @@ through Stripe Checkout and the policy names no payment processor at all. The
 policy currently *over*claims analytics (it lists Google Analytics and Plausible,
 and only one ships) and *under*claims payments — **the second is the one that
 matters legally**, so if only one thing gets fixed, fix that.
+
+**This is now live and wrong, not pending-and-wrong** (verified against
+`https://openmined.org/privacy-policy/`, 2026-08-20): the page still names Google
+Analytics and WP Engine, and mentions Stripe and Workable zero times each.
+
+**Sequencing — draft this last.** Three fixes change what the policy has to
+disclose, so drafting before they land means drafting twice. One is done:
+
+- ~~`BACKLOG.md` §22's commit deletes `DiamondEmbed.astro → ensureFont()`~~ —
+  **landed 2026-08-21.** The Google Fonts request is gone, and with it the "Google
+  as a recipient of visitor IP addresses" clause this section used to condition on
+  §5. One input down.
+- The HubSpot embed is now deferred (`AGENTS.md → Forms`), which changes *when* `__cf_bm` is
+  set (only once a visitor reaches a form) rather than whether it is.
+
+The YouTube embeds in §5 are the third input and are still open. Draft once the
+two remaining ones are settled; the disclosure list is stable after that.
 
 ---
 
@@ -572,9 +617,9 @@ day.
   deploy, off WP Engine (the domain-association change in the cutover sequence).
 - **Live Stripe key** in the SSM parameter
   (`aws/create-donation/README.md`), with §2's error-text fix alongside it.
-- **`www` → apex 301 preserved** — pre-wired in the sync script and inert until
-  `www` maps to the app, so cutover is the **first** time it can be observed.
-  Test the bare root as well as a deep path (see cutover step 4).
+- ✅ **`www` → apex 301 preserved** — verified after cutover, path and query
+  preserved, on the bare root as well as deep paths. Took a fix to get there;
+  cutover step 4 records the bare-origin source rule and how it was isolated.
 - **True 404 on the production origin** — unknown paths answer HTTP 404, not
   a redirect onto the 404 page (the smoke `unknown path → true 404` row).
   Soft-404s poison exactly the GSC Coverage data §7 says to watch.
@@ -626,9 +671,11 @@ day.
   Then submit `/sitemap-index.xml` in GSC and watch Coverage for 404 spikes for
   the first two weeks.
 - **Route parity** — every URL in `reference/live-sitemap/` resolves, directly or
-  via a 301. Swept 2026-08-17 against staging: **452/453**, the one gap being the
-  `resource_type` archive in §7. Re-run against the production origin after the
-  repoint; delete the reference directory once it passes.
+  via a 301. Re-swept against the **production** origin 2026-08-20: **459/460**,
+  the one gap still being the `resource_type` archive in §7, whose fix is
+  committed and waiting on `main`. Re-run once that lands; **delete
+  `reference/live-sitemap/` when it reads 460/460** — that directory exists only
+  to answer this question.
 - **Blog permalinks** — every migrated post resolves at its WordPress URL. This
   matched 371/371 when last audited (2026-07-22), and the 2026-08-17 parity
   sweep re-confirmed all 368 sitemapped posts; re-verify only if the live post
@@ -677,7 +724,17 @@ session) — but it is no longer serving the site, which is what the line was fo
 - **`apple-touch-icon`, web manifest, `.ico` fallback** — the SVG favicon, OG
   default image, and `theme-color` are done.
 - **Lighthouse and cross-browser QA on the real deployed build** — the earlier
-  a11y pass ran on a sample of pages, not the full set on real hosting.
+  a11y pass ran on a sample of pages, not the full set on real hosting. To
+  reproduce what **PageSpeed Insights** measures rather than what a local run
+  does, force software rendering — its headless Chromium has no GPU:
+  `npx lighthouse https://openmined.org/ --only-categories=performance
+  --chrome-flags="--headless=new --use-angle=swiftshader"`. Take a median of five
+  runs; single runs of this swing by thousands of ms of TBT. The 2026-08-21 WebGL
+  fix closed the gap the flag used to expose — TBT scores 100 under it now (5-run
+  median 41ms against 3,156ms before, same local build and server). What still
+  separates a software run from a GPU one is page-wide paint speed (LCP, Speed
+  Index), which is the software rasterizer, not our script — so expect the flagged
+  score to sit below the unflagged one and stop treating that as a defect.
 - **Extend CI coverage.** The four deterministic guards already gate every push
   to both deploying branches. What's still manual is anything needing a browser,
   the network, or a deployment — the overflow audit, the currency check, and the

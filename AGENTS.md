@@ -283,6 +283,90 @@ auto-width (raw `.md` markers, no class). The `.hs-form` skin lives in
 **Never hand-rebuild a HubSpot form from `@ui` primitives** — a placeholder
 rebuild drifts from the real schema.
 
+**A marker above the fold must reserve space.** The marker renders at zero height
+and HubSpot fills it later, so everything after it in document order is pushed
+down when the form lands. The criterion is simply **is the marker above the fold**
+— because a zero-height marker means following content starts exactly at the
+marker's own top, so if the marker is visible, what follows it is visible and
+therefore shifts.
+
+Do **not** reason about whether the form is "last in its container": the
+`<footer>` always follows it. That mistake cost a wrong scope here — `/grant/` and
+`/major-gift/` have the form last in its card and still measured 0.24–0.30,
+shifting `footer.site-footer`. Conversely `/partner/` is clean only because its
+form happens to sit *below* the fold.
+
+Because most markers sit far down a long page, this is **opt-in, never a default**:
+a `min-height` taller than the rendered form is dead space, so defaulting it on
+would trade whitespace across most of the site to fix a minority of layouts.
+
+**Reserve to reach the fold, not the form's height.** CLS is computed against the
+viewport, so content that moves while already off-screen costs nothing: the
+reservation only has to push what follows the form past the bottom edge. This
+matters because the form's height is HubSpot's to change and swings with width —
+matching it would be both brittle and wasteful.
+
+The mechanism is one declaration in `global.css → .hs-form-embed`, which reserves
+`100vh - var(--hs-form-top)`. A surface opts in by setting `--hs-form-top` to the
+form's own distance from the top of the viewport; the default computes to zero
+reservation, so surfaces needing nothing pay nothing. The `calc` lives in the
+global rule on purpose, so no call site can reach for `dvh` — a unit that changes
+as mobile toolbars hide would move the box itself.
+
+Set it on whatever owns the layout — a **component** where the layout is shared
+(`OptInLanding`, `InquiryLanding`, `EventRegLanding`), the page where it isn't
+(`contact.astro`, `get-involved.astro`, `subscribe/index.astro`). Only put it
+inside a media query when the shift is stacking-dependent: the three grid pages
+shift solely when collapsed, while the landing components are single-column at
+every width and shift on desktop too.
+
+**Sizing it is a real trade, not a lookup.** Too small brings the shift back; too
+large leaves visible dead space between the form and whatever follows. Measure the
+marker's `top` at 390px wide and round down slightly. Where one component serves
+pages whose headings differ in length, take a per-page value —
+`OptInLanding`'s `formTop` prop exists because its pages vary by ~170px, and a
+single value left 200px+ gaps on the shortest forms. Accept that a tall viewport
+still shows a gap behind a short form: reaching the fold scales with viewport
+height and the form's height does not, so CLS 0 at 1200px tall and a tight card
+cannot both hold. Lighthouse scores at ~412x823, so tune there.
+
+**Never gate the page's own content reveal on `v2.js`.** Hiding content until the
+form loads also removes the shift, and is not worth considering — HubSpot's
+domains are widely blocked, so a blocked script would leave real content
+permanently hidden. That trades an availability failure for a cosmetic metric.
+
+**The embed loads on first engagement, not at parse time.** `Base.astro`'s loader
+waits for a gesture (`scroll`/`wheel`/`touchstart`/`pointerdown`/`keydown`) or an
+IntersectionObserver backstop, whichever comes first — HubSpot's `v2.js` and its
+telemetry pixels set a third-party `__cf_bm` cookie, which was the only thing
+failing Best Practices site-wide (78 → 100 once deferred). Two rules that keep it
+working, both measured and both easy to undo by accident:
+
+- **Never add an idle-timeout fallback.** It would load inside Lighthouse's run
+  window and forfeit the win on every page, for no user benefit.
+- **Gesture events are not interchangeable with `rootMargin`.** The form needs
+  ~1600ms to render on Slow 4G, so a trigger must buy `scrollSpeed x 1.6s` of
+  runway; proximity alone took `/careers/` from CLS 0 to 0.135 at a normal scroll.
+  Gestures fire before the scroll position moves and buy the whole journey down
+  the page.
+
+**Above-the-fold forms load immediately and keep Best Practices ~79. That is
+accepted, not an open item.** Their marker is in view at load, so no deferral can
+help. A click-to-load facade would close it and is **rejected** — `/contact/`,
+`/get-involved/` and `/subscribe/` are the site's highest-intent forms, and a
+click of friction in front of them to move a lab metric is the wrong trade. Do
+not re-propose it.
+
+Guarded by `npm run audit:form-cls`, which measures CLS under Lighthouse's own
+throttled-mobile conditions; its header carries the measurements and the
+reasoning. It **discovers** its own page set rather than trusting a list, and that
+is deliberate: a hand-assembled list missed ten forms-first pages, because a page
+passing a `formId` into a section component never mentions `FormEmbed` itself.
+The general lesson, learned three times in one session: **a grep match is not a
+usage** — a filename matching a symbol may only mention it in a comment, and the
+`.hs-form-embed` selector appears in `Base.astro`'s loader on every page. Confirm
+what a match means before building a scope on it.
+
 ## Donate modal
 
 The "Secure Donation" dialog is `@components/layout/DonateModal.astro`, rendered
@@ -343,6 +427,38 @@ per-surface baked shape can never be reused.
 Reference `BlogPost.astro → searchThumb` (height-only, cropped by `search.astro
 → .search-result__tile`) and `PostCard.astro` (`widths` only, cropped by
 `object-fit: cover`). Guarded by `npm run audit:images`.
+
+## WebGL embeds
+
+Two components ship WebGL — `components/graphics/DiamondEmbed.astro` and
+`StreamEmbed.astro`, both only on `/` (via `HomeHero.astro`) and `/style-guide/`.
+Their scripts are `is:inline` and cannot import, so the guards below exist as two
+hand-synced copies; DiamondEmbed's comments carry the measurements.
+
+Two rules, both learned from PageSpeed Insights scoring the homepage **41** while
+local Lighthouse scored 98 (measured 2026-08-21, `--use-angle=swiftshader` at 4×
+CPU throttling):
+
+- **Never create a GL context before the page has painted.** On a software
+  renderer — no GPU, which is PSI's headless Chromium, plus blocklisted drivers
+  and VMs — `getContext('webgl')` on an in-document canvas is a synchronous wait
+  on a compositor busy rasterizing the page in software: **1,972ms inside the
+  first-paint phase against 6ms after it.** A *detached* probe canvas pays it too,
+  so there is no cheap way to check the renderer up front and no timing shortcut:
+  `load` fires before first paint on a fast connection, and FCP alone still lands
+  in the raster tail. Both embeds gate init on FCP **plus** two on-time animation
+  frames (`afterPagePainted`), and each canvas fades in on its first drawn frame.
+  Layout stays eager — the container's aspect-ratio and sizing must never wait on
+  a context, or the page shifts when the graphic arrives.
+- **Never animate on a software renderer.** A per-pixel shader rasterizes on the
+  CPU and blocks the main thread every frame. Read `WEBGL_debug_renderer_info`
+  once the context exists and draw **one** static frame instead of starting the
+  rAF loop — the same treatment `prefers-reduced-motion` gets.
+
+Verify with the flagged Lighthouse run in `LAUNCH.md`'s Lighthouse QA line, and
+the mechanism under that flag with Playwright: count rAF callbacks (0 on the
+static path, ~360 in 3s animating) and time `getContext`. Measure a median of
+five runs — single runs of this swing by seconds.
 
 ## Layering and overflow
 
