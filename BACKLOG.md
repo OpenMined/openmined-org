@@ -181,8 +181,10 @@ PSI's HeadlessChromium has no GPU, so WebGL falls back to SwiftShader and the
 per-pixel simplex-noise shader rasterizes on the CPU, blocking the main thread
 every frame. Reproduce locally with
 `npx lighthouse https://openmined.org/ --only-categories=performance
---chrome-flags="--headless=new --use-angle=swiftshader"` → 45, vs 98 without
-the flag. Real phones have GPUs, so actual visitors are mostly unaffected — the
+--chrome-flags="--headless=new --use-angle=swiftshader"` → re-measured against
+production 2026-08-20: **41 with the flag, 98 without**, TBT 70ms → 4,500ms. The
+gap is stable and reproduces on demand; it is the flag, not the run. Real phones
+have GPUs, so actual visitors are mostly unaffected — the
 real-user exposure is the software-rendering tail (blocklisted GPU drivers,
 VMs, battery saver), plus the lab score itself misleading anyone who runs PSI.
 
@@ -190,8 +192,66 @@ Fix: after `getContext('webgl')`, read the renderer string
 (`WEBGL_debug_renderer_info`); on SwiftShader/software, draw one static frame
 and skip the animation loop. Respect `prefers-reduced-motion` the same way.
 Both `DiamondEmbed.astro → _start` and `StreamEmbed.astro` (same rAF pattern,
-same missing guards); check `HeroSwoop.astro` while there. Cross-ref the
-Lighthouse QA line in `LAUNCH.md`.
+same missing guards). Cross-ref the Lighthouse QA line in `LAUNCH.md`.
+
+⚠ **Wider than the diamond.** `HeroSwoop.astro` *wraps* `StreamEmbed`, and
+`SimpleHero` renders it through its `swoop` slot — so the unguarded rAF runs on
+every page passing that slot, not just `/`. Re-derive the set rather than
+trusting a list here: `grep -rl 'HeroSwoop' src --include='*.astro'`, then check
+which callers actually fill `swoop` (`SimpleHero.astro → hasSwoop`). The diamond
+is the only TBT catastrophe — StreamEmbed's shader is cheap enough that those
+pages hold TBT under 250ms even on SwiftShader — but the guard belongs in both.
+
+**Ships with `LAUNCH.md` §5's Sometype Mono self-host.** That fix deletes
+`DiamondEmbed.astro → ensureFont()` — the same file this item edits, and the
+homepage's only third-party render-blocking stylesheet. One commit, two items;
+the privacy half stays recorded in `LAUNCH.md` per the one-item-one-tracker rule.
+
+### 23. HubSpot embed loads eagerly into an unreserved box — `READY`
+
+`Base.astro`'s forms loader injects HubSpot's `v2.js` as soon as a
+`.hs-form-embed[data-form-id]` marker exists anywhere in the document, whatever
+the marker's position, and `@elements/FormEmbed` reserves no height for what
+HubSpot renders into it. One cause, three symptoms — all measured against
+production 2026-08-20:
+
+- **Best Practices 78 on `/`.** Exactly two audits fail and both are the same
+  cookie — `third-party-cookies` (weight 5/27) and `inspector-issues` (1/27) —
+  from `__cf_bm`, set by `v2.js` and by HubSpot's own render-telemetry pixels
+  (`forms-na1.hsforms.com/embed/v3/counters.gif`). Fixing the one cause takes the
+  category to **100**. Re-derive:
+  `npx lighthouse https://openmined.org/ --only-categories=best-practices`.
+- **CLS wherever the form has content beneath it** — `/contact/` **0.455**
+  (score 78, the site's lowest page) and `/get-involved/` **0.285** (score 85).
+  The shifting node is the form's own container: on `/get-involved/` that is
+  `get-involved.astro → .gi__col`, where `<FormEmbed>` sits between the column
+  heading and `.gi__fineprint`, so everything below is pushed when HubSpot
+  renders. `/`, `/syftbox/` and `/careers/` measure CLS 0 — there the form is
+  last in its container with nothing to push.
+- **~75 KiB unused JS** on the critical path of every form-bearing page.
+
+Two changes, **not interchangeable**:
+
+1. **Reserve the space** — `min-height` on the marker, measured per form (field
+   counts differ, so measure rather than guess a constant). The CLS fix.
+2. **Defer the load** — gate the loader on an IntersectionObserver over the
+   markers instead of a parse-time document-wide check. The cookie + unused-JS
+   fix.
+
+⚠ Deferral alone does **not** fix the CLS — it moves the shift later, and on an
+above-the-fold form it can still land inside the session window. Do both, or
+`/contact/` stays where it is.
+
+**Not `LAUNCH.md` §5's privacy item, and §5 should not be reopened over it.** §5
+assessed `__cf_bm` on the consent axis and concluded strictly-necessary,
+disclose-don't-mitigate. Lighthouse flags any third-party cookie because Chrome
+is deprecating them — a future-breakage signal, not a consent one. Both readings
+hold. Deferral does incidentally strengthen §5's footing, since the cookie then
+lands only once a visitor has reached the form.
+
+Unverified and worth checking first: that the form still renders when `v2.js`
+arrives late. `Base.astro` calls `hbspt.forms.create` from the script's `load`
+handler, so the wiring should hold — but nothing has tested it.
 
 ## Cleanup — not urgent
 

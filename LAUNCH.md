@@ -426,13 +426,23 @@ closed by other work, and one of its premises about tracking was wrong (§4).
 
 **Still open:**
 
-- **One live URL does not resolve: `/blog/resource_type/video-on-demand/`.**
-  The only gap in a 453-URL parity sweep of `reference/live-sitemap/`
-  (2026-08-17). Live serves it 200 ("Video – On-Demand Archives") and it sits in
-  Yoast's sitemap, so Google has it on file and will keep requesting it. Fix is
-  one `editorialRedirects` entry in `src/data/redirects.mjs` → `/`, matching how
-  the two existing `/resources/…` entries were handled. Cheap, and it wants
-  doing before the origin repoints rather than after.
+- **One live URL does not resolve: `/blog/resource_type/video-on-demand/`** —
+  **fix committed locally, awaiting `main`.** The sole gap in the parity sweep of
+  `reference/live-sitemap/`, re-run against the production origin 2026-08-20.
+  Live served it 200 ("Video – On-Demand Archives") and it sits in Yoast's
+  sitemap, so Google has it on file and keeps requesting it.
+
+  Shipped as a **splat in `public/_redirects`** (`/blog/resource_type/*` → `/`)
+  rather than the `redirects.mjs → editorialRedirects` entry this item first
+  proposed. Why the shape changed: the sitemap records one term, but the taxonomy
+  could have carried others that were never sitemapped, and live is off the
+  origin now — so the term set can no longer be enumerated. One rule retires the
+  whole namespace instead of the single URL we happen to know. Same shape and
+  reasoning as the `/author/*` rule above it.
+
+  ⚠ **Not previewable.** `.github/workflows/sync-redirects.yml` filters to
+  `main`, so the rule only reaches Amplify on a main push — verification is a
+  `curl` against production after merge, not a PR preview.
 - **Article images on coverless posts.** A post with no cover emits no
   `ImageObject`, matching live. Google's Article guidance *recommends* an image,
   so those posts are less rich-result eligible. Falling back to the generic
@@ -578,6 +588,22 @@ policy currently *over*claims analytics (it lists Google Analytics and Plausible
 and only one ships) and *under*claims payments — **the second is the one that
 matters legally**, so if only one thing gets fixed, fix that.
 
+**This is now live and wrong, not pending-and-wrong** (verified against
+`https://openmined.org/privacy-policy/`, 2026-08-20): the page still names Google
+Analytics and WP Engine, and mentions Stripe and Workable zero times each.
+
+**Sequencing — draft this last.** Two in-flight fixes change what the policy has
+to disclose, so drafting before they land means drafting twice:
+
+- `BACKLOG.md` §22's commit deletes `DiamondEmbed.astro → ensureFont()`, which
+  removes the Google Fonts request — and with it the "Google as a recipient of
+  visitor IP addresses" clause this section conditions on §5.
+- `BACKLOG.md` §23 defers the HubSpot embed, which changes *when* `__cf_bm` is
+  set (only once a visitor reaches a form) rather than whether it is.
+
+The YouTube embeds in §5 are the third input and are still open. Draft once those
+three are settled; the disclosure list is stable after that.
+
 ---
 
 ## 🟠 Cutover checklist — the day-of switches and re-audits
@@ -645,9 +671,11 @@ day.
   Then submit `/sitemap-index.xml` in GSC and watch Coverage for 404 spikes for
   the first two weeks.
 - **Route parity** — every URL in `reference/live-sitemap/` resolves, directly or
-  via a 301. Swept 2026-08-17 against staging: **452/453**, the one gap being the
-  `resource_type` archive in §7. Re-run against the production origin after the
-  repoint; delete the reference directory once it passes.
+  via a 301. Re-swept against the **production** origin 2026-08-20: **459/460**,
+  the one gap still being the `resource_type` archive in §7, whose fix is
+  committed and waiting on `main`. Re-run once that lands; **delete
+  `reference/live-sitemap/` when it reads 460/460** — that directory exists only
+  to answer this question.
 - **Blog permalinks** — every migrated post resolves at its WordPress URL. This
   matched 371/371 when last audited (2026-07-22), and the 2026-08-17 parity
   sweep re-confirmed all 368 sitemapped posts; re-verify only if the live post
