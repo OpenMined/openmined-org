@@ -16,6 +16,7 @@
     "audit:assets": "node scripts/audit-public-assets.mjs",
     "audit:headers": "node scripts/audit-headers.mjs",
     "audit:overflow": "node scripts/audit-overflow.mjs",
+    "audit:form-cls": "node scripts/audit-form-cls.mjs",
     "smoke": "node scripts/smoke-deploy.mjs",
     "verify:donate": "node scripts/verify-donate.mjs"
   },

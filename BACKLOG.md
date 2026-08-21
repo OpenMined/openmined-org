@@ -172,13 +172,11 @@ Two things worth doing with them:
   Assert it in a real DOM instead: no `<p>` or heading inside an `article` may
   have a `<pre>` ancestor. That form found exactly 5 pages in 645.
 
-### 23. HubSpot embed loads eagerly into an unreserved box — `READY`
+### 23. HubSpot embed loads eagerly — `READY` (the CLS half is done)
 
 `Base.astro`'s forms loader injects HubSpot's `v2.js` as soon as a
 `.hs-form-embed[data-form-id]` marker exists anywhere in the document, whatever
-the marker's position, and `@elements/FormEmbed` reserves no height for what
-HubSpot renders into it. One cause, three symptoms — all measured against
-production 2026-08-20:
+the marker's position. Two symptoms remain:
 
 - **Best Practices 78 on `/`.** Exactly two audits fail and both are the same
   cookie — `third-party-cookies` (weight 5/27) and `inspector-issues` (1/27) —
@@ -186,26 +184,20 @@ production 2026-08-20:
   (`forms-na1.hsforms.com/embed/v3/counters.gif`). Fixing the one cause takes the
   category to **100**. Re-derive:
   `npx lighthouse https://openmined.org/ --only-categories=best-practices`.
-- **CLS wherever the form has content beneath it** — `/contact/` **0.455**
-  (score 78, the site's lowest page) and `/get-involved/` **0.285** (score 85).
-  The shifting node is the form's own container: on `/get-involved/` that is
-  `get-involved.astro → .gi__col`, where `<FormEmbed>` sits between the column
-  heading and `.gi__fineprint`, so everything below is pushed when HubSpot
-  renders. `/`, `/syftbox/` and `/careers/` measure CLS 0 — there the form is
-  last in its container with nothing to push.
 - **~75 KiB unused JS** on the critical path of every form-bearing page.
 
-Two changes, **not interchangeable**:
+**The fix: defer the load** — gate the loader on an IntersectionObserver over the
+markers instead of a parse-time document-wide check. A marker inside a closed
+`<dialog>` never intersects, so load-on-open falls out of the same code with no
+special case. ⚠ Do **not** add an idle-timeout fallback: it would load the script
+inside Lighthouse's run window and forfeit the win on every below-the-fold page,
+for no user benefit. Above-the-fold forms gain nothing from deferral and keep
+their 78 — a facade would fix that too, but not at the price of a click on the
+site's highest-intent forms.
 
-1. **Reserve the space** — `min-height` on the marker, measured per form (field
-   counts differ, so measure rather than guess a constant). The CLS fix.
-2. **Defer the load** — gate the loader on an IntersectionObserver over the
-   markers instead of a parse-time document-wide check. The cookie + unused-JS
-   fix.
-
-⚠ Deferral alone does **not** fix the CLS — it moves the shift later, and on an
-above-the-fold form it can still land inside the session window. Do both, or
-`/contact/` stays where it is.
+Unverified and worth checking first: that the form still renders when `v2.js`
+arrives late. `Base.astro` calls `hbspt.forms.create` from the script's `load`
+handler, so the wiring should hold — but nothing has tested it.
 
 **Not `LAUNCH.md` §5's privacy item, and §5 should not be reopened over it.** §5
 assessed `__cf_bm` on the consent axis and concluded strictly-necessary,
@@ -214,9 +206,30 @@ is deprecating them — a future-breakage signal, not a consent one. Both readin
 hold. Deferral does incidentally strengthen §5's footing, since the cookie then
 lands only once a visitor has reached the form.
 
-Unverified and worth checking first: that the form still renders when `v2.js`
-arrives late. `Base.astro` calls `hbspt.forms.create` from the script's `load`
-handler, so the wiring should hold — but nothing has tested it.
+**✅ The layout-shift half is done** (2026-08-21) — `global.css → .hs-form-embed`
+reserves `100vh - var(--hs-form-top)`, opt-in per surface; the rule is in
+`AGENTS.md → Forms` and `npm run audit:form-cls` guards it. Ten pages went from
+0.073–0.504 to 0. Two residuals it left behind, both deliberately:
+
+- **A tall viewport still shows a gap behind a short form.** Reaching the fold
+  scales with viewport height; the form's height does not. Post-fix gaps run
+  0–125px at 390x844 and 0–209px at 1440x900 against ~400px at 390x1200. Tuning
+  is per surface via `OptInLanding`'s `formTop` prop.
+- **The guard's default mode asserts an invariant, not CLS.** It proves the
+  reservation clears the fold in ~6s across every form page; `--measure` runs the
+  throttled CLS matrix and takes ~15 minutes. The invariant cannot see non-form
+  shifts, which is why `--measure` keeps control pages carrying known ones.
+
+### 24. Non-form layout shift on `/` and `/careers/` — `NEEDS DECISION`
+
+Surfaced as the control pages in `audit-form-cls`, so they are measured but
+unowned. Throttled, 2026-08-21: `/` **0.044** at 900x1000 from `div.de1` /
+`canvas.de-webgl` (the diamond embed sizing itself after load), and `/careers/`
+**0.055** at 360x640 from `p` / `div.simple-hero__actions`. Both sit under the
+guard's 0.1 threshold, so nothing fails today — but they are the floor that
+stops the threshold being tightened. Decide whether either is worth reserving
+for; the diamond one wants checking against whatever `DiamondEmbed`'s static-draw
+path now does at first paint.
 
 ## Cleanup — not urgent
 

@@ -79,5 +79,8 @@ import HelpWays from '@elements/HelpWays.astro';
 
   @media (max-width: 991px) {
     .contact__grid { grid-template-columns: 1fr; gap: var(--spacing-5XL); }
+    /* Stacked: the form's column sits above the second column, so a late form
+       shoves it down. Reserve past the fold — global.css → .hs-form-embed. */
+    .contact__col { --hs-form-top: 320px; }
   }
 </style>
