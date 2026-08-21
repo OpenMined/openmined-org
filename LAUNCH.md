@@ -114,10 +114,10 @@ handoff can be async.
    afterwards would mean `openmined.org` serves the new site telling Googlebot
    `noindex` for however long the gap runs — on a domain with years of history
    and live rankings, that invites exactly the deindexing §7 exists to prevent,
-   and it recovers slowly. Doing it first costs only that `main`'s branch domain
-   goes indexable early, which is the §3 residual that exists after launch
-   anyway. Bad-direction risk on an unlinked `amplifyapp.com` host beats
-   bad-direction risk on the real domain.
+   and it recovers slowly. Doing it first cost only a window where `main`'s
+   branch domain was indexable, on an unlinked `amplifyapp.com` host that has
+   since been 301'd to the apex (§3). Bad-direction risk there beat
+   bad-direction risk on the real domain, and the trade paid off.
 
    Still to re-assert at cutover: the SEO parity checklist (§7).
 4. Point the domain at `main` by adding root + www to the existing domain
@@ -130,23 +130,35 @@ handoff can be async.
      --sub-domain-settings prefix=,branchName=main prefix=www,branchName=main prefix=staging,branchName=staging
    ```
 
-   Amplify rewrites the Route 53 records itself (same-account zone). Live's
-   www→apex 301 (today emitted by WordPress) needs no cutover step: the sync
-   script already emits it as a domain-qualified, path-preserving rule that
-   activates the moment `www` maps to the app.
-   ⚠ **That rule has never been observed working** — being domain-qualified, it
-   is inert until `www` resolves to the app, so it cannot be tested in advance.
-   Test the **bare root** (`https://www.openmined.org/`, empty splat) as well as
-   a deep path: the rule's source is a splat pattern, and if it doesn't match the
-   empty path then the commonest inbound www URL of all falls through it.
+   Amplify rewrites the Route 53 records itself — **except where a record
+   already exists**: auto-DNS will not overwrite one, so the flip was an explicit
+   `UPSERT` (Stephen, 2026-08-17; rollback values recorded in the change
+   comment).
+
+   ✅ **www → apex 301 works**, verified live after cutover, path and query
+   preserved. It did **not** work on the first try, and the reason is the trap
+   worth carrying forward: **a domain-qualified rule must use a bare origin as
+   its source, with no path and no splat.**
+
+   ```
+   source: 'https://www.openmined.org'        ✅ fires
+   source: 'https://www.openmined.org/<*>'    ❌ never matches
+   ```
+
+   Amplify preserves the path and query itself, so the splat buys nothing and
+   costs everything. Both domain rules shipped in the splat form and both sat
+   inert while every path-sourced rule in the same set fired within seconds. The
+   isolating measurement, if it ever needs re-deriving: with no sync in between,
+   both hosts answered 200 for 70 minutes on the splat form; changing one rule to
+   the bare form had that host redirecting ~60 seconds later while the other,
+   untouched, was still 200 at 72 minutes. It tracks the form, not elapsed time.
 5. `npm run smoke -- https://openmined.org` — expect 17/17, with the
    indexability row now reading **`indexable (production, launched)`** rather
    than `noindex guard on`. That row is direction-aware: it derives what to
    expect from `INDEXING_ENABLED` and the host, so production must be indexable
-   while every other host must not be. ⚠ Re-smoking
-   `main.d1otfqlvqd3jby.amplifyapp.com` after the flip gives **16/17** by design
-   — it serves the production build on a non-production host, which is the §3
-   residual; the row says so in its detail column.
+   while every other host must not be. Note the branch domains now **301 to the
+   apex**, so smoking them no longer exercises the site at all — smoke the apex
+   and `staging.openmined.org`, which are the two hosts that serve.
 6. **Rollback** is one Route 53 change: restore the root/www `A` records to the
    WP Engine origin `141.193.213.10` / `141.193.213.11` (values re-verified in
    the zone 2026-08-13). WordPress stays up through the window regardless.
@@ -287,22 +299,29 @@ it. Only a **runtime hostname check** can — the same shape as
 `@data/analytics.mjs → ANALYTICS_HOSTS`, which exists for the mirror-image
 reason. Three ways to close it, in rough order of cost:
 
-1. **Accept it and watch GSC** — rely on the canonical, and check Coverage for
-   `amplifyapp.com` URLs in the first weeks. Zero work, non-zero risk.
-2. **Add a runtime host check** that forces `noindex` when
-   `location.hostname` is not a production host. Cheap and complete, but
-   JS-dependent, so it is weaker than the build-time directive it supplements.
-3. **Ask whether the default domain can be disabled or redirected** once the
-   custom domain is attached — needs AWS access, and Amplify offers no obvious
-   per-domain header control, so treat this as a question rather than a plan.
+**CLOSED 2026-08-17 by redirecting the host**, verified live:
 
-**Decided 2026-08-17 — option 3, answered:** Amplify *can* redirect a default
-domain, with a domain-qualified custom rule (same mechanism as the www→apex
-301). `scripts/sync-amplify-redirects.mjs` now emits
-`https://main.<app>.amplifyapp.com/<*>` → `https://openmined.org/<*>` 301; it
-applies on the first main-push sync, i.e. at cutover, which also ends the
-window where `main`'s domain answers `index, follow`. Option 1's GSC Coverage
-glance in the first weeks stays worth doing as the check on this.
+```
+main.d1otfqlvqd3jby.amplifyapp.com/blog/  301 → openmined.org/blog/
+```
+
+`scripts/sync-amplify-redirects.mjs → MAIN_DOMAIN_REDIRECT` emits it, and
+Amplify preserves path and query itself. A 301 serves no HTML, so there is
+nothing on that host left to index — the duplicate is gone rather than merely
+discouraged. The GSC Coverage glance in the first weeks is still the cheap check
+that it held.
+
+⚠ **The redirect closes the symptom, not the design.** The gate in
+`@data/indexing.mjs` keys on **branch**, and one build serves several hosts, so
+*any* host serving a `main` build still reports `index, follow` — that is why
+`www` and this domain both did. Today both are redirected, so it doesn't bite.
+It would bite again on a new alias or custom domain pointed at `main`, and the
+only complete answer is a **runtime host check** (the shape
+`@data/analytics.mjs → ANALYTICS_HOSTS` uses), which build time cannot do
+because at build time there is one artifact and no request. Left undone
+deliberately: a runtime check is JS-dependent and therefore weaker than the
+build-time directive, and with both hosts redirecting there is nothing for it to
+catch right now.
 
 Note **branch access control cannot be the answer here**: it applies per branch,
 so locking `main`'s default domain would lock `openmined.org` with it.
@@ -572,9 +591,9 @@ day.
   deploy, off WP Engine (the domain-association change in the cutover sequence).
 - **Live Stripe key** in the SSM parameter
   (`aws/create-donation/README.md`), with §2's error-text fix alongside it.
-- **`www` → apex 301 preserved** — pre-wired in the sync script and inert until
-  `www` maps to the app, so cutover is the **first** time it can be observed.
-  Test the bare root as well as a deep path (see cutover step 4).
+- ✅ **`www` → apex 301 preserved** — verified after cutover, path and query
+  preserved, on the bare root as well as deep paths. Took a fix to get there;
+  cutover step 4 records the bare-origin source rule and how it was isolated.
 - **True 404 on the production origin** — unknown paths answer HTTP 404, not
   a redirect onto the 404 page (the smoke `unknown path → true 404` row).
   Soft-404s poison exactly the GSC Coverage data §7 says to watch.

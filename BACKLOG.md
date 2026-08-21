@@ -91,9 +91,10 @@ the author bios took).
 
 Every fix must land in **both** implementations:
 `src/pages/api/create-donation.ts` (the contract source; serves dev) and
-`aws/create-donation/index.mjs` (what production runs). Four opens — none
-exploitable for theft (the secret never leaves the Lambda and Stripe validates
-the session); this is abuse-resistance and hygiene:
+`aws/create-donation/index.mjs` (what production runs). **Two open**, both
+abuse-resistance rather than exposure — the secret never leaves the Lambda and
+Stripe validates the session. Two others closed at cutover and are kept struck
+through, because both were decided rather than merely done:
 
 - ~~**Staging and previews share production's key.**~~ **Closed 2026-08-17 —
   superseded at Stephen's direction** (it had been accepted-not-blocking,
@@ -113,14 +114,11 @@ the session); this is abuse-resistance and hygiene:
 - **No maximum amount.** `< 1` is rejected with no ceiling; very large values
   stringify to exponential notation in `unit_amount` and 502 with Stripe's
   own error text.
-- **Stripe error text is forwarded to the browser** (the `!res.ok` branch).
-  Stripe's auth-failure messages include a partially-redacted key — an
-  unnecessary information channel out of the route holding the secret. Log
-  server-side, return a fixed message. Confirmed live on the deployed Lambda
-  2026-08-17: an over-large amount returns 502 carrying Stripe's own message.
-  ⏱ **Land this one with the live-key swap, not after** — the moment the key
-  changes is the moment an auth failure is most likely, and that is the variant
-  that leaks a partially-redacted key (cross-ref `LAUNCH.md` §2).
+- ~~**Stripe error text is forwarded to the browser.**~~ **Closed 2026-08-17**
+  by Stephen, ahead of the live-key swap as this item asked. The `!res.ok`
+  branch no longer passes Stripe's message through; verified against production
+  after cutover — an over-large amount returns the fixed
+  `Could not start checkout. Please try again.` with a 502.
 
 ### 15. CTA icon squashed out of its aspect ratio — `READY`
 
@@ -173,6 +171,27 @@ Two things worth doing with them:
   positives and false negatives (it flagged a page the DOM shows as clean).
   Assert it in a real DOM instead: no `<p>` or heading inside an `article` may
   have a `<pre>` ancestor. That form found exactly 5 pages in 645.
+
+### 22. WebGL embeds animate on software rendering — kills PSI score — `READY`
+
+pagespeed.web.dev scored the homepage 53 on mobile (2026-08-17, day of launch)
+with TBT 24,990ms, while the same page scores 98 under local
+Lighthouse with identical mobile throttling. The difference is the diamond hero:
+PSI's HeadlessChromium has no GPU, so WebGL falls back to SwiftShader and the
+per-pixel simplex-noise shader rasterizes on the CPU, blocking the main thread
+every frame. Reproduce locally with
+`npx lighthouse https://openmined.org/ --only-categories=performance
+--chrome-flags="--headless=new --use-angle=swiftshader"` → 45, vs 98 without
+the flag. Real phones have GPUs, so actual visitors are mostly unaffected — the
+real-user exposure is the software-rendering tail (blocklisted GPU drivers,
+VMs, battery saver), plus the lab score itself misleading anyone who runs PSI.
+
+Fix: after `getContext('webgl')`, read the renderer string
+(`WEBGL_debug_renderer_info`); on SwiftShader/software, draw one static frame
+and skip the animation loop. Respect `prefers-reduced-motion` the same way.
+Both `DiamondEmbed.astro → _start` and `StreamEmbed.astro` (same rAF pattern,
+same missing guards); check `HeroSwoop.astro` while there. Cross-ref the
+Lighthouse QA line in `LAUNCH.md`.
 
 ## Cleanup — not urgent
 
