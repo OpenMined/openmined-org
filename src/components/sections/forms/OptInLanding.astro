@@ -18,13 +18,26 @@ import FormEmbed from '@elements/FormEmbed.astro';
 interface Props {
   heading: string;
   formId: string;
+  /**
+   * The form's distance from the top of the viewport, as a CSS length. Drives the
+   * layout-shift reservation (global.css → .hs-form-embed): the marker reserves
+   * `100vh - formTop`, which is what pushes `.optin__fine` below the fold so a
+   * late-arriving form shifts nothing visible.
+   *
+   * Per page because it depends on how tall THIS page's heading + lede run, and
+   * the pages composing this component vary by ~170px. Too large a value is
+   * still correct but leaves visible dead space between the form and the fine
+   * print; too small brings the shift back. Measure the marker's `top` at 390px
+   * wide, round down slightly, and confirm with `npm run audit:form-cls`.
+   */
+  formTop?: string;
 }
-const { heading, formId } = Astro.props;
+const { heading, formId, formTop = '360px' } = Astro.props;
 ---
 
 <section class="optin">
   {/* No data-section: the card themes off --surface-foreground-low, matching live. */}
-  <div class="optin__card">
+  <div class="optin__card" style={`--hs-form-top: ${formTop}`}>
     <div class="optin__inner">
       <div class="optin__icon" aria-hidden="true"><slot name="icon" /></div>
       <h1 class="optin__title">{heading}</h1>
@@ -47,6 +60,11 @@ const { heading, formId } = Astro.props;
     background-repeat: no-repeat;
   }
 
+  /* `--hs-form-top` arrives inline from the `formTop` prop — the layout-shift
+     reservation (global.css → .hs-form-embed). Deliberately NOT scoped to a
+     media query: this is one centred card at every width, so unlike the
+     stacking-grid pages it shifted on desktop too (measured 0.098–0.300 at
+     1440x900 before the reservation). */
   .optin__card {
     max-width: var(--col-5);
     margin-inline: auto;

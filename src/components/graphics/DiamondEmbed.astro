@@ -19,16 +19,93 @@ const {
   /* Skip library init if already loaded — just boot this instance */
   if (window.DiamondEmbed) { boot(); return; }
 
-  var _count = 0, _fontInjected = false;
+  var _count = 0;
   var DESIGN_W = 760;
   var DESIGN_H = 620;
 
-  function ensureFont() {
-    if (_fontInjected) return; _fontInjected = true;
-    if (document.querySelector('link[href*="Sometype+Mono"]')) return;
-    var a = document.createElement('link'); a.rel = 'preconnect'; a.href = 'https://fonts.googleapis.com'; document.head.appendChild(a);
-    var b = document.createElement('link'); b.rel = 'preconnect'; b.href = 'https://fonts.gstatic.com'; b.crossOrigin = ''; document.head.appendChild(b);
-    var c = document.createElement('link'); c.rel = 'stylesheet'; c.href = 'https://fonts.googleapis.com/css2?family=Sometype+Mono:wght@400;500&display=swap'; document.head.appendChild(c);
+  /* The label font (Sometype Mono) is self-hosted through the Astro Fonts API and
+     reached via --font-mono; this embed injects no font request of its own. */
+
+  /* ── When WebGL may start ───────────────────────────────────────────────────
+     Runs cb once the page has painted AND the compositor is keeping up. On a
+     software renderer, creating a WebGL context while the page is still painting
+     blocks the main thread for up to ~2s — it is a synchronous wait on a
+     compositor busy rasterizing the page in software. Measured 2026-08-21 under
+     --use-angle=swiftshader at 4× CPU throttling, one identical getContext call:
+     1,972ms inside that phase, 6ms once past it; a Lighthouse trace of this page
+     caught 1,815ms of it in this very script. It applies to a DETACHED probe
+     canvas too, so there is no cheap way to check the renderer first — the only
+     safe move is to touch WebGL later. On a real GPU the same call is 5-28ms
+     whenever it runs, so this is a software-rendering problem only.
+
+     Two conditions, because neither alone is enough:
+       • `load` is not the gate: on a fast connection it fires long before first
+         paint (a trace of this page had loadEventStart at 28ms, FCP at 1,913ms).
+       • FCP alone is not the gate: the raster burst runs on past it, and an init
+         landing in that tail still measured 541ms.
+     Both waits have a bail-out, so the graphic always eventually renders, and it
+     fades in when it does (`.de-ready`). StreamEmbed.astro carries a twin copy of
+     this pair — these scripts are `is:inline` and cannot import a shared module,
+     so the copies must stay in step. */
+  function afterPagePainted(cb) {
+    var fired = false;
+    function paintDone() {
+      if (fired) return;
+      fired = true;
+      whenFramesFlow(cb);
+    }
+    if (window.PerformanceObserver) {
+      try {
+        var po = new PerformanceObserver(function (list) {
+          var entries = list.getEntries();
+          for (var i = 0; i < entries.length; i++) {
+            if (entries[i].name === 'first-contentful-paint') { po.disconnect(); paintDone(); return; }
+          }
+        });
+        /* buffered: a paint that already happened still reaches us. */
+        po.observe({ type: 'paint', buffered: true });
+      } catch (e) { /* paint timing unsupported — the timeout below covers it */ }
+    }
+    setTimeout(paintDone, 2500);
+  }
+
+  /* A frame gap at roughly display cadence means the compositor has caught up;
+     while it is saturated the gaps run to hundreds of ms. TWO on-time frames in
+     a row, not one — a single lucky gap still caught a busy compositor. Give up
+     after ~90 frames so a permanently busy page still gets its graphic. */
+  function whenFramesFlow(cb) {
+    var last = -1, onTime = 0, tries = 0;
+    function tick(ts) {
+      onTime = (last >= 0 && ts - last < 34) ? onTime + 1 : 0;
+      last = ts;
+      if (onTime >= 2 || ++tries > 90) { cb(); return; }
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  /* Software rasterizers run these per-pixel simplex-noise shaders on the CPU, so
+     animating blocks the main thread every frame: PageSpeed Insights' headless
+     Chromium has no GPU and production scored 41 with TBT 4,500ms that way,
+     against 98 and 70ms on a real GPU (2026-08-20). Read once the context exists
+     (it is the same answer for the whole page) and draw a single static frame
+     instead of looping. Reproduce with --use-angle=swiftshader — see LAUNCH.md's
+     Lighthouse QA line. */
+  var SOFTWARE_RENDERER = /swiftshader|softpipe|llvmpipe|software|basic render/i;
+
+  function isSoftwareRenderer(gl) {
+    if (window.__omSoftwareGL !== undefined) return window.__omSoftwareGL;
+    var soft = false;
+    /* Unavailable under fingerprint resistance — then assume a real GPU rather
+       than freezing every hardened browser's graphic to a still image. */
+    var info = gl.getExtension('WEBGL_debug_renderer_info');
+    if (info) soft = SOFTWARE_RENDERER.test(gl.getParameter(info.UNMASKED_RENDERER_WEBGL) || '');
+    window.__omSoftwareGL = soft;
+    return soft;
+  }
+
+  function prefersReducedMotion() {
+    return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   }
 
   function hexToGL(hex) {
@@ -203,13 +280,25 @@ const {
     this._gl = null; this._glU = null;
     this._rafId = null; this._destroyed = false;
 
-    ensureFont();
+    /* Styles, DOM and sizing run now: _initResize sets the container's
+       aspect-ratio and the stage transform, which reserve the graphic's box —
+       layout must not wait on WebGL. Neither needs a GL context. */
     this._injectStyles();
     this._buildDOM();
-    this._initWebGL();
-    this._bindEvents();
     this._initResize();
-    this._start();
+
+    /* Everything past here needs a context, so it waits for a painted,
+       unsaturated page — see afterPagePainted above. */
+    var self = this;
+    afterPagePainted(function () {
+      if (self._destroyed) return;
+      self._initWebGL();
+      /* Both decided once the context exists: software renderers and
+         reduced-motion visitors get one static frame, never the loop. */
+      self._static = (self._gl && isSoftwareRenderer(self._gl)) || prefersReducedMotion();
+      self._bindEvents();
+      self._start();
+    });
   }
 
   DiamondEmbed.prototype._injectStyles = function() {
@@ -219,14 +308,19 @@ const {
     var css = [
       '.'+id+' { position: relative; width: 100%; overflow: hidden; background: ' + t.bg + '; }',
       '.'+id+' .de-stage { position: absolute; width: ' + DESIGN_W + 'px; height: ' + DESIGN_H + 'px; top: 50%; left: 50%; transform-origin: center center; will-change: transform; }',
-      '.'+id+' .de-webgl { position: absolute; width: ' + DESIGN_W + 'px; height: ' + DESIGN_H + 'px; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 5; pointer-events: none; background: transparent; }',
+      /* opacity 0 → 1 on the first drawn frame (.de-ready): the graphic arrives
+         after first paint now, so it reveals when it is ready instead of popping
+         in. Mirrors global.css → [data-fade], which cannot see a WebGL draw. */
+      '.'+id+' .de-webgl { position: absolute; width: ' + DESIGN_W + 'px; height: ' + DESIGN_H + 'px; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 5; pointer-events: none; background: transparent; opacity: 0; transition: opacity var(--transition-base, 0.4s ease); }',
+      '.'+id+' .de-webgl.de-ready { opacity: 1; }',
+      '@media (prefers-reduced-motion: reduce) { .'+id+' .de-webgl { transition: none; } }',
       '.'+id+' .de-origin { position: absolute; top: 50%; left: 50%; width: 0; height: 0; z-index: 11; }',
       '.'+id+' .de-group-left  { position: absolute; top: 50%; left: 50%; z-index: 1; }',
       '.'+id+' .de-group-right { position: absolute; top: 50%; left: 50%; z-index: 10; }',
       '.'+id+' .de-outline { position: absolute; width: 340px; height: 340px; border: 1.44px solid ' + t.dark + '; transform: translate(-50%,-50%) rotate(45deg); }',
       '.'+id+' .de-outline--left  { left: -120px; top: 0; z-index: 0; background: transparent; }',
       '.'+id+' .de-outline--right { left:  120px; top: 0; z-index: 10; background: transparent; }',
-      '.'+id+' .de-label { position: absolute; top: 0; font-family: "Sometype Mono", monospace; font-weight: 500; font-size: 18px; line-height: 23px; color: ' + t.mid + '; white-space: nowrap; opacity: 0; transition: opacity 1s ease, transform 1s ease; z-index: 11; }',
+      '.'+id+' .de-label { position: absolute; top: 0; font-family: var(--font-mono, monospace); font-weight: 500; font-size: 18px; line-height: 23px; color: ' + t.mid + '; white-space: nowrap; opacity: 0; transition: opacity 1s ease, transform 1s ease; z-index: 11; }',
       '.'+id+' .de-label--left  { left: -335px;  transform: translateY(-50%) translateX(-12px); }',
       '.'+id+' .de-label--right { right: -335px; transform: translateY(-50%) translateX(12px); text-align: right; }',
       '.'+id+' .de-label.de-visible           { opacity: 1; }',
@@ -343,6 +437,9 @@ const {
 
   DiamondEmbed.prototype._bindEvents = function() {
     var self = this;
+    /* Mouse tracking only feeds the animation (parallax + shader ripple), so on
+       the static path it would cost a rect measurement per move for no repaint. */
+    if (this._static) return;
     this._onMove = function(e) {
       if (self._destroyed) return;
       var vCX = window.innerWidth  / 2;
@@ -360,11 +457,88 @@ const {
     this._el.addEventListener('mouseleave', this._onLeave, { passive: true });
   };
 
+  /* One frame at time t — the whole of the visual output, so the static path can
+     reuse it without duplicating any uniform or transform. */
+  DiamondEmbed.prototype._renderFrame = function(t) {
+    var gl = this._gl, u = this._glU, cfg = this._cfg;
+    /* First frame is on the canvas — let it fade in (see .de-ready). */
+    if (!this._revealed) { this._revealed = true; this._webglEl.classList.add('de-ready'); }
+
+    this._smux += (this._mux - this._smux) * 0.08;
+    this._smuy += (this._muy - this._smuy) * 0.08;
+
+    if (gl && u) {
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.uniform1f(u.uTime,  t);
+      gl.uniform2f(u.uRes,   this._webglEl.width, this._webglEl.height);
+      gl.uniform2f(u.uMouse, this._smux, this._smuy);
+
+      var g = prepareGradient(cfg.colors, cfg.shader.wrap);
+      gl.uniform1f(u.uGN, g.count);
+      for (var i = 0; i < 10; i++) {
+        if (i < g.count) {
+          gl.uniform3fv(u['uGC' + i], g.colors[i]);
+          gl.uniform1f(u['uGS' + i], g.stops[i]);
+        }
+      }
+
+      var s = cfg.shader;
+      gl.uniform1f(u.uClusters,  s.clusters);
+      gl.uniform1f(u.uWrap,      s.wrap ? 1 : 0);
+      gl.uniform1f(u.uAlongFlow, s.alongFlow);
+      gl.uniform1f(u.uAcrossFlow,s.acrossFlow);
+      gl.uniform1f(u.uRadial,    s.radial);
+      gl.uniform1f(u.uFlowSpeed, s.flowSpeed);
+      gl.uniform1f(u.uFlowAngle, s.flowAngle);
+      gl.uniform1f(u.uColorNoise,s.colorNoise);
+      gl.uniform1f(u.uSize,      s.size);
+      gl.uniform1f(u.uRoundness, s.roundness);
+      gl.uniform1f(u.uSoftness,  s.softness);
+      gl.uniform1f(u.uNoiseAmp,  s.noiseAmp);
+      gl.uniform1f(u.uNoiseScale,s.noiseScale);
+      gl.uniform1f(u.uNoiseSpeed,s.noiseSpeed);
+      gl.uniform1f(u.uAmbient,   s.ambient);
+      gl.uniform1f(u.uAlphaPow,  s.alphaPow);
+      gl.uniform1f(u.uOpacity,   s.opacity);
+      gl.uniform1f(u.uSaturation,s.saturation);
+      gl.uniform1f(u.uTurbulence,s.turbulence);
+      gl.uniform1f(u.uAttract,   s.attract);
+      gl.uniform1f(u.uRipple,    s.ripple);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    }
+
+    this._cRX += (this._tRX - this._cRX) * 0.03;
+    this._cRY += (this._tRY - this._cRY) * 0.03;
+    var breathe = Math.sin(t * 0.7);
+    var sc      = 1 + Math.sin(t * 0.5) * 0.008;
+
+    var tform =
+      'perspective(1000px)' +
+      ' rotateX(' + (this._cRX + breathe * 0.15) + 'deg)' +
+      ' rotateY(' + this._cRY + 'deg)' +
+      ' scale(' + sc + ')';
+
+    this._groupLeft.style.transform  = tform;
+    this._groupRight.style.transform = tform;
+  };
+
   DiamondEmbed.prototype._start = function() {
     var self = this;
     self._visible = true;
     self._elapsed = 0;
     self._lastTs  = null;
+
+    /* Static path: the diamond at t=0, labels revealed without the staged fade,
+       and no rAF loop, IntersectionObserver, or visibility listener at all. */
+    if (self._static) {
+      self._renderFrame(0);
+      self._lblLeft.classList.add('de-visible');
+      self._lblRight.classList.add('de-visible');
+      /* A resize resizes the stage by transform only — the canvas is fixed at the
+         design size, so the single frame stays correct and needs no redraw. */
+      return;
+    }
 
     if (window.IntersectionObserver) {
       self._io = new IntersectionObserver(function(entries) {
@@ -398,67 +572,7 @@ const {
       if (!self._visible || document.hidden) { self._rafId = null; return; }
       if (self._lastTs !== null) self._elapsed += (ts - self._lastTs) / 1000.0;
       self._lastTs = ts;
-      var t = self._elapsed;
-      var gl = self._gl, u = self._glU, cfg = self._cfg;
-
-      self._smux += (self._mux - self._smux) * 0.08;
-      self._smuy += (self._muy - self._smuy) * 0.08;
-
-      if (gl && u) {
-        gl.clearColor(0, 0, 0, 0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-        gl.uniform1f(u.uTime,  t);
-        gl.uniform2f(u.uRes,   self._webglEl.width, self._webglEl.height);
-        gl.uniform2f(u.uMouse, self._smux, self._smuy);
-
-        var g = prepareGradient(cfg.colors, cfg.shader.wrap);
-        gl.uniform1f(u.uGN, g.count);
-        for (var i = 0; i < 10; i++) {
-          if (i < g.count) {
-            gl.uniform3fv(u['uGC' + i], g.colors[i]);
-            gl.uniform1f(u['uGS' + i], g.stops[i]);
-          }
-        }
-
-        var s = cfg.shader;
-        gl.uniform1f(u.uClusters,  s.clusters);
-        gl.uniform1f(u.uWrap,      s.wrap ? 1 : 0);
-        gl.uniform1f(u.uAlongFlow, s.alongFlow);
-        gl.uniform1f(u.uAcrossFlow,s.acrossFlow);
-        gl.uniform1f(u.uRadial,    s.radial);
-        gl.uniform1f(u.uFlowSpeed, s.flowSpeed);
-        gl.uniform1f(u.uFlowAngle, s.flowAngle);
-        gl.uniform1f(u.uColorNoise,s.colorNoise);
-        gl.uniform1f(u.uSize,      s.size);
-        gl.uniform1f(u.uRoundness, s.roundness);
-        gl.uniform1f(u.uSoftness,  s.softness);
-        gl.uniform1f(u.uNoiseAmp,  s.noiseAmp);
-        gl.uniform1f(u.uNoiseScale,s.noiseScale);
-        gl.uniform1f(u.uNoiseSpeed,s.noiseSpeed);
-        gl.uniform1f(u.uAmbient,   s.ambient);
-        gl.uniform1f(u.uAlphaPow,  s.alphaPow);
-        gl.uniform1f(u.uOpacity,   s.opacity);
-        gl.uniform1f(u.uSaturation,s.saturation);
-        gl.uniform1f(u.uTurbulence,s.turbulence);
-        gl.uniform1f(u.uAttract,   s.attract);
-        gl.uniform1f(u.uRipple,    s.ripple);
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      }
-
-      self._cRX += (self._tRX - self._cRX) * 0.03;
-      self._cRY += (self._tRY - self._cRY) * 0.03;
-      var breathe = Math.sin(t * 0.7);
-      var sc      = 1 + Math.sin(t * 0.5) * 0.008;
-
-      var tform =
-        'perspective(1000px)' +
-        ' rotateX(' + (self._cRX + breathe * 0.15) + 'deg)' +
-        ' rotateY(' + self._cRY + 'deg)' +
-        ' scale(' + sc + ')';
-
-      self._groupLeft.style.transform  = tform;
-      self._groupRight.style.transform = tform;
-
+      self._renderFrame(self._elapsed);
       self._rafId = requestAnimationFrame(loop);
     }
 

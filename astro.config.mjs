@@ -123,6 +123,20 @@ export default defineConfig({
       display: 'swap',
       fallbacks: ['serif'],
     },
+    {
+      // Sometype Mono — the DiamondEmbed graphic's label font, and its only
+      // consumer (/ and /style-guide). Self-hosting it here is what removes the
+      // runtime request to fonts.googleapis.com that the embed used to inject
+      // itself, so no visitor IP reaches Google — see LAUNCH.md §5.
+      provider: fontProviders.google(),
+      name: 'Sometype Mono',
+      cssVariable: '--font-sometype-mono',
+      weights: [400, 500],
+      styles: ['normal'],
+      subsets: ['latin', 'latin-ext'],
+      display: 'swap',
+      fallbacks: ['monospace'],
+    },
   ],
   // Redirect registry (migration + editorial) — see src/data/redirects.mjs.
   // Static build emits a meta-refresh + canonical page per entry.

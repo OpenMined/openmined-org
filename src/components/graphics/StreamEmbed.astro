@@ -16,6 +16,84 @@ const {
 
   var _count = 0;
 
+  /* ── When WebGL may start ───────────────────────────────────────────────────
+     Runs cb once the page has painted AND the compositor is keeping up. On a
+     software renderer, creating a WebGL context while the page is still painting
+     blocks the main thread for up to ~2s — it is a synchronous wait on a
+     compositor busy rasterizing the page in software. Measured 2026-08-21 under
+     --use-angle=swiftshader at 4× CPU throttling, one identical getContext call:
+     1,972ms inside that phase, 6ms once past it; a Lighthouse trace of this page
+     caught 1,815ms of it in this very script. It applies to a DETACHED probe
+     canvas too, so there is no cheap way to check the renderer first — the only
+     safe move is to touch WebGL later. On a real GPU the same call is 5-28ms
+     whenever it runs, so this is a software-rendering problem only.
+
+     Twin of the block in DiamondEmbed.astro, which carries the full
+     measurements; these scripts are `is:inline` and cannot import a shared
+     module, so the two copies stay in step by hand. Both waits have a bail-out,
+     so the band always eventually renders, and it fades in when it does
+     (`.se-ready`). */
+  function afterPagePainted(cb) {
+    var fired = false;
+    function paintDone() {
+      if (fired) return;
+      fired = true;
+      whenFramesFlow(cb);
+    }
+    if (window.PerformanceObserver) {
+      try {
+        var po = new PerformanceObserver(function (list) {
+          var entries = list.getEntries();
+          for (var i = 0; i < entries.length; i++) {
+            if (entries[i].name === 'first-contentful-paint') { po.disconnect(); paintDone(); return; }
+          }
+        });
+        /* buffered: a paint that already happened still reaches us. */
+        po.observe({ type: 'paint', buffered: true });
+      } catch (e) { /* paint timing unsupported — the timeout below covers it */ }
+    }
+    setTimeout(paintDone, 2500);
+  }
+
+  /* A frame gap at roughly display cadence means the compositor has caught up;
+     while it is saturated the gaps run to hundreds of ms. TWO on-time frames in
+     a row, not one — a single lucky gap still caught a busy compositor. Give up
+     after ~90 frames so a permanently busy page still gets its graphic. */
+  function whenFramesFlow(cb) {
+    var last = -1, onTime = 0, tries = 0;
+    function tick(ts) {
+      onTime = (last >= 0 && ts - last < 34) ? onTime + 1 : 0;
+      last = ts;
+      if (onTime >= 2 || ++tries > 90) { cb(); return; }
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  /* Software rasterizers run these per-pixel simplex-noise shaders on the CPU, so
+     animating blocks the main thread every frame: PageSpeed Insights' headless
+     Chromium has no GPU and production scored 41 with TBT 4,500ms that way,
+     against 98 and 70ms on a real GPU (2026-08-20). Read once the context exists
+     (it is the same answer for the whole page) and draw a single static frame
+     instead of looping. Reproduce with --use-angle=swiftshader — see LAUNCH.md's
+     Lighthouse QA line. */
+  var SOFTWARE_RENDERER = /swiftshader|softpipe|llvmpipe|software|basic render/i;
+
+  function isSoftwareRenderer(gl) {
+    if (window.__omSoftwareGL !== undefined) return window.__omSoftwareGL;
+    var soft = false;
+    /* Unavailable under fingerprint resistance — then assume a real GPU rather
+       than freezing every hardened browser's graphic to a still image. */
+    var info = gl.getExtension('WEBGL_debug_renderer_info');
+    if (info) soft = SOFTWARE_RENDERER.test(gl.getParameter(info.UNMASKED_RENDERER_WEBGL) || '');
+    window.__omSoftwareGL = soft;
+    return soft;
+  }
+
+  function prefersReducedMotion() {
+    return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
+
   var VS_SOURCE = [
     'attribute vec2 aPos;',
     'varying vec2 vUV;',
@@ -202,15 +280,30 @@ const {
     this._io        = null;
     this._resizeFn  = null;
     this._destroyed = false;
+    /* _initResize draws a frame before _start runs, so the clock must be real by
+       then — otherwise that first frame goes out with uTime = NaN. */
+    this._elapsed   = 0;
     this._t0        = performance.now();
 
+    /* Styles, DOM and crop run now: _applyCrop sets the container's aspect-ratio,
+       which reserves the band's height and must not wait on WebGL. */
     this._injectStyles();
     this._buildDOM();
     this._applyCrop();
-    this._initGL();
-    this._bindEvents();
-    this._initResize();
-    this._start();
+
+    /* Everything past here needs a context, so it waits for a painted,
+       unsaturated page — see afterPagePainted above. */
+    var self = this;
+    afterPagePainted(function () {
+      if (self._destroyed) return;
+      self._initGL();
+      /* Both decided once the context exists: software renderers and
+         reduced-motion visitors get one static frame, never the loop. */
+      self._static = (self._gl && isSoftwareRenderer(self._gl)) || prefersReducedMotion();
+      self._bindEvents();
+      self._initResize();
+      self._start();
+    });
   }
 
   StreamEmbed.prototype._injectStyles = function () {
@@ -219,7 +312,12 @@ const {
     var css = [
       '.' + id + ' { position:relative; width:100%; overflow:hidden; display:block; }',
       '.' + id + ' .se-inner { position:absolute; left:0; right:0; }',
-      '.' + id + ' canvas { display:block; width:100%; height:100%; }',
+      /* opacity 0 → 1 on the first drawn frame (.se-ready): the graphic arrives
+         after first paint now, so it reveals when it is ready instead of popping
+         in. Mirrors global.css → [data-fade], which cannot see a WebGL draw. */
+      '.' + id + ' canvas { display:block; width:100%; height:100%; opacity:0; transition: opacity var(--transition-base, 0.4s ease); }',
+      '.' + id + ' canvas.se-ready { opacity:1; }',
+      '@media (prefers-reduced-motion: reduce) { .' + id + ' canvas { transition:none; } }',
     ].join('\n');
     var el = document.createElement('style'); el.id = sid; el.textContent = css;
     document.head.appendChild(el);
@@ -304,6 +402,9 @@ const {
 
   StreamEmbed.prototype._bindEvents = function () {
     var self = this;
+    /* Mouse tracking only feeds the animation, so on the static path it would cost
+       two rect measurements per move for no repaint. */
+    if (this._static) return;
     var FALLOFF_PX = 500;
     this._onMove = function (e) {
       if (self._destroyed) return;
@@ -322,6 +423,8 @@ const {
 
   StreamEmbed.prototype._drawFrame = function () {
     if (this._destroyed || !this._gl) return;
+    /* First frame is on the canvas — let it fade in (see .se-ready). */
+    if (!this._revealed) { this._revealed = true; this._canvas.classList.add('se-ready'); }
     var t = this._elapsed;
     var gl = this._gl, u = this._uniforms;
 
@@ -348,6 +451,14 @@ const {
     var self = this;
     self._elapsed = 0;
     self._lastTs  = null;
+
+    /* Static path: one frame at t=0, no rAF loop, IntersectionObserver, or
+       visibility listener. _applySize redraws it on resize, so the still frame
+       survives a viewport change even though the canvas is reallocated. */
+    if (self._static) {
+      self._drawFrame();
+      return;
+    }
 
     if (window.IntersectionObserver) {
       self._io = new IntersectionObserver(function (entries) {

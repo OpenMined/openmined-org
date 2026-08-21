@@ -78,7 +78,25 @@
   --hs-field-bg: var(--surface-background-default);
 }
 
-.hs-form-embed { margin-block: var(--spacing-2XL); }
+/* Layout-shift reservation — OFF unless a surface opts in.
+   The marker renders at zero height and HubSpot fills it later, so any content
+   AFTER it gets shoved down when the form lands. CLS is measured against the
+   viewport, so the cure is not to match the form's height (HubSpot's to change,
+   and it swings with width) but to reserve enough that whatever follows the form
+   starts BELOW the fold — then the form growing moves only off-screen content.
+
+   A surface opts in by setting `--hs-form-top` to the form's own distance from
+   the top of the viewport; the default of 100vh computes to zero reservation, so
+   surfaces that need nothing pay nothing. Keeping the `calc` here rather than at
+   each call site means no page can reach for `dvh` — a unit that changes as
+   mobile toolbars hide would move this box itself.
+
+   See AGENTS.md → Forms for which surfaces need it; `npm run audit:form-cls`
+   measures it and carries the numbers. */
+.hs-form-embed {
+  margin-block: var(--spacing-2XL);
+  min-height: calc(100vh - var(--hs-form-top, 100vh));
+}
 /* Trim the edge margins when the form is the first/last thing in its container:
    the container's own padding already spaces it (e.g. a form alone in a padded
    card). When intro text precedes the form (e.g. OptInLanding's lede), the embed

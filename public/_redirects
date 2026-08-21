@@ -63,3 +63,18 @@
 # 404s on live today; the real author archives live at /blog/author/<slug>/
 # (which the rebuild will serve as pages — do NOT redirect that prefix here).
 /author/*         /blog/              301
+
+# --- Retired `resource_type` taxonomy archives ---
+# Finishes the Resources CPT sunset that `redirects.mjs → editorialRedirects`
+# started (2026-07-22): the CPT's archive index and its one surviving entry were
+# retired to `/` there, but the taxonomy's OWN archive paths were missed and
+# 404'd after cutover. Yoast's sitemap recorded exactly one term
+# (`/blog/resource_type/video-on-demand/`, "Video – On-Demand Archives", live
+# 200), so Google has that URL on file and keeps requesting it.
+#
+# A SPLAT rather than a registry entry, deliberately: the sitemap lists one term
+# but the taxonomy could have carried others that were never sitemapped, and
+# live is off the origin now so the term set can no longer be enumerated. One
+# rule retires the whole namespace instead of the single URL we happen to know.
+# Same shape and reasoning as /author/* above.
+/blog/resource_type/*   /                   301

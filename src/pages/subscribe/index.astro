@@ -78,6 +78,12 @@ const socials = [
     background-repeat: no-repeat;
   }
 
+  /* Layout-shift reservation (global.css → .hs-form-embed). Not stacked-only:
+     when stacked `.subs__side` drops below the form, and on desktop the footer
+     still lands inside the viewport under it. Value is the smallest marker top
+     across the matrix — 338px stacked, 354px desktop. */
+  .subs__form { --hs-form-top: 320px; }
+
   .subs__grid {
     max-width: var(--col-8);
     display: grid;
@@ -149,5 +155,6 @@ const socials = [
       grid-template-columns: 1fr;
       gap: var(--spacing-3XL);
     }
+
   }
 </style>

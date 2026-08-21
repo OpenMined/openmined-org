@@ -132,6 +132,9 @@ const { eyebrow, title, details = [], formId, formHeading = 'Register Now' } = A
   }
 
   .evt__form {
+    /* Same reservation as InquiryLanding — the footer follows the form and the
+       form sits above the fold at every width (global.css → .hs-form-embed). */
+    --hs-form-top: 210px;
     position: relative; /* stacking + positioning context for the breakout blob */
     background-color: var(--surface-foreground-low);
     border-radius: var(--border-radius-L);

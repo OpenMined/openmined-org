@@ -159,13 +159,17 @@ const trail = breadcrumbs ?? [
     <!--
       Self-hosted fonts (Astro Fonts API — config in astro.config.mjs → fonts).
       Emits the @font-face + :root CSS var + preload links; no third-party CDN.
-      Both families are VARIABLE fonts from Google, so every weight of a given
+      All three are VARIABLE fonts from Google, so every weight of a given
       style+subset collapses into one woff2 — we preload the render-critical
-      latin/normal file of each (Inter body+UI, Rubik hero headings), which covers
-      all their weights. Preload is filtered by style+subset only (NOT weight): a
-      variable file's preload candidate is keyed to its first weight, so a
-      per-weight filter would miss it. Italic + latin-ext self-host and load on
-      demand. Semantic aliases (--font-primary / --font-secondary) live in tokens.css.
+      latin/normal file of the two page fonts (Inter body+UI, Rubik hero headings),
+      which covers all their weights. Preload is filtered by style+subset only
+      (NOT weight): a variable file's preload candidate is keyed to its first
+      weight, so a per-weight filter would miss it. Italic + latin-ext self-host and load on
+      demand. Sometype Mono is deliberately NOT preloaded — only the DiamondEmbed
+      graphic's labels use it (/ and /style-guide), so its @font-face rides along
+      everywhere while the file is fetched only where a rule matches.
+      Semantic aliases (--font-primary / --font-secondary / --font-mono) live in
+      tokens.css.
     -->
     <Font
       cssVariable="--font-inter"
@@ -175,6 +179,7 @@ const trail = breadcrumbs ?? [
       cssVariable="--font-rubik"
       preload={[{ style: 'normal', subset: 'latin' }]}
     />
+    <Font cssVariable="--font-sometype-mono" />
   </head>
   <body>
     <slot />
@@ -301,17 +306,82 @@ const trail = breadcrumbs ?? [
           });
         });
       }
-      if (document.querySelector('.hs-form-embed[data-form-id]')) {
+      function loadHubSpotForms() {
         const w = window as any;
         if (w.hbspt?.forms) {
           createHubSpotForms();
-        } else if (!w.__hsFormsLoading) {
-          w.__hsFormsLoading = true;
-          const s = document.createElement('script');
-          s.src = 'https://js.hsforms.net/forms/embed/v2.js';
-          s.charset = 'utf-8';
-          s.addEventListener('load', createHubSpotForms);
-          document.head.appendChild(s);
+          return;
+        }
+        if (w.__hsFormsLoading) return;
+        w.__hsFormsLoading = true;
+        const s = document.createElement('script');
+        s.src = 'https://js.hsforms.net/forms/embed/v2.js';
+        s.charset = 'utf-8';
+        s.addEventListener('load', createHubSpotForms);
+        document.head.appendChild(s);
+      }
+
+      // Deferred until a marker is near the viewport, rather than loaded at parse
+      // time. WHY: v2.js and HubSpot's own telemetry pixels set a third-party
+      // `__cf_bm` cookie, which is the ONLY thing failing Lighthouse Best
+      // Practices on this site (`third-party-cookies` + `inspector-issues`, 78 →
+      // 100), and it costs ~75 KiB of unused JS on the critical path of every
+      // form-bearing page. Most markers sit thousands of px down; a visitor who
+      // never scrolls there never needed the script. AGENTS.md → Forms.
+      //
+      // A marker inside a closed <dialog> never intersects, so load-on-open comes
+      // free — no special case if a form is ever put in a modal.
+      //
+      // ⚠ THE TRIGGER IS A RACE, AND PROXIMITY ALONE LOSES IT. Deferral moves
+      // WHEN the form arrives, and a form landing while its marker is on screen
+      // pushes whatever follows it — the same shift the reservation in
+      // `global.css → .hs-form-embed` prevents at page load, except now caused by
+      // scrolling. Measured on Slow 4G / 4x CPU: the form needs ~1600ms from
+      // first request to rendered, so the runway a trigger must buy is
+      // scrollSpeed x 1.6s. With `rootMargin` alone at 1200px, /careers/ went
+      // from CLS 0 to 0.135 at a normal scroll and 0.326 at a fast flick.
+      //
+      // So the primary trigger is FIRST SCROLL, which buys the whole journey down
+      // the page rather than a fixed margin — thousands of px on the pages whose
+      // form sits far down, which is most of them. Intersection stays as a
+      // backstop for arriving mid-page (a #fragment link, a restored scroll
+      // position) where no scroll event may ever fire.
+      //
+      // Both triggers keep the win intact, because the one thing that never
+      // happens is a scroll during a Lighthouse run.
+      //
+      // ⚠ Never add an idle-timeout fallback. It would load the script inside
+      // Lighthouse's run window and forfeit the Best Practices win on every
+      // below-the-fold page, for no user benefit.
+      {
+        const markers = document.querySelectorAll('.hs-form-embed[data-form-id]');
+        if (markers.length) {
+          if (!('IntersectionObserver' in window)) {
+            loadHubSpotForms();
+          } else {
+            let fired = false;
+            const io = new IntersectionObserver(
+              (entries) => {
+                if (!entries.some((e) => e.isIntersecting)) return;
+                go();
+              },
+              { rootMargin: '1200px 0px' },
+            );
+            // `wheel`, `touchstart` and `pointerdown` fire BEFORE the scroll
+            // position moves, so they buy the gesture's own latency on top of the
+            // journey — strictly more runway than `scroll` alone, at no cost.
+            // Lighthouse dispatches none of these, so the win is unaffected.
+            const TRIGGERS = ['scroll', 'wheel', 'touchstart', 'pointerdown', 'keydown'];
+            const go = () => {
+              if (fired) return;
+              fired = true;
+              io.disconnect();
+              TRIGGERS.forEach((t) => window.removeEventListener(t, go));
+              loadHubSpotForms();
+            };
+            markers.forEach((m) => io.observe(m));
+            TRIGGERS.forEach((t) => window.addEventListener(t, go, { passive: true }));
+          }
         }
       }
     </script>
