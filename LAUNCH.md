@@ -99,9 +99,11 @@ handoff can be async.
    role's trust for `main` is **verified against IAM** (both classic and
    ID-stamped subject forms present), not just claimed. Staging pushes no
    longer sync — intended; rules are app-wide and production owns them. The
-   first push to `main` is still the first live exercise of that trust — **a
-   red sync run there means IAM, not the script**, and it fails before touching
-   any rule. That same first sync also applies the main-default-domain → apex
+   trust is **proven in practice**, not just against IAM: the syncs for PRs #13,
+   #14 (2026-08-17) and #16 (2026-08-21) all ran green on `main`, the last of
+   them applying 60 rules. A red sync run is therefore an ordinary script or
+   rule-set failure now, not a credentials one — and it still fails before
+   touching any rule. That same first sync also applies the main-default-domain → apex
    301 (§3's residual, closed — see the constant in
    `scripts/sync-amplify-redirects.mjs`).
 2. Arm the **live** Stripe key in SSM (`aws/create-donation/README.md`), and see
@@ -426,23 +428,19 @@ closed by other work, and one of its premises about tracking was wrong (§4).
 
 **Still open:**
 
-- **One live URL does not resolve: `/blog/resource_type/video-on-demand/`** —
-  **fix committed locally, awaiting `main`.** The sole gap in the parity sweep of
-  `reference/live-sitemap/`, re-run against the production origin 2026-08-20.
-  Live served it 200 ("Video – On-Demand Archives") and it sits in Yoast's
-  sitemap, so Google has it on file and keeps requesting it.
+- ~~**One live URL does not resolve: `/blog/resource_type/video-on-demand/`.**~~
+  **CLOSED 2026-08-21, verified on production.** Shipped as a splat in
+  `public/_redirects` (`/blog/resource_type/*` → `/`) rather than the
+  `redirects.mjs → editorialRedirects` entry this item first proposed: the sitemap
+  recorded one term, but the taxonomy could have carried others that were never
+  sitemapped, and live was off the origin by then so the set could no longer be
+  enumerated. One rule retires the whole namespace.
 
-  Shipped as a **splat in `public/_redirects`** (`/blog/resource_type/*` → `/`)
-  rather than the `redirects.mjs → editorialRedirects` entry this item first
-  proposed. Why the shape changed: the sitemap records one term, but the taxonomy
-  could have carried others that were never sitemapped, and live is off the
-  origin now — so the term set can no longer be enumerated. One rule retires the
-  whole namespace instead of the single URL we happen to know. Same shape and
-  reasoning as the `/author/*` rule above it.
+  The splat form earned itself — `/blog/resource_type/anything-else/` and the bare
+  `/blog/resource_type/` also 301, which a single registry entry would have
+  missed. Route parity is now **460/460**, so `reference/live-sitemap/` has been
+  deleted per the cutover checklist; git history holds it if it is ever wanted.
 
-  ⚠ **Not previewable.** `.github/workflows/sync-redirects.yml` filters to
-  `main`, so the rule only reaches Amplify on a main push — verification is a
-  `curl` against production after merge, not a PR preview.
 - **Article images on coverless posts.** A post with no cover emits no
   `ImageObject`, matching live. Google's Article guidance *recommends* an image,
   so those posts are less rich-result eligible. Falling back to the generic
@@ -670,12 +668,11 @@ day.
   Google's Rich Results Test on the live origin, not just the built HTML (§7).
   Then submit `/sitemap-index.xml` in GSC and watch Coverage for 404 spikes for
   the first two weeks.
-- **Route parity** — every URL in `reference/live-sitemap/` resolves, directly or
-  via a 301. Re-swept against the **production** origin 2026-08-20: **459/460**,
-  the one gap still being the `resource_type` archive in §7, whose fix is
-  committed and waiting on `main`. Re-run once that lands; **delete
-  `reference/live-sitemap/` when it reads 460/460** — that directory exists only
-  to answer this question.
+- ✅ **Route parity — 460/460** (production origin, 2026-08-21). Every URL from
+  live's Yoast sitemap resolves, directly or via a 301. `reference/live-sitemap/`
+  was deleted in the same change: it existed only to answer this question, and
+  the answer is recorded here.
+
 - **Blog permalinks** — every migrated post resolves at its WordPress URL. This
   matched 371/371 when last audited (2026-07-22), and the 2026-08-17 parity
   sweep re-confirmed all 368 sitemapped posts; re-verify only if the live post
