@@ -129,6 +129,12 @@ const blog = defineCollection({
     // automatic — values at/below 36 render a flat 36px title. Live set custom
     // per-post title sizes; we snap those to this max, flooring at 36px.
     titleMax: z.number().optional(),
+    // Hand-picked "Continue reading" posts, by public slug, display order.
+    // Overrides the computed set (shares-a-category, newest first) when set.
+    // The row is a 2-up — entries past the first two are ignored. A slug that
+    // matches no visible post fails the build (typo guard, same philosophy as
+    // @utils/posts → postHref).
+    related: z.array(z.string()).default([]),
     toc: z.boolean().default(false),
     tocMinDepth: z.number().default(2),
     tocMaxDepth: z.number().default(3),

@@ -10,6 +10,9 @@ authors: [openmined-team]
 # measured at 1440w). Mobile floor + fluid rate stay automatic.
 titleMax: 52
 sectionSpacing: spacious
+related:
+  - secure-enclaves-for-ai-evaluation
+  - hugging-face-leave-commercial-apis-to-read-breach-logs
 # Embargoed until the coordinated launch with GDM/AVERI — the URL must be live
 # for GDM's blog to link, but nothing may point at it before the announcement.
 # Publish by deleting this flag (see content.config.ts → unlisted).
