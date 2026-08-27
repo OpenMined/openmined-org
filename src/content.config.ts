@@ -133,6 +133,14 @@ const blog = defineCollection({
     tocMinDepth: z.number().default(2),
     tocMaxDepth: z.number().default(3),
     draft: z.boolean().default(false),
+    // Live-but-hidden. The post builds at /blog/<slug>/ (unlike `draft`, which
+    // doesn't build in production at all) but is excluded from every discovery
+    // surface: listings and archives, the RSS feed, the sitemap
+    // (astro.config.mjs → sitemap filter), site search (Pagefind), and engines
+    // (robots noindex via BlogPost → Page → Base). For embargoed posts that
+    // need a shareable production URL before announcement — e.g. a partner
+    // linking to the post from their own launch. Publish by deleting the flag.
+    unlisted: z.boolean().default(false),
     legacyId: z.number().optional(),
     seo: z.object({
       title: z.string().optional(),

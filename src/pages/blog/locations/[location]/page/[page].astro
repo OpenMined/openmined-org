@@ -15,7 +15,7 @@ import { postSlug, postLocations, collectLocations, pageCount, pageSlice } from 
 
 export async function getStaticPaths() {
   const includeDrafts = import.meta.env.DEV;
-  const all = await getCollection('blog', ({ data }) => includeDrafts || !data.draft);
+  const all = await getCollection('blog', ({ data }) => includeDrafts || !data.draft && !data.unlisted);
 
   const paths = [];
   for (const loc of collectLocations(all)) {

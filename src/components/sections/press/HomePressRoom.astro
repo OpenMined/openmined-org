@@ -68,7 +68,7 @@ const orgById = Object.fromEntries(allOrgs.map(e => [e.id, e.data]));
 
 // Same draft filter as the blog routes, so a link can't outrun its post.
 const includeDrafts = import.meta.env.DEV;
-const posts = await getCollection('blog', ({ data }) => includeDrafts || !data.draft);
+const posts = await getCollection('blog', ({ data }) => includeDrafts || !data.draft && !data.unlisted);
 
 // Resolve each item's org; drop any that don't resolve (defensive). Post
 // references resolve through postHref, which throws on an unknown slug.

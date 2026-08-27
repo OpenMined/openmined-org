@@ -16,7 +16,7 @@ import { postSlug, pageCount, pageSlice, collectAuthors } from '@utils/posts';
 
 export async function getStaticPaths() {
   const includeDrafts = import.meta.env.DEV;
-  const all = await getCollection('blog', ({ data }) => includeDrafts || !data.draft);
+  const all = await getCollection('blog', ({ data }) => includeDrafts || !data.draft && !data.unlisted);
 
   const paths = [];
   for (const { id } of collectAuthors(all)) {

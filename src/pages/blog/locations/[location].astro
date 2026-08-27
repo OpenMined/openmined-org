@@ -16,7 +16,7 @@ import { postSlug, postLocations, collectLocations, pageCount, pageSlice } from 
 
 export async function getStaticPaths() {
   const includeDrafts = import.meta.env.DEV;
-  const all = await getCollection('blog', ({ data }) => includeDrafts || !data.draft);
+  const all = await getCollection('blog', ({ data }) => includeDrafts || !data.draft && !data.unlisted);
   return collectLocations(all).map((loc) => ({
     params: { location: loc.slug },
     props: { label: loc.label },
@@ -27,7 +27,7 @@ const { location } = Astro.params;
 const { label } = Astro.props;
 const includeDrafts = import.meta.env.DEV;
 
-const posts = (await getCollection('blog', ({ data }) => includeDrafts || !data.draft))
+const posts = (await getCollection('blog', ({ data }) => includeDrafts || !data.draft && !data.unlisted))
   .filter((p) => postLocations(p).some((l) => l.slug === location))
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 

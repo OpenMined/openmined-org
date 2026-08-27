@@ -7,7 +7,10 @@
  * and passes a same-category "Continue reading" set to the layout.
  *
  * Drafts are routed in dev (so seeded posts are previewable) but excluded from
- * production builds.
+ * production builds. Unlisted posts (content.config.ts → unlisted) DO build —
+ * that's the flag's whole point, a live URL nothing links to — so getStaticPaths
+ * must never filter on it; they're just excluded from the related-posts pool
+ * below, and the layout handles noindex + search exclusion.
  */
 import { getCollection, getEntry, getEntries, render } from 'astro:content';
 import BlogPost from '@layouts/BlogPost.astro';
@@ -39,7 +42,7 @@ const readingMinutes = Math.max(1, Math.round(words / 200));
 // "Continue reading" — posts that share ANY category, newest first, up to 3,
 // excluding self. Card shows the related post's primary (first) category.
 const myCatIds = new Set(entry.data.categories.map((c) => c.id));
-const pool = await getCollection('blog', ({ data }) => includeDrafts || !data.draft);
+const pool = await getCollection('blog', ({ data }) => includeDrafts || (!data.draft && !data.unlisted));
 const relatedEntries = pool
   .filter((p) => p.id !== entry.id && p.data.categories.some((c) => myCatIds.has(c.id)))
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
@@ -85,6 +88,7 @@ const related = await Promise.all(
   headings={headings}
   tocMinDepth={entry.data.tocMinDepth}
   tocMaxDepth={entry.data.tocMaxDepth}
+  unlisted={entry.data.unlisted}
 >
   <Content />
 </BlogPost>

@@ -11,7 +11,7 @@ import { postSlug } from '@utils/posts';
 import { SITE_NAME } from '@data/site';
 
 export async function GET(context) {
-  const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+  const posts = (await getCollection('blog', ({ data }) => !data.draft && !data.unlisted)).sort(
     (a, b) => b.data.date.getTime() - a.data.date.getTime(),
   );
 
