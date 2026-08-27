@@ -16,9 +16,6 @@ sectionSpacing: spacious
 related:
   - secure-enclaves-for-ai-evaluation
   - hugging-face-leave-commercial-apis-to-read-breach-logs
-# TODO(content): "Details of the pilots" still cites GDM's, AVERI's and
-# MLCommons' posts plus the technical report with NO links — add the four
-# URLs before this is announced.
 seo:
   description: "After nearly a decade of R&D, PySyft has been used by GDM, AVERI, Singapore AISI, and MLCommons to facilitate the world’s first double-blind evaluations of a proprietary, frontier class AI model."
 ---
@@ -58,7 +55,7 @@ Following this research, in 2024, [PySyft was used by Anthropic and UK AISI](/bl
 
 ## Details of the pilots
 
-Full details of these pilots can be found in Google DeepMind's blogpost, in AVERI's blogpost, in ML Common's blogpost, and in the technical report co-authored by all of the above.
+Full details of these pilots can be found in [Google DeepMind's blogpost](https://deepmind.google/blog/piloting-the-worlds-first-double-blind-ai-evaluations/), in [AVERI's blogpost](https://www.averi.org/ourwork/averi-pilot-report-the-worlds-first-double-blind-eval), in [MLCommons' blogpost](https://mlcommons.org/2026/08/double-blind-reliability-evaluation/), and in the [technical report](https://storage.googleapis.com/deepmind-media/DeepMind.com/Blog/piloting-the-worlds-first-double-blind-ai-evaluations/double-blind-evaluations-technical-report.pdf) co-authored by all of the above.
 
 ## Acknowledgements
 
