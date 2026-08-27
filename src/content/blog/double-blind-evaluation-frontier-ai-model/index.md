@@ -5,6 +5,9 @@ date: 2026-08-27
 categories: [news, research]
 tags: [pysyft, ai-safety, secure-enclaves, ai-auditing]
 authors: [openmined-team]
+cover: ./cover.jpg
+coverAlt: "Graphic depicting a concept of a proprietary, frontier class AI model"
+cardText: light
 # 52px is the largest cap that renders the desired 3-line break with no
 # hyphenated word split (56 splits "double-blind", 48 splits "frontier-class";
 # measured at 1440w). Mobile floor + fluid rate stay automatic.
