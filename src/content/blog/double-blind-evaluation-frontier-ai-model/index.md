@@ -17,6 +17,8 @@ related:
 # for GDM's blog to link, but nothing may point at it before the announcement.
 # Publish by deleting this flag (see content.config.ts → unlisted).
 unlisted: true
+seo:
+  description: "After nearly a decade of R&D, PySyft has been used by GDM, AVERI, Singapore AISI, and MLCommons to facilitate the world’s first double-blind evaluations of a proprietary, frontier class AI model."
 ---
 
 <!-- TODO(content): "Details of the pilots" cites four external pieces (GDM's
