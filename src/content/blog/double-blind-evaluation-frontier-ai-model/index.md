@@ -9,6 +9,7 @@ authors: [openmined-team]
 # hyphenated word split (56 splits "double-blind", 48 splits "frontier-class";
 # measured at 1440w). Mobile floor + fluid rate stay automatic.
 titleMax: 52
+sectionSpacing: spacious
 # Embargoed until the coordinated launch with GDM/AVERI — the URL must be live
 # for GDM's blog to link, but nothing may point at it before the announcement.
 # Publish by deleting this flag (see content.config.ts → unlisted).
