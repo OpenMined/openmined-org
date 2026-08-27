@@ -16,17 +16,12 @@ sectionSpacing: spacious
 related:
   - secure-enclaves-for-ai-evaluation
   - hugging-face-leave-commercial-apis-to-read-breach-logs
-# Embargoed until the coordinated launch with GDM/AVERI — the URL must be live
-# for GDM's blog to link, but nothing may point at it before the announcement.
-# Publish by deleting this flag (see content.config.ts → unlisted).
-unlisted: true
+# TODO(content): "Details of the pilots" still cites GDM's, AVERI's and
+# MLCommons' posts plus the technical report with NO links — add the four
+# URLs before this is announced.
 seo:
   description: "After nearly a decade of R&D, PySyft has been used by GDM, AVERI, Singapore AISI, and MLCommons to facilitate the world’s first double-blind evaluations of a proprietary, frontier class AI model."
 ---
-
-<!-- TODO(content): "Details of the pilots" cites four external pieces (GDM's
-     blogpost, AVERI's, MLCommons', the technical report) with NO links in the
-     source doc — they need URLs before the post is un-hidden. -->
 
 ## Executive Summary
 
