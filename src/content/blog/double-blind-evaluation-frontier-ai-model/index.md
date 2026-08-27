@@ -55,7 +55,7 @@ Following this research, in 2024, [PySyft was used by Anthropic and UK AISI](/bl
 
 ## Details of the pilots
 
-Full details of these pilots can be found in [Google DeepMind's blogpost](https://deepmind.google/blog/piloting-the-worlds-first-double-blind-ai-evaluations/), in [AVERI's blogpost](https://www.averi.org/ourwork/averi-pilot-report-the-worlds-first-double-blind-eval), in [MLCommons' blogpost](https://mlcommons.org/2026/08/double-blind-reliability-evaluation/), and in the [technical report](https://storage.googleapis.com/deepmind-media/DeepMind.com/Blog/piloting-the-worlds-first-double-blind-ai-evaluations/double-blind-evaluations-technical-report.pdf) co-authored by all of the above.
+Full details of these pilots can be found in <a href="https://deepmind.google/blog/piloting-the-worlds-first-double-blind-ai-evaluations/" target="_blank" rel="noopener noreferrer">Google DeepMind's blogpost</a>, in <a href="https://www.averi.org/ourwork/averi-pilot-report-the-worlds-first-double-blind-eval" target="_blank" rel="noopener noreferrer">AVERI's blogpost</a>, in <a href="https://mlcommons.org/2026/08/double-blind-reliability-evaluation/" target="_blank" rel="noopener noreferrer">MLCommons' blogpost</a>, and in the <a href="https://storage.googleapis.com/deepmind-media/DeepMind.com/Blog/piloting-the-worlds-first-double-blind-ai-evaluations/double-blind-evaluations-technical-report.pdf" target="_blank" rel="noopener noreferrer">technical report</a> co-authored by all of the above.
 
 ## Acknowledgements
 
