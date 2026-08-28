@@ -17,7 +17,7 @@ related:
   - secure-enclaves-for-ai-evaluation
   - hugging-face-leave-commercial-apis-to-read-breach-logs
 seo:
-  description: "After nearly a decade of R&D, PySyft has been used by GDM, AVERI, Singapore’s AISI, and MLCommons to facilitate the world’s first double-blind evaluations of a proprietary, frontier class AI model."
+  description: "After nearly a decade of R&D, PySyft has been used by GDM, AVERI, Singapore AISI, and MLCommons to facilitate the world’s first double-blind evaluations of a proprietary, frontier class AI model."
 ---
 
 ## Executive Summary
