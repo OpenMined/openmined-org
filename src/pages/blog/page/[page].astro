@@ -20,7 +20,7 @@ import blogConfig from '@data/blog.json';
 
 export async function getStaticPaths() {
   const includeDrafts = import.meta.env.DEV;
-  const allPosts = (await getCollection('blog', ({ data }) => includeDrafts || !data.draft))
+  const allPosts = (await getCollection('blog', ({ data }) => includeDrafts || !data.draft && !data.unlisted))
     .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
   // Same featured exclusion as index.astro, so page slices stay contiguous.

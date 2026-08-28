@@ -26,7 +26,7 @@ import { postSlug, pageCount, pageSlice, collectAuthors } from '@utils/posts';
 
 export async function getStaticPaths() {
   const includeDrafts = import.meta.env.DEV;
-  const posts = await getCollection('blog', ({ data }) => includeDrafts || !data.draft);
+  const posts = await getCollection('blog', ({ data }) => includeDrafts || !data.draft && !data.unlisted);
   return collectAuthors(posts).map(({ id }) => ({ params: { author: id } }));
 }
 
@@ -46,7 +46,7 @@ const navCats = NAV_ORDER
   .map((c) => ({ id: c.id, label: c.data.label }));
 
 const posts = (await getCollection('blog', ({ data }) =>
-  (includeDrafts || !data.draft) && data.authors.some((a) => a.id === author)))
+  (includeDrafts || !data.draft && !data.unlisted) && data.authors.some((a) => a.id === author)))
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
 // Page 1 renders 12 cards; the rest stream from /blog/author/<author>/page/N/.

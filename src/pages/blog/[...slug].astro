@@ -7,7 +7,10 @@
  * and passes a same-category "Continue reading" set to the layout.
  *
  * Drafts are routed in dev (so seeded posts are previewable) but excluded from
- * production builds.
+ * production builds. Unlisted posts (content.config.ts → unlisted) DO build —
+ * that's the flag's whole point, a live URL nothing links to — so getStaticPaths
+ * must never filter on it; they're just excluded from the related-posts pool
+ * below, and the layout handles noindex + search exclusion.
  */
 import { getCollection, getEntry, getEntries, render } from 'astro:content';
 import BlogPost from '@layouts/BlogPost.astro';
@@ -36,14 +39,21 @@ const tags = await getEntries(entry.data.tags);
 const words = entry.body?.trim().split(/\s+/).filter(Boolean).length ?? 0;
 const readingMinutes = Math.max(1, Math.round(words / 200));
 
-// "Continue reading" — posts that share ANY category, newest first, up to 3,
+// "Continue reading" — hand-picked via `related` frontmatter (slugs, display
+// order) when set; otherwise posts that share ANY category, newest first,
 // excluding self. Card shows the related post's primary (first) category.
 const myCatIds = new Set(entry.data.categories.map((c) => c.id));
-const pool = await getCollection('blog', ({ data }) => includeDrafts || !data.draft);
-const relatedEntries = pool
-  .filter((p) => p.id !== entry.id && p.data.categories.some((c) => myCatIds.has(c.id)))
-  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
-  .slice(0, 2); // "Continued Reading" is a 2-up row — cap at 2 so it never orphans a 3rd
+const pool = await getCollection('blog', ({ data }) => includeDrafts || (!data.draft && !data.unlisted));
+const relatedEntries = (entry.data.related.length
+  ? entry.data.related.map((slug) => {
+      const p = pool.find((x) => postSlug(x) === slug);
+      if (!p) throw new Error(`related: no post with slug "${slug}" on ${postSlug(entry)} — typo, or the post is a draft?`);
+      return p;
+    })
+  : pool
+      .filter((p) => p.id !== entry.id && p.data.categories.some((c) => myCatIds.has(c.id)))
+      .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+).slice(0, 2); // "Continued Reading" is a 2-up row — cap at 2 so it never orphans a 3rd
 const related = await Promise.all(
   relatedEntries.map(async (p) => {
     const cat = await getEntry(p.data.categories[0]);
@@ -85,6 +95,7 @@ const related = await Promise.all(
   headings={headings}
   tocMinDepth={entry.data.tocMinDepth}
   tocMaxDepth={entry.data.tocMaxDepth}
+  unlisted={entry.data.unlisted}
 >
   <Content />
 </BlogPost>

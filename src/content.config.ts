@@ -129,10 +129,24 @@ const blog = defineCollection({
     // automatic — values at/below 36 render a flat 36px title. Live set custom
     // per-post title sizes; we snap those to this max, flooring at 36px.
     titleMax: z.number().optional(),
+    // Hand-picked "Continue reading" posts, by public slug, display order.
+    // Overrides the computed set (shares-a-category, newest first) when set.
+    // The row is a 2-up — entries past the first two are ignored. A slug that
+    // matches no visible post fails the build (typo guard, same philosophy as
+    // @utils/posts → postHref).
+    related: z.array(z.string()).default([]),
     toc: z.boolean().default(false),
     tocMinDepth: z.number().default(2),
     tocMaxDepth: z.number().default(3),
     draft: z.boolean().default(false),
+    // Live-but-hidden. The post builds at /blog/<slug>/ (unlike `draft`, which
+    // doesn't build in production at all) but is excluded from every discovery
+    // surface: listings and archives, the RSS feed, the sitemap
+    // (astro.config.mjs → sitemap filter), site search (Pagefind), and engines
+    // (robots noindex via BlogPost → Page → Base). For embargoed posts that
+    // need a shareable production URL before announcement — e.g. a partner
+    // linking to the post from their own launch. Publish by deleting the flag.
+    unlisted: z.boolean().default(false),
     legacyId: z.number().optional(),
     seo: z.object({
       title: z.string().optional(),

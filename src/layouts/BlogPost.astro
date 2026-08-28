@@ -98,6 +98,11 @@ interface Props {
   headings?: Heading[];
   tocMinDepth?: number;
   tocMaxDepth?: number;
+  /**
+   * Live-but-hidden (content.config.ts → unlisted): robots noindex + excluded
+   * from the Pagefind index. Listing/feed/sitemap exclusion happens upstream.
+   */
+  unlisted?: boolean;
 }
 
 const {
@@ -125,6 +130,7 @@ const {
   headings = [],
   tocMinDepth = 2,
   tocMaxDepth = 3,
+  unlisted = false,
 } = Astro.props;
 
 // Absolute date — kept for the <time title> tooltip / machine-readable value.
@@ -203,12 +209,13 @@ const searchThumbMeta = searchThumb ? `thumb:${searchThumb.src}` : undefined;
   keywords={topics.map((t) => t.label)}
   articleSection={categories.map((c) => c.label)}
   searchKind="post"
+  noindex={unlisted || undefined}
 >
   <Header slot="header" revealOnScrollUp={!showToc} />
   {/* The `type:post` kind filter now comes from Page.astro via `searchKind` — one
       owner for both kinds, so a post can't end up carrying `type:page` too. The
       meta here is the row payload /search/ renders from. */}
-  <article class="post container content-top-rule" data-pagefind-meta={searchThumbMeta}>
+  <article class="post container content-top-rule" data-pagefind-meta={searchThumbMeta} data-pagefind-ignore={unlisted ? 'all' : undefined}>
     <header class="post__hero">
       <h1 class="post__title" style={titleMax ? `--h1-max: ${titleMax}px` : undefined}>{title}</h1>
 

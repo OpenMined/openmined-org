@@ -235,6 +235,32 @@ path to keep looking identical to the first — which is why this is a decision,
 a task. Verify with the flagged Lighthouse run in `LAUNCH.md`'s Lighthouse QA
 line, median of five (single runs of this swing by 15+ points).
 
+### 27. External links don't open in a new tab — `READY`
+
+Site-wide behaviour, requested 2026-08-27. The double-blind post's four partner
+links were done by hand as inline `<a target="_blank" rel="noopener noreferrer">`
+anchors, because markdown link syntax can't carry `target`. Doing that per link
+doesn't scale — three seams need it instead:
+
+1. **Markdown prose** (all of `src/content/blog/` plus `.md` pages) — a rehype
+   plugin in `astro.config.mjs → markdown.rehypePlugins`. The repo has **no**
+   rehype/remark dependencies today, so either add `rehype-external-links` or
+   hand-write a hast walker and keep the dependency count at zero. External =
+   `https?://` whose host isn't `SITE_URL`'s, so absolute self-links stay
+   in-tab; skip `mailto:`/`tel:` and anchors that already set `target`.
+2. **`@ui/Link.astro`** — derive `target`/`rel` from the href, overridable by an
+   explicit prop. Covers component call sites from then on.
+3. **Raw `<a href="https://…">` in `.astro` pages** — 23 non-OpenMined ones
+   across `src/pages/`. Neither seam above reaches these; they're hand edits, or
+   convert them to `@ui/Link`.
+
+~30 anchors in migrated WordPress content already set `target="_blank"`, so any
+implementation must leave an existing `target` alone rather than doubling it.
+
+**Worth deciding, not just doing:** new-tab links are a WCAG 3.2.5 concern —
+opening a window without warning. If we go site-wide, pair it with a visible or
+screen-reader affordance rather than shipping the bare attribute.
+
 ## Cleanup — not urgent
 
 No user-visible change; do when touching the files anyway, or as one pass.

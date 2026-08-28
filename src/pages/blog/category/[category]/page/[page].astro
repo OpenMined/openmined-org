@@ -23,7 +23,7 @@ export async function getStaticPaths() {
   const paths = [];
   for (const category of NAV_ORDER) {
     const categoryEntry = allCats.find((c) => c.id === category);
-    const posts = (await getCollection('blog', ({ data }) => (includeDrafts || !data.draft) && data.categories.some((c) => c.id === category)))
+    const posts = (await getCollection('blog', ({ data }) => (includeDrafts || !data.draft && !data.unlisted) && data.categories.some((c) => c.id === category)))
       .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
     // Same featured exclusion as page 1 (only in 'featured' header mode).

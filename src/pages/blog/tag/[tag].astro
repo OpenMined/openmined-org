@@ -24,7 +24,7 @@ const { tag } = Astro.params;
 const { label } = Astro.props;
 const includeDrafts = import.meta.env.DEV;
 
-const posts = (await getCollection('blog', ({ data }) => (includeDrafts || !data.draft) && data.tags.some((t) => t.id === tag)))
+const posts = (await getCollection('blog', ({ data }) => (includeDrafts || !data.draft && !data.unlisted) && data.tags.some((t) => t.id === tag)))
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
 // Page 1 renders 12 cards; the rest stream from /blog/tag/<tag>/page/N/.

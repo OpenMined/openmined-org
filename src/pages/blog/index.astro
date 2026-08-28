@@ -30,7 +30,7 @@ import blogConfig from '@data/blog.json';
 
 const includeDrafts = import.meta.env.DEV;
 
-const allPosts = (await getCollection('blog', ({ data }) => includeDrafts || !data.draft))
+const allPosts = (await getCollection('blog', ({ data }) => includeDrafts || !data.draft && !data.unlisted))
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
 // Featured is a property of THIS listing, set in blog.json (blog config), not on
