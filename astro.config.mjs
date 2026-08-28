@@ -1,6 +1,7 @@
 import { defineConfig, fontProviders } from 'astro/config';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import fs from 'node:fs';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import cloudflare from '@astrojs/cloudflare';
@@ -9,6 +10,27 @@ import { redirects } from './src/data/redirects.mjs';
 import { SITE_URL } from './src/data/site.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// URL paths of unlisted blog posts (content.config.ts → unlisted): they build,
+// but the sitemap is a public URL list, so advertising them there would defeat
+// the flag. The config can't load content collections, so the frontmatter is
+// scanned textually — config code runs in Node at build setup, never workerd,
+// so `node:fs` is fine here. URL = explicit `slug` frontmatter, else the post's
+// folder name (same fallback as @utils/posts → postSlug).
+const unlistedPaths = fs
+  .readdirSync(path.join(__dirname, 'src/content/blog'), { withFileTypes: true })
+  .filter((d) => d.isDirectory())
+  .flatMap((d) => {
+    const dir = path.join(__dirname, 'src/content/blog', d.name);
+    const index = ['index.md', 'index.mdx']
+      .map((f) => path.join(dir, f))
+      .find((f) => fs.existsSync(f));
+    if (!index) return [];
+    const frontmatter = fs.readFileSync(index, 'utf8').split(/^---\s*$/m)[1] ?? '';
+    if (!/^unlisted:\s*true\s*$/m.test(frontmatter)) return [];
+    const slug = frontmatter.match(/^slug:\s*["']?([^"'\n]+?)["']?\s*$/m)?.[1] ?? d.name;
+    return [`/blog/${slug}/`];
+  });
 
 // `astro dev` vs `astro build` — only used to pick the adapter's image service
 // (see the adapter config below). Deliberately narrow: nothing else should
@@ -83,7 +105,10 @@ export default defineConfig({
         // linked from every post byline — but out of the sitemap: live serves
         // them without sitemapping them (parity), and most are thin (59 of 114
         // authors have a single post). Decision 2026-08-13, see LAUNCH.md.
-        !page.includes('/blog/author/'),
+        !page.includes('/blog/author/') &&
+        // Unlisted posts — live URLs deliberately absent from every discovery
+        // surface (see the unlistedPaths scan above).
+        !unlistedPaths.some((p) => page.includes(p)),
     }),
     // Builds the Pagefind search index into the build output. Deliberately an
     // integration, not a chained npm script, so no build command can skip it

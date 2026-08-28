@@ -175,13 +175,23 @@ Two things worth doing with them:
 ### 24. Non-form layout shift on `/` and `/careers/` — `NEEDS DECISION`
 
 Surfaced as the control pages in `audit-form-cls`, so they are measured but
-unowned. Throttled, 2026-08-21: `/` **0.044** at 900x1000 from `div.de1` /
-`canvas.de-webgl` (the diamond embed sizing itself after load), and `/careers/`
-**0.055** at 360x640 from `p` / `div.simple-hero__actions`. Both sit under the
-guard's 0.1 threshold, so nothing fails today — but they are the floor that
-stops the threshold being tightened. Decide whether either is worth reserving
-for; the diamond one wants checking against whatever `DiamondEmbed`'s static-draw
-path now does at first paint.
+unowned. Re-measured against **production** after the WebGL fix shipped
+(2026-08-21, throttled, median of 3):
+
+- `/` at 900x1000 — **0.044**, unchanged, and stable to the third decimal across
+  three runs. ⚠ It survived the static-draw fix: the shifting sources are now
+  `div.de1` / `div.de-stage` (plus the hero's own text blocks) rather than
+  `canvas.de-webgl`, so what moves is the embed's **container sizing itself after
+  load**, not the canvas painting. At the default mobile viewport the homepage
+  measures CLS 0, which is why this looked fixed at first — it is viewport-
+  dependent, so check 900x1000 specifically before believing it closed.
+- `/careers/` at 360x640 — **0.055** (runs: 0.06, 0, 0.055) from `p` /
+  `div.simple-hero__actions`.
+
+Both sit under the guard's 0.1 threshold, so nothing fails today — but they are
+the floor that stops the threshold being tightened. The homepage one is the more
+interesting: a container that knows its aspect ratio up front should not need to
+resize at all (`AGENTS.md → WebGL embeds` already requires layout to stay eager).
 
 ### 25. Anchor landings shift the page — `READY`
 
@@ -199,6 +209,57 @@ URL, or the one-off in this item's commit.
 
 Worth checking whether browser scroll restoration on back-navigation lands the
 same way — it takes the same no-gesture path.
+
+### 26. WebGL context creation costs ~1s on software renderers — `NEEDS DECISION`
+
+The static-draw fix removed the animation loop and took the homepage from PSI 41
+to the high 70s, but a residual remains: creating the GL context and drawing one
+frame is an **~811ms long task** on a software renderer. Production measures
+(2026-08-21, `--use-angle=swiftshader`): mobile 68–85 across runs, desktop median
+81, TBT 1,310ms against 4,500ms before the fix. With a GPU the same page is 98–100
+and TBT ~0, so this is entirely the no-GPU path — which is also the only path
+PageSpeed Insights ever measures. **Expect PSI to read high-70s, not ~98.**
+
+For scale: live WordPress measured desktop **93** with TBT 29–180ms and no WebGL
+at all, so on PSI the old site probably beat what we score now.
+
+⚠ **Detection cannot come first.** `AGENTS.md → WebGL embeds` records that even a
+*detached* probe canvas pays the same context cost, so "check the renderer, then
+decide" is not available. The static frame has to be the **default**, with WebGL
+as an upgrade: ship a poster (pre-rendered image, or a 2D-canvas/CSS gradient
+approximation) and create the GL context only after load/idle, so no context is
+created inside a lab run's measurement window.
+
+The cost is a possible visible pop when the upgrade lands, and a second rendering
+path to keep looking identical to the first — which is why this is a decision, not
+a task. Verify with the flagged Lighthouse run in `LAUNCH.md`'s Lighthouse QA
+line, median of five (single runs of this swing by 15+ points).
+
+### 27. External links don't open in a new tab — `READY`
+
+Site-wide behaviour, requested 2026-08-27. The double-blind post's four partner
+links were done by hand as inline `<a target="_blank" rel="noopener noreferrer">`
+anchors, because markdown link syntax can't carry `target`. Doing that per link
+doesn't scale — three seams need it instead:
+
+1. **Markdown prose** (all of `src/content/blog/` plus `.md` pages) — a rehype
+   plugin in `astro.config.mjs → markdown.rehypePlugins`. The repo has **no**
+   rehype/remark dependencies today, so either add `rehype-external-links` or
+   hand-write a hast walker and keep the dependency count at zero. External =
+   `https?://` whose host isn't `SITE_URL`'s, so absolute self-links stay
+   in-tab; skip `mailto:`/`tel:` and anchors that already set `target`.
+2. **`@ui/Link.astro`** — derive `target`/`rel` from the href, overridable by an
+   explicit prop. Covers component call sites from then on.
+3. **Raw `<a href="https://…">` in `.astro` pages** — 23 non-OpenMined ones
+   across `src/pages/`. Neither seam above reaches these; they're hand edits, or
+   convert them to `@ui/Link`.
+
+~30 anchors in migrated WordPress content already set `target="_blank"`, so any
+implementation must leave an existing `target` alone rather than doubling it.
+
+**Worth deciding, not just doing:** new-tab links are a WCAG 3.2.5 concern —
+opening a window without warning. If we go site-wide, pair it with a visible or
+screen-reader affordance rather than shipping the bare attribute.
 
 ## Cleanup — not urgent
 

@@ -30,7 +30,7 @@ import { postSlug, postLocations } from '@utils/posts';
 
 const includeDrafts = import.meta.env.DEV;
 
-const posts = (await getCollection('blog', ({ data }) => includeDrafts || !data.draft))
+const posts = (await getCollection('blog', ({ data }) => includeDrafts || !data.draft && !data.unlisted))
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
 const [cats, tags, people] = await Promise.all([
