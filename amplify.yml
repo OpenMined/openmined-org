@@ -13,7 +13,12 @@ frontend:
       commands:
         # CI builds on Node 22 (.github/workflows/ci.yml) — match it here.
         - nvm use 22
-        - npm ci
+        # --cache .npm parks npm's download cache at the project root, where
+        # cache.paths below can persist it; --prefer-offline then installs from
+        # those cached tarballs instead of the network. (`npm ci` itself always
+        # deletes node_modules wholesale before installing — that's why neither
+        # cache can live inside node_modules; see cache.paths.)
+        - npm ci --cache .npm --prefer-offline
     build:
       commands:
         # PRERENDER_ENV=node: Amplify's build containers can't boot workerd —
@@ -27,6 +32,19 @@ frontend:
     baseDirectory: dist/client
     files:
       - '**/*'
+  # Amplify restores these paths before preBuild and saves them after a
+  # successful build. node_modules is deliberately NOT cached: `npm ci`
+  # deletes it before installing, so a restored node_modules is pure tar/
+  # upload overhead that never survives to the build (AWS acknowledges the
+  # conflict — aws-amplify/amplify-hosting#2831). The two dirs below are
+  # project-root precisely so `npm ci` can't touch them.
   cache:
     paths:
-      - node_modules/**/*
+      # Astro's build cache (astro.config.mjs → cacheDir): content-addressed
+      # image variants, content-layer data store, self-hosted fonts. This is
+      # what stops every deploy re-optimizing every image on the site. First
+      # build after a cache reset is cold (populates); the win shows from the
+      # second build on ("generating optimized images" drops to sub-second).
+      - .astro-cache/**/*
+      # npm's download cache (see preBuild) — clean installs without the network.
+      - .npm/**/*
