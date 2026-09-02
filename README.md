@@ -67,6 +67,14 @@ through as-is. The build also emits `dist/server` (an artifact of the adapter);
 it is not deployed — the API route production serves is the Lambda in
 `aws/create-donation/`.
 
+Builds are cached: `.astro-cache/` (`astro.config.mjs → cacheDir`) holds the
+optimized image variants, content-layer store, and self-hosted fonts, so only
+the first build after cloning (or after deleting the dir) pays the full
+image-optimization cost. Amplify persists the same dir between hosted builds
+(`amplify.yml → cache.paths` — the rationale for its location lives on those
+two config comments). Deleting `.astro-cache/` is always safe — the next build
+is just cold.
+
 ## Deploy
 
 Hosting is **AWS Amplify** (app `d1otfqlvqd3jby`, us-west-1). Deploys are

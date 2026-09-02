@@ -41,6 +41,18 @@ export default defineConfig({
   // Canonical production origin — required for correct canonical URLs, the
   // sitemap, and the RSS feed. Single source of truth in src/data/site.mjs.
   site: SITE_URL,
+  // Astro's build cache: optimized image variants, the content-layer data
+  // store, and self-hosted font downloads. Every entry is content-addressed
+  // (a changed source or transform produces a different key), so persisting
+  // the dir across builds is safe — a stale entry is simply never matched.
+  // Moved out of the default (node_modules/.astro) because Amplify could
+  // never persist it there: `npm ci` deletes node_modules wholesale at the
+  // start of every build, destroying the restored cache before the build ran.
+  // A project-root dir survives `npm ci`, so amplify.yml → cache.paths can
+  // carry it between builds — that's where the 375 posts' image variants stop
+  // being re-optimized on every deploy. Dev is unaffected (fonts + data store
+  // use the .astro/ dir in dev by Astro's design).
+  cacheDir: './.astro-cache',
   // Output stays 'static' (the default): every page is prerendered to HTML.
   // The Cloudflare adapter is the BUILD TOOLCHAIN here, not the host: it runs
   // dev SSR + prerender under workerd and claims redirects.mjs into the merged
