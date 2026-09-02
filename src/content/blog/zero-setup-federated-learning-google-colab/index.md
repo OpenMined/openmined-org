@@ -33,7 +33,7 @@ We’ll use the [PIMA Indians Diabetes dataset](https://www.kaggle.com/datasets/
 
 ## Quick Demo
 
-<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio"><div class="wp-block-embed__wrapper"><iframe title="Federated Learning in Google Colab — No Setup Required" width="500" height="281" src="https://www.youtube.com/embed/iWlQJhBMs1E?feature=oembed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe></div></figure>
+<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio"><div class="wp-block-embed__wrapper"><iframe title="Federated Learning in Google Colab — No Setup Required" width="500" height="281" src="https://www.youtube-nocookie.com/embed/iWlQJhBMs1E?feature=oembed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe></div></figure>
 
 <p class="has-text-align-center prose-divider">⬩⬩⬩</p>
 

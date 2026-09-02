@@ -261,6 +261,48 @@ implementation must leave an existing `target` alone rather than doubling it.
 opening a window without warning. If we go site-wide, pair it with a visible or
 screen-reader affordance rather than shipping the bare attribute.
 
+### 28. Video embeds hand the visitor's IP to Google on page load — `NEEDS DECISION`
+
+Moved here from `LAUNCH.md` §5 on 2026-09-02, once the cookie half of that
+section's YouTube item was closed and only the request half was left.
+
+Re-derive the scope: `grep -rl 'youtube-nocookie.com/embed' src/content/` — the
+posts carrying an embed, currently 4 files / 5 iframes. They were swapped from
+`youtube.com/embed` to `youtube-nocookie.com/embed` on 2026-09-02, which fixed
+cookies and nothing else.
+
+**Measured 2026-09-02** (cold-load Playwright probe, fresh browser context per
+page, 4s settle): **zero cookies, empty local/sessionStorage** — but opening one
+of these posts reaches `www.youtube-nocookie.com`, `www.google.com`,
+`i.ytimg.com`, `fonts.gstatic.com` and `jnn-pa.googleapis.com`, so Google
+receives the visitor's IP with no consent and no interaction. `nocookie` cannot
+fix this: the request exists in order to render the player.
+
+**Why it's worth doing rather than accepting.** This is the same exposure
+`LAUNCH.md` §5 treats as actionable for the homepage's Google-hosted webfont (LG
+München I, Jan 2022), which was fixed on those grounds 2026-08-21. It also sits
+against §5's stated property — no page reaches a third-party origin for its own
+rendering — of which these posts are now the largest remaining exception.
+
+**Unblock path:** a click-to-load facade — poster image plus a play affordance,
+swapping in the iframe on click, so nothing is requested until a visitor asks
+for the video. What needs deciding is its shape, and none of it is mechanical:
+where the poster comes from (`i.ytimg.com` at build time and committed, or a
+hand-picked frame — pulling it at runtime reopens the exact problem), whether it
+becomes a component that markdown can call or a rehype transform over raw
+iframes, and what it does with `prefers-reduced-motion` and keyboard focus.
+
+**Two things to update when it lands:**
+
+- `src/pages/privacy-policy.astro` §6 discloses this connection in so many
+  words ("does contact Google's servers to load the player"). That clause can
+  tighten to play-time only.
+- The cold-load guard proposed in `LAUNCH.md` §5 should assert on third-party
+  **requests**, not cookies alone — a cookie-only assertion calls these four
+  posts clean today — and should assert `youtube.com/embed` never reappears under
+  `src/content/`, which is how the cookie leak returns the next time a post is
+  pasted in from WordPress.
+
 ## Cleanup — not urgent
 
 No user-visible change; do when touching the files anyway, or as one pass.
@@ -319,7 +361,7 @@ Unblock path: ship `Content-Security-Policy-Report-Only` in both header
 files, conceding `style-src 'unsafe-inline'` for Shiki, and collect
 violations across the blog, the HubSpot form pages, and a live donate run
 before enforcing. Expected origins: `js.hsforms.net` (plus HubSpot's runtime
-injections), `www.youtube.com` (`frame-src`), `apply.workable.com`
+injections), `www.youtube-nocookie.com` (`frame-src`), `apply.workable.com`
 (`connect-src`, `/careers`), `unpkg.com` (`script-src`, `/style-guide` only).
 Fonts are self-hosted, Pagefind is same-origin, and Stripe Checkout is a
 top-level redirect — none need entries.

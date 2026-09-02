@@ -90,7 +90,7 @@ However, this area is heavily under explored and there is definitely a lot of ro
 
 **Watch the full talk on YouTube.**
 
-<figure class=""><iframe width="480" height="270" src="https://www.youtube.com/embed/F46lX5VIoas?start=6708&amp;feature=oembed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe><figcaption>Openmined Privacy Conference Day-1 Part-2</figcaption></figure>
+<figure class=""><iframe width="480" height="270" src="https://www.youtube-nocookie.com/embed/F46lX5VIoas?start=6708&amp;feature=oembed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe><figcaption>Openmined Privacy Conference Day-1 Part-2</figcaption></figure>
 
 ## Private NLP Paper List
 
