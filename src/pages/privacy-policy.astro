@@ -25,10 +25,12 @@ import ContentSection from '@components/sections/ContentSection.astro';
  * needs a line here — see `AGENTS.md` and `LAUNCH.md` §5 for why bannerlessness
  * depends on the storage claim in §6 staying true.
  *
- * TODO(client): §1 still lacks the registered entity name and a postal address,
- * which GDPR Art 13(1)(a) asks for. Requested from the client 2026-09-02; drop
- * them into §1 when they arrive. No EU representative is appointed (Art 27), so
- * the policy deliberately says nothing about one rather than implying otherwise.
+ * §1 names the controller and a postal address, which GDPR Art 13(1)(a) asks for
+ * (client-supplied 2026-09-02). The entity name matches the rest of the site —
+ * `Footer.astro`'s copyright line and `/foundation/`, which is also where the
+ * 501(c)(3) status is already public. No EU representative is appointed
+ * (Art 27), so the policy deliberately says nothing about one rather than
+ * implying otherwise.
  *
  * Layout is unchanged from the migrated page: centered h1 + "Last Updated"
  * subhead (no hero graphic) over a col-6 `.prose` reading column, with the
@@ -62,6 +64,8 @@ import ContentSection from '@components/sections/ContentSection.astro';
       <hr class="legal-rule" />
       <h2>1. Who We Are</h2>
       <p>OpenMined is a globally distributed nonprofit organization. We maintain a digital presence through our website and community tools, including Slack and email communications. Our primary operations are based in the United States and the United Kingdom.</p>
+      <p>The data controller responsible for your personal information under this policy is:</p>
+      <p>OpenMined Foundation, a 501(c)(3) nonprofit<br />154 W 14th Street<br />New York, NY 10011<br />United States</p>
 
       <hr class="legal-rule" />
       <h2>2. What This Policy Covers</h2>
