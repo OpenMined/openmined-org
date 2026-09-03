@@ -259,3 +259,4 @@ if (jsonOut) {
   await writeFile(jsonOut, JSON.stringify(results, null, 2));
   console.log(`\nWrote ${jsonOut}`);
 }
+// route-check test line
