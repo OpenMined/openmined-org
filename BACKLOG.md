@@ -261,6 +261,99 @@ implementation must leave an existing `target` alone rather than doubling it.
 opening a window without warning. If we go site-wide, pair it with a visible or
 screen-reader affordance rather than shipping the bare attribute.
 
+### 28. Video embeds hand the visitor's IP to Google on page load — `NEEDS DECISION`
+
+Moved here from `LAUNCH.md` §5 on 2026-09-02, once the cookie half of that
+section's YouTube item was closed and only the request half was left.
+
+Re-derive the scope: `grep -rl 'youtube-nocookie.com/embed' src/content/` — the
+posts carrying an embed, currently 4 files / 5 iframes. They were swapped from
+`youtube.com/embed` to `youtube-nocookie.com/embed` on 2026-09-02, which fixed
+cookies and nothing else.
+
+**Measured 2026-09-02** (cold-load Playwright probe, fresh browser context per
+page, 4s settle): **zero cookies, empty local/sessionStorage** — but opening one
+of these posts reaches `www.youtube-nocookie.com`, `www.google.com`,
+`i.ytimg.com`, `fonts.gstatic.com` and `jnn-pa.googleapis.com`, so Google
+receives the visitor's IP with no consent and no interaction. `nocookie` cannot
+fix this: the request exists in order to render the player.
+
+**Why it's worth doing rather than accepting.** This is the same exposure
+`LAUNCH.md` §5 treats as actionable for the homepage's Google-hosted webfont (LG
+München I, Jan 2022), which was fixed on those grounds 2026-08-21. It also sits
+against §5's stated property — no page reaches a third-party origin for its own
+rendering — of which these posts are now the largest remaining exception.
+
+**Unblock path:** a click-to-load facade — poster image plus a play affordance,
+swapping in the iframe on click, so nothing is requested until a visitor asks
+for the video. What needs deciding is its shape, and none of it is mechanical:
+where the poster comes from (`i.ytimg.com` at build time and committed, or a
+hand-picked frame — pulling it at runtime reopens the exact problem), whether it
+becomes a component that markdown can call or a rehype transform over raw
+iframes, and what it does with `prefers-reduced-motion` and keyboard focus.
+
+**Two things to update when it lands:**
+
+- `src/pages/privacy-policy.astro` §6 discloses this connection in so many
+  words ("does contact Google's servers to load the player"). That clause can
+  tighten to play-time only.
+- The cold-load guard proposed in `LAUNCH.md` §5 should assert on third-party
+  **requests**, not cookies alone — a cookie-only assertion calls these four
+  posts clean today — and should assert `youtube.com/embed` never reappears under
+  `src/content/`, which is how the cookie leak returns the next time a post is
+  pasted in from WordPress.
+
+### 29. Deploy pipeline speed & smoothness — `NEEDS DECISION` (ongoing workstream)
+
+Making publish-a-small-change as fast and flexible as possible for the
+maintaining team. Done so far: the Astro build cache persists across Amplify
+builds (PR #21; measured on staging 2026-09-02: merge→live 172s cold, then
+150s and 141s across two warm deploys — a ~25–30s saving matching the
+image-optimization phase, the only compressible chunk visible from outside
+the console). **Parked on staging as of 2026-09-02 — not yet promoted to
+main.** On promotion, production's first build is cold (populates its own
+cache); the win shows from its second build. Attribution detail, if ever
+needed: any staging build log after PR #21 should show `generating optimized
+images` sub-second with `(reused cache entry)` lines — logs stay attached to
+historical builds, so this can be checked retroactively.
+
+What remains is the ~2¼ minutes of mostly-fixed pipeline, in pieces that each
+need a look:
+
+- **CI check latency** — merges wait on the GitHub Actions gate
+  (`check-and-build` runs `astro check` + full build + audits) before the
+  Amplify build even starts, so the two full builds run back-to-back, not in
+  parallel. Investigate: caching in Actions, splitting fast gates from slow
+  audits, or trusting the PR-preview build for content-only changes.
+- **Amplify fixed overhead** — provisioning, clone, `nvm`, deploy, CDN
+  invalidation. Largely AWS's; quantify from build logs (Stephen) before
+  assuming anything is winnable.
+- **Astro `experimental.incrementalBuild`** (7.2) — would skip re-rendering
+  unchanged blog routes, but currently useless here (any `fonts` config
+  poisons the module-graph hash — withastro/astro#17642/#17652) and carries a
+  correctness bug (#17704, stale CSS hashes). Revisit when those close.
+- **Publishing-workflow skills** (openmined-skills plugin) — the human round
+  trips dwarf the machine minutes; a `publish-post` skill encoding the blog
+  schema, registries, and PR flow is the highest-leverage piece.
+- **Staging-drift notice — possible todo, deliberately not built (2026-09-03).**
+  The quick road (README → Deploy) relies on the catch-up PR `main → staging`
+  being opened after every hotfix, and today only the AGENTS.md instruction
+  ensures it. If forgotten, `staging` shows the un-fixed page until the next
+  promotion — production is never wrong, since promotion is a merge and keeps
+  `main`'s commits; the only real cost is a possible conflict if later work
+  touches the same lines. If that turns out to happen in practice, add a
+  workflow on PRs into `staging` that **comments** (never blocks) when `main`
+  has commits `staging` lacks: one comment per PR, updated in place and removed
+  once level, suggesting `git merge origin/main` into the branch. Always green,
+  default token, no secrets. A fully automatic catch-up PR is the step beyond
+  that, but a PR opened by the workflow token gets no CI run and so can't clear
+  the required check — it would need a PAT or GitHub App secret to own.
+  Decision 2026-09-03: hold; the instruction is assumed good enough.
+
+Merge→live is measurable without console access: poll the site's
+`last-modified` header (it flips on every deploy; the etag doesn't flip on
+config-only deploys — HTML can be byte-identical).
+
 ## Cleanup — not urgent
 
 No user-visible change; do when touching the files anyway, or as one pass.
@@ -319,7 +412,7 @@ Unblock path: ship `Content-Security-Policy-Report-Only` in both header
 files, conceding `style-src 'unsafe-inline'` for Shiki, and collect
 violations across the blog, the HubSpot form pages, and a live donate run
 before enforcing. Expected origins: `js.hsforms.net` (plus HubSpot's runtime
-injections), `www.youtube.com` (`frame-src`), `apply.workable.com`
+injections), `www.youtube-nocookie.com` (`frame-src`), `apply.workable.com`
 (`connect-src`, `/careers`), `unpkg.com` (`script-src`, `/style-guide` only).
 Fonts are self-hosted, Pagefind is same-origin, and Stripe Checkout is a
 top-level redirect — none need entries.

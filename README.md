@@ -67,15 +67,41 @@ through as-is. The build also emits `dist/server` (an artifact of the adapter);
 it is not deployed — the API route production serves is the Lambda in
 `aws/create-donation/`.
 
+Builds are cached: `.astro-cache/` (`astro.config.mjs → cacheDir`) holds the
+optimized image variants, content-layer store, and self-hosted fonts, so only
+the first build after cloning (or after deleting the dir) pays the full
+image-optimization cost. Amplify persists the same dir between hosted builds
+(`amplify.yml → cache.paths` — the rationale for its location lives on those
+two config comments). Deleting `.astro-cache/` is always safe — the next build
+is just cold.
+
 ## Deploy
 
 Hosting is **AWS Amplify** (app `d1otfqlvqd3jby`, us-west-1). Deploys are
 git-driven; no contributor runs a build or holds cloud credentials to publish:
 
-- **Pull requests** target `staging` (the default branch) and each get their
-  own preview URL, posted on the PR by the Amplify bot.
+- **Every pull request** gets its own preview URL, posted on the PR by the
+  Amplify bot — a full build of exactly that change.
 - **Merging to `staging`** deploys <https://staging.openmined.org>.
 - **Merging to `main`** deploys production, <https://openmined.org>.
+
+**Two routes, chosen by the PR's base branch.** Both branches require the CI
+gate (`check-and-build`) to pass before a merge; neither requires a review.
+
+- **Quick road — PR into `main`.** For content-only changes: blog posts and
+  frontmatter, page copy, links, images, the `src/data/` registries, `public/`,
+  and the root docs. The preview URL is the visual check; merge when CI is
+  green and production builds. Two waits, roughly four minutes. Afterwards,
+  open the catch-up PR `main → staging` so staging never lags production:
+  `gh pr create --base staging --head main`. Merge it with a **merge commit**,
+  never a squash, or the two histories diverge and every later catch-up
+  conflicts. The `Route check` workflow flags a PR into `main` that touches
+  code; the `hotfix` label overrides it for an urgent production fix.
+- **Normal road — PR into `staging`.** Everything else: components, styles,
+  layouts, config, scripts, workflows. Review it on the staging site with the
+  rest of what is queued, then promote with a `staging → main` PR (also a
+  merge commit). `staging` is the default branch, so a bare `gh pr create`
+  takes this road.
 
 The build spec is `amplify.yml`: Node 22 (matching CI), `npm ci`,
 `PRERENDER_ENV=node npm run build`, publish `dist/client`. Response headers are

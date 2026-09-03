@@ -323,6 +323,6 @@ workers_virtual = [alice, bob]
 
 c. **Run the code!** Now you just need to run every single cell of the Jupyter Notebook! You may find an explanation of the Recurrent Neural Network training process on Raspberry PIs based on the Jupyter Notebook you cloned previously in this video:
 
-<figure class=""><iframe width="480" height="270" src="https://www.youtube.com/embed/knNgFk0uZHM?feature=oembed" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></figure>
+<figure class=""><iframe width="480" height="270" src="https://www.youtube-nocookie.com/embed/knNgFk0uZHM?feature=oembed" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></figure>
 
 Have fun with your newly trained Recurrent Neural Networks!

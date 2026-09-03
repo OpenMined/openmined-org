@@ -35,6 +35,31 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+
+      # Astro's build cache (astro.config.mjs → cacheDir) — the same dir
+      # amplify.yml persists between hosted builds, for the same reason: without
+      # it every run re-optimizes all ~1800 image variants and the build step
+      # measures ~87s against ~15s warm (2026-09-03). Entries are
+      # content-addressed, so restoring any prior cache is safe — a stale entry
+      # is never matched, and new sources simply populate on top.
+      #
+      # The key ends in run_id so every run SAVES (actions/cache only writes on a
+      # key miss); restore-keys then match the newest prior entry by prefix. The
+      # lockfile sits in the prefix so a dependency bump prefers a cache built
+      # with the same toolchain, falling back to any cache rather than cold.
+      #
+      # Scope matters here: a pull_request run can read caches written by its
+      # BASE branch, but caches it writes stay private to the PR. So the push
+      # runs on `main` and `staging` below are what populate the cache PRs
+      # actually hit — one more reason those runs stay in the trigger list.
+      - uses: actions/cache@v4
+        with:
+          path: .astro-cache
+          key: astro-cache-${{ hashFiles('package-lock.json') }}-${{ github.run_id }}
+          restore-keys: |
+            astro-cache-${{ hashFiles('package-lock.json') }}-
+            astro-cache-
+
       - run: npm run check
       - run: npm run build
 

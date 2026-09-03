@@ -1,6 +1,10 @@
 node_modules/
 dist/
 .astro/
+# Astro build cache (astro.config.mjs → cacheDir) + npm download cache
+# (amplify.yml → preBuild) — both project-root so they survive `npm ci`.
+.astro-cache/
+.npm/
 .env
 .env.*
 !.env.example

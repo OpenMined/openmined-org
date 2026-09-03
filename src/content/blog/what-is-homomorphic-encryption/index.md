@@ -17,7 +17,7 @@ __**This post is part of our [Privacy-Preserving Data Science, Explained](https:
 
 **_Check out the companion video to this article on [youtube](https://youtu.be/2TVqFGu1vhw)._**
 
-<div style="position: relative; padding-bottom: 56.25%"><iframe style="width: 100%; height: 100%; position: absolute; left: 0px; top: 0px;" src="https://www.youtube.com/embed/2TVqFGu1vhw" width="100%" height="100%" frameborder="0" allowfullscreen="allowfullscreen"></iframe></div>
+<div style="position: relative; padding-bottom: 56.25%"><iframe style="width: 100%; height: 100%; position: absolute; left: 0px; top: 0px;" src="https://www.youtube-nocookie.com/embed/2TVqFGu1vhw" width="100%" height="100%" frameborder="0" allowfullscreen="allowfullscreen"></iframe></div>
 
 ## Introduction
 
@@ -156,7 +156,7 @@ Let’s say, to keep things simple, that we would like to add to itself a number
 
 `Cp(0)+Cp(0)+Cp(0) = 5946 = 0 + 2*(15) + (204)*29` as always `5946` doesn’t tell us much about the result of our calculation but with `p` we can decrypt it as we detailed above. We start with `5946%29 = 1` and then we check whether the result is even or odd, `1`  is odd so we conclude `3m=1` but of course we know that is not the case so what went wrong?
 
-<div style="position: relative; padding-bottom: 56.25%"><iframe style="width: 100%; height: 100%; position: absolute; left: 0px; top: 0px;" src="https://www.youtube.com/embed/xzHF8lMmqsw" width="100%" height="100%" frameborder="0" allowfullscreen="allowfullscreen"></iframe></div>
+<div style="position: relative; padding-bottom: 56.25%"><iframe style="width: 100%; height: 100%; position: absolute; left: 0px; top: 0px;" src="https://www.youtube-nocookie.com/embed/xzHF8lMmqsw" width="100%" height="100%" frameborder="0" allowfullscreen="allowfullscreen"></iframe></div>
 
 The error term has gotten too big and instead of being even it’s now odd. Since `30` is bigger than `p=29` the modulo `p` operation that usually doesn’t effect the error because it’s too small has now changed it, corrupting the encryption. This example is specific to our scheme and the noise was a little too high to begin with. The behavior of all SWHE schemes become unpredictable as the error grows larger.
 
