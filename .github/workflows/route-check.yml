@@ -1,0 +1,56 @@
+# Route check — a PR into `main` should be quick-road material.
+#
+# The site has two deploy routes (README → Deploy, AGENTS.md → Deploy routes):
+# content-only changes go straight to `main` (the quick road), everything else
+# goes through `staging` (the normal road). The route is chosen by the PR's
+# base branch and nothing else, so the only way to take the quick road by
+# mistake is to target `main` with a code change out of habit. This job makes
+# that mistake visible: it lists the PR's files and fails if any fall outside
+# the content, data, public, or root-docs paths.
+#
+# Not a hard gate. It is deliberately NOT a required status check — an urgent
+# production bug fix is allowed to take the quick road, and the `hotfix` label
+# is the explicit override. If it is ever made required, the label path is
+# what keeps emergencies unblocked.
+#
+# Promotion PRs (`staging` → `main`) carry code by design and are skipped.
+name: Route check
+
+on:
+  pull_request:
+    branches: [main]
+    # `labeled`/`unlabeled` re-run the check when the hotfix override is applied
+    # or removed, so the status reflects the label without a fresh push.
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  pull-requests: read
+  contents: read
+
+jobs:
+  route:
+    if: github.head_ref != 'staging'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check changed paths
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          HOTFIX: ${{ contains(github.event.pull_request.labels.*.name, 'hotfix') }}
+        run: |
+          if [ "$HOTFIX" = "true" ]; then
+            echo "hotfix label present — quick road allowed for any path."
+            exit 0
+          fi
+          files=$(gh pr diff "$PR" --repo "$GITHUB_REPOSITORY" --name-only)
+          # Quick-road paths: content collections, data registries, served-as-is
+          # assets, and the root markdown docs. Keep in step with AGENTS.md →
+          # Deploy routes.
+          outside=$(printf '%s\n' "$files" | grep -Ev '^(src/content/|src/data/|public/|[^/]+\.md$)' || true)
+          if [ -n "$outside" ]; then
+            echo "::error::This PR targets main but changes files outside the quick-road paths:"
+            printf '  %s\n' $outside
+            echo "Retarget the PR to staging (the normal road), or add the 'hotfix' label if this is an urgent production fix."
+            exit 1
+          fi
+          echo "content-only change — quick road OK."

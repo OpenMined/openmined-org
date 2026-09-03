@@ -35,6 +35,16 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Restore-only: this job runs on the same `main` pushes as ci.yml, which
+      # saves the cache (see the rationale there). Reading it here turns this
+      # job's cold build warm without writing a duplicate entry.
+      - uses: actions/cache/restore@v4
+        with:
+          path: .astro-cache
+          key: astro-cache-${{ hashFiles('package-lock.json') }}-${{ github.run_id }}
+          restore-keys: |
+            astro-cache-${{ hashFiles('package-lock.json') }}-
+            astro-cache-
       - run: PRERENDER_ENV=node npm run build
       - uses: aws-actions/configure-aws-credentials@v4
         with:
