@@ -620,14 +620,10 @@ portal change lands.
 between 13 and 16 by member state, and 16 covers every state without
 per-country wording. Client's call, 2026-09-02.
 
-**§1 names the controller** — OpenMined Foundation, with its New York postal
-address (client-supplied 2026-09-02), which closes the Art 13(1)(a) gap this
-section shipped with for a few hours. The entity name already appears in
-`Footer.astro`'s copyright line and on `/foundation/`, so nothing on the site
-contradicts it. **This list is now closed.** One question left over, and it is
-not a blocker: §1 and §14 both say operations span the US *and UK*, so if a
-separate UK entity exists it may belong in §1 too — ask before assuming the New
-York entity is the only controller.
+**⚠ Open, and the one gap the page ships with:** §1 carries no registered entity
+name or postal address, which GDPR Art 13(1)(a) asks for. Requested from the
+client 2026-09-02; a `TODO(client)` in the page header marks the insertion point.
+Everything else on this list is closed.
 
 **Still worth an hour of EU counsel review** against the research — the questions
 that earn the hour are the legitimate-interest basis for cookieless analytics
