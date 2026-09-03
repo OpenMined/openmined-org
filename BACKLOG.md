@@ -468,3 +468,5 @@ Same shape as above: **what**, **state grounded in code** (path + stable
 symbol, or the grep that re-derives the count — never a number trusted to
 age), **what unblocks it**. Launch or hosting work goes to `LAUNCH.md`
 instead, with a cross-reference if it started here.
+
+<!-- route-check test: content-only change, never merged -->
