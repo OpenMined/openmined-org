@@ -4,37 +4,16 @@ import SimpleHero from '@components/sections/hero/SimpleHero.astro';
 import ContentSection from '@components/sections/ContentSection.astro';
 
 /**
- * /privacy-policy/ — the site's privacy policy.
+ * /privacy-policy/ — the site's privacy policy. Rebuilt verbatim from live
+ * #brxe-ogcyyp (https://openmined.org/privacy-policy/), captured to
+ * the live page (sections 9–15 pulled from its raw HTML,
+ * the live innerText grab having raced lazy render).
  *
- * REWRITTEN 2026-09-02 to describe the stack this site actually ships. It is no
- * longer the verbatim WordPress-era text: that version named Google Analytics
- * and WP Engine (neither of which this site uses), described cookies as current
- * practice, and named no payment processor at all while the site took donations
- * through Stripe. `LAUNCH.md` §6 specified the rewrite and holds the reasoning;
- * §4 and §5 hold the analytics and cookie-consent decisions it discloses.
- *
- * The disclosure list is a factual claim about the code, so it goes stale if the
- * stack moves. Each clause below names the surface it describes:
- *   §6 cookies/storage → `Base.astro` theme init + `.js-switch-theme` handler,
- *                        `Base.astro` HubSpot forms loader
- *   §7 analytics       → `@components/Analytics.astro`, `@data/analytics.mjs`
- *   §10 donations      → `src/pages/api/create-donation.ts` + its Lambda twin
- *   §11 recruitment    → `@elements/JobBoard.astro`
- *   §12/§13 hosting    → `HOSTING.md`
- * Anything added that reaches a third party, or writes to the visitor's device,
- * needs a line here — see `AGENTS.md` and `LAUNCH.md` §5 for why bannerlessness
- * depends on the storage claim in §6 staying true.
- *
- * TODO(client): §1 still lacks the registered entity name and a postal address,
- * which GDPR Art 13(1)(a) asks for. Requested from the client 2026-09-02; drop
- * them into §1 when they arrive. No EU representative is appointed (Art 27), so
- * the policy deliberately says nothing about one rather than implying otherwise.
- *
- * Layout is unchanged from the migrated page: centered h1 + "Last Updated"
- * subhead (no hero graphic) over a col-6 `.prose` reading column, with the
- * numbered sections separated by a strong headline-color hairline (the live
- * legal-doc rule). Section headings are h2 for semantic order but rendered at
- * the live h4 size via `.prose.downsize-2` (27px, regular weight).
+ * Layout matches live: centered h1 + "Last Updated" subhead (no hero graphic)
+ * over a col-6 `.prose` reading column; the 15 numbered sections are separated
+ * by a strong headline-color hairline (the live legal-doc rule). Section
+ * headings are h2 for semantic order but rendered at the live h4 size via
+ * `.prose.downsize-2` (27px, regular weight — the understated live treatment).
  */
 ---
 
@@ -43,16 +22,15 @@ import ContentSection from '@components/sections/ContentSection.astro';
   description="How OpenMined collects, uses, and safeguards your personal information across our website, communications, and community platforms."
 >
   <!-- § Hero — title + last-updated. No swoop (live is a plain centered header).
-       The opening statement leads the body (below), not the hero.
-       Bump the date when this page's content next changes. -->
+       The opening statement now leads the body (below), not the hero. -->
   <SimpleHero
     heading="Privacy Policy"
-    subhead="Last Updated: 09/02/2026"
+    subhead="Last Updated: 04/28/2026"
     subheadAs="h6"
     padTop="spacious"
   />
 
-  <!-- § Policy body — col-6 reading column, rules between sections.
+  <!-- § Policy body — verbatim, col-6 reading column, rules between sections.
        Opens with the policy's intro statement, then a rule into section 1.
        flushTop: article-style page, so the hero's padding-bottom owns the gap. -->
   <ContentSection width="col-6" flushTop>
@@ -61,146 +39,108 @@ import ContentSection from '@components/sections/ContentSection.astro';
 
       <hr class="legal-rule" />
       <h2>1. Who We Are</h2>
-      <p>OpenMined is a globally distributed nonprofit organization. We maintain a digital presence through our website and community tools, including Slack and email communications. Our primary operations are based in the United States and the United Kingdom.</p>
+      <p>OpenMined is a globally distributed nonprofit organization. We maintain a digital presence through our websites and community tools, including Slack and email communications. Our primary operations are based in the United States and the United Kingdom.</p>
 
       <hr class="legal-rule" />
-      <h2>2. What This Policy Covers</h2>
-      <p>This policy covers openmined.org, the email we send you, and our community Slack workspace.</p>
-
-      <hr class="legal-rule" />
-      <h2>3. Information We Collect</h2>
+      <h2>2. Information We Collect</h2>
       <p>We may collect the following categories of personal data:</p>
       <ul>
-        <li><strong>Contact information:</strong> Name, email address, affiliation, or other information you provide via forms or email communications.</li>
-        <li><strong>Community data:</strong> Slack username, participation details, and other interaction metadata when joining our community platforms.</li>
-        <li><strong>Technical data:</strong> IP address, browser type, pages visited, and the page or site you arrived from. Our analytics provider uses these to produce an anonymous, aggregate count and does not retain them in a form that identifies you — see section 7.</li>
-        <li><strong>Communication preferences:</strong> Your opt-in status, including records of email engagement and unsubscribe actions.</li>
-        <li><strong>Application data:</strong> The CV, contact details, and answers you submit when applying for a role — see section 11.</li>
-        <li><strong>Donation data:</strong> Your name, email address, and donation amount. We never receive or store your card details — see section 10.</li>
+        <li><strong>Contact Information:</strong> Name, email address, affiliation, or other information you provide via forms or email communications.</li>
+        <li><strong>Community Data:</strong> Slack username, participation details, and other interaction metadata when joining our community platforms.</li>
+        <li><strong>Technical Data:</strong> IP address, browser type, device identifiers, pages visited, and referral information, collected via analytics tools and tracking links.</li>
+        <li><strong>Communication Preferences:</strong> Your opt-in status, including records of email engagement and unsubscribe actions.</li>
       </ul>
 
       <hr class="legal-rule" />
-      <h2>4. How We Collect Information</h2>
+      <h2>3. How We Collect Information</h2>
       <p>We collect information through:</p>
       <ul>
-        <li>Forms on our website, which are hosted and processed by HubSpot</li>
+        <li>Form submissions on our WordPress website</li>
         <li>Slack workspace registration</li>
         <li>Newsletter sign-ups and event registration</li>
-        <li>Email communications, through HubSpot and Google Workspace</li>
-        <li>Our analytics provider, Plausible, which counts visits without identifying visitors</li>
-        <li>Job applications submitted through Workable</li>
-        <li>Donations processed by Stripe</li>
-        <li>Contributor license agreements with companies and individuals contributing to our open-source and other published projects</li>
+        <li>Email communications (via HubSpot and Gmail)</li>
+        <li>Cookies and analytics tools, including Google Analytics, Plausible Analytics, UTM tracking, and Bitly links</li>
+        <li>Blanks on form license agreements with companies and individuals contributing to our computer-software and other published projects</li>
       </ul>
 
       <hr class="legal-rule" />
-      <h2>5. How We Use Your Information</h2>
+      <h2>4. How We Use Your Information</h2>
       <p>We use your data to:</p>
       <ul>
         <li>Send updates, newsletters, and community-related announcements</li>
         <li>Manage your participation in our programs and events</li>
-        <li>Understand which pages and campaigns bring people to the site, in aggregate</li>
-        <li>Process donations and issue receipts</li>
-        <li>Consider your application for a role</li>
+        <li>Improve our website and outreach through analytics and tracking</li>
         <li>Monitor community engagement and opt-in preferences</li>
         <li>Comply with applicable laws and protect our community</li>
       </ul>
-      <p>Where GDPR or UK GDPR applies, we rely on your <strong>consent</strong> for marketing email, on <strong>legitimate interests</strong> for aggregate website measurement and for protecting the security of our site, on the <strong>performance of a contract</strong> for processing a donation or an application you have submitted, and on <strong>legal obligation</strong> where a law requires us to retain or disclose information.</p>
 
       <hr class="legal-rule" />
-      <h2>6. Cookies and Device Storage</h2>
-      <p><strong>Our website does not set any cookies of its own, and we do not use a cookie banner.</strong> There is nothing non-essential stored on your device to consent to.</p>
-      <p>The only thing our website stores on your device is a record of your light or dark display preference, saved when you use the theme switch so the site can honour your choice on your next visit. It contains no identifier and is never sent to us.</p>
-      <p>Two third parties may set or request data through pages you visit:</p>
-      <ul>
-        <li><strong>HubSpot</strong>, which hosts our forms, sets a short-lived bot-protection cookie (<code>__cf_bm</code>, about 30 minutes) on its own domains when a page containing a form loads its form software. This is a security measure necessary to deliver the form.</li>
-        <li><strong>YouTube</strong>, on the small number of blog posts that embed a video. We use YouTube’s privacy-enhanced domain, which sets no cookies unless you choose to play the video. Opening one of those posts does contact Google’s servers to load the player, which means Google receives your IP address; if you then play the video, YouTube may also set cookies, under Google’s privacy policy rather than ours.</li>
-      </ul>
-      <p>You can manage cookies in your browser settings.</p>
+      <h2>5. Email Communications</h2>
+      <p>We are initiating formal email communications for the first time. If you receive an email from us and believe you have not opted in, we sincerely apologize. Our team is reviewing historical records to ensure consent is respected.</p>
+      <p>Every marketing email will include a visible unsubscribe link, as required by law and supported by our email platform (HubSpot).</p>
+      <p>You may also request to be removed from our communications manually by contacting <a href="mailto:privacy@openmined.org">privacy@openmined.org</a>.</p>
 
       <hr class="legal-rule" />
-      <h2>7. Analytics</h2>
-      <p>We use <strong>Plausible Analytics</strong>, an EU-based, EU-hosted analytics service, as our only website measurement tool. We do not use Google Analytics.</p>
-      <p>Plausible stores nothing on your device. It counts a visit by generating a one-way hash from your IP address, browser type, and our domain name, combined with a secret that is destroyed every 24 hours — so the same visitor cannot be recognised across days and no profile of you is ever built. We see aggregate counts of pages, referrers, and countries; we cannot see individuals.</p>
-      <p>We rely on our legitimate interest in understanding how our website is used (Article 6(1)(f) GDPR), and we have documented our assessment that this processing has a minimal effect on your privacy. You may object to it by contacting us at <a href="mailto:privacy@openmined.org">privacy@openmined.org</a>, or by using your browser’s or an extension’s blocking tools.</p>
-
-      <hr class="legal-rule" />
-      <h2>8. Email Communications</h2>
-      <p>Every marketing email we send includes a visible unsubscribe link, as required by law and supported by our email platform, HubSpot.</p>
-      <p>You may also ask to be removed from our communications by contacting <a href="mailto:privacy@openmined.org">privacy@openmined.org</a>.</p>
-
-      <hr class="legal-rule" />
-      <h2>9. Slack and Community Platforms</h2>
+      <h2>6. Slack and Community Platforms</h2>
       <p>By accepting an invite to our Slack workspace or participating in related programs, you acknowledge and consent to receive communication related to your involvement. Slack participation is considered an opt-in to community updates unless you indicate otherwise.</p>
-      <p>Slack is operated by Slack Technologies, LLC, a Salesforce company, and your use of it is also subject to Slack’s own privacy policy.</p>
 
       <hr class="legal-rule" />
-      <h2>10. Donations and Payments</h2>
-      <p>Donations are processed by <strong>Stripe</strong>. When you donate, you are taken to a payment page hosted by Stripe, where you enter your card details directly.</p>
-      <p><strong>Your card details never reach our website or our servers.</strong> We do not load Stripe’s scripts on our own pages, so no Stripe cookie is set while you are browsing openmined.org. We receive from Stripe only what we need to acknowledge and account for your gift: your name, email address, the amount, and the currency.</p>
-      <p>Stripe processes your payment information as its own controller, under <a href="https://stripe.com/privacy">Stripe’s privacy policy</a>.</p>
+      <h2>7. Cookies and Analytics</h2>
+      <p>We use cookies and similar tracking technologies on our website. These include:</p>
+      <ul>
+        <li>Google Analytics</li>
+        <li>Plausible Analytics</li>
+        <li>Bitly links and UTM parameters</li>
+        <li>Custom tracking tools used for campaign measurement</li>
+      </ul>
+      <p>You can manage your cookie preferences in your browser settings. Some services we use may also provide individual opt-out tools.</p>
 
       <hr class="legal-rule" />
-      <h2>11. Job Applications</h2>
-      <p>Open roles on our careers page are listed, and applications are received, through <strong>Workable</strong>, our recruitment platform. When you view our careers page, your browser requests the current list of roles from Workable; when you apply, you do so on Workable’s site, and the information you submit — including your CV and any answers you provide — is processed there on our behalf.</p>
-      <p>We use that information to assess your application, and we retain it only as long as needed for the recruitment process and any follow-up we have told you about.</p>
-
-      <hr class="legal-rule" />
-      <h2>12. Data Sharing and Service Providers</h2>
+      <h2>8. Data Sharing</h2>
       <p>We do not sell or rent your personal information.</p>
-      <p>We share data with the following service providers, who process it on our behalf and only on our instructions:</p>
+      <p>We may share your data with:</p>
       <ul>
-        <li><strong>Amazon Web Services</strong> — website hosting and content delivery</li>
-        <li><strong>HubSpot</strong> — forms, email, and contact management</li>
-        <li><strong>Google Workspace</strong> — our email</li>
-        <li><strong>Plausible Analytics</strong> — aggregate website measurement</li>
-        <li><strong>Workable</strong> — recruitment</li>
+        <li>Service providers who help us operate our website, email, or analytics (e.g., WP Engine, HubSpot, Gmail)</li>
+        <li>Legal or regulatory authorities if required to comply with law</li>
+        <li>Team members and contractors under confidentiality obligations, strictly for operations</li>
       </ul>
-      <p>Two services we use also handle your data for their own purposes, as independent controllers under their own privacy policies:</p>
-      <ul>
-        <li><strong>Stripe</strong> — payment processing and fraud prevention, as described in section 10</li>
-        <li><strong>Slack</strong> — operating the workspace itself, as described in section 9</li>
-      </ul>
-      <p>We may also share data with legal or regulatory authorities where required by law, and with team members and contractors under confidentiality obligations, strictly for operations.</p>
       <p>We do not publish contributor license agreements, but may share them privately with third parties to demonstrate that we have secured intellectual property rights in contributions to our projects.</p>
 
       <hr class="legal-rule" />
-      <h2>13. Data Security</h2>
-      <p>We use reasonable administrative, technical, and physical safeguards to protect your information. Our website is hosted on Amazon Web Services and served over HTTPS; our contact and email data is held in HubSpot and Google Workspace, with access restricted to authorized personnel.</p>
+      <h2>9. Data Security</h2>
+      <p>We use reasonable administrative, technical, and physical safeguards to protect your information. Our data is hosted securely via WP Engine and HubSpot, with access restricted to authorized personnel.</p>
       <p>No method of transmission over the Internet or electronic storage is 100% secure, and we cannot guarantee absolute security.</p>
 
       <hr class="legal-rule" />
-      <h2>14. International Data Transfers</h2>
-      <p>Because we operate globally, your information may be processed outside your country of residence, including in the United States and the United Kingdom.</p>
-      <p>If you are located in the European Economic Area (EEA) or the United Kingdom, we comply with GDPR and UK GDPR, and we rely on appropriate safeguards for transfers — including the EU-US Data Privacy Framework and, where applicable, Standard Contractual Clauses with our service providers.</p>
+      <h2>10. International Data Transfers</h2>
+      <p>Because we operate globally, your information may be processed outside of your country of residence, including in the United States and the United Kingdom.</p>
+      <p>If you are located in the European Economic Area (EEA) or United Kingdom, we comply with GDPR and applicable data protection laws, including using appropriate safeguards when transferring data.</p>
 
       <hr class="legal-rule" />
-      <h2>15. Your Rights</h2>
+      <h2>11. Your Rights</h2>
       <p>Depending on your jurisdiction, you may have the following rights:</p>
       <ul>
         <li>Access or request a copy of your personal data</li>
         <li>Request correction or deletion of your data</li>
-        <li>Withdraw consent or object to processing, including our analytics</li>
+        <li>Withdraw consent or object to processing</li>
         <li>Request that we restrict use of your information</li>
-        <li>Request that we transfer your data to another provider</li>
-        <li>Lodge a complaint with your local data protection authority</li>
       </ul>
       <p>To exercise your rights, email <a href="mailto:privacy@openmined.org">privacy@openmined.org</a>. We will respond within 30 days, as required by law.</p>
 
       <hr class="legal-rule" />
-      <h2>16. Retention of Data</h2>
-      <p>We retain your data only as long as necessary to fulfill the purposes described in this policy, unless a longer period is required by law. Our analytics data is aggregate and contains nothing that identifies you.</p>
+      <h2>12. Retention of Data</h2>
+      <p>We retain your data only as long as necessary to fulfill the purposes described in this policy, unless a longer period is required by law.</p>
 
       <hr class="legal-rule" />
-      <h2>17. Children’s Privacy</h2>
-      <p>Our website and community are not intended for children under the age of 16. We do not knowingly collect data from children. If you believe a child has submitted personal information to us, please contact us immediately.</p>
+      <h2>13. Children’s Privacy</h2>
+      <p>Our website and community are not intended for children under the age of 13. We do not knowingly collect data from children. If you believe a child has submitted personal information to us, please contact us immediately.</p>
 
       <hr class="legal-rule" />
-      <h2>18. Changes to This Policy</h2>
+      <h2>14. Changes to This Policy</h2>
       <p>We may update this Privacy Policy occasionally. When we do, we’ll update the “Last Updated” date at the top. Significant changes will be communicated via our website or email.</p>
 
       <hr class="legal-rule" />
-      <h2>19. Contact Us</h2>
+      <h2>15. Contact Us</h2>
       <p>If you have any questions or concerns about this Privacy Policy, or how we use your data, please contact:</p>
       <p>OpenMined Privacy Team<br />📧 <a href="mailto:privacy@openmined.org">privacy@openmined.org</a></p>
     </div>

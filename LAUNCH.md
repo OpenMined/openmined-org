@@ -450,7 +450,7 @@ closed by other work, and one of its premises about tracking was wrong (§4).
 
 ---
 
-## 🟡 Launch decisions — §4/§5/§6 all settled
+## 🟡 Launch decisions — §4/§5 settled, §6 outstanding
 
 Grounding for §4–§6: the 2026-08-11 analytics/privacy/GDPR research, in the
 palace at `clients/omd/research/2026-08-11-web-analytics-privacy-tracking.md`
@@ -493,10 +493,9 @@ the record is in the palace note, not here: GA4 ungated, Plausible twice, a
 legacy HubSpot embed whose banner never loads, and a dead "Cookie Settings"
 button. None of it is a pattern to port.
 
-**Still to do:**
+**Still to do, and neither is code:**
 
-1. ~~**Privacy policy** rewritten to match the shipped stack~~ — **landed
-   2026-09-02** (§6).
+1. **Privacy policy** rewritten to match the shipped stack (§6).
 2. **HubSpot GDPR form fields** — portal-level enable, then a consent type chosen
    **per form** (32 form ids are embedded here). Only forms that feed marketing
    need an opt-in checkbox; inquiry forms need a notice. ⚠ Portal 6487402 is
@@ -522,34 +521,14 @@ list them in the privacy policy. Submission-side behaviour (a contact is created
 and deduped by email when no tracking cookie exists) is documented and
 staff-confirmed, not probe-tested — testing it would inject junk contacts.
 
-⚠ **Correction, 2026-09-02 — the storage half of that sentence is cold-load
-only.** The theme switch writes `localStorage.theme`
-(`Base.astro → .js-switch-theme` click handler; the pre-stylesheet init script
-only *reads* it), so a visitor who toggles the theme leaves one key behind. The
-2026-08-11 probe never clicked the toggle, which is why it saw an empty store.
-**Bannerlessness is unaffected** — a user-set display preference is the textbook
-Art 5(3) "strictly necessary / explicitly requested" exemption, the same class as
-a language selector — but the site does not store *nothing*, and the privacy
-policy discloses this key rather than claiming an empty device (§6).
-
-- ~~**Known leak, 4 posts**~~ — **fixed 2026-09-02.** Those 4 posts (5 iframes)
-  embedded `youtube.com/embed` and set YouTube cookies on page load. All five now
-  use `youtube-nocookie.com/embed` — same player, same video ids, no cookies
-  until a visitor presses play. **Measured 2026-09-02** with a cold-load probe
-  (fresh browser context per page, 4s settle) across all four posts: **zero
-  cookies, empty local/sessionStorage**. So this was the last thing standing
-  between the site and zero cookies on load, and the sentence above now holds as
-  written. Guard it with the cold-load assertion below — a future post pasted
-  from WordPress will carry the plain domain again.
-
-  **What `nocookie` does NOT fix:** the same probe shows those posts still
-  reaching Google at page load, so the visitor's IP goes to Google without
-  consent — the *identical* exposure this section's Google-Fonts bullet treats as
-  actionable. Cookies were the launch concern and they are closed; the request is
-  post-launch polish, so **the remaining work moved to `BACKLOG.md` §28** on
-  2026-09-02 and does not live here. It is why the guard below should assert on
-  third-party *requests* rather than cookies alone: a cookie-only view calls
-  these four posts clean.
+- **Known leak, 4 posts** (re-confirmed 2026-08-17: 4 posts embed
+  `youtube.com/embed`, none on `youtube-nocookie`). Those iframes set YouTube
+  cookies on load. Fix by swapping to `youtube-nocookie.com/embed` (same player,
+  no cookies until play) or a click-to-load facade. Find them with a search for
+  `youtube.com/embed` under `src/content/`. **This is the only thing standing
+  between the site and genuinely zero cookies** — and while it stands, the
+  zero-cookie sentence above is not literally true, which matters because it is
+  the basis for shipping without a banner. Worth doing before launch.
 - **The homepage's Google-hosted webfont — fixed 2026-08-21.** `DiamondEmbed.astro`
   used to inject two preconnects and a Google Fonts stylesheet at runtime for
   **Sometype Mono**, its label font, on the two pages carrying the embed (`/` via
@@ -576,61 +555,52 @@ policy discloses this key rather than claiming an empty device (§6).
 - **Guard worth building:** assert that no page sets cookies on a cold load, so
   bannerlessness can't silently break. Nothing checks this today. Worth widening
   to third-party *requests* rather than cookies alone — a cookie-only assertion
-  would not have caught the Google Fonts call above, and `BACKLOG.md` §28 is a
-  live example it would miss. One thing it must get right on our own side:
-  **allowlist `localStorage.theme` by name** rather than asserting an empty store
-  (the correction above).
+  would not have caught the Google Fonts call above.
 
-### 6. Privacy-policy page rewrite — DONE (2026-09-02)
+### 6. Privacy-policy page rewrite
 
-**Shipped.** `src/pages/privacy-policy.astro` now describes the stack this site
-actually runs. Its header docblock carries the clause → surface map, so a future
-stack change can find the line it invalidates; the rationale is here.
+`src/pages/privacy-policy.astro` still names **Google Analytics** and **WP
+Engine** as host, and treats cookies as current practice — all wrong at cutover
+(re-confirmed 2026-08-17). Rewrite to match what actually ships (§4 is settled,
+so this is no longer conditional):
 
-What the WordPress-era text got wrong, and what replaced it: **Google Analytics**
-and **WP Engine** are gone (the page now says plainly that we do not use Google
-Analytics, since the over-claim was the confusing part); hosting is **AWS**;
-**Plausible** is named as the sole analytics with the Art 6(1)(f)
-legitimate-interest basis written out, which is the record that replaces a
-consent banner; the cookie section discloses what is actually set. **Stripe got a
-section it had never had** — the site took donations while the policy named no
-payment processor, and of everything wrong here that was the one that mattered
-legally. **Workable** got one too. Section count went 15 → 19; **Bitly** came out
-(it is an email/social tool, and the live page listed it as a *website*
-collection method, which the website never did).
+- **hosting on AWS** — Amplify Hosting fronted by CloudFront, in the OpenMined
+  AWS account;
+- **Plausible as the sole analytics**, plus the written legitimate-interest
+  record that replaces a consent banner;
+- a **cookie/storage disclosure** stating the site sets no cookies of its own —
+  only third-party strictly-necessary `__cf_bm` on HubSpot's domains, and the
+  YouTube embeds in §5 until those are fixed;
+- **no Google clause** — the homepage's Google-hosted webfont was self-hosted
+  2026-08-21 (§5), so Google receives nothing and the policy should name it
+  nowhere;
+- **HubSpot forms** and the in-form consent basis;
+- **Workable** for job applications.
 
-Two disclosures are worth not re-deriving, because both look like mistakes:
+Worth an hour of EU counsel review against the research.
 
-- **The theme preference is disclosed, not hidden.** §5's correction explains
-  why — the site does write one `localStorage` key. Claiming an empty device
-  would have been the easy sentence and a false one.
-- **YouTube is still named** even though the embeds moved to `nocookie`
-  (§5), because the page-load request reaches Google and pressing play still sets
-  Google's cookies. The clause says exactly that rather than implying the embeds
-  are inert, and it can tighten to play-time only once `BACKLOG.md` §28 lands.
+**Also missing entirely, not just wrong: Stripe.** The site takes donations
+through Stripe Checkout and the policy names no payment processor at all. The
+policy currently *over*claims analytics (it lists Google Analytics and Plausible,
+and only one ships) and *under*claims payments — **the second is the one that
+matters legally**, so if only one thing gets fixed, fix that.
 
-**Two things deliberately absent.** No **Art 27 EU representative** clause —
-none is appointed, and naming a contact for representative matters would imply
-one exists (client-confirmed 2026-09-02). No **in-form consent** language — the
-HubSpot GDPR fields in §4 are still not enabled, and a policy describing a
-checkbox nobody sees is worse than one that waits. Add that sentence when the
-portal change lands.
+**This is now live and wrong, not pending-and-wrong** (verified against
+`https://openmined.org/privacy-policy/`, 2026-08-20): the page still names Google
+Analytics and WP Engine, and mentions Stripe and Workable zero times each.
 
-**Children's age moved 13 → 16.** Live used the COPPA line; GDPR Art 8 sets it
-between 13 and 16 by member state, and 16 covers every state without
-per-country wording. Client's call, 2026-09-02.
+**Sequencing — draft this last.** Three fixes change what the policy has to
+disclose, so drafting before they land means drafting twice. One is done:
 
-**⚠ Open, and the one gap the page ships with:** §1 carries no registered entity
-name or postal address, which GDPR Art 13(1)(a) asks for. Requested from the
-client 2026-09-02; a `TODO(client)` in the page header marks the insertion point.
-Everything else on this list is closed.
+- ~~`BACKLOG.md` §22's commit deletes `DiamondEmbed.astro → ensureFont()`~~ —
+  **landed 2026-08-21.** The Google Fonts request is gone, and with it the "Google
+  as a recipient of visitor IP addresses" clause this section used to condition on
+  §5. One input down.
+- The HubSpot embed is now deferred (`AGENTS.md → Forms`), which changes *when* `__cf_bm` is
+  set (only once a visitor reaches a form) rather than whether it is.
 
-**Still worth an hour of EU counsel review** against the research — the questions
-that earn the hour are the legitimate-interest basis for cookieless analytics
-(including the EDPB 2/2023 grey area the research documents), the
-controller/processor split with Stripe and Workable, and the two absences above.
-The brief to send: the palace's 2026-09-01 rewrite-draft note plus the 2026-08-11
-analytics/privacy research.
+The YouTube embeds in §5 are the third input and are still open. Draft once the
+two remaining ones are settled; the disclosure list is stable after that.
 
 ---
 
@@ -678,8 +648,7 @@ day.
   it had to ship before cutover still stands — Plausible runs on the WordPress
   site too, so it is the one tool that can tell the before/after story across the
   switch.
-- ✅ **Privacy policy** matches the shipped stack — rewritten 2026-09-02 (§6),
-  with §1's entity details the one gap still open.
+- **Privacy policy** matches the shipped stack (§6).
 - **No WordPress hotlinks** — nothing loads an asset from
   `https://openmined.org/wp-content/…`. These resolve only while that host is
   still WordPress and break the instant the origin repoints, and
