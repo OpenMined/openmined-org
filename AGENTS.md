@@ -502,6 +502,38 @@ Guarded by `npm run audit:overflow`. Three traps it exists for:
   content's min-content width. Use `minmax(0, 1fr)` for any grid that must
   survive a narrow column.
 
+## Deploy routes
+
+Merging is the deploy (README → Deploy). There are two routes and the **PR's
+base branch is the whole choice** — nothing else is selected anywhere. Pick the
+route yourself from the diff, and **always say which one you picked and why**
+before opening the PR, so the choice is never silent.
+
+- **Content-only → PR into `main` (quick road).** Every changed file is under
+  `src/content/`, `src/data/`, `public/`, or is a root `*.md`. Blog posts,
+  frontmatter, copy, links, images, registries, docs. Production is live about
+  four minutes after the merge. `gh pr create --base main`.
+- **Anything else → PR into `staging` (normal road).** Components, styles,
+  layouts, `astro.config.mjs`, `scripts/`, `.github/`, `amplify.yml`. Reviewed
+  on the staging site, then promoted `staging → main`. `gh pr create --base
+  staging` (the default, as `staging` is the default branch).
+- **Urgent production bug fix in code** may take the quick road. Say so
+  explicitly, add the `hotfix` label so the `Route check` workflow passes, and
+  keep the diff to the fix.
+
+When unsure, take the normal road — a wrong choice in the slow direction costs
+minutes; the `Route check` workflow exists to catch the other direction.
+
+**Quick-road close-out.** After a merge into `main`, open the catch-up PR so
+`staging` includes the fix: `gh pr create --base staging --head main`. Catch-up
+and promotion PRs are merged with a **merge commit, never squash or rebase** —
+a squash rewrites the commits and the two branches diverge permanently.
+
+**Branch from the route's base.** Quick-road branches start at `origin/main`,
+normal-road branches at `origin/staging`, and neither sets an upstream
+(`git checkout -b <name> origin/<base> --no-track`), so an accidental push
+targets nothing.
+
 ## Gates
 
 - `npm run check` — `astro check`, the type gate. CI runs it on every push.
