@@ -1,0 +1,50 @@
+---
+/**
+ * StreamSwoop — the animated rainbow stream (StreamEmbed) in HeroSwoop's
+ * position: full-bleed, bottom-anchored under a SimpleHero, zero layout
+ * height, at --z-below so hero content and following sections paint above.
+ *
+ * Geometry: the stream renders at a 2:1 aspect (height = 50vw), far taller
+ * than the swoop raster (288/1024 ≈ 0.28), so the default bleed pushes more
+ * of it below the hero edge — bleed 0.7 leaves a visible band of
+ * 50vw × 0.3 ≈ the same strip the static swoop showed at 0.45. The hidden
+ * remainder sits behind the next section's background, same as HeroSwoop.
+ *
+ * Perf: StreamEmbed carries its own guards (init gated on first paint + two
+ * on-time frames; one static frame on software renderers / reduced motion) —
+ * see its header and AGENTS.md → WebGL embeds. Desktop-only like HeroSwoop
+ * (hidden ≤991px), which also keeps phones from paying for a GL context.
+ */
+import StreamEmbed from '@components/graphics/StreamEmbed.astro';
+
+interface Props {
+  /** Unique per page — the embed div's id. */
+  id: string;
+  /** Fraction of the stream's height pushed below the hero's bottom edge. */
+  bleed?: number;
+}
+const { id, bleed = 0.7 } = Astro.props;
+---
+
+<div class="stream-swoop" aria-hidden="true" data-fade style={`--stream-bleed:${bleed};`}>
+  <StreamEmbed id={id} />
+</div>
+
+<style>
+  .stream-swoop {
+    position: absolute;
+    width: 100vw;
+    left: 50%;
+    margin-left: -50vw;
+    bottom: 0;
+    z-index: var(--z-below);
+    pointer-events: none;
+    /* the stream is 2:1 — height 50vw; push bleed × that below the hero edge */
+    transform: translateY(calc(100vw / 2 * var(--stream-bleed)));
+  }
+
+  /* desktop-only, matching HeroSwoop */
+  @media (max-width: 991px) {
+    .stream-swoop { display: none; }
+  }
+</style>
