@@ -6,7 +6,8 @@
  *
  * Copy verbatim from the program's source doc (the "Fellows Bio" doc);
  * theme names + framing questions from the fellowship Welcome Packet.
- * Band archetype: swooped hero (the foundation.astro treatment) → intro (dim)
+ * Band archetype: hero with the animated stream (StreamEmbed via
+ * StreamSwoop, the home hero's graphic in the swoop position) → intro (dim)
  * → themes ledger (the HomeFederatedNetwork bordered-rows device) → cohort
  * roster (editorial rows, grayscale portraits — the page's bold element) →
  * form CTA.
@@ -17,9 +18,9 @@
  */
 import Page from '@layouts/Page.astro';
 import SimpleHero from '@components/sections/hero/SimpleHero.astro';
-import HeroSwoop from '@components/graphics/HeroSwoop.astro';
+import StreamSwoop from '@components/graphics/StreamSwoop.astro';
 import ContentSection from '@components/sections/ContentSection.astro';
-import ResearchThemes from '@components/sections/features/ResearchThemes.astro';
+import IconCard from '@elements/IconCard.astro';
 import CtaSection from '@components/sections/cta/CtaSection.astro';
 import FormEmbed from '@elements/FormEmbed.astro';
 import ResearchCohort from '@components/sections/people/ResearchCohort.astro';
@@ -32,11 +33,11 @@ import Button from '@ui/Button.astro';
 const themesFootnote =
   'These themes are intended as a starting point for collaboration rather than a fixed research agenda. One goal for the inaugural cohort is to shape this agenda together and identify the questions that deserve sustained attention over the coming years.';
 const themes = [
-  { title: 'Protocols, Networks & Power', question: 'How can technical infrastructure distribute rather than concentrate power?' },
-  { title: 'Secure Audits & Institutional Design', question: 'How should increasingly powerful AI systems be evaluated and governed?' },
-  { title: 'Emerging AI Architectures', question: 'How will new AI architectures change governance?' },
-  { title: 'Copyright & the Value of Data', question: 'How should society understand ownership and economic value in the AI era?' },
-  { title: 'Alternative Ownership, Governance & Business Models', question: 'What alternatives exist to conventional models of technology ownership and control?' },
+  { icon: 'network', title: 'Protocols, Networks & Power', question: 'How can technical infrastructure distribute rather than concentrate power?' },
+  { icon: 'search-check', title: 'Secure Audits & Institutional Design', question: 'How should increasingly powerful AI systems be evaluated and governed?' },
+  { icon: 'core-concepts', title: 'Emerging AI Architectures', question: 'How will new AI architectures change governance?' },
+  { icon: 'scale', title: 'Copyright & the Value of Data', question: 'How should society understand ownership and economic value in the AI era?' },
+  { icon: 'handshake', title: 'Alternative Ownership, Governance & Business Models', question: 'What alternatives exist to conventional models of technology ownership and control?' },
 ];
 
 // The inaugural cohort — bios verbatim from the program's source doc.
@@ -92,7 +93,7 @@ const cohort = [
       <Button href="#cohort">Meet the fellows</Button>
       <Button variant="outline" href="#contact">Get in touch</Button>
     </Fragment>
-    <HeroSwoop slot="swoop" src="/images/om-flow-hero.png" width={1024} height={288} />
+    <StreamSwoop slot="swoop" id="stream-embed-research" />
   </SimpleHero>
 
   <!-- The fellowship announcement -->
@@ -103,18 +104,26 @@ const cohort = [
     </div>
   </ContentSection>
 
-  <!-- Research themes — the ledger -->
+  <!-- Research themes — icon cards; 3-up row then 2 wider, so five items
+       compose deliberately instead of orphaning a short last row -->
   <ContentSection
     eyebrow="Research Themes"
     as="h4"
-    width="col-8"
+    width="col-10"
     align="left"
     headGap="tight"
     heading="Five areas of interest"
     intro="The fellowship is broadly organized around five areas of interest."
     introMeasure="45em"
   >
-    <ResearchThemes themes={themes} footnote={themesFootnote} />
+    <div class="themes-grid">
+      {themes.map((t) => (
+        <IconCard icon={t.icon} title={t.title} surface="dim" layout="stacked">
+          <p>{t.question}</p>
+        </IconCard>
+      ))}
+    </div>
+    <p class="themes-note measure" style="--measure: 52em;">{themesFootnote}</p>
   </ContentSection>
 
   <!-- The inaugural cohort -->
@@ -135,3 +144,35 @@ const cohort = [
     </CtaSection>
   </div>
 </Page>
+
+<style>
+  /* ── Research themes grid ──────────────────────────────────────────
+     Five cards composed on a 6-track grid: three across the top (span 2),
+     two wider beneath (span 3) — a deliberate 3/2 composition instead of a
+     grid that orphans a short last row. Children are component roots, so
+     the selectors reach them via :global. */
+  .themes-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: var(--spacing-XL);
+  }
+  .themes-grid > :global(.icon-card) { grid-column: span 2; }
+  .themes-grid > :global(.icon-card:nth-child(n + 4)) { grid-column: span 3; }
+
+  .themes-note {
+    margin: var(--spacing-2XL) 0 0;
+    color: var(--text-subtle);
+  }
+
+  @media (max-width: 991px) {
+    .themes-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .themes-grid > :global(.icon-card),
+    .themes-grid > :global(.icon-card:nth-child(n + 4)) { grid-column: auto; }
+    /* five cards on two tracks: the last spans both, so no half-empty row */
+    .themes-grid > :global(.icon-card:nth-child(5)) { grid-column: span 2; }
+  }
+  @media (max-width: 767px) {
+    .themes-grid { grid-template-columns: 1fr; }
+    .themes-grid > :global(.icon-card:nth-child(5)) { grid-column: auto; }
+  }
+</style>
