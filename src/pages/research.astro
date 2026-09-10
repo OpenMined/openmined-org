@@ -208,6 +208,23 @@ const cohort = [
     color: var(--text-subtle);
   }
 
+  /* ── Contact form: labels hidden, placeholders carry the field names ──
+     Scoped to this page's form only (the site-wide .hs-form skin keeps
+     labels). Visually hidden, not display:none, so screen readers still get
+     each field's name; error labels (.hs-error-msgs) stay fully visible.
+     The career-stage dropdown has no placeholder attribute — its unselected
+     option text is set to "Career stage" in the form definition instead. */
+  #contact :global(.hs-form .hs-form-field > label:not(.hs-error-msg)) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
   @media (max-width: 991px) {
     .themes-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .theme-card,
