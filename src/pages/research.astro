@@ -32,12 +32,16 @@ import Button from '@ui/Button.astro';
 // prescribed agenda).
 const themesFootnote =
   'These themes are intended as a starting point for collaboration rather than a fixed research agenda. One goal for the inaugural cohort is to shape this agenda together and identify the questions that deserve sustained attention over the coming years.';
+// Theme icons are the Iconoir TRIAL SET (`iconoir-*` files in @assets/icons —
+// 1.5px strokes vs the site set's 2px): this page pilots the set before any
+// site-wide switch. If the trial is adopted, drop the prefix and migrate the
+// whole icon folder; if not, delete the five prefixed files with this usage.
 const themes = [
-  { icon: 'network', title: 'Protocols, Networks & Power', question: 'How can technical infrastructure distribute rather than concentrate power?' },
-  { icon: 'search-check', title: 'Secure Audits & Institutional Design', question: 'How should increasingly powerful AI systems be evaluated and governed?' },
-  { icon: 'core-concepts', title: 'Emerging AI Architectures', question: 'How will new AI architectures change governance?' },
-  { icon: 'scale', title: 'Copyright & the Value of Data', question: 'How should society understand ownership and economic value in the AI era?' },
-  { icon: 'handshake', title: 'Alternative Ownership, Governance & Business Models', question: 'What alternatives exist to conventional models of technology ownership and control?' },
+  { icon: 'iconoir-network', title: 'Protocols, Networks & Power', question: 'How can technical infrastructure distribute rather than concentrate power?' },
+  { icon: 'iconoir-doc-magnifying-glass', title: 'Secure Audits & Institutional Design', question: 'How should increasingly powerful AI systems be evaluated and governed?' },
+  { icon: 'iconoir-cpu', title: 'Emerging AI Architectures', question: 'How will new AI architectures change governance?' },
+  { icon: 'iconoir-copyright', title: 'Copyright & the Value of Data', question: 'How should society understand ownership and economic value in the AI era?' },
+  { icon: 'iconoir-community', title: 'Alternative Ownership, Governance & Business Models', question: 'What alternatives exist to conventional models of technology ownership and control?' },
 ];
 
 // The inaugural cohort — bios verbatim from the program's source doc.

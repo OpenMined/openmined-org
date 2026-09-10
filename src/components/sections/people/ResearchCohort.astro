@@ -6,11 +6,10 @@
  * research institution's roster. Data lives in the page (research.astro) —
  * this file owns only the presentation.
  *
- * Portraits take the SpeakerRoster grayscale treatment scaled up — the
- * site's one established photo language — with color restored on hover
- * (filter-only, so `prefers-reduced-motion` needs no carve-out: nothing
- * moves). Crops happen in CSS (`object-fit: cover`); source files keep
- * their native aspect per the images rule.
+ * Portraits render in full color (decided 2026-09-10 — a hover reveal was
+ * tried and cut: no functionality sat behind it, so the interaction promised
+ * more than it delivered). Crops happen in CSS (`object-fit: cover`); source
+ * files keep their native aspect per the images rule.
  *
  * Hairlines divide people within a group; groups open with a heading over a
  * strong rule (the .section-divider language). Names balance and bios wrap
@@ -80,10 +79,7 @@ const { groups } = Astro.props;
     height: 200px;
     object-fit: cover; /* crop in CSS — sources keep native aspect (images rule) */
     border-radius: var(--border-radius-S);
-    filter: grayscale(100%);
-    transition: filter var(--transition-base);
   }
-  .cohort__person:hover .cohort__photo { filter: grayscale(0%); }
 
   .cohort__text h4 {
     margin: 0 0 var(--spacing-XS);
