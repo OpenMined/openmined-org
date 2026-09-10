@@ -41,7 +41,7 @@ const { groups } = Astro.props;
         <h3>{g.heading}</h3>
         <div class="cohort__people">
           {g.people.map((p) => (
-            <article class="cohort__person">
+            <article class="cohort__person" data-reveal>
               <img class="cohort__photo" src={p.photo} alt={`Portrait of ${p.name}`} width="200" height="200" loading="lazy" data-fade />
               <div class="cohort__text">
                 <h4>{p.name}</h4>
