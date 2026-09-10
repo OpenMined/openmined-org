@@ -91,6 +91,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: 'Home', href: '/' },
   { label: 'Foundation', href: '/foundation/' },
+  { label: 'Research', href: '/research/' },
   { label: 'Blog', href: '/blog/' },
   { label: 'Careers', href: '/careers/' },
   {
@@ -559,9 +560,20 @@ const socials = [
        right cluster — revealed menu, colormode toggle, burger — is aligned to
        the right in the available space. */
     .site-header--simple .site-header__logo { order: 1; margin-right: auto; }
-    /* Nav collapsed by default; reappears inline (in place, right-aligned) when open. */
+    /* Nav collapsed by default; reappears inline (in place, right-aligned) when open.
+       The revealed row WRAPS: this variant spends ~36px more of the bar than the
+       default header (the always-visible burger), so the full nav that just fits
+       inline at 992 in the default chrome overflows here — measured +33px at 992
+       when Research became the 7th item. Wrapping is boundary-free (no magic
+       width to land wrong on); the trailing cluster drops to a second right-
+       aligned line only while the menu is open at widths where it must. */
     .site-header--simple .site-header__nav { display: none; order: 2; }
-    .site-header--simple[data-nav-open] .site-header__nav { display: flex; }
+    .site-header--simple[data-nav-open] .site-header__nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      row-gap: var(--spacing-S);
+    }
     /* Colormode toggle stays in its normal absolute top-right corner spot (base
        .site-header__theme-corner) — out of the flex flow, so it doesn't sit in
        the menu cluster. No override needed here beyond the burger placement. */
