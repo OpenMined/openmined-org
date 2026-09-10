@@ -1,19 +1,28 @@
 ---
 /**
- * ResearchCohort — the /research/ fellows roster: grouped people cards with
- * headshot + name + full bio. Page-specific section (the [Page]-prefixed
- * convention); the data lives in the page and comes through as props, so the
- * copy has one home (research.astro) and this file owns only the presentation.
+ * ResearchCohort — the /research/ roster, and the page's one bold element:
+ * per-person editorial rows (portrait column | name + affiliation + bio)
+ * rather than a card grid, so each fellow reads like a directory entry in a
+ * research institution's roster. Data lives in the page (research.astro) —
+ * this file owns only the presentation.
  *
- * Layout: each group is an h3 + a 2-up grid (1-up ≤767px, same collapse as
- * the careers values grid). A person is a stacked card — square headshot
- * cropped in CSS (object-fit: cover; the source files keep their native
- * aspect per the images rule), name, bio. Headshots render at 160px.
+ * Portraits take the SpeakerRoster grayscale treatment scaled up — the
+ * site's one established photo language — with color restored on hover
+ * (filter-only, so `prefers-reduced-motion` needs no carve-out: nothing
+ * moves). Crops happen in CSS (`object-fit: cover`); source files keep
+ * their native aspect per the images rule.
+ *
+ * Hairlines divide people within a group; groups open with a heading over a
+ * strong rule (the .section-divider language). Names balance and bios wrap
+ * pretty — the no-widows rule, enforced structurally.
  */
 interface Person {
   name: string;
   /** /images/research/<slug>.jpg — public/ path, served as-is. */
   photo: string;
+  /** One-line role + institution, fact-lifted from the bio. Omitted when the
+   *  bio names no institution — never invented. */
+  affiliation?: string;
   bio: string;
 }
 interface Group {
@@ -26,18 +35,21 @@ interface Props {
 const { groups } = Astro.props;
 ---
 
-<section class="cohort">
+<section class="cohort" id="cohort">
   <div class="container cohort__container">
     {groups.map((g) => (
       <div class="cohort__group">
         <h3>{g.heading}</h3>
-        <div class="cohort__grid">
+        <div class="cohort__people">
           {g.people.map((p) => (
-            <div class="cohort__person">
-              <img class="cohort__photo" src={p.photo} alt={`Portrait of ${p.name}`} width="160" height="160" loading="lazy" />
-              <h5>{p.name}</h5>
-              <p>{p.bio}</p>
-            </div>
+            <article class="cohort__person">
+              <img class="cohort__photo" src={p.photo} alt={`Portrait of ${p.name}`} width="200" height="200" loading="lazy" data-fade />
+              <div class="cohort__text">
+                <h4>{p.name}</h4>
+                {p.affiliation && <p class="cohort__affiliation">{p.affiliation}</p>}
+                <p class="cohort__bio measure" style="--measure: 42em;">{p.bio}</p>
+              </div>
+            </article>
           ))}
         </div>
       </div>
@@ -48,25 +60,47 @@ const { groups } = Astro.props;
 <style>
   .cohort { margin-block: var(--spacing-full); }
   .cohort__container { max-width: var(--col-10); }
-  .cohort__group + .cohort__group { margin-top: var(--spacing-4XL); }
-  .cohort__group h3 { margin-bottom: var(--spacing-2XL); }
-  .cohort__grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--spacing-4XL) var(--spacing-3XL);
-  }
-  .cohort__photo {
-    display: block;
-    width: 160px;
-    height: 160px;
-    object-fit: cover; /* crop in CSS — sources keep native aspect (AGENTS.md images rule) */
-    border-radius: var(--border-radius-S);
+  .cohort__group + .cohort__group { margin-top: var(--spacing-full); }
+  .cohort__group h3 {
     margin-bottom: var(--spacing-XL);
+    padding-bottom: var(--spacing-L);
+    border-bottom: var(--border-strong);
+    text-wrap: balance;
   }
-  .cohort__person h5 { margin-bottom: var(--spacing-S); }
-  .cohort__person p { margin: 0; }
+
+  .cohort__person {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: var(--spacing-3XL);
+    padding-block: var(--spacing-3XL);
+  }
+  .cohort__person + .cohort__person { border-top: var(--border-subtle); }
+
+  .cohort__photo {
+    width: 200px;
+    height: 200px;
+    object-fit: cover; /* crop in CSS — sources keep native aspect (images rule) */
+    border-radius: var(--border-radius-S);
+    filter: grayscale(100%);
+    transition: filter var(--transition-base);
+  }
+  .cohort__person:hover .cohort__photo { filter: grayscale(0%); }
+
+  .cohort__text h4 {
+    margin: 0 0 var(--spacing-XS);
+    text-wrap: balance;
+  }
+  .cohort__affiliation {
+    margin: 0 0 var(--spacing-XL);
+    color: var(--text-subtle);
+  }
+  .cohort__bio {
+    margin: 0;
+    text-wrap: pretty;
+  }
 
   @media (max-width: 767px) {
-    .cohort__grid { grid-template-columns: 1fr; gap: var(--spacing-3XL); }
+    .cohort__person { grid-template-columns: 1fr; gap: var(--spacing-XL); }
+    .cohort__photo { width: 160px; height: 160px; }
   }
 </style>
