@@ -1,0 +1,72 @@
+---
+/**
+ * ResearchCohort — the /research/ fellows roster: grouped people cards with
+ * headshot + name + full bio. Page-specific section (the [Page]-prefixed
+ * convention); the data lives in the page and comes through as props, so the
+ * copy has one home (research.astro) and this file owns only the presentation.
+ *
+ * Layout: each group is an h3 + a 2-up grid (1-up ≤767px, same collapse as
+ * the careers values grid). A person is a stacked card — square headshot
+ * cropped in CSS (object-fit: cover; the source files keep their native
+ * aspect per the images rule), name, bio. Headshots render at 160px.
+ */
+interface Person {
+  name: string;
+  /** /images/research/<slug>.jpg — public/ path, served as-is. */
+  photo: string;
+  bio: string;
+}
+interface Group {
+  heading: string;
+  people: Person[];
+}
+interface Props {
+  groups: Group[];
+}
+const { groups } = Astro.props;
+---
+
+<section class="cohort">
+  <div class="container cohort__container">
+    {groups.map((g) => (
+      <div class="cohort__group">
+        <h3>{g.heading}</h3>
+        <div class="cohort__grid">
+          {g.people.map((p) => (
+            <div class="cohort__person">
+              <img class="cohort__photo" src={p.photo} alt={`Portrait of ${p.name}`} width="160" height="160" loading="lazy" />
+              <h5>{p.name}</h5>
+              <p>{p.bio}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .cohort { margin-block: var(--spacing-full); }
+  .cohort__container { max-width: var(--col-10); }
+  .cohort__group + .cohort__group { margin-top: var(--spacing-4XL); }
+  .cohort__group h3 { margin-bottom: var(--spacing-2XL); }
+  .cohort__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacing-4XL) var(--spacing-3XL);
+  }
+  .cohort__photo {
+    display: block;
+    width: 160px;
+    height: 160px;
+    object-fit: cover; /* crop in CSS — sources keep native aspect (AGENTS.md images rule) */
+    border-radius: var(--border-radius-S);
+    margin-bottom: var(--spacing-XL);
+  }
+  .cohort__person h5 { margin-bottom: var(--spacing-S); }
+  .cohort__person p { margin: 0; }
+
+  @media (max-width: 767px) {
+    .cohort__grid { grid-template-columns: 1fr; gap: var(--spacing-3XL); }
+  }
+</style>
