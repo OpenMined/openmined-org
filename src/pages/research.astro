@@ -20,7 +20,7 @@ import Page from '@layouts/Page.astro';
 import SimpleHero from '@components/sections/hero/SimpleHero.astro';
 import StreamSwoop from '@components/graphics/StreamSwoop.astro';
 import ContentSection from '@components/sections/ContentSection.astro';
-import IconCard from '@elements/IconCard.astro';
+import Icon from '@elements/Icon.astro';
 import CtaSection from '@components/sections/cta/CtaSection.astro';
 import FormEmbed from '@elements/FormEmbed.astro';
 import ResearchCohort from '@components/sections/people/ResearchCohort.astro';
@@ -36,12 +36,15 @@ const themesFootnote =
 // 1.5px strokes vs the site set's 2px): this page pilots the set before any
 // site-wide switch. If the trial is adopted, drop the prefix and migrate the
 // whole icon folder; if not, delete the five prefixed files with this usage.
+// Theme artwork: a generated series in the brand hue families (source runs in
+// the marketing image-gen archive under research-page/), one motif per theme,
+// served from public/images/research/themes/.
 const themes = [
-  { icon: 'iconoir-network', title: 'Protocols, Networks & Power', question: 'How can technical infrastructure distribute rather than concentrate power?' },
-  { icon: 'iconoir-doc-magnifying-glass', title: 'Secure Audits & Institutional Design', question: 'How should increasingly powerful AI systems be evaluated and governed?' },
-  { icon: 'iconoir-cpu', title: 'Emerging AI Architectures', question: 'How will new AI architectures change governance?' },
-  { icon: 'iconoir-copyright', title: 'Copyright & the Value of Data', question: 'How should society understand ownership and economic value in the AI era?' },
-  { icon: 'iconoir-community', title: 'Alternative Ownership, Governance & Business Models', question: 'What alternatives exist to conventional models of technology ownership and control?' },
+  { icon: 'iconoir-network', art: '/images/research/themes/protocols-networks-power.jpg', title: 'Protocols, Networks & Power', question: 'How can technical infrastructure distribute rather than concentrate power?' },
+  { icon: 'iconoir-doc-magnifying-glass', art: '/images/research/themes/secure-audits.jpg', title: 'Secure Audits & Institutional Design', question: 'How should increasingly powerful AI systems be evaluated and governed?' },
+  { icon: 'iconoir-cpu', art: '/images/research/themes/emerging-architectures.jpg', title: 'Emerging AI Architectures', question: 'How will new AI architectures change governance?' },
+  { icon: 'iconoir-copyright', art: '/images/research/themes/copyright-value-data.jpg', title: 'Copyright & the Value of Data', question: 'How should society understand ownership and economic value in the AI era?' },
+  { icon: 'iconoir-community', art: '/images/research/themes/alternative-ownership.jpg', title: 'Alternative Ownership, Governance & Business Models', question: 'What alternatives exist to conventional models of technology ownership and control?' },
 ];
 
 // The inaugural cohort — bios verbatim from the program's source doc.
@@ -82,16 +85,21 @@ const cohort = [
   title="Research at OpenMined"
   description="The OpenMined Research Fellowship supports emerging leaders in academic research working on privacy-preserving AI and responsible governance — meet the inaugural cohort."
 >
+  {/* Display type is the program's name. The earlier mission-sentence heading
+      could not end in a two-word line at 390px at any reasonable size
+      ("responsible governance" is wider than the mobile measure), so the
+      no-orphans rule forced better copy, not a smaller font. */}
   <SimpleHero
     eyebrow="OpenMined Research"
     eyebrowItalic
-    heading={'Supporting the next generation of leaders in privacy-preserving AI and responsible governance'}
+    heading="The OpenMined Research Fellowship"
     headingMax={48}
     headingMeasure="20em"
     lede="The OpenMined Research Fellowship is a part-time fellowship program which supports emerging leaders in academic research as they pursue their PhDs through financial stipend, mentorship with OpenMined team members, opportunities to connect with the broader AI community, and supporting conference involvement."
     ledeMeasure="45em"
     contentWidth="col-10"
     contentGap="tight"
+    padBottom="calc(var(--spacing-max) * 2)"
   >
     <Fragment slot="actions">
       <Button href="#cohort">Meet the fellows</Button>
@@ -121,20 +129,27 @@ const cohort = [
     introMeasure="45em"
   >
     <div class="themes-grid">
-      {themes.map((t) => (
-        <IconCard icon={t.icon} title={t.title} surface="dim" layout="stacked">
-          <p>{t.question}</p>
-        </IconCard>
+      {themes.map((t, i) => (
+        <div class="theme-card" data-reveal data-reveal-delay={i * 70}>
+          <img class="theme-card__art" src={t.art} alt="" width="1400" height="786" loading="lazy" data-fade />
+          <div class="theme-card__body">
+            <div class="theme-card__head">
+              <Icon name={t.icon} size={20} class="theme-card__icon" />
+              <h5>{t.title}</h5>
+            </div>
+            <p>{t.question}</p>
+          </div>
+        </div>
       ))}
     </div>
-    <p class="themes-note measure" style="--measure: 52em;">{themesFootnote}</p>
+    <p class="themes-note measure" style="--measure: 52em;" data-reveal>{themesFootnote}</p>
   </ContentSection>
 
   <!-- The inaugural cohort -->
   <ResearchCohort groups={cohort} />
 
   <!-- Contact -->
-  <div id="contact">
+  <div id="contact" data-reveal>
     <CtaSection
       variant="gradient"
       icon={false}
@@ -160,8 +175,33 @@ const cohort = [
     grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: var(--spacing-XL);
   }
-  .themes-grid > :global(.icon-card) { grid-column: span 2; }
-  .themes-grid > :global(.icon-card:nth-child(n + 4)) { grid-column: span 3; }
+  .theme-card { grid-column: span 2; }
+  .theme-card:nth-child(n + 4) { grid-column: span 3; }
+
+  /* The card: generated series artwork as a banner, icon + title, question.
+     Art is CSS-cropped (aspect-ratio box + cover) per the images rule. */
+  .theme-card {
+    background-color: var(--surface-background-dim);
+    border-radius: var(--border-radius-S);
+    overflow: hidden;
+  }
+  .theme-card__art {
+    width: 100%;
+    height: auto; /* release the attribute height so aspect-ratio governs */
+    aspect-ratio: 16 / 6;
+    object-fit: cover;
+  }
+  .theme-card__body { padding: var(--spacing-2XL); }
+  .theme-card__head {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-M);
+    margin-bottom: var(--spacing-M);
+    color: var(--text-headline); /* currentColor for the icon */
+  }
+  .theme-card__head h5 { margin: 0; }
+  .theme-card__icon { flex: none; }
+  .theme-card__body p { margin: 0; }
 
   .themes-note {
     margin: var(--spacing-2XL) 0 0;
@@ -170,13 +210,13 @@ const cohort = [
 
   @media (max-width: 991px) {
     .themes-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .themes-grid > :global(.icon-card),
-    .themes-grid > :global(.icon-card:nth-child(n + 4)) { grid-column: auto; }
+    .theme-card,
+    .theme-card:nth-child(n + 4) { grid-column: auto; }
     /* five cards on two tracks: the last spans both, so no half-empty row */
-    .themes-grid > :global(.icon-card:nth-child(5)) { grid-column: span 2; }
+    .theme-card:nth-child(5) { grid-column: span 2; }
   }
   @media (max-width: 767px) {
     .themes-grid { grid-template-columns: 1fr; }
-    .themes-grid > :global(.icon-card:nth-child(5)) { grid-column: auto; }
+    .theme-card:nth-child(5) { grid-column: auto; }
   }
 </style>

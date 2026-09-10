@@ -4,11 +4,12 @@
  * position: full-bleed, bottom-anchored under a SimpleHero, zero layout
  * height, at --z-below so hero content and following sections paint above.
  *
- * Geometry: the stream renders at a 2:1 aspect (height = 50vw), far taller
- * than the swoop raster (288/1024 ≈ 0.28), so the default bleed pushes more
- * of it below the hero edge — bleed 0.7 leaves a visible band of
- * 50vw × 0.3 ≈ the same strip the static swoop showed at 0.45. The hidden
- * remainder sits behind the next section's background, same as HeroSwoop.
+ * Geometry: the stream renders at a 2:1 aspect (height = 50vw). Bleed 0.55
+ * mirrors the home hero's stream presence (bottom offset 0.59 there): the
+ * visible band above the hero's bottom edge is ~0.45 × 50vw, and the hero
+ * must RESERVE real space for it (padBottom on SimpleHero — the 8/2026
+ * lesson: a big bleed with no reserved space leaves the band "barely seen"
+ * under the next section's background).
  *
  * Perf: StreamEmbed carries its own guards (init gated on first paint + two
  * on-time frames; one static frame on software renderers / reduced motion) —
@@ -23,12 +24,35 @@ interface Props {
   /** Fraction of the stream's height pushed below the hero's bottom edge. */
   bleed?: number;
 }
-const { id, bleed = 0.7 } = Astro.props;
+const { id, bleed = 0.55 } = Astro.props;
 ---
 
-<div class="stream-swoop" aria-hidden="true" data-fade style={`--stream-bleed:${bleed};`}>
+<div class="stream-swoop" aria-hidden="true" data-fade style={`--stream-bleed:${bleed};`} data-stream-parallax>
   <StreamEmbed id={id} />
 </div>
+
+<script is:inline>
+  // Subtle scroll parallax: the stream drifts up slightly slower than the
+  // page (transform-only, rAF-throttled). Skipped under reduced motion and
+  // wherever the wrapper is display:none (≤991px — offsetParent is null).
+  (function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var el = document.querySelector('[data-stream-parallax]');
+    if (!el) return;
+    var inner = el.firstElementChild;
+    if (!inner) return;
+    var ticking = false;
+    function frame() {
+      ticking = false;
+      if (el.offsetParent === null) { inner.style.transform = ''; return; }
+      var y = Math.min(window.scrollY * 0.08, 160);
+      inner.style.transform = 'translateY(' + y.toFixed(1) + 'px)';
+    }
+    window.addEventListener('scroll', function () {
+      if (!ticking) { ticking = true; requestAnimationFrame(frame); }
+    }, { passive: true });
+  })();
+</script>
 
 <style>
   .stream-swoop {
