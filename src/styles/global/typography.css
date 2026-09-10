@@ -30,6 +30,18 @@ body {
 h1, h2, h3, h4, h5, h6 {
   color: var(--text-headline);
   letter-spacing: 0;
+  /* No widowed last words on display type, site-wide. `balance` evens the
+     lines (capped internally by browsers at ~6 lines, so long prose headings
+     are untouched); unsupported browsers simply wrap as before. House rule:
+     never a one-word last line. */
+  text-wrap: balance;
+}
+
+/* Body copy avoids orphans the softer way: `pretty` only re-flows the last
+   few lines to prevent a lone final word, without re-balancing whole
+   paragraphs. Progressive enhancement, same as above. */
+p, li, blockquote, figcaption, dd {
+  text-wrap: pretty;
 }
 
 /* Fluid clamp: min = mobile floor, max = desktop ceiling (from --hN-min/max tokens).

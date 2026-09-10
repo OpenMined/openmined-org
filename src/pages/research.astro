@@ -1,0 +1,239 @@
+---
+/**
+ * /research/ — the OpenMined Research program page: the fellowship
+ * introduction, the inaugural cohort (fellows, mentors, affiliates), the five
+ * research themes, and a contact form.
+ *
+ * Copy verbatim from the program's source doc (the "Fellows Bio" doc);
+ * theme names + framing questions from the fellowship Welcome Packet.
+ * Band archetype: hero with the animated stream (StreamEmbed via
+ * StreamSwoop, the home hero's graphic in the swoop position) → intro (dim)
+ * → themes ledger (the HomeFederatedNetwork bordered-rows device) → cohort
+ * roster (editorial rows, grayscale portraits — the page's bold element) →
+ * form CTA.
+ *
+ * Phase 2 (deliberately not here yet): a curated research-publications feed —
+ * blocked on the research-category cleanup pass; curate by slug via
+ * @utils/posts → postHref when it lands, per the for-ai-auditors pattern.
+ */
+import Page from '@layouts/Page.astro';
+import SimpleHero from '@components/sections/hero/SimpleHero.astro';
+import StreamSwoop from '@components/graphics/StreamSwoop.astro';
+import ContentSection from '@components/sections/ContentSection.astro';
+import Icon from '@elements/Icon.astro';
+import CtaSection from '@components/sections/cta/CtaSection.astro';
+import FormEmbed from '@elements/FormEmbed.astro';
+import ResearchCohort from '@components/sections/people/ResearchCohort.astro';
+import Button from '@ui/Button.astro';
+
+// The five research themes — names + framing questions from the fellowship
+// Welcome Packet; the ledger's dark footer carries the packet's autonomy
+// statement verbatim (so the section itself says the themes aren't a
+// prescribed agenda).
+const themesFootnote =
+  'These themes are intended as a starting point for collaboration rather than a fixed research agenda. One goal for the inaugural cohort is to shape this agenda together and identify the questions that deserve sustained attention over the coming years.';
+// Theme icons are the Iconoir TRIAL SET (`iconoir-*` files in @assets/icons —
+// 1.5px strokes vs the site set's 2px): this page pilots the set before any
+// site-wide switch. If the trial is adopted, drop the prefix and migrate the
+// whole icon folder; if not, delete the five prefixed files with this usage.
+// Theme artwork: a generated series in the brand hue families (source runs in
+// the marketing image-gen archive under research-page/), one motif per theme,
+// served from public/images/research/themes/.
+const themes = [
+  { icon: 'iconoir-network', art: '/images/research/themes/protocols-networks-power.jpg', title: 'Protocols, Networks & Power', question: 'How can technical infrastructure distribute rather than concentrate power?' },
+  { icon: 'iconoir-doc-magnifying-glass', art: '/images/research/themes/secure-audits.jpg', title: 'Secure Audits & Institutional Design', question: 'How should increasingly powerful AI systems be evaluated and governed?' },
+  { icon: 'iconoir-cpu', art: '/images/research/themes/emerging-architectures.jpg', title: 'Emerging AI Architectures', question: 'How will new AI architectures change governance?' },
+  { icon: 'iconoir-copyright', art: '/images/research/themes/copyright-value-data.jpg', title: 'Copyright & the Value of Data', question: 'How should society understand ownership and economic value in the AI era?' },
+  { icon: 'iconoir-community', art: '/images/research/themes/alternative-ownership.jpg', title: 'Alternative Ownership, Governance & Business Models', question: 'What alternatives exist to conventional models of technology ownership and control?' },
+];
+
+// The inaugural cohort — bios verbatim from the program's source doc.
+const cohort = [
+  {
+    heading: 'PhD Fellows',
+    people: [
+      { name: 'Seungeun Lee', affiliation: 'PhD student, Computer Science — New York University', photo: '/images/research/seungeun-lee.jpg', bio: 'Seungeun Lee is a PhD student in Computer Science at New York University, advised by Prof. Julia Stoyanovich at the Center for Responsible AI. She tries to make machine learning systems more explainable and trustworthy. Broadly, she is interested in designing AI that remains reliable as data, environments, and people change, both in practice and theory.' },
+      { name: 'Victor Ojewale', affiliation: 'PhD candidate, Computer Science — Brown University', photo: '/images/research/victor-ojewale.jpg', bio: 'Victor Ojewale is a Ph.D. candidate in Computer Science at Brown University, affiliated with the Center for Technological Responsibility. His research builds evaluation and audit infrastructure for large language models and the agents built on them, with a focus on moving evaluation out of the sandbox and toward the communities that actually use these systems. He has developed community-centered evaluation infrastructure for LLMs, multilingual functional evaluations, and measures of when agents should act versus defer, and has co-authored regulatory filings to NIST, NTIA, and the European Commission. He was previously a researcher with the Mozilla Open Source Audit Tooling Project.' },
+      { name: 'Ben Bucknall', affiliation: 'DPhil student — University of Oxford', photo: '/images/research/ben-bucknall.jpg', bio: 'Ben Bucknall is a DPhil (PhD) student at the University of Oxford, and an affiliate at the Oxford Martin AI Governance Initiative, where his work focuses on technical AI governance. He was previously a visiting student researcher at Stanford University, a chapter lead for the 2026 International AI Safety Report, and organiser of the ICML workshop on technical AI governance research. Before his DPhil, Ben worked as a research scholar at GovAI and technical advisor in the UK AI Security Institute. His current research centres around the governance of AI agent protocols and assurance of model versioning.' },
+    ],
+  },
+  {
+    heading: 'Predoctoral Fellows',
+    people: [
+      { name: 'Hannah Ismael', affiliation: 'Senior Program Associate — Mozilla Foundation', photo: '/images/research/hannah-ismael.jpg', bio: 'Hannah Ismael is a Senior Program Associate at Mozilla Foundation. She is interested in how law and policy can enable publicly accountable governance of AI, and in where existing frameworks fall short of creating a technological ecosystem that meaningfully balances privacy, transparency, security, and innovation. These questions have led her to explore intellectual property, privacy, and antitrust law, as well as the broader political and geopolitical forces shaping AI policy. Her work has been featured in ACM and JIGS and has contributed to partnerships with governments, nonprofits, and think tanks in pursuit of more equitable benefit-sharing and participatory governance.' },
+      { name: 'Ayana Hussain', photo: '/images/research/ayana-hussain.jpg', bio: 'Ayana Hussain is interested in privacy-preserving machine learning and AI safety, particularly in how individuals and communities can exercise agency and influence over algorithms, models, and digital platforms. Her research explores how individuals can control whether and how their data is shared, as well as how groups can use algorithmic collective action to influence computational technologies. She is also interested in how communities can organize to resist technological harms, particularly those involving AI-enabled misinformation and surveillance, and in how influence over increasingly powerful AI technologies can be distributed more widely.' },
+    ],
+  },
+  {
+    heading: 'Academic Partner Mentors',
+    people: [
+      { name: 'Niloofar Mireshghallah', affiliation: 'Assistant Professor — Carnegie Mellon University', photo: '/images/research/niloofar-mireshghallah.jpg', bio: 'Niloofar Mireshghallah is an Assistant Professor at Carnegie Mellon University, with appointments in the Engineering & Public Policy Department and Language Technologies Institute, as well as a courtesy appointment in the Software and Societal Systems Department. She is also a core member of CyLab, where she leads the Looni Lab. Her research sits at the intersection of privacy, machine learning, and the societal implications of AI, with a particular focus on contextual integrity, information-flow norms, natural language processing, LLM reasoning, and AI for science, including chemistry and drug discovery. Prior to joining Carnegie Mellon, she was a Founding Member of Technical Staff at humans&, a Research Scientist with Meta AI’s FAIR Alignment group, and a postdoctoral scholar at the University of Washington. She received her PhD from UC San Diego. Her work has been recognized with the NCWIT Collegiate Award and the Rising Star in Adversarial ML Award.' },
+      { name: 'Nick Vincent', affiliation: 'Assistant Professor, Computing Science — Simon Fraser University', photo: '/images/research/nick-vincent.jpg', bio: 'Nick Vincent is an Assistant Professor in Computing Science at Simon Fraser University and director of the People- and Data-centric Computing Research Group (PadComp). He studies the content ecosystems and data supply chains that fuel data-dependent technologies like search engines, recommender systems, and generative AI. This involves exploring avenues for people to control how data flows and participate in the governance of AI systems. His work is published in responsible AI venues like ACM FAccT and human-computer interaction venues like ACM CHI. His dissertation on data leverage received the 2024 ACM SIGCHI Outstanding Dissertation Award. Prof. Vincent was previously a postdoc at UC Davis and the University of Washington, and received his PhD from Northwestern University’s Technology and Social Behavior program.' },
+    ],
+  },
+  {
+    heading: 'Research Affiliates',
+    people: [
+      { name: 'Matija Franklin', affiliation: 'Research Scientist — Google DeepMind', photo: '/images/research/matija-franklin.jpg', bio: 'Matija Franklin is a Research Scientist on the Humanity, Ethics and Alignment Research Team (HEART) at Google DeepMind, where he works on AI value alignment and multi-agent safety. His research focuses on understanding how human values, preferences, and judgments can inform the development of safe and aligned AI systems, with particular interests in responsibility attribution, explainable AI, and the influence of AI on human preferences and behavior. Matija completed his PhD at UCL’s Causal Cognition Lab and has collaborated with researchers at Nokia Bell Labs, the Future of Humanity Institute, and the Future of Life Institute.' },
+      { name: 'Kyoko Eng', affiliation: 'Interaction Designer — Nashville', photo: '/images/research/kyoko-eng.jpg', bio: 'Kyoko Eng is a Nashville-based interaction designer. Her practice explores the problem spaces of Privacy and AI, Constructive Communication, and the Public and Private Self. Drawing from participatory design, critical design theory, and ethnographic research practices, she investigates how we might cultivate greater literacy, agency, and contextual awareness within our digital interactions.' },
+    ],
+  },
+];
+---
+
+<Page
+  title="Research at OpenMined"
+  description="The OpenMined Research Fellowship supports emerging leaders in academic research working on privacy-preserving AI and responsible governance — meet the inaugural cohort."
+>
+  {/* Display type is the program's name. The earlier mission-sentence heading
+      could not end in a two-word line at 390px at any reasonable size
+      ("responsible governance" is wider than the mobile measure), so the
+      no-orphans rule forced better copy, not a smaller font. */}
+  <SimpleHero
+    eyebrow="OpenMined Research"
+    eyebrowItalic
+    heading="The OpenMined Research Fellowship"
+    headingMax={48}
+    headingMeasure="20em"
+    lede="The OpenMined Research Fellowship is a part-time fellowship program which supports emerging leaders in academic research as they pursue their PhDs through financial stipend, mentorship with OpenMined team members, opportunities to connect with the broader AI community, and supporting conference involvement."
+    ledeMeasure="45em"
+    contentWidth="col-10"
+    contentGap="tight"
+    padBottom="calc(var(--spacing-max) * 2)"
+  >
+    <Fragment slot="actions">
+      <Button href="#cohort">Meet the fellows</Button>
+      <Button variant="outline" href="#contact">Get in touch</Button>
+    </Fragment>
+    <StreamSwoop slot="swoop" id="stream-embed-research" />
+  </SimpleHero>
+
+  <!-- The fellowship announcement -->
+  <ContentSection surface="dim" eyebrow="The Fellowship" as="h4" width="col-8" align="left" headGap="tight" heading="The 2026 Research Fellowship">
+    <div class="research-prose">
+      <p>Scholars are nominated by their advisors and are selected for the program based on their innovative research, leadership and commitment to advancing research fields that OpenMined is investigating.</p>
+      <p>As part of OpenMined&rsquo;s commitment to fostering the next generation of leaders in privacy-preserving AI and responsible governance, we are proud to announce the 2026 recipients of the inaugural OpenMined Research Fellowship.</p>
+    </div>
+  </ContentSection>
+
+  <!-- Research themes — icon cards; 3-up row then 2 wider, so five items
+       compose deliberately instead of orphaning a short last row -->
+  <ContentSection
+    eyebrow="Research Themes"
+    as="h4"
+    width="col-10"
+    align="left"
+    headGap="tight"
+    heading="Five areas of interest"
+    intro="The fellowship is broadly organized around five areas of interest."
+    introMeasure="45em"
+  >
+    <div class="themes-grid">
+      {themes.map((t, i) => (
+        <div class="theme-card" data-reveal data-reveal-delay={i * 70}>
+          <img class="theme-card__art" src={t.art} alt="" width="1400" height="786" loading="lazy" data-fade />
+          <div class="theme-card__body">
+            <div class="theme-card__head">
+              <Icon name={t.icon} size={20} class="theme-card__icon" />
+              <h5>{t.title}</h5>
+            </div>
+            <p>{t.question}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+    <p class="themes-note measure" style="--measure: 52em;" data-reveal>{themesFootnote}</p>
+  </ContentSection>
+
+  <!-- The inaugural cohort -->
+  <ResearchCohort groups={cohort} />
+
+  <!-- Contact -->
+  <div id="contact" data-reveal>
+    <CtaSection
+      variant="gradient"
+      icon={false}
+      heading="Work with our research team"
+      body="If your research connects with these themes — or you'd like to explore the fellowship, mentorship, or collaboration with OpenMined — we'd love to hear from you."
+    >
+      <FormEmbed slot="form" formId="4e884b19-b671-46f7-a211-0ae1fe4726a3" />
+      <Fragment slot="fineprint">
+        <p>Reaching out confirms you agree with our <a href="/privacy-policy/">privacy policy</a>.</p>
+      </Fragment>
+    </CtaSection>
+  </div>
+</Page>
+
+<style>
+  /* ── Research themes grid ──────────────────────────────────────────
+     Five cards composed on a 6-track grid: three across the top (span 2),
+     two wider beneath (span 3) — a deliberate 3/2 composition instead of a
+     grid that orphans a short last row. Children are component roots, so
+     the selectors reach them via :global. */
+  .themes-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: var(--spacing-XL);
+  }
+  .theme-card { grid-column: span 2; }
+  .theme-card:nth-child(n + 4) { grid-column: span 3; }
+
+  /* The card: generated series artwork as a banner, icon + title, question.
+     Art is CSS-cropped (aspect-ratio box + cover) per the images rule. */
+  .theme-card {
+    background-color: var(--surface-background-dim);
+    border-radius: var(--border-radius-S);
+    overflow: hidden;
+  }
+  .theme-card__art {
+    width: 100%;
+    height: auto; /* release the attribute height so aspect-ratio governs */
+    aspect-ratio: 16 / 6;
+    object-fit: cover;
+  }
+  .theme-card__body { padding: var(--spacing-2XL); }
+  .theme-card__head {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-M);
+    margin-bottom: var(--spacing-M);
+    color: var(--text-headline); /* currentColor for the icon */
+  }
+  .theme-card__head h5 { margin: 0; }
+  .theme-card__icon { flex: none; }
+  .theme-card__body p { margin: 0; }
+
+  .themes-note {
+    margin: var(--spacing-2XL) 0 0;
+    color: var(--text-subtle);
+  }
+
+  /* ── Contact form: labels hidden, placeholders carry the field names ──
+     Scoped to this page's form only (the site-wide .hs-form skin keeps
+     labels). Visually hidden, not display:none, so screen readers still get
+     each field's name; error labels (.hs-error-msgs) stay fully visible.
+     The career-stage dropdown has no placeholder attribute — its unselected
+     option text is set to "Career stage" in the form definition instead. */
+  #contact :global(.hs-form .hs-form-field > label:not(.hs-error-msg)) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 991px) {
+    .themes-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .theme-card,
+    .theme-card:nth-child(n + 4) { grid-column: auto; }
+    /* five cards on two tracks: the last spans both, so no half-empty row */
+    .theme-card:nth-child(5) { grid-column: span 2; }
+  }
+  @media (max-width: 767px) {
+    .themes-grid { grid-template-columns: 1fr; }
+    .theme-card:nth-child(5) { grid-column: auto; }
+  }
+</style>
