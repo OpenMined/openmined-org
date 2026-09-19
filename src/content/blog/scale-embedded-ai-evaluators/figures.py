@@ -138,7 +138,10 @@ idx = here / "index.md"
 s = idx.read_text()
 for n, title, a, body in steps:
     svg = scene(n, title, a, body).replace("\n", "")
-    block = f"<!-- fig:{n} -->\n{svg}\n<!-- /fig:{n} -->"
+    # breakout--full → the figure rides the article grid's full zone (the
+    # 1300px page container), so the diagram text renders ~2x the size it
+    # would at the col-6 reading column. See global.css → .prose-article.
+    block = f"<!-- fig:{n} -->\n<figure class=\"breakout--full\">{svg}</figure>\n<!-- /fig:{n} -->"
     if f"<!-- fig:{n} -->" in s:
         s = re.sub(rf"<!-- fig:{n} -->.*?<!-- /fig:{n} -->", block, s, flags=re.S)
     else:
