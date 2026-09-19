@@ -127,10 +127,7 @@ There is more to a secure enclave in practice, but this is enough to understand 
 
 So far, this post has focused on evaluations involving one external party and one AI model owner. But some of the most important questions about AI systems require combining assets from multiple organisations; for example, demographic data from a third party to measure an AI system’s fairness across populations. This is a harder coordination problem: each data owner needs assurance that their information won’t be exposed to the others and, realistically, no single trusted intermediary can serve all parties. Secure enclaves solve this by giving multiple data holders joint control over what runs inside the enclave, without any party needing to trust another or relinquish control to an intermediary. This multi-party case is what SETUPs 3-5 are designed for, and we’ll cover them in future posts.
 
-Tutorial
-
-## Evaluate an AI’s User-log Using PySyft
-Conclusion
+## Conclusion
 
 There is more to discuss when considering how to do this in practice. How do 3rd party shareholders come to meet one another, and what does the governance process look like? How do they approve or deny extensions of the static API when they cannot see the information contributed from other parties? When the evaluator receives their results, how do they know they haven’t been faked? And when a consumer later uses an AI product or service, how do they know they are receiving predictions from an AI model that has in fact been evaluated? This involves a myriad of important topics: meta-evaluations, evaluation registries, signed hashes, digital identity, and more.
 
