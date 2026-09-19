@@ -118,8 +118,8 @@ steps = [
   flow(1030, 866, 240, BLUE, "datasets · user logs", "mb3")),
  (4, "Embedded evaluator builds the evaluation",
   dict(ext=False, emb=True, ds=True, ir=False),
-  flow(576, 734, 222, VIOLET, "explore real data", "mv4")
-  + flow(734, 576, 268, VIOLET, "write evaluation job", "mv4", above=False)),
+  flow(734, 576, 222, VIOLET, "explore real data", "mv4")
+  + flow(576, 734, 268, VIOLET, "write evaluation job", "mv4", above=False)),
  (5, "The job is submitted, reviewed and run",
   dict(ext=False, emb=True, ds=True, ir=True),
   flow(576, 1024, 172, VIOLET, "submit job for review", "mv5")
