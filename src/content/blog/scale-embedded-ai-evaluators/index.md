@@ -76,19 +76,19 @@ An AI owner and evaluator must jointly execute several steps together. First, th
 
 An evaluator then “proposes a project”, which is a bit of code they’d like to be added to the Domain Server’s API. This code typically interacts with datasets and AI models in a specific way, so that the external evaluator can use it to answer important question in the future. The model owner reviews this project (reviews the code) and — if they approve — the code is added to the API. And against this new API, the external evaluator can download their results. Below, you can see this process broken apart into a series of 7 steps:
 
-![](./media/figure-1.png)
+![](./media/figure-1.svg)
 
-![](./media/figure-2.png)
+![](./media/figure-2.svg)
 
-![](./media/figure-3.png)
+![](./media/figure-3.svg)
 
-![](./media/figure-4.png)
+![](./media/figure-4.svg)
 
-![](./media/figure-5.png)
+![](./media/figure-5.svg)
 
-![](./media/figure-6.png)
+![](./media/figure-6.svg)
 
-![](./media/figure-7.png)
+![](./media/figure-7.svg)
 
 ## A Flexible Query API
 PySyft uses a type of API that allows for particularly flexible use. Instead of an API which allows an external party to call specific functions on an AI model, the API offers mock (fake) versions of the private datasets and models behind the API. This allows an external evaluator to write code against these fake versions (as if they had access to the real datasets and models). Then, they can use the API to submit this code to the AI owner. When they do so, they’re asking permission to answer a specific question. And if the AI owner is willing to run their code and see the result, the AI owner is granting them permission to answer their question.
