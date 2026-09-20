@@ -368,9 +368,14 @@ const searchThumbMeta = searchThumb ? `thumb:${searchThumb.src}` : undefined;
 
   /* .post__title on <h1> — type from global h1. An optional per-post `titleMax`
      frontmatter value sets --h1-max inline (see BlogPost <h1>), capping the
-     desktop size while the 36px floor + fluid rate stay automatic. */
+     desktop size while the 36px floor + fluid rate stay automatic.
+     Post titles opt OUT of the global heading `text-wrap: balance`: titleMax
+     exists precisely to art-direct a title's breaks per post, and balance
+     fights it — measured re-splitting "double-blind" at its hyphen on a
+     title whose 52px cap was chosen for the unbalanced 3-line break. */
   .post__title {
     margin-bottom: 0;
+    text-wrap: wrap;
   }
 
   /* Deck / standfirst — mirrors the global h4 fluid scale (Rubik 27→22px),
