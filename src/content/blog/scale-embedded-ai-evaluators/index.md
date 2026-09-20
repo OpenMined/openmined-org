@@ -5,6 +5,9 @@ date: 2026-09-19
 categories: [research]
 tags: [pysyft, ai-auditing]
 authors: [openmined-team]
+cover: ./cover.jpg
+coverAlt: "A frosted glass diamond on a dark reflective floor: a single beam of light enters one side and a fan of many distinct filtered rays emerges from the other"
+cardText: light
 ---
 
 ## Introduction
