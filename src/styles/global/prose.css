@@ -186,7 +186,11 @@
    h2 value but isn't one. */
 .prose * + h2 { margin-top: var(--spacing-3XL); }               /* 32 */
 .prose * + h3 { margin-top: var(--spacing-2XL); }               /* 24 */
-.prose * + :is(h4, h5, h6) { margin-top: var(--spacing-L); }    /* 16 */
+/* h4–h6 deviate from live (which gives them 16/16): equal air above and below
+   leaves a subheading floating between sections instead of binding to its own.
+   24/16 keeps space-before > space-after, matching h3's ratio. (Bennett,
+   2026-09-20, evaluators post review.) */
+.prose * + :is(h4, h5, h6) { margin-top: var(--spacing-2XL); }  /* 24 */
 
 /* Stacked headings tighten (live collapses these to 24). Must come after the
    space-before rules — same specificity, so source order decides. */
