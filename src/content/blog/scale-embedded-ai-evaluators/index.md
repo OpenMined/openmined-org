@@ -8,6 +8,9 @@ authors: [openmined-team]
 cover: ./cover.jpg
 coverAlt: "A frosted glass diamond on a dark reflective floor: a single beam of light enters one side and a fan of many distinct filtered rays emerges from the other"
 cardText: light
+related:
+  - double-blind-evaluation-frontier-ai-model
+  - ai-audit-part-1
 ---
 
 ## Introduction
@@ -136,7 +139,7 @@ On that last set of questions (verification and trust) there has been real progr
 
 There is also more to discuss with respect to domain specific applications. There are already a myriad of tools emerging for studying AI bias, fairness, plagiarism, value alignment, illegal content, disinformation, and copyright. For the most part, these tools assume that the access problem has already been solved, focusing instead on how to measure these properties using AI models they can already access. We’ll publish a hands-on tutorial for SETUP 1 — the simplest tier, where an evaluator trusts that the model owner’s assets are genuine — very soon. And as the double-blind evaluation pilot demonstrates, the same ideas scale up. SETUPs 3 through 5 (where the evaluator can cryptographically verify they're working with genuine assets) are now not just theoretical. They've been demonstrated on a production frontier model. We'll explore those higher SETUPs in future posts.
 
-If you’d like to play with code yourself, you can [find all the code here](https://colab.research.google.com/drive/1btWDAU0hHtqmbegvfi3tT9bj8ixUqJ5V?usp=sharing). If you’d like to get involved in developing and using the tools you’ve seen here, please join us on slack at [slack.openmined.org](http://slack.openmined.org)
+If you’d like to get involved in developing and using the tools you’ve seen here, please join us on slack at [slack.openmined.org](http://slack.openmined.org)
 
 ## Authors
 
