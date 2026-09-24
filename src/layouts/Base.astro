@@ -304,6 +304,13 @@ const trail = breadcrumbs ?? [
             portalId: el.dataset.portalId || '6487402',
             formId: el.dataset.formId,
             target: `#${el.id}`,
+            // Feeds the `HubSpot Form Submitted` goal (dormant since cutover) with
+            // which form and which page — no personal data leaves the form.
+            onFormSubmitted: () => {
+              w.plausible?.('HubSpot Form Submitted', {
+                props: { form: el.dataset.formId, page: window.location.pathname },
+              });
+            },
           });
         });
       }

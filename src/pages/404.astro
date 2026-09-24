@@ -28,4 +28,9 @@ import Button from '@ui/Button.astro';
       <Button variant="outline" href="/blog/">Read the blog</Button>
     </Fragment>
   </SimpleHero>
+  {/* Feeds the `404` goal (the WordPress site fired it; it went dormant at
+      cutover) so broken inbound links surface in Plausible by path. */}
+  <script is:inline>
+    window.plausible && window.plausible('404', { props: { path: window.location.pathname } });
+  </script>
 </Page>
