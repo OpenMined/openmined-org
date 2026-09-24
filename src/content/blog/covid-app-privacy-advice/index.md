@@ -14,13 +14,13 @@ __Right now, COVID-19 apps are being built around the world to help societies mi
 
 __Data privacy is crucial for these apps. Not only is privacy a human right, but it is also needed for establishing trust — and therefore, compliance — in these COVID-19 apps.__
 
-[__Read our original announcement here.__](https://blog.openmined.org/providing-opensource-privacy-for-covid19/)
+[__Read our original announcement here.__](/blog/providing-opensource-privacy-for-covid19/)
 
-_****UPDATE:**** Our community is working on four main open-source projects relating to pandemic-tech: a white label COVID Alert App, private set intersection, a differential privacy wrapper, and private identity. [****Read more about these here.****](https://blog.openmined.org/openmineds-efforts-for-the-coronavirus-pandemic/)_
+_****UPDATE:**** Our community is working on four main open-source projects relating to pandemic-tech: a white label COVID Alert App, private set intersection, a differential privacy wrapper, and private identity. [****Read more about these here.****](/blog/openmineds-efforts-for-the-coronavirus-pandemic/)_
 
 ---
 
-**NOTICE:** This is a live document which is being continually updated. We have decided to publish it in an earlier state because of the rapid pace of COVID-19 development. If you have recommended edits to this blogpost, ping the #covid\_technical\_blogpost on [OpenMined’s Slack](https://join.slack.com/t/openmined/shared_invite/zt-deu0kql0-kn~hh1CM3LdME6WORkIp6g).
+**NOTICE:** This is a live document which is being continually updated. We have decided to publish it in an earlier state because of the rapid pace of COVID-19 development. If you have recommended edits to this blogpost, ping the #covid\_technical\_blogpost on [OpenMined’s Slack](/slack/).
 
 _Disclaimer: this series is meant to be a helpful high-level guide towards the construction of your app. It was rapidly written to assist with the COVID-19 response by a team of experts, and it is edited by open submission. Please ensure that you bring dedicated experts onto your team to help you implement important privacy and security measures properly. For introduction to such experts, join slack.openmined.org and request an introduction in the #general-discussion channel._
 
@@ -247,7 +247,7 @@ However, whether individuals subscribe to a group can be particularly challengin
 
 For more on how this data can be collected in a reliable and privacy preserving way, please see this our ongoing [Privacy Identity Server](https://github.com/OpenMined/private-identity-server) project. Additional discussion is provided in the next section.
 
-**Call for Contributors:** the above data sources are key to fighting this epidemic. Key to both the collection of this data and the infrastructure for privacy preservation is the ability to load this data directly from its source into a smartphone. We, as a community, are calling for contributions to create individual components for iOS, Android, and React Native which can collect each of the above-mentioned datasets. This will allow app makers around the world to be empowered with this information in a way that forms **the starting point for privacy-preserving analysis** (on-device data), as mentioned in the next section. If you would like to get involved, please join the #covid\_mobile\_data\_collection channel in [OpenMined’s Slack](https://join.slack.com/t/openmined/shared_invite/zt-deu0kql0-kn~hh1CM3LdME6WORkIp6g) .
+**Call for Contributors:** the above data sources are key to fighting this epidemic. Key to both the collection of this data and the infrastructure for privacy preservation is the ability to load this data directly from its source into a smartphone. We, as a community, are calling for contributions to create individual components for iOS, Android, and React Native which can collect each of the above-mentioned datasets. This will allow app makers around the world to be empowered with this information in a way that forms **the starting point for privacy-preserving analysis** (on-device data), as mentioned in the next section. If you would like to get involved, please join the #covid\_mobile\_data\_collection channel in [OpenMined’s Slack](/slack/) .
 
 ## Part 4: Privacy Preserving App Tech  
 
@@ -283,7 +283,7 @@ So, for any analytic where you want to compare a user’s data (on a phone) with
 -   Can do inner product based private set intersection by doing an inner product between an encrypted vector of bits from the client and a decrypted vector of bits from the server.
 -   More to come…
 
-**Call for Contributions:**We need to rapidly prototype more private set intersection infrastructure for use in iOS, Android, and React Native apps against a variety of server architectures (Python and Node.js being the primary). We need to build more individual component libraries for PSI as well as end-to-end example implementations to aid in people’s ability to use this vital technology. We also need security vetting of existing implementations. Please join the #covid\_private\_set\_intersection channel in [OpenMined’s slack](https://join.slack.com/t/openmined/shared_invite/zt-deu0kql0-kn~hh1CM3LdME6WORkIp6g) if you are interested and able to help with this vital work.
+**Call for Contributions:**We need to rapidly prototype more private set intersection infrastructure for use in iOS, Android, and React Native apps against a variety of server architectures (Python and Node.js being the primary). We need to build more individual component libraries for PSI as well as end-to-end example implementations to aid in people’s ability to use this vital technology. We also need security vetting of existing implementations. Please join the #covid\_private\_set\_intersection channel in [OpenMined’s slack](/slack/) if you are interested and able to help with this vital work.
 
 ### Differential Privacy  
 
@@ -319,7 +319,7 @@ This approach is useful for allowing app users to transform their local data in 
 -   ******Todo: Swift Repos?******
 -   ******Todo: Kotlin Repos?******
 
-**Call for Contributions:** Perhaps the most robust differential privacy library is [Google’s C++ DP LIbrary](https://github.com/google/differential-privacy), however we need this library to be running on mobile phones and servers. While there is currently a project to [wrap this library in Python](https://github.com/OpenMined/PyDP), we also need to provide this library to Java, Swift, and Kotlin languages. If you are interested and able to help with these efforts, please join the #covid\_dp\_lib\_wrapping channel in [OpenMined’s Slack Team](https://join.slack.com/t/openmined/shared_invite/zt-deu0kql0-kn~hh1CM3LdME6WORkIp6g).
+**Call for Contributions:** Perhaps the most robust differential privacy library is [Google’s C++ DP LIbrary](https://github.com/google/differential-privacy), however we need this library to be running on mobile phones and servers. While there is currently a project to [wrap this library in Python](https://github.com/OpenMined/PyDP), we also need to provide this library to Java, Swift, and Kotlin languages. If you are interested and able to help with these efforts, please join the #covid\_dp\_lib\_wrapping channel in [OpenMined’s Slack Team](/slack/).
 
 ### Private Identity Server  
 
@@ -364,7 +364,7 @@ And most importantly, all of this is possible without requiring every other serv
 -   ****[**https://github.com/OpenMined/private-identity-server**](https://github.com/OpenMined/private-identity-server)****
 -   ****[**https://github.com/OpenMined/Aries-DID**](https://github.com/OpenMined/Aries-DID)****
 
-**Call for Contributions:** Perhaps the greatest need for contributions is the construction of backend SSO infrastructure for the Private Identity Server, allowing it to safely login to the thousands of services that people around the world use every day. If you are experienced at building SSO integrations (or at web scraping which may also be required), please join the #covid\_pis\_sso channel in [OpenMined’s Slack Team](https://join.slack.com/t/openmined/shared_invite/zt-deu0kql0-kn~hh1CM3LdME6WORkIp6g).
+**Call for Contributions:** Perhaps the greatest need for contributions is the construction of backend SSO infrastructure for the Private Identity Server, allowing it to safely login to the thousands of services that people around the world use every day. If you are experienced at building SSO integrations (or at web scraping which may also be required), please join the #covid\_pis\_sso channel in [OpenMined’s Slack Team](/slack/).
 
 ### Private Identity Server -> Sovereign Self Identity  
 

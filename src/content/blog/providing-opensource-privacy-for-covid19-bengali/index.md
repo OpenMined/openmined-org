@@ -9,7 +9,7 @@ draft: false
 legacyId: 2399
 ---
 
-_We sincerely thank [Zarreen Reza](https://www.linkedin.com/in/zarreennreza/) and [Mir Mohammad Jaber](https://www.linkedin.com/in/mir-mohammad-jaber/) for this translation! [Click here for English.](https://blog.openmined.org/providing-opensource-privacy-for-covid19/)_
+_We sincerely thank [Zarreen Reza](https://www.linkedin.com/in/zarreennreza/) and [Mir Mohammad Jaber](https://www.linkedin.com/in/mir-mohammad-jaber/) for this translation! [Click here for English.](/blog/providing-opensource-privacy-for-covid19/)_
 
 ---
 
@@ -69,8 +69,8 @@ OpenMined থেকে আমরা কি চাচ্ছি:
 
 ### ডেভলপারদের জন্যঃ  
 
--   প্রযুক্তিগত উপদেশ সম্বলিত আমাদের নথি পড়ুন, **[Maximising Privacy and Effectiveness in COVID-19 Apps.](https://blog.openmined.org/covid-app-privacy-advice/)**
--   ****যদি আপনার কোন প্রশ্ন থাকে কিংবা কোন সাহায্যের প্রয়োজন হয়, তবে পোস্ট করুন এখানে – [Covid-19 Technical Collaboration Slack Channel](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1).****
+-   প্রযুক্তিগত উপদেশ সম্বলিত আমাদের নথি পড়ুন, **[Maximising Privacy and Effectiveness in COVID-19 Apps.](/blog/covid-app-privacy-advice/)**
+-   ****যদি আপনার কোন প্রশ্ন থাকে কিংবা কোন সাহায্যের প্রয়োজন হয়, তবে পোস্ট করুন এখানে – [Covid-19 Technical Collaboration Slack Channel](/slack/).****
 -   ******Github Repositories******
 -   ****[**https://github.com/OpenMined/private-identity-server**](https://github.com/OpenMined/private-identity-server)****
 -   ****[**https://github.com/OpenMined/PyDP**](https://github.com/OpenMined/PyDP)****
@@ -80,12 +80,12 @@ OpenMined থেকে আমরা কি চাচ্ছি:
 
 ### সরকারি কর্মকর্তাদের জন্য যারা অ্যাপসের অনুমোদন প্রদান করে থাকেন কিংবা অগ্রাহ্য করে থাকেনঃ  
 
--   ****যদি কোন অ্যাপ সম্পর্কে আপনার প্রশ্ন থাকে যেটা কি-না আপনি অনুমোদন প্রদান করতে যাচ্ছেন অথবা COVID-19 এপের গোপনীয়তা বিষয়ে আপনার কোন প্রশ্ন থেকে থাকে, আমাদেরকে এখানে জিজ্ঞাসা করতে পারেন –  [Covid-19 Technical Collaboration Channel](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1) কিংবা ইমেইলে – [covid@openmined.org](mailto:covid@openmined.org).****
+-   ****যদি কোন অ্যাপ সম্পর্কে আপনার প্রশ্ন থাকে যেটা কি-না আপনি অনুমোদন প্রদান করতে যাচ্ছেন অথবা COVID-19 এপের গোপনীয়তা বিষয়ে আপনার কোন প্রশ্ন থেকে থাকে, আমাদেরকে এখানে জিজ্ঞাসা করতে পারেন –  [Covid-19 Technical Collaboration Channel](/slack/) কিংবা ইমেইলে – [covid@openmined.org](mailto:covid@openmined.org).****
 
 ### গোপনীয়তা এবং নিরাপত্তায় পারদর্শী যারা সাহায্য করতে চানঃ  
 
--   প্রযুক্তিগত উপদেশ সম্বলিত আমাদের নথি, [**Maximising Privacy and Effectiveness in COVID-19 Apps.**](https://blog.openmined.org/covid-app-privacy-advice/)
--   ****এই ব্লগপোস্টে কোনকিছুর সংযুক্তিতে এবং সম্পাদনায় যদি আপনার কোন পরামর্শে থাকে কিংবা আমাদেরকে সাহায্য করতে চান, তবে এখানে – [Covid-19 Technical Collaboration Slack Channel](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1) পোস্ট করুন।****
+-   প্রযুক্তিগত উপদেশ সম্বলিত আমাদের নথি, [**Maximising Privacy and Effectiveness in COVID-19 Apps.**](/blog/covid-app-privacy-advice/)
+-   ****এই ব্লগপোস্টে কোনকিছুর সংযুক্তিতে এবং সম্পাদনায় যদি আপনার কোন পরামর্শে থাকে কিংবা আমাদেরকে সাহায্য করতে চান, তবে এখানে – [Covid-19 Technical Collaboration Slack Channel](/slack/) পোস্ট করুন।****
 
 ### দাতাদের জন্যঃ  
 

@@ -12,7 +12,7 @@ legacyId: 2133
 <!-- TODO(a11y): 2 localized body image(s) have empty alt text -->
 
 
-_**This post is part of our [Privacy-Preserving Data Science, Explained](https://blog.openmined.org/private-machine-learning-explained/) series.**_
+_**This post is part of our [Privacy-Preserving Data Science, Explained](/blog/private-machine-learning-explained/) series.**_
 
 In the era of XaaS(Anything as a Service), many companies provide different technologies as a service. Nowadays big cloud operators, such as Google, AWS, and Microsoft, and startups alike are offering Machine Learning as a Service(MLaaS). These services help small companies that lack the ML expertise or required infrastructure to build a predictive model with the data from the small companies. These data are valuable and sensitive. The customers get their services via API calls. Service providers don’t want to open up about their model, which are black boxes to the customers. And because of the data sensitivity, customers may not be interested to share their raw data through API calls. **Here comes the trust worthy “Encrypted Machine Learning” concept that helps protect the data and the model by encrypting it.** Instead of merely providing MLaaS that might be leaky, service providers can introduce EMLaaS(Encrypted Machine Learning as a Service) to assure customers about their data security.
 
@@ -51,7 +51,7 @@ _**Acknowledgments:** I’m extremely grateful to Nahua, for helping me in impro
 -   **[Chiron: Privacy-preserving Machine Learning as a Service](https://arxiv.org/abs/1803.05961)**
 -   **[PyGrid Examples](https://github.com/OpenMined/PyGrid/tree/dev/examples)**
 -   **[Section: Encrypted Deep Learning](https://github.com/udacity/private-ai/blob/master/Section%204%20-%20Encrypted%20Deep%20Learning.ipynb)**
--   **[ENCRYPTED DEEP LEARNING CLASSIFICATION WITH PYTORCH & PYSYFT](https://blog.openmined.org/encrypted-deep-learning-classification-with-pysyft/)**
+-   **[ENCRYPTED DEEP LEARNING CLASSIFICATION WITH PYTORCH & PYSYFT](/blog/encrypted-deep-learning-classification-with-pysyft/)**
 -   **[WHAT IS MACHINE LEARNING AS A SERVICE (MLAAS)?](https://analyticsindiamag.com/what-is-machine-learning-as-a-service-mlaas/)**
 -   **[XaaS (Anything as a Service)](https://searchcloudcomputing.techtarget.com/definition/XaaS-anything-as-a-service)**
 -   **[Private Machine Learning as a Service using PySyft](https://devpost.com/software/private-machine-learning-as-a-service-on-top-of-pysyft)**

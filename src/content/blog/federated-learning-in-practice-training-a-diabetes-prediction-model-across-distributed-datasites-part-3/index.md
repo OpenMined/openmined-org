@@ -85,5 +85,5 @@ We invite data scientists, researchers, and engineers working on production fede
 
 Your journey doesn’t have to end here. The best way to learn is by doing and engaging with the community. If you have questions, run into issues, or want to share your experience, the OpenMined community is the place to go.
 
--   Join the conversation in our [Slack Community](https://openmined.org/slack/)
+-   Join the conversation in our [Slack Community](/slack/)
 -   Already in the OpenMined workspace? Join the `[#community-federated-learning](https://openmined.slack.com/archives/C081120HQ21)` channel

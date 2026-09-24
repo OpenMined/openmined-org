@@ -9,7 +9,7 @@ draft: false
 legacyId: 2417
 ---
 
-_Agradecemos a Claudia Ghezzou por llevar a cabo esta traducción. [Click here for English.](https://blog.openmined.org/providing-opensource-privacy-for-covid19/)_
+_Agradecemos a Claudia Ghezzou por llevar a cabo esta traducción. [Click here for English.](/blog/providing-opensource-privacy-for-covid19/)_
 
 ---
 
@@ -66,8 +66,8 @@ También, tratándose de una pandemia global; cientos de organizaciones independ
 
 ### Para desarrolladores:
 
--   ****Nuestro documento activo con consejos técnicos,** [****Maximizar la Privacidad y Eficacia en las Aplicaciones de COVID-19****.](https://blog.openmined.org/providing-opensource-privacy-for-covid19-spanish/blog.openmined.org/covid-app-privacy-advice/)**
--   Si tiene alguna pregunta o necesita asistencia, escribanos en el [Covid-19 Technical Collaboration Slack Channel](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1).
+-   ****Nuestro documento activo con consejos técnicos,** [****Maximizar la Privacidad y Eficacia en las Aplicaciones de COVID-19****.](/blog/covid-app-privacy-advice/)**
+-   Si tiene alguna pregunta o necesita asistencia, escribanos en el [Covid-19 Technical Collaboration Slack Channel](/slack/).
 
 ******Repositorios Github****:**
 
@@ -79,12 +79,12 @@ También, tratándose de una pandemia global; cientos de organizaciones independ
 
 ### Para oficiales gubernamentales que autorizan/desautorizan aplicaciones:  
 
--   Si tiene alguna duda acerca de una aplicación que va a autorizar o tiene dudas acerca de la privacidad en aplicaciones de COVID-19, pregúntanos en el [Covid-19 Technical Collaboration Channel](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1) o mande un email a  [covid@openmined.org](mailto:covid@openmined.org).
+-   Si tiene alguna duda acerca de una aplicación que va a autorizar o tiene dudas acerca de la privacidad en aplicaciones de COVID-19, pregúntanos en el [Covid-19 Technical Collaboration Channel](/slack/) o mande un email a  [covid@openmined.org](mailto:covid@openmined.org).
 
 ### Para los expertos de privacidad y seguridad buscando asistencia:  
 
--   ****Nuestro documento activo con consejos técnicos, **[Maximizar la Privacidad y Eficacia en las Aplicaciones de COVID-19.](https://blog.openmined.org/providing-opensource-privacy-for-covid19-spanish/blog.openmined.org/covid-app-privacy-advice/)******
--   Si tiene recomendaciones para añadir/editar a esta publicación de blog o nos quiere ayudar, publique en el  [Covid-19 Technical Collaboration Slack Channel](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1).
+-   ****Nuestro documento activo con consejos técnicos, **[Maximizar la Privacidad y Eficacia en las Aplicaciones de COVID-19.](/blog/covid-app-privacy-advice/)******
+-   Si tiene recomendaciones para añadir/editar a esta publicación de blog o nos quiere ayudar, publique en el  [Covid-19 Technical Collaboration Slack Channel](/slack/).
 
 ### Para los donadores:
 

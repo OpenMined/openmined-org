@@ -12,7 +12,7 @@ legacyId: 2127
 <!-- TODO(a11y): 1 localized body image(s) have empty alt text -->
 
 
-_**This post is part of our [Privacy-Preserving Data Science, Explained](https://blog.openmined.org/private-machine-learning-explained/) series.**_
+_**This post is part of our [Privacy-Preserving Data Science, Explained](/blog/private-machine-learning-explained/) series.**_
 
 Differential privacy has been established as the gold standard for measuring and guaranteeing data privacy, but putting it into practice has [proved challenging until recently](https://journalprivacyconfidentiality.org/index.php/jpc/article/view/689). Practitioners often face a difficult choice between privacy and accuracy. Privacy amplification by shuffling is a relatively new idea that aims to provide greater accuracy while preserving privacy by shuffling batches of similar data. This approach has the potential to allow for richer, more reliable data analysis while preserving privacy.
 

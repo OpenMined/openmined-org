@@ -10,7 +10,7 @@ draft: false
 legacyId: 2460
 ---
 
-As a part of OpenMined’s new [initiative to foster a research community](https://blog.openmined.org/introducing-openmined-research/), we are excited to issue a call for applications to become an OpenMined Research Engineer!
+As a part of OpenMined’s new [initiative to foster a research community](/blog/introducing-openmined-research/), we are excited to issue a call for applications to become an OpenMined Research Engineer!
 
 This is an exciting new volunteer role designed to help **talented engineers gain research experience** by partnering them with experienced researchers on a research project.
 
@@ -19,7 +19,7 @@ As such, we do have some minimum requirements to apply to become a Research Engi
 **Minimum Requirements:**
 
 -   [A Github Account](http://github.com/)
--   An OpenMined Slack account ([slack.openmined.org](https://blog.openmined.org/p/5185f06b-b46f-4f27-a324-591ca535d712/slack.openmined.org))
+-   An OpenMined Slack account ([slack.openmined.org](/slack/))
 -   Strong Python development skills
 -   Familiarity with an existing research-oriented deep learning framework (PyTorch, Tensorflow, or Jax)
 -   Familiarity with collaboration tools such as [Google Colab](https://colab.research.google.com/), [Jupyter Lab](https://jupyterlab.readthedocs.io/en/stable/), and git

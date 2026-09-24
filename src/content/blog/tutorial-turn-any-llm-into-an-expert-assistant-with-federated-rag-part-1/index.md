@@ -74,7 +74,7 @@ _Sign up here to get new learning resources sent to your inbox as they are publi
 
 ## Intro: Closing the Expert Data Gap with Federated RAG
 
-_If you have already heard of RAG (Retrieval-Augmented Generation), but would still like a quick recap, [check out our primer on RAG](https://openmined.org/?p=7502)._
+_If you have already heard of RAG (Retrieval-Augmented Generation), but would still like a quick recap, [check out our primer on RAG](/blog/tutorial-build-your-own-rag-in-10-lines-of-python/)._
 
 LLMs perform well on open-domain questions (_i.e. “Who wrote Romeo and Juliet?”_) since they are trained on broad public datasets. However, they struggle on domain-specific questions: a doctor asking about drug interactions, a lawyer checking precedents, or a patient comparing insurance claims will usually get vague or wrong answers. The issue isn’t model size or architecture: it’s that the data they need simply isn’t part of the training set.
 
@@ -551,7 +551,7 @@ What you get back here? A single, LLM-generated answer that gets the best out of
 -   ****Discover SyftBox****: [Install](https://syft-protocol.openmined.org/syft-router/index.html) it, setup your first data source and start querying your own files!
 -   **Invite a friend** **to query your file**: after setting up your data source and added a test file, ask a friend to send you a query!
 
-In the upcoming parts of this series, we’ll dive deeper into how you can define your own AI service effectively. If you encounter issues, [join our Slack and don’t hesitate to drop us a message!](https://openmined.org/slack/)
+In the upcoming parts of this series, we’ll dive deeper into how you can define your own AI service effectively. If you encounter issues, [join our Slack and don’t hesitate to drop us a message!](/slack/)
 
 <p class="has-text-align-center prose-divider">⬩⬩⬩</p>
 

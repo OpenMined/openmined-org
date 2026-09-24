@@ -50,7 +50,7 @@ GitHub: [@simcof](https://github.com/simcof)  |   Slack: [@BenS](https://app.s
 
 ****What would you say to someone who wants to start contributing?****
 
-> “Read this [post](https://blog.openmined.org/providing-opensource-privacy-for-covid19/) and then jump onto the OpenMined slack. There is so much to do right now, so perfect time to jump in! My advice is to figure out how you want to contribute, join the right channel on slack and away you go!”
+> “Read this [post](/blog/providing-opensource-privacy-for-covid19/) and then jump onto the OpenMined slack. There is so much to do right now, so perfect time to jump in! My advice is to figure out how you want to contribute, join the right channel on slack and away you go!”
 
 **Please recommend one interesting book, podcast or resource to the OpenMined community.**
 

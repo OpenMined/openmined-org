@@ -223,7 +223,7 @@ The tricky bit is figuring out how to provide officials with these aggregate sta
 
 Fortunately there are several scientific fields dedicated to this: Secure Aggregation and Differential Privacy being the main ones you should look at. I wouldn’t go so far as to say it’s a solved problem, but there are approaches that are more than practical enough for this use-case.
 
-The trickier bit is making sure you’re using a secure implementation of Differential Privacy or Secure Aggregation. If you’re unsure, please use the [resources we are providing](https://blog.openmined.org/openmineds-efforts-for-the-coronavirus-pandemic/).
+The trickier bit is making sure you’re using a secure implementation of Differential Privacy or Secure Aggregation. If you’re unsure, please use the [resources we are providing](/blog/openmineds-efforts-for-the-coronavirus-pandemic/).
 
 This aggregate information, in combination with “dimmers” for relevant categories in society, really is a powerful tool for epidemiologists working with health authorities. Officials can observe current health trends and modify society’s risk thresholds in real time to address them. It’s a powerful idea.
 

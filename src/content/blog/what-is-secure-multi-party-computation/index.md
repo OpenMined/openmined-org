@@ -12,7 +12,7 @@ legacyId: 2239
 <!-- TODO(a11y): 3 localized body image(s) have empty alt text -->
 
 
-_**This post is part of our [Privacy-Preserving Data Science, Explained](https://blog.openmined.org/private-machine-learning-explained/) series.**_
+_**This post is part of our [Privacy-Preserving Data Science, Explained](/blog/private-machine-learning-explained/) series.**_
 
 As we mentioned in one of the previous posts in this series, federated learning is not enough to develop privacy-preserving ML applications. In fact, to keep the model from merely copying what it receives, the data needs to be kept secret while still permitting training and inference. One way to achieve this objective, with both significant advantages and trade-offs, is secret sharing in secure multi-party computation. Today we’ll explore secure multi-party computation (SMPC) and explore how it can help us achieve input privacy. Similar to the post on FL, we hope that all the information in this article will be digestible for a broad audience, but section by section, we will go more into the weeds to understand and use this technique. For more info about the series, check out the intro article or take a look at the other posts to learn more about the technologies that can enable privacy-preserving ML with OpenMined’s libraries.
 
@@ -157,7 +157,7 @@ decode(35000) <-- 3.5
 
 ## SMPC in PyGrid
 
-SMPC is also one of the pillars of **[PyGrid, OpenMined’s peer-to-peer platform that uses the PySyft framework for Federated Learning and data science.](https://blog.openmined.org/what-is-pygrid-demo/)** The platform uses secure multiparty computation in cases when the overhead in communication is manageable, for example, when using a model only for inference. In those cases, this technique protects both data and model’s parameters and enables the kind of Private MLaaS applications that we introduced in this article.
+SMPC is also one of the pillars of **[PyGrid, OpenMined’s peer-to-peer platform that uses the PySyft framework for Federated Learning and data science.](/blog/what-is-pygrid-demo/)** The platform uses secure multiparty computation in cases when the overhead in communication is manageable, for example, when using a model only for inference. In those cases, this technique protects both data and model’s parameters and enables the kind of Private MLaaS applications that we introduced in this article.
 
 <figure class="">
 

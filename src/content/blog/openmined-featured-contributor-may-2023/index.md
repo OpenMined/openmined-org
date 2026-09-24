@@ -39,7 +39,7 @@ What are your specialties (i.e. Python development, Javascript development, comm
 
 **How and when did you originally come across OpenMined?**
 
-> While I was interning at a social media company, some of my colleagues were [exploring](https://blog.openmined.org/announcing-our-partnership-with-twitter-to-advance-algorithmic-transparency/) ways to share data and improve algorithmic transparency while preserving user privacy. OpenMined’s approach to data governance is a promising method for doing so, and I  stayed connected with the community to continue exploring the potential.
+> While I was interning at a social media company, some of my colleagues were [exploring](/blog/announcing-our-partnership-with-twitter-to-advance-algorithmic-transparency/) ways to share data and improve algorithmic transparency while preserving user privacy. OpenMined’s approach to data governance is a promising method for doing so, and I  stayed connected with the community to continue exploring the potential.
 
 **What was the first thing you started working on within OpenMined?**
 
@@ -62,4 +62,4 @@ What are your specialties (i.e. Python development, Javascript development, comm
 **Other social media links:**  
 Hci.social: [@jackbandy](https://hci.social/@jackbandy)  Twitter: @[jackbandy](https://twitter.com/jackbandy)
 
-**?**Want to work with folks like Jack? **[Apply here](https://blog.openmined.org/work-on-ais-most-exciting-frontier-no-phd-required/)** to be mentored by core team members (like Jack) on the PySyft codebase!
+**?**Want to work with folks like Jack? **[Apply here](/blog/work-on-ais-most-exciting-frontier-no-phd-required/)** to be mentored by core team members (like Jack) on the PySyft codebase!

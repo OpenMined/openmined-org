@@ -130,7 +130,7 @@ const rail = (categoryEntry?.data.rail ?? []).map((w) =>
       )}
     </div>
 
-    <BlogToolbar
+    <BlogToolbar headingAs="h1"
       heading={label}
       count={gridPosts.length}
       scope={{ cat: category, exclude: featuredEntry && postSlug(featuredEntry) }}

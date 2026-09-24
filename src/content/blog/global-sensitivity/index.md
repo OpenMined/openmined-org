@@ -127,7 +127,7 @@ _If the number of users/IoT devices itself is desired to be protected, then one 
 
 In this post we will show only the highlights of the underlying [notebook](https://github.com/gonzalo-munillag/Blog/blob/main/My_implementations/Global_sensitivity/Global_Sensitivity.ipynb). I invite you to check it out for more details.
 
-In the notebook, I used two datasets for each scenario (a) and (b), one that is large and one that is small. In this post, I will only target the larger datasets to allow for larger than one Hamming distance. The smaller dataset is the same as one included in a paper from Jaewoo Lee et al. I implemented that paper in a previous [post](https://blog.openmined.org/choosing-epsilon/).  I used it as a sanity check.
+In the notebook, I used two datasets for each scenario (a) and (b), one that is large and one that is small. In this post, I will only target the larger datasets to allow for larger than one Hamming distance. The smaller dataset is the same as one included in a paper from Jaewoo Lee et al. I implemented that paper in a previous [post](/blog/choosing-epsilon/).  I used it as a sanity check.
 
 **Scenario (a)**
 

@@ -84,5 +84,5 @@ We invite data scientists, researchers, and engineers working on production fede
 
 ### Have questions?
 
--   Join the conversation in our [Slack Community](https://openmined.org/slack/)
+-   Join the conversation in our [Slack Community](/slack/)
 -   Already in the OpenMined workspace? Join the `[#community-federated-learning](https://openmined.slack.com/archives/C081120HQ21)` channel

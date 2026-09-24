@@ -9,7 +9,7 @@ draft: false
 legacyId: 2423
 ---
 
-_हम इस अनुवाद के लिए उर्वशी रहेजा भट्टाचार्य का साभार धन्यवाद करते हैं|._ ____[Click here for English.](https://blog.openmined.org/providing-opensource-privacy-for-covid19/)____
+_हम इस अनुवाद के लिए उर्वशी रहेजा भट्टाचार्य का साभार धन्यवाद करते हैं|._ ____[Click here for English.](/blog/providing-opensource-privacy-for-covid19/)____
 
 ---
 
@@ -76,12 +76,12 @@ OpenMined **हमारी विशेषज्ञता, ओपन-सोर�
 
 ### उन सरकारी अधिकारियों के लिए जो ऐप्स को स्वीकृत / अस्वीकृत करते हैं:  
 
--   यदि आपके पास COVID-19 ऐप्स में गोपनीयता के बारे में कोई प्रश्न है, जिसे आप स्वीकार कर रहे हैं या कोई प्रश्न हैं, तो हमेंमें पूछें [Covid-19 तकनीकी सहयोग चैनल](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1) या ईमेल covid@openmined.org।
+-   यदि आपके पास COVID-19 ऐप्स में गोपनीयता के बारे में कोई प्रश्न है, जिसे आप स्वीकार कर रहे हैं या कोई प्रश्न हैं, तो हमेंमें पूछें [Covid-19 तकनीकी सहयोग चैनल](/slack/) या ईमेल covid@openmined.org।
 
 ### डेवलपर्स के लिए:  
 
--   तकनीकी सलाह के साथ हमारा लाइव दस्तावेज़, **[Maximising Privacy and Effectiveness in COVID-19 Apps।](https://blog.openmined.org/providing-opensource-privacy-for-covid19-hindi/blog.openmined.org/covid-app-privacy-advice/blog.openmined.org/covid-app-privacy-advice/)**
--   यदि आपके पास प्रश्न या सहायता की आवश्यकता है, तो [Covid -19 तकनीकी सहयोग स्लैक चैनल में पोस्ट करें](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1)।
+-   तकनीकी सलाह के साथ हमारा लाइव दस्तावेज़, **[Maximising Privacy and Effectiveness in COVID-19 Apps।](/blog/covid-app-privacy-advice/)**
+-   यदि आपके पास प्रश्न या सहायता की आवश्यकता है, तो [Covid -19 तकनीकी सहयोग स्लैक चैनल में पोस्ट करें](/slack/)।
 
 ******Github डेटा संग्रह स्थान******
 
@@ -94,8 +94,8 @@ OpenMined **हमारी विशेषज्ञता, ओपन-सोर�
 
 ### मदद करने के लिए देख रहे गोपनीयता और सुरक्षा विशेषज्ञों के लिए:  
 
--   तकनीकी सलाह के साथ हमारे लाइव दस्तावेज़, [**Maximising Privacy and Effectiveness in COVID-19 Apps**।](https://blog.openmined.org/providing-opensource-privacy-for-covid19-hindi/blog.openmined.org/covid-app-privacy-advice/)
--   यदि आपने इस ब्लॉगपोस्ट में परिवर्धन / संपादन की सिफारिश की है या हमारी सहायता करना चाहते हैं, तो [कोविद -19 तकनीकी सहयोग स्लैक चैनल में पोस्ट करें](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1)।
+-   तकनीकी सलाह के साथ हमारे लाइव दस्तावेज़, [**Maximising Privacy and Effectiveness in COVID-19 Apps**।](/blog/covid-app-privacy-advice/)
+-   यदि आपने इस ब्लॉगपोस्ट में परिवर्धन / संपादन की सिफारिश की है या हमारी सहायता करना चाहते हैं, तो [कोविद -19 तकनीकी सहयोग स्लैक चैनल में पोस्ट करें](/slack/)।
 
 ### दाताओं के लिए:  
 

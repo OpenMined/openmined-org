@@ -22,7 +22,7 @@ Today, we live in a world where massive amounts of data are constantly being ‘
 
 In the human quest of life-long discovery, the power that lies untapped in this vast, complex, heterogeneous ocean of data to answer questions is undeniable. Therefore, ensuring that the proper people can access this unharnessed trove of data, without data getting ‘spewed’ all over, risking access to the wrong hands, such as someone who wants some malicious use of the data, is a significantly important task.
 
-Considering privacy-preserving tools such as Differential Privacy and Secure Multi-Party Computation (discussed in [Part 1](https://blog.openmined.org/privacy-preserving-ai-a-birds-eye-view/) of this blog) as the building blocks, the only thing that stands between us and a better world in terms of data privacy is the usual cycle of adoption, maturation of the technology, and good engineering as is the case with any new concept/invention.
+Considering privacy-preserving tools such as Differential Privacy and Secure Multi-Party Computation (discussed in [Part 1](/blog/privacy-preserving-ai-a-birds-eye-view/) of this blog) as the building blocks, the only thing that stands between us and a better world in terms of data privacy is the usual cycle of adoption, maturation of the technology, and good engineering as is the case with any new concept/invention.
 
 Some broad examples of areas where the positive impacts could be substantial include:
 

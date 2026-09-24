@@ -88,4 +88,4 @@ Interested in knowing more about FE? This [talk](https://youtu.be/8EY4nskMCb4) w
 
 You can also know more about the recent advancements in FHE by IBM [here](https://arstechnica.com/gadgets/2020/07/ibm-completes-successful-field-trials-on-fully-homomorphic-encryption/https://arstechnica.com/gadgets/2020/07/ibm-completes-successful-field-trials-on-fully-homomorphic-encryption/https://arstechnica.com/gadgets/2020/07/ibm-completes-successful-field-trials-on-fully-homomorphic-encryption/).
 
-[This](https://blog.openmined.org/what-is-homomorphic-encryption/) is a great blog which explains the working of Homomorphic Encryption.
+[This](/blog/what-is-homomorphic-encryption/) is a great blog which explains the working of Homomorphic Encryption.

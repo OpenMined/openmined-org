@@ -48,9 +48,9 @@ We’ll be happy to have you with us in this project that we are excited and pas
 
 ---
 
-?Thanks to [Bala Priya](https://blog.openmined.org/author/balapriya/) for her editorial review and encouragement.
+?Thanks to [Bala Priya](/blog/author/balapriya/) for her editorial review and encouragement.
 
-?Thanks to [Emma Bluemke](https://blog.openmined.org/author/emma/), [Georgios Kaissis](https://blog.openmined.org/author/george-2/) and [Nahua Kang](https://blog.openmined.org/author/nahua/) for their support and encouragement.
+?Thanks to [Emma Bluemke](/blog/author/emma/), [Georgios Kaissis](/blog/author/george-2/) and [Nahua Kang](/blog/author/nahua/) for their support and encouragement.
 
 ---
 

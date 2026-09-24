@@ -12,7 +12,7 @@ legacyId: 2245
 <!-- TODO(a11y): 2 localized body image(s) have empty alt text -->
 
 
-_**This post is part of our [Privacy-Preserving Data Science, Explained](https://blog.openmined.org/private-machine-learning-explained/) series.**_
+_**This post is part of our [Privacy-Preserving Data Science, Explained](/blog/private-machine-learning-explained/) series.**_
 
 **_Update as of November 18, 2021: The version of PySyft mentioned in this post has been deprecated. Any implementations using this older version of PySyft are unlikely to work. Stay tuned for the release of PySyft 0.6.0, a data centric library for use in production targeted for release in early December._**
 
@@ -28,7 +28,7 @@ The data remains at its source devices, a.k.a. the clients, which receive a copy
 
 ## **Use cases**
 
-One of the first applications of FL was to improve word recommendation in [Google’s Android keyboard](https://ai.googleblog.com/2017/04/federated-learning-collaborative.html) without uploading the data, i.e. a user’s text, to the cloud. More recently, Apple has detailed how it employs [federated learning to improve Siri](https://www.technologyreview.com/2019/12/11/131629/apple-ai-personalizes-siri-federated-learning/)‘s voice recognition. Besides, intuitively, **keeping the data at its source is valuable in any privacy-preserving applications**, especially when [applied in healthcare](https://blog.openmined.org/federated-learning-differential-privacy-and-encrypted-computation-for-medical-imaging/) or on confidential data in business and government.
+One of the first applications of FL was to improve word recommendation in [Google’s Android keyboard](https://ai.googleblog.com/2017/04/federated-learning-collaborative.html) without uploading the data, i.e. a user’s text, to the cloud. More recently, Apple has detailed how it employs [federated learning to improve Siri](https://www.technologyreview.com/2019/12/11/131629/apple-ai-personalizes-siri-federated-learning/)‘s voice recognition. Besides, intuitively, **keeping the data at its source is valuable in any privacy-preserving applications**, especially when [applied in healthcare](/blog/federated-learning-differential-privacy-and-encrypted-computation-for-medical-imaging/) or on confidential data in business and government.
 
 <figure class="">
 
@@ -49,7 +49,7 @@ One of the first applications of FL was to improve word recommendation in [Googl
 
 ## Implementation
 
-To get started we will use t[he classical MNIST data set](https://blog.openmined.org/upgrade-to-federated-learning-in-10-lines/) that will stand in for our clients’ data, PySyft will provide all the components needed to demo federated learning and test it locally on this data set.
+To get started we will use t[he classical MNIST data set](/blog/upgrade-to-federated-learning-in-10-lines/) that will stand in for our clients’ data, PySyft will provide all the components needed to demo federated learning and test it locally on this data set.
 
 If you want to imagine a reasonably close application, we could conceive that the MNIST characters are part of the digital signatures of our clients, produced when signing documents on their smartphone and we would like to use them to train a character recognition model. In this scenario we would like to provide strong privacy assurances to our users by not uploading their signatures to a central server.
 
@@ -112,7 +112,7 @@ To contribute to making this vision a reality OpenMined is working on **PyGrid a
 
 Data owners and data scientists can connect on the platform, where the data owners can feel safe in the knowledge that their data will never leave their node, and data scientists can perform their analysis without infringing on anyone’s privacy rights.
 
-Today, this type of interaction could take from weeks to months in sectors working on sensitive data, but with PyGrid it could all be just a few lines of code away. To learn more about PyGrid, [here is a deeper dive in the platform and the use cases it enables](https://blog.openmined.org/what-is-pygrid-demo/).
+Today, this type of interaction could take from weeks to months in sectors working on sensitive data, but with PyGrid it could all be just a few lines of code away. To learn more about PyGrid, [here is a deeper dive in the platform and the use cases it enables](/blog/what-is-pygrid-demo/).
 
 ---
 

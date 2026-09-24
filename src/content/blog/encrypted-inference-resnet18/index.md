@@ -37,9 +37,9 @@ First, let’s try to understand what mechanisms we use to make the data and the
 
 ### Secret Sharing
 
-The cryptography protocol that we use to encrypt data is called Function Secret Sharing (FSS). It belongs to the family of [Secure Multi-Party Computation](https://blog.openmined.org/what-is-secure-multi-party-computation/) (SMPC) protocols, which involves several parties that share a secret to ensure privacy. A party alone holds a share of the private value and can’t reconstruct the value, and a quorum of parties (sometimes all parties) need to collaborate to reconstruct the private data. Therefore, saying that we _encrypt_ the data is an abuse of language and we should say that we _secret share_ it.
+The cryptography protocol that we use to encrypt data is called Function Secret Sharing (FSS). It belongs to the family of [Secure Multi-Party Computation](/blog/what-is-secure-multi-party-computation/) (SMPC) protocols, which involves several parties that share a secret to ensure privacy. A party alone holds a share of the private value and can’t reconstruct the value, and a quorum of parties (sometimes all parties) need to collaborate to reconstruct the private data. Therefore, saying that we _encrypt_ the data is an abuse of language and we should say that we _secret share_ it.
 
-Other families of protocols exist like those based on Homomorphic Encryption, where data is truly encrypted and a party only needs a key to decrypt it. I recommend reading this [OpenMined blog](https://blog.openmined.org/what-is-homomorphic-encryption/) to learn more about Homomorphic Encryption.
+Other families of protocols exist like those based on Homomorphic Encryption, where data is truly encrypted and a party only needs a key to decrypt it. I recommend reading this [OpenMined blog](/blog/what-is-homomorphic-encryption/) to learn more about Homomorphic Encryption.
 
 ### Function Secret Sharing
 

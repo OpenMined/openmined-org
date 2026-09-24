@@ -48,6 +48,13 @@ import { getCollection } from 'astro:content';
 interface Props {
   heading?: string;
   /**
+   * Element for the heading. Taxonomy archives pass `h1`: the toolbar heading
+   * IS their page title, and they have no other h1. Listings that carry their
+   * own (visually hidden) h1 — /blog/ and its pagination — keep the default.
+   * Visual size is identical either way; see `.blog-toolbar__heading:is(h1)`.
+   */
+  headingAs?: 'h1' | 'h6';
+  /**
    * The archive's own post count, shown before the controls as "N articles"
    * (live's taxonomy archives). Omit it on a listing that isn't a subset of
    * anything — the main /blog listing — and the element still renders, hidden,
@@ -79,7 +86,8 @@ interface Props {
     exclude?: string;
   };
 }
-const { heading = 'Recent', count, icon, byline, scope } = Astro.props;
+const { heading = 'Recent', headingAs = 'h6', count, icon, byline, scope } = Astro.props;
+const HeadingTag = headingAs;
 
 // Topic options — every tag, with its site-wide post count so terms nobody has
 // used render disabled (live does the same: cryptography / cost-of-intelligence
@@ -112,10 +120,10 @@ const topics = tags
   data-scope-exclude={scope?.exclude}
 >
   <div class="blog-toolbar__head">
-    <h6 class="blog-toolbar__heading">
+    <HeadingTag class="blog-toolbar__heading">
       {icon && <Icon name={icon} size={16} class="blog-toolbar__icon" />}
       {heading}
-    </h6>
+    </HeadingTag>
 
     {/* Overlays the heading while search is open (live: `.search-articles`,
         absolutely positioned over `.info-content`, the two cross-fading). */}
@@ -249,6 +257,12 @@ const topics = tags
     min-width: 0;
   }
 
+  /* Match the h6 tier exactly when rendered as an h1 (typography.css → h6). */
+  .blog-toolbar__heading:is(h1) {
+    font-family: var(--font-primary);
+    font-size: clamp(var(--h6-min), 1.54vw, 21px);
+    line-height: 1.5;
+  }
   .blog-toolbar__heading {
     --h6-max: 21px;
     display: flex;

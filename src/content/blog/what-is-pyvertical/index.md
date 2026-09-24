@@ -14,7 +14,7 @@ legacyId: 2113
 
 <!-- TODO(content): shortcode(s) present (verify) -->
 
-**_This post is part of our_ [_Privacy-Preserving Data Science, Explained_](https://blog.openmined.org/private-machine-learning-explained/) _series._**
+**_This post is part of our_ [_Privacy-Preserving Data Science, Explained_](/blog/private-machine-learning-explained/) _series._**
 
 <figure class="">
 
@@ -35,7 +35,7 @@ Let’s firstly briefly explain the three basic concepts regarding [PyVertical](
 
 Private set intersection (PSI) is a powerful cryptographic technique which enables two parties, which both have a set of data points, to find the intersection of both sets without exposing their raw data to the other party, thus protecting the data privacy of each party. Each party does not learn anything from the other party’s data set except for the intersection. In other words, PSI allows us to test in a privacy preserving way whether the parties share common data points (such as a location, ID, etc.) – the result is a third data set with only those elements, which both parties have in common.
 
-For more information and a code demonstration, see [**What is Private Set Intersection?**](https://blog.openmined.org/private-set-intersection/)
+For more information and a code demonstration, see [**What is Private Set Intersection?**](/blog/private-set-intersection/)
 
 ## Split Neural Networks
 
@@ -43,7 +43,7 @@ The training of a Neural Network (NN) is ‘split’ across two or more hosts. E
 
 This allows for improved efficiency of Split Neural Networks (SplitNNs) in terms of computational power during the training process, while achieving higher accuracy over a large number of hosts [\[2\]](https://arxiv.org/abs/1812.00564). SplitNNs often compared with Federated Learning, which is more efficient in situations where the number of the participating entities and/or the size of the model is small [\[3\]](https://arxiv.org/abs/1909.09145).
 
-For more information, see **[Split Neural Networks on PySyft](https://blog.openmined.org/split-neural-networks-on-pysyft/)**.
+For more information, see **[Split Neural Networks on PySyft](/blog/split-neural-networks-on-pysyft/)**.
 
 ## Vertically partitioned data
 
@@ -406,11 +406,11 @@ You made it to the end, that’s cool and we hope you enjoyed it! We are happy t
 
 **This post was written by:**
 
-1.  **[Pavlos Papadopoulos](https://blog.openmined.org/author/pavlos/)**  
+1.  **[Pavlos Papadopoulos](/blog/author/pavlos/)**  
     Researcher at apheris AI / Security & Identity team member at OpenMined / PhD student at Edinburgh Napier University
-2.  **[Tom Titcombe](https://blog.openmined.org/author/tom-titcombe/)**  
+2.  **[Tom Titcombe](/blog/author/tom-titcombe/)**  
     OpenMined Research Engineer. Security & Identity team member. Data Scientist by trade.
-3.  [**Robin Roehm**](https://blog.openmined.org/author/robin/)  
+3.  [**Robin Roehm**](/blog/author/robin/)  
     CEO & Co-Founder of apheris AI
-4.  [**Michael Hoeh**](https://blog.openmined.org/author/michael/)  
+4.  [**Michael Hoeh**](/blog/author/michael/)  
     CTO & Co-Founder of apheris AI

@@ -20,7 +20,7 @@ This integration is in the spirit of the OpenMined community’s desire to bring
 
 To read more about the vision and motivations for this partnership, please see [TensorFlow Federated’s companion blogpost](https://blog.tensorflow.org/2022/09/bridging-communities-tensorflow-federated-tff-and-openmined.html).
 
-If you’d like to join the team working on TensorFlow Federated, apply to work with Teo Milea as a part of [OpenMined’s padawan program](https://blog.openmined.org/work-on-ais-most-exciting-frontier-no-phd-required/)!
+If you’d like to join the team working on TensorFlow Federated, apply to work with Teo Milea as a part of [OpenMined’s padawan program](/blog/work-on-ais-most-exciting-frontier-no-phd-required/)!
 
 Outline:
 
@@ -40,7 +40,7 @@ TensorFlow Federated combines TensorFlow with distributed communication operator
 
 We are excited to announce a partnership with TFF which is born out of our shared belief in both privacy enhancing technologies and the value of open source software communities. The main goal of our collaboration is to allow PySyft users to use the TFF-compatible frameworks (TensorFlow/Keras/Jax/etc.) inside a PyGrid node deployed by HAGrid without requiring them to have a deep knowledge of either PySyft or TFF.
 
-To help add clarity to this integration, we have prepared a proof-of-concept tutorial below in which we train a Keras model using data from a PyGrid node. Hopefully, this will offer you a glimpse into what the future of remote data science looks like and inspire you to [apply to work on this project with Teo Milea (me)!](https://blog.openmined.org/work-on-ais-most-exciting-frontier-no-phd-required/)
+To help add clarity to this integration, we have prepared a proof-of-concept tutorial below in which we train a Keras model using data from a PyGrid node. Hopefully, this will offer you a glimpse into what the future of remote data science looks like and inspire you to [apply to work on this project with Teo Milea (me)!](/blog/work-on-ais-most-exciting-frontier-no-phd-required/)
 
 **Part 3: PySyft + TFF Tutorial**
 
@@ -279,4 +279,4 @@ It might take a while, depending on the number of rounds you specified, the comp
 
 **Step 17:** Get involved in the team integrating PySyft + TFF!
 
-It is true that our collaboration with TFF has just begun and there are plenty of improvements we can work on to make this proof-of-concept production ready. And by “we” I am also looking at you. Yeah, you!! If you have spotted some things that can be improved, feel free to apply to work with me through [OpenMined’s padawan program](https://blog.openmined.org/work-on-ais-most-exciting-frontier-no-phd-required/) — we want to expand our team and are excited to work with people that share our values and want to learn and contribute to both OpenMined and TFF. Feel free to take a look and apply!
+It is true that our collaboration with TFF has just begun and there are plenty of improvements we can work on to make this proof-of-concept production ready. And by “we” I am also looking at you. Yeah, you!! If you have spotted some things that can be improved, feel free to apply to work with me through [OpenMined’s padawan program](/blog/work-on-ais-most-exciting-frontier-no-phd-required/) — we want to expand our team and are excited to work with people that share our values and want to learn and contribute to both OpenMined and TFF. Feel free to take a look and apply!

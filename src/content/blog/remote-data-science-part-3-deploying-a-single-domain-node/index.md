@@ -18,7 +18,7 @@ legacyId: 1395
 
 This post is a continuation of  
 [“Remote Data Science  
-Part 2: Introduction to PySyft and PyGrid”](https://blog.openmined.org/remote-data-science-part-2-introduction-to-pysyft-and-pygrid/). Previous blog was about introduction to PySyft, PyGrid and HAGrid, Visualizing the domain and about Model/Data-centric FL in “Remote Data Science”
+Part 2: Introduction to PySyft and PyGrid”](/blog/remote-data-science-part-2-introduction-to-pysyft-and-pygrid/). Previous blog was about introduction to PySyft, PyGrid and HAGrid, Visualizing the domain and about Model/Data-centric FL in “Remote Data Science”
 
 ## Deploying a Single Domain Node locally using docker  
 
@@ -364,7 +364,7 @@ domain_node.users
 6\. [“Everyone wants to do the model work, not the data work”: Data Cascades in High-Stakes AI  
 ](https://storage.googleapis.com/pub-tools-public-publication-data/pdf/0d556e45afc54afeb2eb6b51a9bc1827b9961ff4.pdf)  
   
-7\. [Understanding the types of Federated learning.](https://blog.openmined.org/federated-learning-types/)  
+7\. [Understanding the types of Federated learning.](/blog/federated-learning-types/)  
   
 8\. [What can Data-Centric AI Learn from Data and ML Engineering?](https://arxiv.org/pdf/2112.06439.pdf)  
   
@@ -376,4 +376,4 @@ domain_node.users
 11\. [OpenMined – PySyft Github Library  
 ](https://github.com/OpenMined/PySyft)  
   
-12\. [Privacy Series Basics : Definition](https://blog.openmined.org/privacy-series-basics-definition/)
+12\. [Privacy Series Basics : Definition](/blog/privacy-series-basics-definition/)

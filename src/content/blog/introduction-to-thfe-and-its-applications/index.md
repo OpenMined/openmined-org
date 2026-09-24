@@ -86,7 +86,7 @@ where \* is sum, product, NAND, etc
     ![The Origins of TFHE](./media/origins.png)
     
 
-### [The TFHE-Chimera Library](https://blog.openmined.org/introduction-to-thfe-and-its-applications/tfhe.github.io)
+### [The TFHE-Chimera Library](https://tfhe.github.io)
 
 Features :
 

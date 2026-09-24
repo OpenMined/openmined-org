@@ -9,7 +9,7 @@ draft: false
 legacyId: 2443
 ---
 
-[OpenMined’s 2020 Roadmap](https://github.com/OpenMined/Roadmap) stipulates that our primary objective this year is to put software into production. At present, we are championing [7 use cases](https://github.com/OpenMined/Roadmap), several of which have been funded by organizations such as [PyTorch](https://blog.openmined.org/announcing-the-pytorch-openmined-federated-learning-fellowships/), the [RAAIS Foundation](https://blog.openmined.org/raais/), and soon, [Google Summer of Code](https://blog.openmined.org/announcing-openmined-google-summer-of-code/). This has lead to a very important (and intentional) change in the focus of our development teams.
+[OpenMined’s 2020 Roadmap](https://github.com/OpenMined/Roadmap) stipulates that our primary objective this year is to put software into production. At present, we are championing [7 use cases](https://github.com/OpenMined/Roadmap), several of which have been funded by organizations such as [PyTorch](/blog/announcing-the-pytorch-openmined-federated-learning-fellowships/), the [RAAIS Foundation](/blog/raais/), and soon, [Google Summer of Code](/blog/announcing-openmined-google-summer-of-code/). This has lead to a very important (and intentional) change in the focus of our development teams.
 
 Instead of each of our teams focusing on _abstract technologies_, each of our teams are focusing on _use cases_, with technologies being a dependency to accomplish the use case.
 

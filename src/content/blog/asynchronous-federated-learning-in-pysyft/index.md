@@ -239,7 +239,7 @@ When working with federated learning, we also have to look at its requirements. 
 
 We also have to take into account the communication channels that this architecture relies on, since the workers need to communicate in the training phase with the coordinator. This gets more tricky when working over unreliable edge environments, where connectivity and security are challenges that have to be resolved.  
 
-At [Midokura](https://blog.openmined.org/asynchronous-federated-learning-in-pysyft/www.midokura.com), we use our Edge Virtualization Platform (EVP) to take care of the deployment part, handling AI application components as microservices of a distributed architecture and enabling vertical placement of the workloads so the user can design where the workloads are processed. The platform takes care of the communication channels (which federated learning relies on), whether for an edge-edge or for an edge-cloud scenario, providing flexible connectivity, workload prioritization (QoS) and secure paths.
+At [Midokura](https://www.midokura.com), we use our Edge Virtualization Platform (EVP) to take care of the deployment part, handling AI application components as microservices of a distributed architecture and enabling vertical placement of the workloads so the user can design where the workloads are processed. The platform takes care of the communication channels (which federated learning relies on), whether for an edge-edge or for an edge-cloud scenario, providing flexible connectivity, workload prioritization (QoS) and secure paths.
 
 ### Conclusion
 

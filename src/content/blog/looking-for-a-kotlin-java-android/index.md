@@ -14,7 +14,7 @@ legacyId: 2192
 
 ### Our efforts in PSI
 
-We recently published an article shining light on private set intersection (PSI) and  its use in the COVID-19 crisis. We are currently developing an open source library for PSI. You can find an overview for the PSI approaches we follow with our libraries in the same article [here](https://blog.openmined.org/private-set-intersection/).
+We recently published an article shining light on private set intersection (PSI) and  its use in the COVID-19 crisis. We are currently developing an open source library for PSI. You can find an overview for the PSI approaches we follow with our libraries in the same article [here](/blog/private-set-intersection/).
 
 ### What we bring to the table
 

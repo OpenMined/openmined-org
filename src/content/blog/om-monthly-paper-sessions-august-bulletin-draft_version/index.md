@@ -81,9 +81,9 @@ In this section, the approach will be wrapped up. Fig.2 depicts the algorithm of
 
 ### Acknowledgements
 
-?_Thank you very much to [Helena Barmer](https://blog.openmined.org/author/helenabarmer/) for being the best teammate ever._
+?_Thank you very much to [Helena Barmer](/blog/author/helenabarmer/) for being the best teammate ever._
 
-?__Thank you very much to [Emma Bluemke](https://blog.openmined.org/author/emma/) and [Nahua Kang](https://blog.openmined.org/author/nahua/) for their editorial review.__
+?__Thank you very much to [Emma Bluemke](/blog/author/emma/) and [Nahua Kang](/blog/author/nahua/) for their editorial review.__
 
 ### References
 

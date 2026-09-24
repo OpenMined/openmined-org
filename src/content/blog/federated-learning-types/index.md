@@ -26,9 +26,9 @@ We’ll look at **Federated Learning**\[1\](of course), but then cover **Model-C
 
 The terms **Cross-Silo** & **Cross-Device**\[3\]**,** **Horizontal** & **Vertical**\[4\], **Federated Transfer Learning** \[9\] also occur, reflecting real world use cases and various solutions approaches.
 
-But beware — those building the software that will deliver the benefits of this technology are not limited by, or overly influenced by these terms. To quote [OpenMined](https://www.openmined.org/)’s Patrick Cason, such terms ‘ matter very little in the art of engineering solutions.’
+But beware — those building the software that will deliver the benefits of this technology are not limited by, or overly influenced by these terms. To quote [OpenMined](https://openmined.org/)’s Patrick Cason, such terms ‘ matter very little in the art of engineering solutions.’
 
-[OpenMined](https://www.openmined.org/)’s PyGrid & PySyft are very much at the forefront of Federated Learning and privacy preserving AI, extending Facebook’s popular PyTorch machine learning framework, so keep this caveat in mind as you read.
+[OpenMined](https://openmined.org/)’s PyGrid & PySyft are very much at the forefront of Federated Learning and privacy preserving AI, extending Facebook’s popular PyTorch machine learning framework, so keep this caveat in mind as you read.
 
 However, understanding these federating learning terms  may help you orientate and navigate the strange world of Federated Learning, where you can _build machine learning models using data you don’t own and can’t see._
 
@@ -200,9 +200,9 @@ This is a blog article, not a research paper, so I have used direct quotes from 
 
 \[1\] [Communication-Efficient Learning of Deep Networks from Decentralised Data](https://www.arxiv-vanity.com/papers/1602.05629/) — paper (2016)  
 \[2\] [Advances and Open Problems in Federated Learning](https://arxiv.org/pdf/1912.04977.pdf) — paper (2019)  
-\[3\] [So, What is ‘Model-Centric’ Federated Learning?](https://blog.openmined.org/announcing-new-libraries-for-fl-on-web-and-mobile/) — blog  
+\[3\] [So, What is ‘Model-Centric’ Federated Learning?](/blog/announcing-new-libraries-for-fl-on-web-and-mobile/) — blog  
 \[4\] [Federated Machine Learning: Concept and Applications](https://www.arxiv-vanity.com/papers/1902.04885/) — paper (2019)  
-\[5\] [Federated Learning For Credit Scoring](https://blog.openmined.org/federated-credit-scoring/) — blog  
+\[5\] [Federated Learning For Credit Scoring](/blog/federated-credit-scoring/) — blog  
 \[6\] [Utilisation of FATE in Anti Money Laundering Through Multiple Banks](https://www.fedai.org/cases/utilization-of-fate-in-anti-money-laundering-through-multiple-banks/) — blog  
 \[7\] [Utilisation of FATE in Risk Management of Credit in Small and Micro Enterprises](https://www.fedai.org/cases/utilization-of-fate-in-risk-management-of-credit-in-small-and-micro-enterprises/) — blog  
 \[8\][Pygrid](https://github.com/OpenMined/PyGrid) — project  

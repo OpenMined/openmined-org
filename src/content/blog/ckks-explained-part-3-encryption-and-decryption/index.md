@@ -11,19 +11,19 @@ draft: false
 legacyId: 2064
 ---
 
-__****This post is part of our [Privacy-Preserving Data Science, Explained](https://blog.openmined.org/private-machine-learning-explained/) series.****__
+__****This post is part of our [Privacy-Preserving Data Science, Explained](/blog/private-machine-learning-explained/) series.****__
 
 ## CKKS explained series
 
-[Part 1, Vanilla Encoding and Decoding](https://blog.openmined.org/ckks-explained-part-1-simple-encoding-and-decoding/)  
-[Part 2, Full Encoding and Decoding](https://blog.openmined.org/ckks-explained-part-2-ckks-encoding-and-decoding/)  
+[Part 1, Vanilla Encoding and Decoding](/blog/ckks-explained-part-1-simple-encoding-and-decoding/)  
+[Part 2, Full Encoding and Decoding](/blog/ckks-explained-part-2-ckks-encoding-and-decoding/)  
 Part 3, Encryption and Decryption  
-[Part 4, Multiplication and Relinearization](https://blog.openmined.org/ckks-explained-part-4-multiplication-and-relinearization/)  
-[Part 5, Rescaling](https://blog.openmined.org/ckks-explained-part-5-rescaling/)
+[Part 4, Multiplication and Relinearization](/blog/ckks-explained-part-4-multiplication-and-relinearization/)  
+[Part 5, Rescaling](/blog/ckks-explained-part-5-rescaling/)
 
 ## Introduction
 
-In the previous article [CKKS explained, Part 2: full encoding and decoding](https://blog.openmined.org/ckks-explained-part-2-ckks-encoding-and-decoding/), we saw how we could implement CKKS’s encoder and decoder, which enabled us to transform vectors to polynomials and vice-versa. This step was necessary as we will see that using polynomials is much more efficient for building an homomorphic encryption scheme than using vectors directly.
+In the previous article [CKKS explained, Part 2: full encoding and decoding](/blog/ckks-explained-part-2-ckks-encoding-and-decoding/), we saw how we could implement CKKS’s encoder and decoder, which enabled us to transform vectors to polynomials and vice-versa. This step was necessary as we will see that using polynomials is much more efficient for building an homomorphic encryption scheme than using vectors directly.
 
 We will see in this article how we can use hard problems, such as **LWE** or **RLWE** to build an approximate homomorphic encryption scheme. CKKS uses approximate arithmetic instead of exact arithmetic, in the sense that once we finish computation we might get a slightly different result than if we did the computation directly. This means that if you encrypt 2 and 3, add their ciphertexts, and decrypt you might get something like 4.99 or 5.01 but not 5. Other schemes such as BFV are exact, which mean they will yield exactly 5.
 

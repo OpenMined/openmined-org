@@ -11,7 +11,7 @@ draft: false
 legacyId: 2155
 ---
 
-__****This post is part of our [Privacy-Preserving Data Science, Explained](https://blog.openmined.org/private-machine-learning-explained/) series.****__
+__****This post is part of our [Privacy-Preserving Data Science, Explained](/blog/private-machine-learning-explained/) series.****__
 
 This post introduces the Paillier cryptosystem, which is a partial homomorphic encryption scheme. In a subsequent post we’ll see how this can be used as the basis for a private set intersection protocol.
 

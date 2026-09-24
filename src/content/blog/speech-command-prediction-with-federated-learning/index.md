@@ -37,7 +37,7 @@ You can learn in this tutorial…
 
 I use PySyft library for federated learning. PySyft is one of libraries for privacy preserving AI, which is developed and maintained by the open-source community called OpenMined.
 
-If the idea of privacy preserving AI is not familiar to you, please check out [OpenMined’s websites](https://www.openmined.org/). There are tons of good blogs and tutorials.
+If the idea of privacy preserving AI is not familiar to you, please check out [OpenMined’s websites](https://openmined.org/). There are tons of good blogs and tutorials.
 
 ### Training Objective
 

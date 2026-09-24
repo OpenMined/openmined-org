@@ -27,9 +27,9 @@ We simply don’t have the bandwidth or reach to give this amazing and unique co
 
 We want to share our curation efforts with you. Below are just some examples of stories and tutorials that our amazing community has created for the OpenMined blog.
 
--   [Predictive Maintenance of Turbofan Engines using Federated Learning](https://blog.openmined.org/predictive-maintenance-of-turbofan-engines-using-federated-learning/)
--   [Autonomous Driving’s Seat Belt Moment](https://blog.openmined.org/autonomous-driving-federated-learning/)
--   [Privacy-Preserving AI in Medical Imaging: Federated Learning, Differential Privacy, and Encrypted Computation](https://blog.openmined.org/federated-learning-differential-privacy-and-encrypted-computation-for-medical-imaging/)
+-   [Predictive Maintenance of Turbofan Engines using Federated Learning](/blog/predictive-maintenance-of-turbofan-engines-using-federated-learning/)
+-   [Autonomous Driving’s Seat Belt Moment](/blog/autonomous-driving-federated-learning/)
+-   [Privacy-Preserving AI in Medical Imaging: Federated Learning, Differential Privacy, and Encrypted Computation](/blog/federated-learning-differential-privacy-and-encrypted-computation-for-medical-imaging/)
 
 If you feel that you and your audiences would benefit from sharing these ideas and tutorials we will be arranging a monthly call to share the latest and greatest articles from our community.
 

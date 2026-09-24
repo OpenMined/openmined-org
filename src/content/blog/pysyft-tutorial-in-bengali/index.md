@@ -15,9 +15,9 @@ legacyId: 2194
 
 Welcome! OpenMined is an open-source community whose goal is to make the world more privacy-preserving by lowering the barrier-to-entry to private AI technologies. Since it’s birth, OpenMined has been aiming for making decentralized, privacy preserving Artificial Intelligence as accessible as possible to a wide community. As a continuation to this effort, OpenMined community has published [PySyft](https://github.com/OpenMined/PySyft) tutorials in Bengali! Check-out the [tutorials](https://github.com/OpenMined/PySyft/tree/master/examples/tutorials/translations/bengali) and [PySyft repository](https://github.com/OpenMined/PySyft) today and join our movement for making the world a safer and secured place. Originals tutorials in English are available [here](https://github.com/OpenMined/PySyft/tree/master/examples/tutorials).
 
-Please [subscribe](https://feedly.com/i/subscription/feed/https://blog.openmined.org/rss/) to this platform for more exciting news! If you wish to contribute in translating or writing for us, please fill out this form [here](https://docs.google.com/forms/d/e/1FAIpQLSdWSdhmXjLypvenrajYlaFDzipNZFhK9K-MtvXw8MeXqj6a5g/viewform)!
+Please [subscribe](https://feedly.com/i/subscription/feed//rss.xml) to this platform for more exciting news! If you wish to contribute in translating or writing for us, please fill out this form [here](https://docs.google.com/forms/d/e/1FAIpQLSdWSdhmXjLypvenrajYlaFDzipNZFhK9K-MtvXw8MeXqj6a5g/viewform)!
 
-Click [here](https://blog.openmined.org/pysyft-tutorial-in-bengali/slack.openmined.org) to join our amazing community of 7,300+ engineers, researchers, marketers, and hackers.
+Click [here](/slack/) to join our amazing community of 7,300+ engineers, researchers, marketers, and hackers.
 
 We sincerely thank [Mir Mohammad Jaber](https://www.linkedin.com/in/mir-mohammad-jaber/), [Zarreen Reza](https://www.linkedin.com/in/zarreennreza/), [Sourav Das](https://twitter.com/adventuroussrv) and [Sayantan Das](https://ucalyptus.github.io/) for contributing to these translations.
 
@@ -44,9 +44,9 @@ We sincerely thank [Mir Mohammad Jaber](https://www.linkedin.com/in/mir-mohammad
 
 স্বাগতম! ওপেনমাইন্ড একটি ওপেন-সোর্স সংগঠন যার লক্ষ্য হচ্ছে প্রাইভেট এ.আই (AI) প্রযুক্তি তৈরি ও ব্যবহারকে আরও সহজ করে তোলার মধ্য দিয়ে একটি  গোপনীয়তা-সংরক্ষণশীল পৃথিবী গড়ে তোলা। এর জন্মের শুরু থেকেই ওপেনমাইন্ড বিকেন্দ্রীভূত,  গোপনীয়তা-সংরক্ষণশীল কৃত্রিম-বুদ্ধিমত্তা (AI) নির্ভর প্রযুক্তিকে বৃহত্তর জনগোষ্ঠীর কাছে যথাসম্ভব সহজলভ্য করে তোলার জন্যে কাজ করে যাচ্ছে। এরই ধারাবাহিকতায় এবার ওপেনমাইন্ড কমিউনিটি [PySyft](https://github.com/OpenMined/PySyft) টিউটোরিয়াল বাংলায় প্রকাশ করছে! [বাংলা টিউটোরিয়ালগুলো](https://github.com/OpenMined/PySyft/tree/master/examples/tutorials/translations/bengali) ও [PySyft রিপোজিটরি](https://github.com/OpenMined/PySyft) থেকে আজই ঘুরে আসুন এবং একটি নিরাপদ ও সুরক্ষিত পৃথিবী গড়ে তোলার আমাদের এই অভিযানে যোগদান করুন। মূল টিউটোরিয়ালগুলো ইংরেজিতে পড়তে [এখানে](https://github.com/OpenMined/PySyft/tree/master/examples/tutorials) ক্লিক করুন।
 
-আরও রোমাঞ্চকর তথ্য সম্পর্কে অবহিত থাকতে এই প্লাটফর্মটি [সাবস্ক্রাইব](https://feedly.com/i/subscription/feed/https://blog.openmined.org/rss/) করে রাখুন। আপনি যদি অনুবাদ অথবা লেখালেখির কাজে অবদান রাখতে চান তবে এই [ফর্মটি](https://docs.google.com/forms/d/e/1FAIpQLSdWSdhmXjLypvenrajYlaFDzipNZFhK9K-MtvXw8MeXqj6a5g/viewform) পূরণ করুন।
+আরও রোমাঞ্চকর তথ্য সম্পর্কে অবহিত থাকতে এই প্লাটফর্মটি [সাবস্ক্রাইব](https://feedly.com/i/subscription/feed//rss.xml) করে রাখুন। আপনি যদি অনুবাদ অথবা লেখালেখির কাজে অবদান রাখতে চান তবে এই [ফর্মটি](https://docs.google.com/forms/d/e/1FAIpQLSdWSdhmXjLypvenrajYlaFDzipNZFhK9K-MtvXw8MeXqj6a5g/viewform) পূরণ করুন।
 
-৭৩০০ এর অধিক ডেভেলপার, ইঞ্জিনিয়ার, গবেষক, মার্কেটার ও হ্যাকারদের নিয়ে গঠিত আমাদের অসাধারণ কমিউনিটিতে যোগ দিতে এখানে [ক্লিক](https://blog.openmined.org/pysyft-tutorial-in-bengali/slack.openmined.org) করুন।
+৭৩০০ এর অধিক ডেভেলপার, ইঞ্জিনিয়ার, গবেষক, মার্কেটার ও হ্যাকারদের নিয়ে গঠিত আমাদের অসাধারণ কমিউনিটিতে যোগ দিতে এখানে [ক্লিক](/slack/) করুন।
 
 টিউটোরিয়ালগুলো বাংলায় অনুবাদের কাজে অবদান রাখার জন্য আমরা [মীর মোহাম্মদ জাবের](https://www.linkedin.com/in/mir-mohammad-jaber/), [যাররিন রেজা](https://www.linkedin.com/in/zarreennreza/), [সৌরভ দাস](https://twitter.com/adventuroussrv) ও [সায়ন্তন দাস](https://ucalyptus.github.io/) কে আন্তরিকভাবে ধন্যবাদ জানাই।
 

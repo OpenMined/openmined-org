@@ -7,7 +7,7 @@
  */
 import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
-import { postSlug } from '@utils/posts';
+import { postSlug, postExcerpt } from '@utils/posts';
 import { SITE_NAME } from '@data/site';
 
 export async function GET(context) {
@@ -23,7 +23,7 @@ export async function GET(context) {
     items: posts.map((p) => ({
       title: p.data.title,
       pubDate: p.data.date,
-      description: p.data.seo?.description ?? p.data.excerpt ?? '',
+      description: p.data.seo?.description ?? p.data.excerpt ?? postExcerpt(p.body),
       link: `/blog/${postSlug(p)}/`,
       categories: p.data.categories.map((c) => c.id),
     })),

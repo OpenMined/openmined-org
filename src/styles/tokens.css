@@ -186,17 +186,13 @@
   --text-headline-light: var(--color-grayscale-50);   /* text on dark surfaces */
   --text-body-light:     var(--color-grayscale-400);  /* text on dark surfaces */
   /* The one quiet-text token: placeholders, captions, form field descriptions,
-     CTA fineprint, blog meta. Static grayscale-550 in both modes, matching live
-     exactly (verified against openmined.org 2026-08-05: live paints 550 for
-     these in light AND dark, while body copy themes 750 → 400).
-
-     KNOWN a11y GAP, deliberately carried for now: 550 is 3.25–4.07:1 on the
-     surfaces we paint, below the 4.5:1 that 1.4.3 wants at 14px — live has the
-     same failure. Matching live comes first so the migration can be reviewed
-     against it; the contrast pass comes after (see BACKLOG). Do NOT spot-fix a
-     single consumer to a darker literal — that is what produced two divergent
-     values here before, one of which failed dark mode worse than 550 does. */
-  --text-subtle:         var(--color-grayscale-550);
+     CTA fineprint, blog meta. THEMED, so it clears WCAG 1.4.3 (4.5:1) on every
+     surface we paint: light 600 = 5.8–6.6:1 on grayscale-00/50/150/200; dark 500
+     (see the dark block) = 4.55–8.1:1 on grayscale-700/800/950. (Contrast pass
+     2026-09-24 — replaces the static 550 carried from WordPress, which measured
+     3.25–3.73:1 in both modes.) Never spot-fix a single consumer to a literal;
+     change it here. */
+  --text-subtle:         var(--color-grayscale-600);
 
 
   /* ── 5b. BORDER TOKENS ───────────────────────────────────────────── */
@@ -370,7 +366,7 @@
   --text-body:           var(--color-grayscale-400);
   --text-headline-light: var(--color-grayscale-850);
   --text-body-light:     var(--color-grayscale-750);
-  /* --text-subtle intentionally omitted — static value, does not switch */
+  --text-subtle:         var(--color-grayscale-500);
 
   --button-dark-color:   var(--color-grayscale-50);
   --button-light-color:  var(--color-grayscale-800);

@@ -9,7 +9,7 @@ draft: false
 legacyId: 2392
 ---
 
-_We sincerely thank Anna Dahlin ([@AnnaDahlin](https://twitter.com/AnnaDahlin)) for this translation! _[Click here for English.](https://blog.openmined.org/providing-opensource-privacy-for-covid19/)__
+_We sincerely thank Anna Dahlin ([@AnnaDahlin](https://twitter.com/AnnaDahlin)) for this translation! _[Click here for English.](/blog/providing-opensource-privacy-for-covid19/)__
 
 ---
 
@@ -69,7 +69,7 @@ Vi vill betona att det varken är OpenMineds mål att bygga en app eller att def
 
 ### För utvecklare:  
 
--   Läs vårt live-dokument med teknisk rådgivning _**[Maximera integriteten och effektiviteten i Covid-19-appar](https://blog.openmined.org/covid-app-privacy-advice/)**_
+-   Läs vårt live-dokument med teknisk rådgivning _**[Maximera integriteten och effektiviteten i Covid-19-appar](/blog/covid-app-privacy-advice/)**_
 -   Om du har frågor eller behöver hjälp kan du posta i Covid-19 Technical Collaboration Slack chatten.
 
 **Github arkiv**
@@ -86,7 +86,7 @@ Om du har frågor om en app du utreder, eller undrar om sekretess i Covid-19 app
 
 ### För sekretess- och säkerhetsexperter som vill hjälpa till:  
 
--   Läs vårt live-dokument med teknisk rådgivning _**[Maximera integriteten och effektiviteten i Covid-19-appar](https://blog.openmined.org/covid-app-privacy-advice/)**_
+-   Läs vårt live-dokument med teknisk rådgivning _**[Maximera integriteten och effektiviteten i Covid-19-appar](/blog/covid-app-privacy-advice/)**_
 -   Om du vill rekommendera tillägg/redigeringar till denna bloggpost, eller vill hjälpa oss, posta i Covid-19 Technical Collaboration Slack chatten.
 
 ### För sponsorer:  

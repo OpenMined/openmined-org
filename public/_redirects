@@ -78,3 +78,10 @@
 # rule retires the whole namespace instead of the single URL we happen to know.
 # Same shape and reasoning as /author/* above.
 /blog/resource_type/*   /                   301
+
+# --- Post-launch recovery (audit 2026-09-24) ---
+# The old WP sitemap root: crawlers still request it (404 since cutover).
+/sitemap.xml            /sitemap-index.xml   301
+# Retired WP "resources-old" namespace — Search Console still records clicks on
+# paths under it. Same retire-the-namespace reasoning as /blog/resource_type/*.
+/resources-old/*        /                    301

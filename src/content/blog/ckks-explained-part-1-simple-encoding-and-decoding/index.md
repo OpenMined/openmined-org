@@ -13,19 +13,19 @@ legacyId: 2087
 <!-- TODO(a11y): 2 localized body image(s) have empty alt text -->
 
 
-__****This post is part of our [Privacy-Preserving Data Science, Explained](https://blog.openmined.org/private-machine-learning-explained/) series.****__
+__****This post is part of our [Privacy-Preserving Data Science, Explained](/blog/private-machine-learning-explained/) series.****__
 
 ## CKKS explained series
 
 Part 1, Vanilla Encoding and Decoding  
-[Part 2, Full Encoding and Decoding](https://blog.openmined.org/ckks-explained-part-2-ckks-encoding-and-decoding/)  
-[Part 3, Encryption and Decryption](https://blog.openmined.org/ckks-explained-part-3-encryption-and-decryption/)  
-[Part 4, Multiplication and Relinearization](https://blog.openmined.org/ckks-explained-part-4-multiplication-and-relinearization/)  
-[Part 5, Rescaling](https://blog.openmined.org/ckks-explained-part-5-rescaling/)
+[Part 2, Full Encoding and Decoding](/blog/ckks-explained-part-2-ckks-encoding-and-decoding/)  
+[Part 3, Encryption and Decryption](/blog/ckks-explained-part-3-encryption-and-decryption/)  
+[Part 4, Multiplication and Relinearization](/blog/ckks-explained-part-4-multiplication-and-relinearization/)  
+[Part 5, Rescaling](/blog/ckks-explained-part-5-rescaling/)
 
 ## Introduction
 
-Homomorphic encryption is a promising field which allows computation on encrypted data. This excellent post, [What Is homomorphic Encryption](https://blog.openmined.org/what-is-homomorphic-encryption/), provides a broad explanation of what homomorphic encryption is and what the stakes are for this field of research.
+Homomorphic encryption is a promising field which allows computation on encrypted data. This excellent post, [What Is homomorphic Encryption](/blog/what-is-homomorphic-encryption/), provides a broad explanation of what homomorphic encryption is and what the stakes are for this field of research.
 
 In this series of articles, we will study in depth the Cheon-Kim-Kim-Song (CKKS) scheme, which is first discussed in the paper [Homomorphic Encryption for Arithmetic of Approximate Numbers](https://eprint.iacr.org/2016/421.pdf). CKKS allows us to perform computations on vectors of complex values (thus real values as well). The idea is that we will implement CKKS from scratch in Python and then, by using these crypto primitives, we can explore how to perform complex operations such as linear regression, neural networks, and so on.
 

@@ -101,7 +101,7 @@ On the other side of the fence is a **different path**, a much more _Open_ path;
 
 </div><h6 style="text-align:left; margin-top:0">Shubham ??</h6><p style="font-size:13px">Before joining OpenMined, Shubham worked as a Data Scientist and Software Engineer with B2B and B2C tech companies. In his work as a Data Scientist Shubham discovered PETs. Now spends his time engineering the Data Science API of Syft.</p></div>
 
-Learn more from our recent [R2Q4 Graduate Padawans](https://blog.openmined.org/openmined-r2q4-padawan-graduates/) and [Padawan Program Alumni](https://blog.openmined.org/padawan-program-alumni/) and find out what they are up to now!
+Learn more from our recent [R2Q4 Graduate Padawans](/blog/openmined-r2q4-padawan-graduates/) and [Padawan Program Alumni](/blog/padawan-program-alumni/) and find out what they are up to now!
 
 ### What do all of the above community members have in common?
 
