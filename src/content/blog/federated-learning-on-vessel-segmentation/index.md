@@ -198,4 +198,4 @@ The complete code for this demo can be found [here](https://github.com/siddhesh1
 
 Datasets: [DRIVE](https://drive.grand-challenge.org/), [STARE](https://cecas.clemson.edu/~ahoover/stare/)
 
-Want to learn more about Privacy Preserving AI in Medical Imaging? Check out [this post](https://blog.openmined.org/federated-learning-differential-privacy-and-encrypted-computation-for-medical-imaging/) by [Emma](https://blog.openmined.org/author/emma/) which will give you an overview about the application of Privacy Preserving in Medical Imaging.
+Want to learn more about Privacy Preserving AI in Medical Imaging? Check out [this post](/blog/federated-learning-differential-privacy-and-encrypted-computation-for-medical-imaging/) by [Emma](/blog/author/emma/) which will give you an overview about the application of Privacy Preserving in Medical Imaging.

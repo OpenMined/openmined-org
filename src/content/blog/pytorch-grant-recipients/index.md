@@ -50,7 +50,7 @@ legacyId: 2521
 
 </div></div></div></figure>
 
-We’re very excited to announce the recipients of the latest [round of open-source software development grants](https://blog.openmined.org/announcing-the-openmined-pytorch-development-challenges/) in the OpenMined community, generously sponsored by the PyTorch team! Congratulations to **Ajay Singh, Ayoub Benaissa, Varun Khare, Maddie Shang, Mark Jiminez, George-Cristian Muraru, Karl Higley,** **Mike Nolan** and **Vova Manannikov!**
+We’re very excited to announce the recipients of the latest [round of open-source software development grants](/blog/announcing-the-openmined-pytorch-development-challenges/) in the OpenMined community, generously sponsored by the PyTorch team! Congratulations to **Ajay Singh, Ayoub Benaissa, Varun Khare, Maddie Shang, Mark Jiminez, George-Cristian Muraru, Karl Higley,** **Mike Nolan** and **Vova Manannikov!**
 
 **Thank you to everyone who applied** – we had a huge number of fantastic applicants! You made selecting the final recipients a very tough decision. We hope you’ll apply again in the future, and keep in mind that you are still welcome to get involved with the codebases and projects.
 
@@ -58,13 +58,13 @@ We’re very excited to announce the recipients of the latest [round of open-sou
 
 If you or someone you know may be **interested in sponsoring a grant** like this one, please don’t hesitate to reach out via email – [partnerships@openmined.org](mailto:andrew@openmined.org).
 
-**If you’re interested in getting involved** contact [**@Théo Ryffel**](https://openmined.slack.com/team/UA2LD4PHS) about the [CrypTen](https://github.com/facebookresearch/CrypTen) project, and [**@cereallarceny**](https://openmined.slack.com/team/U6966R9BJ) about the [federated learning project](https://blog.openmined.org/announcing-the-pytorch-openmined-federated-learning-fellowships/).
+**If you’re interested in getting involved** contact [**@Théo Ryffel**](https://openmined.slack.com/team/UA2LD4PHS) about the [CrypTen](https://github.com/facebookresearch/CrypTen) project, and [**@cereallarceny**](https://openmined.slack.com/team/U6966R9BJ) about the [federated learning project](/blog/announcing-the-pytorch-openmined-federated-learning-fellowships/).
 
 ---
 
 ## OpenMined-PyTorch Fellows working on Crypten Integration
 
-The [CrypTen Integration fellowships](https://blog.openmined.org/openmined-pytorch-fellowship-crypten-project/) will focus on integrating the new [CrypTen](https://github.com/facebookresearch/CrypTen) library in PySyft to offer a new backend for highly efficient encrypted computations using secure multi-party computation (SMPC). CrypTen has been released with PyTorch 1.3. It focuses on making encrypted server-to-server SMPC computations as fast as possible. Upon the completion of this project, Crypten will offer PySyft users new ways to run encrypted computation between cloud servers using state-of-the-art crypto protocols.
+The [CrypTen Integration fellowships](/blog/openmined-pytorch-fellowship-crypten-project/) will focus on integrating the new [CrypTen](https://github.com/facebookresearch/CrypTen) library in PySyft to offer a new backend for highly efficient encrypted computations using secure multi-party computation (SMPC). CrypTen has been released with PyTorch 1.3. It focuses on making encrypted server-to-server SMPC computations as fast as possible. Upon the completion of this project, Crypten will offer PySyft users new ways to run encrypted computation between cloud servers using state-of-the-art crypto protocols.
 
 This project is lead by [****Theo Ryffel****](https://github.com/LaRiffle), the Crypto Team Lead for OpenMined. You may contact Theo with any further questions related to the project on the OpenMined Slack channel (****@Theo Ryffel****).
 
@@ -172,7 +172,7 @@ Mike Nolan a software engineer and open source community strategy & AI ethics/tr
 
 ---
 
-A final note: ****anyone may apply for an OpenMined fellowship****, however, we will show a strong preference to existing contributors. If you would like to better your chances of receiving a grant, we suggest you pick an issue labeled “good first issue” on the following code repositories (and of course, [Join the Slack](https://blog.openmined.org/p/594b0cc1-76b1-4371-aea1-bf0f77217dc0/slack.openmined.org)):
+A final note: ****anyone may apply for an OpenMined fellowship****, however, we will show a strong preference to existing contributors. If you would like to better your chances of receiving a grant, we suggest you pick an issue labeled “good first issue” on the following code repositories (and of course, [Join the Slack](/slack/)):
 
 -   [Syft.js](https://github.com/OpenMined/syft.js/issues) – __the Syft worker for the web (written in Javascript)__
 -   [Grid.js](https://github.com/OpenMined/grid.js/issues) – __a WebSocket/HTTPS server connecting PySyft to Syft.js__

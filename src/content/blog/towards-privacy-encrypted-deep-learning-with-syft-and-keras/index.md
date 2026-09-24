@@ -131,7 +131,7 @@ _Syft_ is a very promising, very actively developed framework that aims for prov
 
 ## Introducing Syft
 
-Syft – also known as [PySyft](https://github.com/OpenMined/PySyft), since as of today, its most mature implementation is written in and for Python – is maintained by [OpenMined](https://www.openmined.org/), an open source community dedicated to enabling privacy-preserving AI. It’s worth it reproducing their mission statement here:
+Syft – also known as [PySyft](https://github.com/OpenMined/PySyft), since as of today, its most mature implementation is written in and for Python – is maintained by [OpenMined](https://openmined.org/), an open source community dedicated to enabling privacy-preserving AI. It’s worth it reproducing their mission statement here:
 
 Industry standard tools for artificial intelligence have been designed with several assumptions: data is centralized into a single compute cluster, the cluster exists in a secure cloud, and the resulting models will be owned by a central authority. We envision a world in which we are not restricted to this scenario – a world in which AI tools treat privacy, security, and multi-owner governance as first class citizens. \[…\] The mission of the OpenMined community is to create an accessible ecosystem of tools for private, secure, multi-owner governed AI.
 
@@ -335,6 +335,6 @@ Let’s wrap up.
 
 Our example use case has not been too ambitious – we started with a trained model, thus leaving aside federated learning. Keeping the setup simple, we were able to focus on underlying principles: _Secret sharing_ as a means of encryption, and setting up a Syft/TFE cluster of workers that together, provide the infrastructure for encrypting model weights as well as client data.
 
-In case you’ve read our previous post on [TensorFlow Federated](https://blogs.rstudio.com/tensorflow/posts/2019-12-20-differential-privacy/) – that, too, a framework under development – you may have gotten an impression similar to the one I got: Setting up Syft was a lot more straightforward, concepts were easy to grasp, and surprisingly little code was required. As we may gather from a [recent blog post](https://blog.openmined.org/introducing-pysyft-tensorflow/), integration of Syft with TensorFlow Federated and TensorFlow Privacy are on the roadmap. I am looking forward _a lot_ for this to happen.
+In case you’ve read our previous post on [TensorFlow Federated](https://blogs.rstudio.com/tensorflow/posts/2019-12-20-differential-privacy/) – that, too, a framework under development – you may have gotten an impression similar to the one I got: Setting up Syft was a lot more straightforward, concepts were easy to grasp, and surprisingly little code was required. As we may gather from a [recent blog post](/blog/introducing-pysyft-tensorflow/), integration of Syft with TensorFlow Federated and TensorFlow Privacy are on the roadmap. I am looking forward _a lot_ for this to happen.
 
 Thanks for reading!

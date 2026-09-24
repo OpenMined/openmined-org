@@ -12,9 +12,9 @@ legacyId: 1835
 <!-- TODO(a11y): 3 localized body image(s) have empty alt text -->
 
 
-The [first post](https://blog.openmined.org/society-runs-on-information-flows/) of the Private AI series was all about information flows and how they are fundamental to our society. We also learned about how information flows are often broken today because of the privacy-transparency trade-off.
+The [first post](/blog/society-runs-on-information-flows/) of the Private AI series was all about information flows and how they are fundamental to our society. We also learned about how information flows are often broken today because of the privacy-transparency trade-off.
 
-In the [second post](https://blog.openmined.org/limitations-of-information-flows/) we discussed which technical problems exactly are underlying the privacy-transparency trade-off.
+In the [second post](/blog/limitations-of-information-flows/) we discussed which technical problems exactly are underlying the privacy-transparency trade-off.
 
 In today’s post we cover the first half of lesson 4 and learn about **solutions**.
 

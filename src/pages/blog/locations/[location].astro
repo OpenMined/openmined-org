@@ -53,7 +53,7 @@ const cards = await Promise.all(
 
 <BlogListing title={`${label} — Blog — OpenMined`} description={`OpenMined blog posts from ${label}.`}>
   <section class="location-archive container content-top-rule">
-    <BlogToolbar heading={label} count={total} scope={{ location }} />
+    <BlogToolbar headingAs="h1" heading={label} count={total} scope={{ location }} />
 
     {total > 0 ? (
       <div class="blog-grid">

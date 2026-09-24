@@ -72,7 +72,7 @@ Some examples of mitigation measures are as follows:
 -   Add appropriate data and retrain the model in case of insufficient data from certain classes
 -   Choose to learn with a proper privacy protection like Differential Privacy
 
-A learning algorithm is said to satisfy [Differential Privacy](https://blog.openmined.org/tag/differential-privacy/) if the models that are obtained by training on a data set that differs by only one record are indistinguishable to an external attacker. The level of distinguishability is controlled by a privacy parameter epsilon (ɛ). Open source tools such as [OpenDP](https://opendp.org/) and [TensorFlow](https://www.tensorflow.org/) allow for training models with Differential Privacy guarantees.
+A learning algorithm is said to satisfy [Differential Privacy](/blog/tag/differential-privacy/) if the models that are obtained by training on a data set that differs by only one record are indistinguishable to an external attacker. The level of distinguishability is controlled by a privacy parameter epsilon (ɛ). Open source tools such as [OpenDP](https://opendp.org/) and [TensorFlow](https://www.tensorflow.org/) allow for training models with Differential Privacy guarantees.
 
 Smaller values of ɛ – better privacy but less accuracy
 

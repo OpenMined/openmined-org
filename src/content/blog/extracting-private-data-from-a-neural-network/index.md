@@ -179,7 +179,7 @@ We have shown a simple way data can be extracted from a model if not enough care
 
 ### References
 
-\[1\]: [https://www.openmined.org/](https://www.openmined.org/)
+\[1\]: [https://openmined.org/](https://openmined.org/)
 
 \[2\]: [https://arxiv.org/pdf/2002.00937.pdf](https://arxiv.org/pdf/2002.00937.pdf)
 

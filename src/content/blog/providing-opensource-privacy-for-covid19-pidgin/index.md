@@ -9,7 +9,7 @@ draft: false
 legacyId: 2411
 ---
 
-_We sincerely thank Temitope Oladokun for this translation! _[Click here for English.](https://blog.openmined.org/providing-opensource-privacy-for-covid19/)__
+_We sincerely thank Temitope Oladokun for this translation! _[Click here for English.](/blog/providing-opensource-privacy-for-covid19/)__
 
 ---
 
@@ -38,7 +38,7 @@ OpenMined is **providing our expertise, open-source code, educational materials,
 **Specifically, OpenMined is working to:**
 
 -   **[Provide the free, open-source code](https://github.com/OpenMined)** for implementing the necessary privacy preserving techniques. To serve as many requirements as possible, the code base includes both individual components and white-label applications.
--   [**Provide education for all**](https://blog.openmined.org/covid-app-privacy-advice/) app makers and personnel responsible for vetting apps on behalf of their local jurisdiction about how these apps should and can be built in a way that protects citizen data and the private information it contains.
+-   [**Provide education for all**](/blog/covid-app-privacy-advice/) app makers and personnel responsible for vetting apps on behalf of their local jurisdiction about how these apps should and can be built in a way that protects citizen data and the private information it contains.
 
 ### These apps are urgently needed. Why care about privacy right now?  
 
@@ -70,8 +70,8 @@ Furthermore, by providing our open-source code we help developers two-fold:
 
 ### For developers:  
 
--   Read our live document with technical advice, **[Maximising Privacy and Effectiveness in COVID-19 Apps.](https://blog.openmined.org/covid-app-privacy-advice/)**
--   ****If you have questions or need assistance, post in the [Covid-19 Technical Collaboration Slack Channel](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1).****
+-   Read our live document with technical advice, **[Maximising Privacy and Effectiveness in COVID-19 Apps.](/blog/covid-app-privacy-advice/)**
+-   ****If you have questions or need assistance, post in the [Covid-19 Technical Collaboration Slack Channel](/slack/).****
 
 **Relevant ****Github Repositories****:**
 
@@ -83,12 +83,12 @@ Furthermore, by providing our open-source code we help developers two-fold:
 
 ### For government officials who approve/disapprove apps:  
 
--   ****If you have questions about an app that you are approving or have any questions about privacy in COVID-19 apps, ask us in the [Covid-19 Technical Collaboration Channel](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1) or email [covid@openmined.org](mailto:covid@openmined.org).****
+-   ****If you have questions about an app that you are approving or have any questions about privacy in COVID-19 apps, ask us in the [Covid-19 Technical Collaboration Channel](/slack/) or email [covid@openmined.org](mailto:covid@openmined.org).****
 
 ### For privacy and security experts looking to help:  
 
--   Our live document with technical advice, **[Maximising Privacy and Effectiveness in COVID-19 Apps.](https://blog.openmined.org/covid-app-privacy-advice/)**
--   ****If you have recommended additions/edits to this blogpost or want to help us out, post in the [Covid-19 Technical Collaboration Slack Channel](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1).****
+-   Our live document with technical advice, **[Maximising Privacy and Effectiveness in COVID-19 Apps.](/blog/covid-app-privacy-advice/)**
+-   ****If you have recommended additions/edits to this blogpost or want to help us out, post in the [Covid-19 Technical Collaboration Slack Channel](/slack/).****
 
 ### For donors:  
 

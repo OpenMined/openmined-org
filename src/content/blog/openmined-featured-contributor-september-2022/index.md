@@ -51,7 +51,7 @@ development, community organization, etc.)?**
 
 **What would you say to someone who wants to start contributing?**
 
-> OpenMined community is a vast, diverse, very welcoming, and supportive community. At first, it may be challenging, but you will get the proper support to continue your journey. Don’t get shy from the complexity of the technology. You just need to ask; someone will always answer or guide you. There are lots of opportunities to learn from the core developers. One interesting program is called the OpenMined [Padawan program](https://blog.openmined.org/work-on-ais-most-exciting-frontier-no-phd-required/), where you will get a one-on-one mentorship with various OpenMined experts to get you started.
+> OpenMined community is a vast, diverse, very welcoming, and supportive community. At first, it may be challenging, but you will get the proper support to continue your journey. Don’t get shy from the complexity of the technology. You just need to ask; someone will always answer or guide you. There are lots of opportunities to learn from the core developers. One interesting program is called the OpenMined [Padawan program](/blog/work-on-ais-most-exciting-frontier-no-phd-required/), where you will get a one-on-one mentorship with various OpenMined experts to get you started.
 
 **Please recommend one interesting book, podcast or resource to the OpenMined community.**
 

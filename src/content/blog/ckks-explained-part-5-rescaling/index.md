@@ -13,19 +13,19 @@ legacyId: 1965
 <!-- TODO(a11y): 2 localized body image(s) have empty alt text -->
 
 
-__****This post is part of our [Privacy-Preserving Data Science, Explained](https://blog.openmined.org/private-machine-learning-explained/) series.****__
+__****This post is part of our [Privacy-Preserving Data Science, Explained](/blog/private-machine-learning-explained/) series.****__
 
 ## CKKS explained series
 
-[Part 1, Vanilla Encoding and Decoding](https://blog.openmined.org/ckks-explained-part-1-simple-encoding-and-decoding/)  
-[Part 2, Full Encoding and Decoding](https://blog.openmined.org/ckks-explained-part-2-ckks-encoding-and-decoding/)  
-[Part 3, Encryption and Decryption](https://blog.openmined.org/ckks-explained-part-3-encryption-and-decryption/)  
-[Part 4, Multiplication and Relinearization](https://blog.openmined.org/ckks-explained-part-4-multiplication-and-relinearization/)  
+[Part 1, Vanilla Encoding and Decoding](/blog/ckks-explained-part-1-simple-encoding-and-decoding/)  
+[Part 2, Full Encoding and Decoding](/blog/ckks-explained-part-2-ckks-encoding-and-decoding/)  
+[Part 3, Encryption and Decryption](/blog/ckks-explained-part-3-encryption-and-decryption/)  
+[Part 4, Multiplication and Relinearization](/blog/ckks-explained-part-4-multiplication-and-relinearization/)  
 Part 5, Rescaling
 
 ## Introduction
 
-In the previous article of CKKS explained, [Part 4: Multiplication and Relinearization](https://blog.openmined.org/ckks-explained-part-4-multiplication-and-relinearization/), we saw how ciphertext multiplication works in CKKS, why we needed to relinearize the output in order to keep a constant ciphertext size and how to do it.
+In the previous article of CKKS explained, [Part 4: Multiplication and Relinearization](/blog/ckks-explained-part-4-multiplication-and-relinearization/), we saw how ciphertext multiplication works in CKKS, why we needed to relinearize the output in order to keep a constant ciphertext size and how to do it.
 
 Nonetheless, as we will see, we need a final operation called rescaling to manage the noise and avoid overflow. This will be the last theoretical article of this series, and in the next and final article we will implement everything in Python!
 
@@ -70,7 +70,7 @@ So before we move on to the more theoretical part, let’s see what are the key 
 
 So now that we see the high-level picture, let’s dig into the why and how it all works.
 
-If you remember correctly from the [Part 2 about encoding](https://blog.openmined.org/ckks-explained-part-2-ckks-encoding-and-decoding/), if we had an initial vector of values \\(z\\), it is multiplied by a scale \\(\\Delta\\) during encoding to keep some level of precision.
+If you remember correctly from the [Part 2 about encoding](/blog/ckks-explained-part-2-ckks-encoding-and-decoding/), if we had an initial vector of values \\(z\\), it is multiplied by a scale \\(\\Delta\\) during encoding to keep some level of precision.
 
 So the underlying value contained in the plaintext \\(\\mu\\) and ciphertext \\(c\\) is \\(\\Delta \\cdot z\\). The problem is that when we multiply two ciphertexts \\(c, c’\\), the result holds the value \\(z \\cdot z’ \\cdot \\Delta^2\\). So it contains the square of the scale, which might lead to overflow after a few multiplications as the scale might grow exponentially. Moreover, as we saw before, the noise increases after each multiplication.
 

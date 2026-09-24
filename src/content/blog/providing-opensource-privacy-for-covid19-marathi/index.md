@@ -9,7 +9,7 @@ draft: false
 legacyId: 2405
 ---
 
-_We sincerely thank Krunal Kshirsagar for this translation! ([Twitter](https://twitter.com/krunal_wrote), [Github](https://github.com/Noob-can-Compile)) _______[Click here for English.](https://blog.openmined.org/providing-opensource-privacy-for-covid19/)________
+_We sincerely thank Krunal Kshirsagar for this translation! ([Twitter](https://twitter.com/krunal_wrote), [Github](https://github.com/Noob-can-Compile)) _______[Click here for English.](/blog/providing-opensource-privacy-for-covid19/)________
 
 ---
 
@@ -68,8 +68,8 @@ _We sincerely thank Krunal Kshirsagar for this translation! ([Twitter](https://t
 
 ### विकसकांसाठी:  
 
--   तांत्रिक सल्ल्यासह आमचे थेट दस्तऐवज वाचा, **[COVID-19 अ‍ॅप्समध्ये जास्तीत जास्त गोपनीयता आणि प्रभावीपणा.](https://blog.openmined.org/covid-app-privacy-advice/)**
--   आपल्याकडे प्रश्न असल्यास किंवा मदतीची आवश्यकता असल्यास [COVID-19 तांत्रिक सहयोग स्लॅक चॅनेलवर](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1) पोस्ट करा.
+-   तांत्रिक सल्ल्यासह आमचे थेट दस्तऐवज वाचा, **[COVID-19 अ‍ॅप्समध्ये जास्तीत जास्त गोपनीयता आणि प्रभावीपणा.](/blog/covid-app-privacy-advice/)**
+-   आपल्याकडे प्रश्न असल्यास किंवा मदतीची आवश्यकता असल्यास [COVID-19 तांत्रिक सहयोग स्लॅक चॅनेलवर](/slack/) पोस्ट करा.
 -   ******Github Repositories******
 -   ****[**https://github.com/OpenMined/private-identity-server**](https://github.com/OpenMined/private-identity-server)****
 -   ****[**https://github.com/OpenMined/PyDP**](https://github.com/OpenMined/PyDP)****
@@ -79,12 +79,12 @@ _We sincerely thank Krunal Kshirsagar for this translation! ([Twitter](https://t
 
 ### अ‍ॅप्सना मान्यता / नामंजूर करणार्‍या सरकारी अधिकाऱ्यांसाठी:  
 
--   आपल्या COVID-19 अ‍ॅप्सला मंजूरी असलेल्या किंवा गोपनीयतेबद्दल काही प्रश्न असल्यास, [COVID-19 तांत्रिक सहयोग चॅनेल](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1) किंवा ईमेल [covid@openmined.org](mailto:covid@openmined.org) वर आम्हाला विचारा.
+-   आपल्या COVID-19 अ‍ॅप्सला मंजूरी असलेल्या किंवा गोपनीयतेबद्दल काही प्रश्न असल्यास, [COVID-19 तांत्रिक सहयोग चॅनेल](/slack/) किंवा ईमेल [covid@openmined.org](mailto:covid@openmined.org) वर आम्हाला विचारा.
 
 ### मदतीसाठी शोधत असलेल्या गोपनीयता आणि सुरक्षा तज्ञांसाठीः  
 
--   तांत्रिक सल्ल्यासह आमचा थेट कागदजत्र, **[COVID-19 अ‍ॅप्समध्ये अधिकतम गोपनीयता आणि प्रभावीपणा.](https://blog.openmined.org/covid-app-privacy-advice/)**
--   आपण या ब्लॉगपोस्टमध्ये काही समावेश/संपादनांची शिफारस केली असल्यास किंवा आम्हाला मदत करू इच्छित असल्यास [COVID-19 तांत्रिक सहयोग स्लॅक चॅनेलवर](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1) पोस्ट करा.
+-   तांत्रिक सल्ल्यासह आमचा थेट कागदजत्र, **[COVID-19 अ‍ॅप्समध्ये अधिकतम गोपनीयता आणि प्रभावीपणा.](/blog/covid-app-privacy-advice/)**
+-   आपण या ब्लॉगपोस्टमध्ये काही समावेश/संपादनांची शिफारस केली असल्यास किंवा आम्हाला मदत करू इच्छित असल्यास [COVID-19 तांत्रिक सहयोग स्लॅक चॅनेलवर](/slack/) पोस्ट करा.
 
 ### देणगीदारांसाठी:  
 

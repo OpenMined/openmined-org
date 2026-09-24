@@ -9,7 +9,7 @@ draft: false
 legacyId: 2297
 ---
 
-__We sincerely thank_ Shahrokh Bahtooei _for this translation! __[Click here for English.](https://blog.openmined.org/providing-opensource-privacy-for-covid19/)____
+__We sincerely thank_ Shahrokh Bahtooei _for this translation! __[Click here for English.](/blog/providing-opensource-privacy-for-covid19/)____
 
 ---
 
@@ -21,7 +21,7 @@ __We sincerely thank_ Shahrokh Bahtooei _for this translation! __[Click here for
 
 ****اُپن‌مایند یک** **کامیونیتی (community) با بیش از ۷،۳۰۰ مهندس، پژوهشگر،** وبلاگ‌نویس **و برنامه‌نویس است که** بنا نهاده است **با کدِ باز**متن (open-source) **و آموزش رایگان ورود** را **به فناوری‌های هوش مصنوعیِ نهان** (private AI) آسان کند**.****
 
-**[توصیهٔ فنی](https://blog.openmined.org/covid-app-privacy-advice/) می‌کنیم و [کد بازمتن](https://github.com/OpenMined) می‌سازیم و روی [اِسلَک](https://join.slack.com/t/openmined/shared_invite/zt-deu0kql0-kn~hh1CM3LdME6WORkIp6g) پشتیبانی می‌کنیم. کمک می‌کنیم سازندگان اپ در هرکجا از حریم خصوصی کاربران محافظت کنند.**
+**[توصیهٔ فنی](/blog/covid-app-privacy-advice/) می‌کنیم و [کد بازمتن](https://github.com/OpenMined) می‌سازیم و روی [اِسلَک](/slack/) پشتیبانی می‌کنیم. کمک می‌کنیم سازندگان اپ در هرکجا از حریم خصوصی کاربران محافظت کنند.**
 
 ---
 
@@ -36,7 +36,7 @@ __We sincerely thank_ Shahrokh Bahtooei _for this translation! __[Click here for
 **به‌طور خاص، اُپن‌مایند می‌کوشد:**
 
 -   برای پیاده‌سازیِ تکنیک‌های ضروری در حفظِ حریم خصوصی **[کد رایگان و بازمتن فراهم کند.](https://github.com/OpenMined)** برای آنکه تاحدامکان بیشترین نیازمندی برآورده شود، کدِ پایه هم شامل کامپوننت‌های مجزا می‌شود، هم شامل اپ‌های بِرندگذاری‌نشده (white-label apps).
--   برای **همهٔ** سازندگان اپ و مسئولان ممیزی آن در حوزه‌های قضاییِ محلی **[آموزش فراهم کند.](https://blog.openmined.org/covid-app-privacy-advice/)** این آموزش‌ها دراین‌باره‌اند که چگونه این اپ‌ها را باید و می‌توان به گونه‌ای ساخت که از داده‌های شهروندان و اطلاعات خصوصیِ دربرداشته، محافظت کند.
+-   برای **همهٔ** سازندگان اپ و مسئولان ممیزی آن در حوزه‌های قضاییِ محلی **[آموزش فراهم کند.](/blog/covid-app-privacy-advice/)** این آموزش‌ها دراین‌باره‌اند که چگونه این اپ‌ها را باید و می‌توان به گونه‌ای ساخت که از داده‌های شهروندان و اطلاعات خصوصیِ دربرداشته، محافظت کند.
 
 ## این اپ‌ها فوراً نیازند. چرا الان به حریم خصوصی اهمیت دهیم؟
 
@@ -69,9 +69,9 @@ __We sincerely thank_ Shahrokh Bahtooei _for this translation! __[Click here for
 ### برای برنامه‌نویسان:
 
 -   سندِ زندهٔ ما را با عنوان زیر که محتویِ توصیه‌های فنی‌ است، بخوانید:  
-    **[Maximising Privacy and Effectiveness in COVID-19 Apps](https://blog.openmined.org/covid-app-privacy-advice/)**
+    **[Maximising Privacy and Effectiveness in COVID-19 Apps](/blog/covid-app-privacy-advice/)**
 -   **اگر سؤالی دارید یا کمکی می‌خواهید، در کانال اِسلَک ما پست گذارید:**  
-    [**Covid-19 Technical Collaboration Slack Channel**](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1)
+    [**Covid-19 Technical Collaboration Slack Channel**](/slack/)
 
 **ریپازیتوری‌های مرتبط در گیت‌هاب:**
 
@@ -84,15 +84,15 @@ __We sincerely thank_ Shahrokh Bahtooei _for this translation! __[Click here for
 ### برای مقام‌هایی دولتی که اپ‌ها را تأیید یا رد می‌کنند:
 
 -   **اگر دربارهٔ اپی که دارید به آن مجوز می‌دهید، سؤالی دارید یا هر پرسشی راجع به حریم خصوصی در اپ‌های کووید ۱۹ ذهنتان را مشغول کرده، در کانال اِسلَک ما مطرح کنید:**  
-    **[Covid-19 Technical Collaboration Slack Channel](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1)**  
+    **[Covid-19 Technical Collaboration Slack Channel](/slack/)**  
     **یا به ما ایمیل بزنید:covid@openmined.org**
 
 ### برای متخصصانی در امنیت و حریم خصوصی که به‌دنبال کمک‌اند:
 
 -   به سندِ زندهٔ ما با عنوان زیر که محتوی توصیه‌های فنی‌ است، رجوع کنید:  
-    **[Maximising Privacy and Effectiveness in COVID-19 Apps](https://blog.openmined.org/covid-app-privacy-advice/)**
+    **[Maximising Privacy and Effectiveness in COVID-19 Apps](/blog/covid-app-privacy-advice/)**
 -   **اگر می‌خواهید توصیه‌هایی به آن پستِ وبلاگ بیفزایید یا در آن ویرایشی کنید یا به هر نحو کمکی کنید، در کانال اِسلَک ما پست گذارید:  
-    [Covid-19 Technical Collaboration Slack Channel](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1)**
+    [Covid-19 Technical Collaboration Slack Channel](/slack/)**
 
 ### برای اهداگران:
 

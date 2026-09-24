@@ -12,7 +12,7 @@ legacyId: 2295
 <!-- TODO(a11y): 3 localized body image(s) have empty alt text -->
 
 
-__****This post is part of our [Privacy-Preserving Data Science, Explained](https://blog.openmined.org/private-machine-learning-explained/) series.****__
+__****This post is part of our [Privacy-Preserving Data Science, Explained](/blog/private-machine-learning-explained/) series.****__
 
 _Private set intersection (PSI) is a powerful cryptographic technique which allows two parties to compute the intersection of their data without exposing their raw data to the other party. In other words, PSI allows to test whether the parties share a common datapoint (such as a location, ID, etc)._
 

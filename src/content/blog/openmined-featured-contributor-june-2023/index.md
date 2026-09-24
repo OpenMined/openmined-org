@@ -52,7 +52,7 @@ Github: [@Poppy22](https://github.com/Poppy22)
 
 **What would you say to someone who wants to start contributing?**
 
-> Everyone is super friendly and help is needed at all levels! So don’t be shy, message someone and clearly state your interests, and they will be able to redirect you to someone else closely related to what you want to engage in (or to the nearest [Padawan program](https://blog.openmined.org/work-on-ais-most-exciting-frontier-no-phd-required/) 😉 ).
+> Everyone is super friendly and help is needed at all levels! So don’t be shy, message someone and clearly state your interests, and they will be able to redirect you to someone else closely related to what you want to engage in (or to the nearest [Padawan program](/blog/work-on-ais-most-exciting-frontier-no-phd-required/) 😉 ).
 
 **Please recommend one interesting book, podcast or resource to the  
 OpenMined community.**
@@ -69,6 +69,6 @@ OpenMined community.**
 
 > \[podcast\] Re: Dracula – the book Dracula by Bram Stoker is written in journal entries and letters, all dated, and the action takes place between mid-may until autumn. This podcast releases an episode with the content of the book on that particular day when it was written by the characters, so you get to listen to the book as the action takes place!
 
-**[Other social media links:](https://blog.openmined.org/work-on-ais-most-exciting-frontier-no-phd-required/)**
+**[Other social media links:](/blog/work-on-ais-most-exciting-frontier-no-phd-required/)**
 
 [LinkedIn](https://www.linkedin.com/in/carmengpopa/)

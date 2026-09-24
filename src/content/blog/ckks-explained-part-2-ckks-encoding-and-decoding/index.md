@@ -13,19 +13,19 @@ legacyId: 2070
 <!-- TODO(a11y): 1 localized body image(s) have empty alt text -->
 
 
-__****This post is part of our [Privacy-Preserving Data Science, Explained](https://blog.openmined.org/private-machine-learning-explained/) series.****__
+__****This post is part of our [Privacy-Preserving Data Science, Explained](/blog/private-machine-learning-explained/) series.****__
 
 ## CKKS explained series
 
-[Part 1, Vanilla Encoding and Decoding](https://blog.openmined.org/ckks-explained-part-1-simple-encoding-and-decoding/)  
+[Part 1, Vanilla Encoding and Decoding](/blog/ckks-explained-part-1-simple-encoding-and-decoding/)  
 Part 2, Full Encoding and Decoding  
-[Part 3, Encryption and Decryption](https://blog.openmined.org/ckks-explained-part-3-encryption-and-decryption/)  
-[Part 4, Multiplication and Relinearization](https://blog.openmined.org/ckks-explained-part-4-multiplication-and-relinearization/)  
-[Part 5, Rescaling](https://blog.openmined.org/ckks-explained-part-5-rescaling/)
+[Part 3, Encryption and Decryption](/blog/ckks-explained-part-3-encryption-and-decryption/)  
+[Part 4, Multiplication and Relinearization](/blog/ckks-explained-part-4-multiplication-and-relinearization/)  
+[Part 5, Rescaling](/blog/ckks-explained-part-5-rescaling/)
 
 ## Introduction
 
-In the previous article [CKKS explained: Part 1, Vanilla Encoding and Decoding](https://blog.openmined.org/ckks-explained-part-1-simple-encoding-and-decoding/), we learned that to implement the CKKS encryption scheme for computation on encrypted complex vectors, we must first build an encoder and a decoder to transform our complex vectors into polynomials.
+In the previous article [CKKS explained: Part 1, Vanilla Encoding and Decoding](/blog/ckks-explained-part-1-simple-encoding-and-decoding/), we learned that to implement the CKKS encryption scheme for computation on encrypted complex vectors, we must first build an encoder and a decoder to transform our complex vectors into polynomials.
 
 This encoder-decoder step is necessary because the encryption, decryption, and other mechanisms work on polynomial rings. Therefore it is necessary to have a way to transform our vectors of real values into polynomials.
 

@@ -20,7 +20,7 @@ Differential privacy is a great approach to reducing this risk in a provable mat
 
 Fortunatley, last year Google has open sourced it’s DP [C++ library](https://github.com/google/differential-privacy), which we believe to be one of the most secure, battle-hardened implementations of Differential Privacy ever produced.. However, since the library is in C++, it is definitely not a trivial task for a React developer or an iOS app builder use it!
 
-OpenMined is working on a few projects ([read more here](https://blog.openmined.org/openmineds-efforts-for-the-coronavirus-pandemic/)) to bake this library into languages that most of you are familiar with. We need some help to get these completed quickly, so come join us on [Slack](http://slack.openmined.org/) now and introduce yourself in the #covid\_dp\_lib\_wrapping channel!
+OpenMined is working on a few projects ([read more here](/blog/openmineds-efforts-for-the-coronavirus-pandemic/)) to bake this library into languages that most of you are familiar with. We need some help to get these completed quickly, so come join us on [Slack](http://slack.openmined.org/) now and introduce yourself in the #covid\_dp\_lib\_wrapping channel!
 
 -   [PyDP: Python wrapper for Google’s Differential Privacy project](https://github.com/OpenMined/PyDP)
 -   [dp.js: Javascript wrapper for Google’s Differential Privacy project](https://github.com/OpenMined/dp.js)

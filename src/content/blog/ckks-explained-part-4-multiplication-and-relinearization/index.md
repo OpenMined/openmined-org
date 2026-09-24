@@ -11,19 +11,19 @@ draft: false
 legacyId: 1991
 ---
 
-__****This post is part of our [Privacy-Preserving Data Science, Explained](https://blog.openmined.org/private-machine-learning-explained/) series.****__
+__****This post is part of our [Privacy-Preserving Data Science, Explained](/blog/private-machine-learning-explained/) series.****__
 
 ## CKKS explained series
 
-[Part 1, Vanilla Encoding and Decoding](https://blog.openmined.org/ckks-explained-part-1-simple-encoding-and-decoding/)  
-[Part 2, Full Encoding and Decoding](https://blog.openmined.org/ckks-explained-part-2-ckks-encoding-and-decoding/)  
-[Part 3, Encryption and Decryption](https://blog.openmined.org/ckks-explained-part-3-encryption-and-decryption/)  
+[Part 1, Vanilla Encoding and Decoding](/blog/ckks-explained-part-1-simple-encoding-and-decoding/)  
+[Part 2, Full Encoding and Decoding](/blog/ckks-explained-part-2-ckks-encoding-and-decoding/)  
+[Part 3, Encryption and Decryption](/blog/ckks-explained-part-3-encryption-and-decryption/)  
 Part 4, Multiplication and Relinearization  
-[Part 5, Rescaling](https://blog.openmined.org/ckks-explained-part-5-rescaling/)
+[Part 5, Rescaling](/blog/ckks-explained-part-5-rescaling/)
 
 ## Introduction
 
-In the previous article [CKKS explained, Part 3: Encryption and Decryption](https://blog.openmined.org/ckks-explained-part-3-encryption-and-decryption/), we saw how one could create an homomorphic encryption scheme based on the RLWE problem, with an implementation of homomorphic addition, and ciphertext-plaintext multiplication.
+In the previous article [CKKS explained, Part 3: Encryption and Decryption](/blog/ckks-explained-part-3-encryption-and-decryption/), we saw how one could create an homomorphic encryption scheme based on the RLWE problem, with an implementation of homomorphic addition, and ciphertext-plaintext multiplication.
 
 While it was easy to perform ciphertext-plaintext multiplication, ciphertext-ciphertext is much more involved as we will see. Indeed, we will have many things to handle to do it properly, such as finding the right operation such that once decrypted we get the product of two ciphertexts, and managing the size of the ciphertext.
 

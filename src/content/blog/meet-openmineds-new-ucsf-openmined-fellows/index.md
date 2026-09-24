@@ -30,7 +30,7 @@ legacyId: 2183
 
 </div></div></div></figure>
 
-We’re very excited to announce the recipients of the latest [round of open-source software development grants](https://blog.openmined.org/announcing-openmined-ucsf-data-centric-fl-fellowship/) in the OpenMined community, generously sponsored by the UCSF team! Congratulations to **[Héricles Emanuel](https://github.com/hericlesme)**, **[José Benardi de Souza Nunes](https://github.com/Benardi)**, **[Amr Kayid](https://github.com/AmrMKayid)**, and **[Sachin Kumar](https://github.com/sachin-101)**!
+We’re very excited to announce the recipients of the latest [round of open-source software development grants](/blog/announcing-openmined-ucsf-data-centric-fl-fellowship/) in the OpenMined community, generously sponsored by the UCSF team! Congratulations to **[Héricles Emanuel](https://github.com/hericlesme)**, **[José Benardi de Souza Nunes](https://github.com/Benardi)**, **[Amr Kayid](https://github.com/AmrMKayid)**, and **[Sachin Kumar](https://github.com/sachin-101)**!
 
 **Thank you to everyone who applied** – we had a huge number of fantastic applicants! You made selecting the final recipients a very tough decision. We hope you’ll apply again in the future, and keep in mind that you are still welcome to get involved with the codebases and projects.
 
@@ -38,7 +38,7 @@ We’re very excited to announce the recipients of the latest [round of open-sou
 
 If you or someone you know may be **interested in sponsoring a grant** like this one, please don’t hesitate to reach out via email – [partnerships@openmined.org](mailto:partnerships@openmined.org).
 
-**If you’re interested in getting involved** contact [**@cereallarceny**](https://openmined.slack.com/team/U6966R9BJ) about the [federated learning project](https://blog.openmined.org/announcing-openmined-ucsf-data-centric-fl-fellowship/).
+**If you’re interested in getting involved** contact [**@cereallarceny**](https://openmined.slack.com/team/U6966R9BJ) about the [federated learning project](/blog/announcing-openmined-ucsf-data-centric-fl-fellowship/).
 
 ---
 

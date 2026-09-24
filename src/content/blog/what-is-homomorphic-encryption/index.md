@@ -13,7 +13,7 @@ legacyId: 2122
 <!-- TODO(a11y): 3 localized body image(s) have empty alt text -->
 
 
-__**This post is part of our [Privacy-Preserving Data Science, Explained](https://blog.openmined.org/private-machine-learning-explained/) series.**__
+__**This post is part of our [Privacy-Preserving Data Science, Explained](/blog/private-machine-learning-explained/) series.**__
 
 **_Check out the companion video to this article on [youtube](https://youtu.be/2TVqFGu1vhw)._**
 
@@ -47,7 +47,7 @@ Homomorphic encryption has numerous applications that range from healthcare to s
 
 ## Implementation
 
-PySyft supports the **CKKS** leveled homomorphic encryption scheme and the [**Paillier** partially homomorphic encryption scheme](https://blog.openmined.org/the-paillier-cryptosystem/) which is limited to addition but is much faster.
+PySyft supports the **CKKS** leveled homomorphic encryption scheme and the [**Paillier** partially homomorphic encryption scheme](/blog/the-paillier-cryptosystem/) which is limited to addition but is much faster.
 
 More details on CKKS and Paillier are available below in the “theory behind the implementation” section. Here we’ll focus on how to use HE in PySyft.
 
@@ -176,7 +176,7 @@ The following are some examples of HE schemes: some partial, others fully homomo
 
 #### Paillier
 
-In 1999 Pascal Paillier invented a partially homomorphic, asymmetric cryptosystem now bearing his last name. Paillier’s scheme is homomorphic with respect to addition. For more details on the actual algorithm take a look at the [article dedicated to it on our blog](https://blog.openmined.org/the-paillier-cryptosystem/).
+In 1999 Pascal Paillier invented a partially homomorphic, asymmetric cryptosystem now bearing his last name. Paillier’s scheme is homomorphic with respect to addition. For more details on the actual algorithm take a look at the [article dedicated to it on our blog](/blog/the-paillier-cryptosystem/).
 
 In short, it achieves HE with respect to addition by encrypting the message as an exponent of the public key. This way when multiplying two ciphertexts encrypted with the same key the result is a valid encryption of the sum.
 
@@ -190,7 +190,7 @@ CKKS has been developed by researchers at Seoul National University and UC San D
 
 OpenMined uses CKKS as the primary way to encrypt tensors on which we want to perform both addition and multiplication.
 
-**OpenMined demo on CKKS:** _[Homomorphic Encryption in PySyft with SEAL and PyTorch](https://blog.openmined.org/ckks-homomorphic-encryption-pytorch-pysyft-seal/)_
+**OpenMined demo on CKKS:** _[Homomorphic Encryption in PySyft with SEAL and PyTorch](/blog/ckks-homomorphic-encryption-pytorch-pysyft-seal/)_
 
 **Original paper:** _[Homomorphic Encryption for Arithmetic of Approximate Numbers](https://eprint.iacr.org/2016/421.pdf)_
 
@@ -200,7 +200,7 @@ OpenMined uses CKKS as the primary way to encrypt tensors on which we want to pe
 
 It uses rings over polynomials and has an approachable construction similar to the scheme we described in this post but using LWE. It was developed by Brakerski,Fan and Vercauteren. We have a beginner friendly post on how to implement it in Python.
 
-**OM Implementation:** [_Build an Homomorphic Encryption Scheme from Scratch with Python_](https://blog.openmined.org/build-an-homomorphic-encryption-scheme-from-scratch-with-python/)
+**OM Implementation:** [_Build an Homomorphic Encryption Scheme from Scratch with Python_](/blog/build-an-homomorphic-encryption-scheme-from-scratch-with-python/)
 
 **Great Blogpost:** [_A Homomorphic Encryption Illustrated Primer_](https://blog.n1analytics.com/homomorphic-encryption-illustrated-primer/)
 
@@ -234,4 +234,4 @@ BGV can use modulus switching, an alternative technique for noise management. BG
 
 ---
 
-You might also be interested in: **[Homomorphic Encryption in PySyft with SEAL and PyTorch](https://blog.openmined.org/ckks-homomorphic-encryption-pytorch-pysyft-seal/), [Build an Homomorphic Encryption Scheme from Scratch with Python](https://blog.openmined.org/build-an-homomorphic-encryption-scheme-from-scratch-with-python/),** [**What is the Paillier Cryptosystem?**](https://blog.openmined.org/the-paillier-cryptosystem/)
+You might also be interested in: **[Homomorphic Encryption in PySyft with SEAL and PyTorch](/blog/ckks-homomorphic-encryption-pytorch-pysyft-seal/), [Build an Homomorphic Encryption Scheme from Scratch with Python](/blog/build-an-homomorphic-encryption-scheme-from-scratch-with-python/),** [**What is the Paillier Cryptosystem?**](/blog/the-paillier-cryptosystem/)

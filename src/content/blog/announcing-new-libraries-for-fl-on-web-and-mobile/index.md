@@ -12,7 +12,7 @@ legacyId: 2145
 <!-- TODO(a11y): 3 localized body image(s) have empty alt text -->
 
 
-As part of [the PyTorch/OpenMined grants we announced last December](https://blog.openmined.org/announcing-the-pytorch-openmined-federated-learning-fellowships/), the Web & Mobile team has been hard at work on developing 4 new libraries for model-centric federated learning:
+As part of [the PyTorch/OpenMined grants we announced last December](/blog/announcing-the-pytorch-openmined-federated-learning-fellowships/), the Web & Mobile team has been hard at work on developing 4 new libraries for model-centric federated learning:
 
 -   **[syft.js](https://github.com/OpenMined/syft.js)** – a library for federated learning in the browser
 -   **[KotlinSyft](https://github.com/OpenMined/KotlinSyft)** – a library for federated learning on Android devices
@@ -347,7 +347,7 @@ We hope to build out further support for Threepio and **[need your help](https:/
 
 ## What about data-centric federated learning?
 
-Funny you should mention it – [we’re also in the middle of some real big developments when it comes to data-centric federated learning](https://blog.openmined.org/meet-openmineds-new-ucsf-openmined-fellows/). We’ve teamed up with the University of California, San Francisco to work on building out OpenMined’s data-centric federated learning capabilities in PyGrid. [Stay tuned to our roadmap for more updates](https://github.com/OpenMined/Roadmap/blob/master/federated_learning/projects/data_centric_fl.md) on what’s happening in that project.
+Funny you should mention it – [we’re also in the middle of some real big developments when it comes to data-centric federated learning](/blog/meet-openmineds-new-ucsf-openmined-fellows/). We’ve teamed up with the University of California, San Francisco to work on building out OpenMined’s data-centric federated learning capabilities in PyGrid. [Stay tuned to our roadmap for more updates](https://github.com/OpenMined/Roadmap/blob/master/federated_learning/projects/data_centric_fl.md) on what’s happening in that project.
 
 ## Where do we go from here?
 

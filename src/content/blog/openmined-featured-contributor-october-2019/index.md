@@ -60,7 +60,7 @@ legacyId: 2533
 
 > “As a preliminary step for my Master’s Thesis, I was trying to see if PySyft could indeed be used to train a Recurrent Neural Network in a federated manner over resource-constrained devices, such as Raspberry PIs. My first contribution to OpenMined was a fix to PySyft for running federated Recurrent Neural Network training using PySyft on Raspberry PIs.
 
-> Based on that contribution, I also wrote a [Tutorial](https://blog.openmined.org/federated-learning-of-a-rnn-on-raspberry-pis/), which inspired many other members of the OpenMined community to expand upon the topic of federated RNN training as part of the PyTorch Robotics group from the Secure and Private AI Scholarship Challenge by [Facebook AI](https://ai.facebook.com/) and [Udacity](https://www.udacity.com/) . At this [link](https://github.com/shashigharti/federated-learning-on-raspberry-pi), you may find a full list of projects that were created based on the tutorial I wrote in May 2019.”
+> Based on that contribution, I also wrote a [Tutorial](/blog/federated-learning-of-a-rnn-on-raspberry-pis/), which inspired many other members of the OpenMined community to expand upon the topic of federated RNN training as part of the PyTorch Robotics group from the Secure and Private AI Scholarship Challenge by [Facebook AI](https://ai.facebook.com/) and [Udacity](https://www.udacity.com/) . At this [link](https://github.com/shashigharti/federated-learning-on-raspberry-pi), you may find a full list of projects that were created based on the tutorial I wrote in May 2019.”
 
 **And what are you working on now?**
 

@@ -9,7 +9,7 @@ draft: false
 legacyId: 2407
 ---
 
-_Bu çeviri için Zumrut Muftuoglu’ na içtenlikle teşekkür ederiz. _______________[Click here for English.](https://blog.openmined.org/providing-opensource-privacy-for-covid19/)________________
+_Bu çeviri için Zumrut Muftuoglu’ na içtenlikle teşekkür ederiz. _______________[Click here for English.](/blog/providing-opensource-privacy-for-covid19/)________________
 
 ---
 
@@ -70,8 +70,8 @@ Ayrıca, açık kaynak kodumuzu sağlayarak geliştiricilere iki kat yardımcı 
 
 ### Geliştiriciler için:  
 
--   ****[**COVID-19 Uygulamalarında Mahremiyet ve Etkiyi En Üst Düzeye Çıkarmak** için teknik tavsiyeler içeren canlı dokümanımızı lütfen okuyun.](https://blog.openmined.org/covid-app-privacy-advice/)****
--   Sorularınız ve yardıma ihtiyacınız olduğunda, [Covid-19 Teknik İşbirliği Slack Kanalından](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1) bizlere ulaşabilirsiniz.
+-   ****[**COVID-19 Uygulamalarında Mahremiyet ve Etkiyi En Üst Düzeye Çıkarmak** için teknik tavsiyeler içeren canlı dokümanımızı lütfen okuyun.](/blog/covid-app-privacy-advice/)****
+-   Sorularınız ve yardıma ihtiyacınız olduğunda, [Covid-19 Teknik İşbirliği Slack Kanalından](/slack/) bizlere ulaşabilirsiniz.
 -   ******Github Repoları******
 -   ****[**https://github.com/OpenMined/private-identity-server**](https://github.com/OpenMined/private-identity-server)****
 -   ****[**https://github.com/OpenMined/PyDP**](https://github.com/OpenMined/PyDP)****
@@ -81,12 +81,12 @@ Ayrıca, açık kaynak kodumuzu sağlayarak geliştiricilere iki kat yardımcı 
 
 ### Uygulamaları onaylayan / onaylamayan hükümet yetkilileri için:  
 
--   COVID-19 uygulamalarında onayladığınız bir uygulama veya mahremiyetle ilgili herhangi bir hususta sorularınız varsa, bize [Covid-19 Teknik İşbirliği Kanalı](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1) veya [covid@openmined.org](mailto:covid@openmined.org) e-posta adresinden ulaşabilirsiniz.
+-   COVID-19 uygulamalarında onayladığınız bir uygulama veya mahremiyetle ilgili herhangi bir hususta sorularınız varsa, bize [Covid-19 Teknik İşbirliği Kanalı](/slack/) veya [covid@openmined.org](mailto:covid@openmined.org) e-posta adresinden ulaşabilirsiniz.
 
 ### Yardıma ihtiyaç duyan mahremiyet ve güvenlik uzmanları için:  
 
--   **[COVID-19 Uygulamalarında Mahremiyet ve Etkiyi En Üst Düzeye Çıkarmak](https://blog.openmined.org/covid-app-privacy-advice/)** için teknik tavsiyeler içeren canlı dokümanımızı lütfen okuyunuz.
--   Bu blog yazısına ilişkin her türlü öneri,ekleme/düzeltmeleriniz veya yardımcı olmak istediğiniz konular için bize [Covid-19 Teknik İşbirliği Kanalı](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1)ndan ulaşabilirsiniz.
+-   **[COVID-19 Uygulamalarında Mahremiyet ve Etkiyi En Üst Düzeye Çıkarmak](/blog/covid-app-privacy-advice/)** için teknik tavsiyeler içeren canlı dokümanımızı lütfen okuyunuz.
+-   Bu blog yazısına ilişkin her türlü öneri,ekleme/düzeltmeleriniz veya yardımcı olmak istediğiniz konular için bize [Covid-19 Teknik İşbirliği Kanalı](/slack/)ndan ulaşabilirsiniz.
 
 ### Bağışçılar için:  
 

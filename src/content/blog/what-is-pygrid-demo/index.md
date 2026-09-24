@@ -15,7 +15,7 @@ legacyId: 2377
 <!-- TODO(a11y): 44 localized body image(s) have empty alt text -->
 
 
-_As the leader of the_ [_PyGrid_](https://github.com/OpenMined/PyGrid/) _team,_ [_Ionésio Lima Da Costa Junior_](https://github.com/IonesioJunior) _is building a peer-to-peer platform for private data science and federated learning. This piece is a summary of_ [_Ionesio’s AMA presentation in February 2020_](https://www.youtube.com/watch?v=-OOMXbwFOKo)_. Ionesio is an AI researcher whose work is supported by the_ [_OpenMined / RAAIS Grant program_](https://blog.openmined.org/raais/) _and commissioned by Oxford University and the United Nations Privacy Task Team._
+_As the leader of the_ [_PyGrid_](https://github.com/OpenMined/PyGrid/) _team,_ [_Ionésio Lima Da Costa Junior_](https://github.com/IonesioJunior) _is building a peer-to-peer platform for private data science and federated learning. This piece is a summary of_ [_Ionesio’s AMA presentation in February 2020_](https://www.youtube.com/watch?v=-OOMXbwFOKo)_. Ionesio is an AI researcher whose work is supported by the_ [_OpenMined / RAAIS Grant program_](/blog/raais/) _and commissioned by Oxford University and the United Nations Privacy Task Team._
 
 ---
 
@@ -75,9 +75,9 @@ Now the model has learned from both Joe and Jane’s data. **We can repeat this 
 
 It’s easy to think of potential use cases of this technology. For example,
 
--   [A scientist training on data from multiple hospitals](https://blog.openmined.org/federated-learning-differential-privacy-and-encrypted-computation-for-medical-imaging/)
--   [A smartphone app training on data from multiple phones](https://blog.openmined.org/apheris-openmined-pytorch-announcement/)
--   [A company leaning to predict data when it’s machines need maintenance by training models across data from many sensors](https://blog.openmined.org/predictive-maintenance-of-turbofan-engines-using-federated-learning/)
+-   [A scientist training on data from multiple hospitals](/blog/federated-learning-differential-privacy-and-encrypted-computation-for-medical-imaging/)
+-   [A smartphone app training on data from multiple phones](/blog/apheris-openmined-pytorch-announcement/)
+-   [A company leaning to predict data when it’s machines need maintenance by training models across data from many sensors](/blog/predictive-maintenance-of-turbofan-engines-using-federated-learning/)
 
 ## Secure Multi-party Computation
 

@@ -9,7 +9,7 @@ draft: false
 legacyId: 2409
 ---
 
-‌_Ringraziamo Antonio Lopardo per questa traduzione in italiano!_ __[Click here for English.](https://blog.openmined.org/providing-opensource-privacy-for-covid19/)__
+‌_Ringraziamo Antonio Lopardo per questa traduzione in italiano!_ __[Click here for English.](/blog/providing-opensource-privacy-for-covid19/)__
 
 ---
 
@@ -68,7 +68,7 @@ Inoltre, mettendo a disposizione il nostro codice open-source aiuteremo gli svil
 
 ##### Per gli sviluppatori:
 
--   Consulta il nostro materiale per suggerimenti tecnici,  [Maximising Privacy and Effectiveness in COVID-19 App](https://blog.openmined.org/covid-app-privacy-advice/).
+-   Consulta il nostro materiale per suggerimenti tecnici,  [Maximising Privacy and Effectiveness in COVID-19 App](/blog/covid-app-privacy-advice/).
 -   Se hai domande o vuoi assistenza , scrivi pure nel canale slack per Covid-19 Technical Collaboration.
 -   Github Repositories
 -   [https://github.com/OpenMined/private-identity-server](https://github.com/OpenMined/private-identity-server)
@@ -79,12 +79,12 @@ Inoltre, mettendo a disposizione il nostro codice open-source aiuteremo gli svil
 
 ##### Per i rappresentati dei cittadini che approvano le app:
 
--   Per domande, opinioni e consulti su una soluzione tecnica da giudicare nell’ambito della privacy, siamo raggiungibili per mail a covid@openmined.org e sul nostro canale slack per [Covid-19 Technical Collaboration.](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1)
+-   Per domande, opinioni e consulti su una soluzione tecnica da giudicare nell’ambito della privacy, siamo raggiungibili per mail a covid@openmined.org e sul nostro canale slack per [Covid-19 Technical Collaboration.](/slack/)
 
 ##### Per esperti di privacy e sicurezza che vorrebbero aiutare:
 
--   Consulta il nostro materiale per suggerimenti tecnici, [Maximising Privacy and Effectiveness in COVID-19 App](https://blog.openmined.org/covid-app-privacy-advice/).
--   Se hai consigli o suggerimenti per aggiunte o cambiamenti a questo articolo o vuoi aiutarci, faccelo sapere nel canale slack per [Covid-19 Technical Collaboration.](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1)
+-   Consulta il nostro materiale per suggerimenti tecnici, [Maximising Privacy and Effectiveness in COVID-19 App](/blog/covid-app-privacy-advice/).
+-   Se hai consigli o suggerimenti per aggiunte o cambiamenti a questo articolo o vuoi aiutarci, faccelo sapere nel canale slack per [Covid-19 Technical Collaboration.](/slack/)
 
 ##### Per chi vorrebbe aiutare a finanziare il nostro lavoro
 

@@ -53,6 +53,6 @@ We’ve chosen to align our roadmap to a set of themes that represent our growin
 
 ### Thanks and talk soon!
 
-Thanks for checking out this first installment of what will be a bit of a war journal of the efforts of Team DP. Please join us on [Slack](https://join.slack.com/t/openmined/shared_invite/zt-dvd2kmnk-TMcwvScAxd0Uh25imZc3QA) now!
+Thanks for checking out this first installment of what will be a bit of a war journal of the efforts of Team DP. Please join us on [Slack](/slack/) now!
 
 Also feel free to connect with me (Ben Szymkow) directly at my [twitter](https://twitter.com/BenjaminSzymkow) or [LinkedIn](https://www.linkedin.com/in/benjaminszymkow/) profiles!

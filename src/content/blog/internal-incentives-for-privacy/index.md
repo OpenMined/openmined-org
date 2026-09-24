@@ -21,7 +21,7 @@ Sometimes even certain uses of seemingly “public” data are perceived as priv
 
 Moved by similar considerations, Helen Nissenbaum developed the theory of _contextual integrity_ \[[25](https://nyuscholars.nyu.edu/en/publications/privacy-as-contextual-integrity); [26](https://www.sup.org/books/title/?id=8862)\]. Instead of conjuring up an artificial definition of privacy, she started by examining people’s perceptions. Different **social domains have their own norms, often implicit**, regulating how information is transmitted and stored. Breaking these norms is perceived as a privacy violation.
 
-Privacy is not secrecy. To enjoy the benefits of living in a society, we need to share information with one another. But there is no need to share all information with everyone. Information meant for one context should not be used arbitrarily in another context. “Privacy is not about information itself. It is about the manner in which it flows” \[[49](https://twitter.com/openminedorg/status/1399028939511717893)\]. Privacy is about appropriate _information flows_ \[[46](https://blog.openmined.org/society-runs-on-information-flows/)\].
+Privacy is not secrecy. To enjoy the benefits of living in a society, we need to share information with one another. But there is no need to share all information with everyone. Information meant for one context should not be used arbitrarily in another context. “Privacy is not about information itself. It is about the manner in which it flows” \[[49](https://twitter.com/openminedorg/status/1399028939511717893)\]. Privacy is about appropriate _information flows_ \[[46](/blog/society-runs-on-information-flows/)\].
 
 ![wall](./media/wall.svg)
 
@@ -33,9 +33,9 @@ Maybe you expected that your car insurance premium would be determined by your d
 
 The more indiscriminately we pour information across contexts, the more we shift towards a dull single ranking: a _social scoring system_, like [in China](https://en.wikipedia.org/wiki/Social_Credit_System). Social scoring systems are the opposite of contextual integrity, and they are going to be banned in the EU \[[11](https://www.politico.eu/article/europe-strict-rules-artificial-intelligence/); [52](https://www.theverge.com/2021/4/21/22393785/eu-ai-regulation-proposal-social-credit-ban-biometric-surveillance-exceptions); [51](https://ai-governance.eu/eu-published-an-ai-regulation-proposal/); [38](https://digital-strategy.ec.europa.eu/en/library/proposal-regulation-laying-down-harmonised-rules-artificial-intelligence)\]. Going back to the sewage analogy, we need to build plumbing to accurately channel our information flows. Then we can process them, extracting value while minimizing harm.
 
-So, how can we build appropriate information flows? We have a **theoretical framework**: _structured transparency_ \[[48](https://arxiv.org/abs/2012.08347); [47](https://blog.openmined.org/structured-transparency-input-output-privacy/)\], developed by Andrew Trask, Emma Bluemke and others in the OpenMined community \[[30](https://www.openmined.org/)\], inspired by contextual integrity. We have the **technology**: with _privacy-preserving AI_ we can “answer questions using data we cannot see” \[[35](https://youtu.be/NJBBE_SN90A); [36](https://youtu.be/4zrU54VIK6k)\]. Now we only need **incentives** to drive adoption.
+So, how can we build appropriate information flows? We have a **theoretical framework**: _structured transparency_ \[[48](https://arxiv.org/abs/2012.08347); [47](/blog/structured-transparency-input-output-privacy/)\], developed by Andrew Trask, Emma Bluemke and others in the OpenMined community \[[30](https://openmined.org/)\], inspired by contextual integrity. We have the **technology**: with _privacy-preserving AI_ we can “answer questions using data we cannot see” \[[35](https://youtu.be/NJBBE_SN90A); [36](https://youtu.be/4zrU54VIK6k)\]. Now we only need **incentives** to drive adoption.
 
-> **Privacy-preserving AI** \[[54](https://blog.openmined.org/privacy-preserving-ai-a-birds-eye-view/); [4](https://blog.openmined.org/private-machine-learning-explained/)\]. Combining federated learning \[[3](https://federated.withgoogle.com/); [15](https://arxiv.org/abs/1912.04977)\], differential privacy \[[40](https://youtu.be/pT19VwBAqKA); [9](https://www.cis.upenn.edu/~aaroth/Papers/privacybook.pdf)\], secure multi-party computation \[[21](https://cacm.acm.org/magazines/2021/1/249459-secure-multiparty-computation/fulltext); [6](https://www.cambridge.org/de/academic/subjects/computer-science/cryptography-cryptology-and-coding/secure-multiparty-computation-and-secret-sharing)\], homomorphic encryption \[[13](https://youtu.be/2u2kTc9KgGs); [12](https://www.microsoft.com/en-us/research/project/homomorphic-encryption/)\] and other privacy-preserving technologies we can build appropriate information flows. Implementation is made easier by dedicated open-source libraries, like OpenMined’s PySyft \[[8](https://youtu.be/9qYDtt2XM2o); [42](https://github.com/OpenMined/PySyft)\] and PyGrid \[[31](https://youtu.be/IW4Tt4qBpHo); [41](https://github.com/OpenMined/PyGrid)\].
+> **Privacy-preserving AI** \[[54](/blog/privacy-preserving-ai-a-birds-eye-view/); [4](/blog/private-machine-learning-explained/)\]. Combining federated learning \[[3](https://federated.withgoogle.com/); [15](https://arxiv.org/abs/1912.04977)\], differential privacy \[[40](https://youtu.be/pT19VwBAqKA); [9](https://www.cis.upenn.edu/~aaroth/Papers/privacybook.pdf)\], secure multi-party computation \[[21](https://cacm.acm.org/magazines/2021/1/249459-secure-multiparty-computation/fulltext); [6](https://www.cambridge.org/de/academic/subjects/computer-science/cryptography-cryptology-and-coding/secure-multiparty-computation-and-secret-sharing)\], homomorphic encryption \[[13](https://youtu.be/2u2kTc9KgGs); [12](https://www.microsoft.com/en-us/research/project/homomorphic-encryption/)\] and other privacy-preserving technologies we can build appropriate information flows. Implementation is made easier by dedicated open-source libraries, like OpenMined’s PySyft \[[8](https://youtu.be/9qYDtt2XM2o); [42](https://github.com/OpenMined/PySyft)\] and PyGrid \[[31](https://youtu.be/IW4Tt4qBpHo); [41](https://github.com/OpenMined/PyGrid)\].
 
 ## Privacy’s dual role protecting individuals and social domains
 
@@ -94,11 +94,11 @@ The biggest jumps in progress have happened with **new datasets, not new models*
 
 In some fields, like healthcare, there is actually a lot of data already; but it is scattered across many devices, organizations, jurisdictions, countries. Because of the sensitive nature of this data, pooling it into a huge dataset would be too costly or complicated. And it would be prohibitive in terms of privacy: no single entity should hold so much information and power.
 
-Privacy-preserving technologies could solve this dilemma. With _federated learning_ \[[3](https://federated.withgoogle.com/); [15](https://arxiv.org/abs/1912.04977)\], data never leaves the place where it is produced. Instead of sending the data to the algorithm, we send the algorithm to the data. We can gain insight from huge aggregated datasets, without actually aggregating them \[[17](https://www.nature.com/articles/s42256-020-0186-1); [44](https://www.nature.com/articles/s41746-020-00323-1); [55](https://link.springer.com/article/10.1007/s41666-020-00082-4)\]. OpenMined’s healthcare projects, like _PriMIA_ \[[16](http://www.nature.com/articles/s42256-021-00337-8); [34](https://g-k.ai/PriMIA/)\] and _Privacy-preserving AI for Mental Health_ \[[23](https://blog.openmined.org/call-to-research-study-on-ppai-for-mental-health/)\], are among the first steps in this direction.
+Privacy-preserving technologies could solve this dilemma. With _federated learning_ \[[3](https://federated.withgoogle.com/); [15](https://arxiv.org/abs/1912.04977)\], data never leaves the place where it is produced. Instead of sending the data to the algorithm, we send the algorithm to the data. We can gain insight from huge aggregated datasets, without actually aggregating them \[[17](https://www.nature.com/articles/s42256-020-0186-1); [44](https://www.nature.com/articles/s41746-020-00323-1); [55](https://link.springer.com/article/10.1007/s41666-020-00082-4)\]. OpenMined’s healthcare projects, like _PriMIA_ \[[16](http://www.nature.com/articles/s42256-021-00337-8); [34](https://g-k.ai/PriMIA/)\] and _Privacy-preserving AI for Mental Health_ \[[23](/blog/call-to-research-study-on-ppai-for-mental-health/)\], are among the first steps in this direction.
 
 ## Privacy can fix data markets, driving competition and innovation
 
-Data can be copied very easily. Whenever you give someone a copy of your data, you cannot control what they do with it. Data laws like GDPR give you some protection, but they are very difficult to enforce. This is known as the _copy problem_ \[[45](https://blog.openmined.org/limitations-of-information-flows/)\].
+Data can be copied very easily. Whenever you give someone a copy of your data, you cannot control what they do with it. Data laws like GDPR give you some protection, but they are very difficult to enforce. This is known as the _copy problem_ \[[45](/blog/limitations-of-information-flows/)\].
 
 In practice, when you sell your data, the buyer instantly becomes your competitor, and your data loses value very quickly. As a result, data markets are bizarre and dysfunctional. One strategy is to **sell data as quickly as possible**; in financial markets, firms pay to have their servers as close as possible to the central trading infrastructure \[[5, 2:34–3:58](https://youtu.be/Tio71BoU0NU?t=154)\]. Another strategy is to **never sell data to anyone**, if it is too valuable or private \[[5, 4:09–4:33](https://youtu.be/Tio71BoU0NU?t=249), [5:20–5:38](https://youtu.be/Tio71BoU0NU?t=320), [7:25–7:36](https://youtu.be/Tio71BoU0NU?t=445)\].
 
@@ -136,7 +136,7 @@ _Big thanks to [**Tinja Pitkämäki**](https://twitter.com/TinjaPitkamaki) (Univ
 
 \[3\] L. Bellwood and S. McCloud. _Federated Learning: Building better products with on-device data and privacy by default_. URL: [https://federated.withgoogle.com/](https://federated.withgoogle.com/) (visited on 05/14/2021).
 
-\[4\] E. Bluemke, A. Lopardo, A. Trask, and N. Kang. _Privacy-Preserving Data Science, Explained_. May 19, 2020. URL: [https://blog.openmined.orghttps://blog.openmined.orghttps://blog.openmined.orghttps://blog.openmined.org/private-machine-learning-explained/](https://blog.openmined.org/private-machine-learning-explained/) (visited on 06/03/2021).
+\[4\] E. Bluemke, A. Lopardo, A. Trask, and N. Kang. _Privacy-Preserving Data Science, Explained_. May 19, 2020. URL: [/blog//blog//blog//blog/private-machine-learning-explained/) (visited on 06/03/2021).
 
 \[5\] _Course 1, Lesson 5, Concept: Machine learning startups need structured transparency_. From the _Private AI series_ \[37\], Course _Our Privacy Opportunity_, Lesson 11 _The Impact of Structured Transparency_, Concept 6 _Machine Learning Startups_. Jan. 2, 2021. URL: [https://youtu.be/Tio71BoU0NU](https://youtu.be/Tio71BoU0NU) (visited on 05/24/2021).
 
@@ -174,7 +174,7 @@ _Big thanks to [**Tinja Pitkämäki**](https://twitter.com/TinjaPitkamaki) (Univ
 
 \[22\] S. Marsh. _GPs warn over plans to share patient data with third parties in England_. May 30, 2021. URL: [https://www.theguardian.com/society/2021/may/30/gps-warn-plans-share-patient-data-third-parties-england](https://www.theguardian.com/society/2021/may/30/gps-warn-plans-share-patient-data-third-parties-england) (visited on 06/08/2021).
 
-\[23\] Z. Müftüoğlu and A. Rao. _Call to Research Study on Privacy-Preserving AI for Mental Health_. Feb. 2, 2021. URL: [https://blog.openmined.orghttps://blog.openmined.orghttps://blog.openmined.orghttps://blog.openmined.org/call-to-research-study-on-ppai-for-mental-health/](https://blog.openmined.org/call-to-research-study-on-ppai-for-mental-health/) (visited on 05/19/2021).
+\[23\] Z. Müftüoğlu and A. Rao. _Call to Research Study on Privacy-Preserving AI for Mental Health_. Feb. 2, 2021. URL: [/blog//blog//blog//blog/call-to-research-study-on-ppai-for-mental-health/) (visited on 05/19/2021).
 
 \[24\] nigoshh. _Modeling the relationship between privacy and accuracy_. URL: [https://github.com/nigoshh/privacy-accuracy/blob/main/privacy-accuracy.ipynb](https://github.com/nigoshh/privacy-accuracy/blob/main/privacy-accuracy.ipynb) (visited on 05/26/2021).
 
@@ -188,7 +188,7 @@ _Big thanks to [**Tinja Pitkämäki**](https://twitter.com/TinjaPitkamaki) (Univ
 
 \[29\] _OM PriCon2020: Privacy, Contextual Integrity, and Obfuscation – Helen Nissenbaum_. URL: [https://youtu.be/Bc2XQCFCeE8](https://youtu.be/Bc2XQCFCeE8) (visited on 05/13/2021).
 
-\[30\] _OpenMined_. URL: [https://www.openmined.org/](https://www.openmined.org/) (visited on 05/24/2021).
+\[30\] _OpenMined_. URL: [https://openmined.org/](https://openmined.org/) (visited on 05/24/2021).
 
 \[31\] _OpenMined PyGrid 0.5 Demo_. Apr. 27, 2021. URL: [https://youtu.be/IW4Tt4qBpHo](https://youtu.be/IW4Tt4qBpHo) (visited on 05/16/2021).
 
@@ -218,11 +218,11 @@ _Big thanks to [**Tinja Pitkämäki**](https://twitter.com/TinjaPitkamaki) (Univ
 
 \[44\] N. Rieke, J. Hancox, W. Li, F. Milletarì, H. R. Roth, S. Albarqouni, S. Bakas, M. N. Galtier, B. A. Landman, K. Maier-Hein, S. Ourselin, M. Sheller, R. M. Summers, A. Trask, D. Xu, M. Baust, and M. J. Cardoso. “The future of digital health with federated learning”. In: _NPJ digital medicine_ 3.1 (Dec. 2020), pp. 1–7. DOI: 10.1038/s41746-020-00323-1. URL: [https://www.nature.com/articles/s41746-020-00323-1](https://www.nature.com/articles/s41746-020-00323-1).
 
-\[45\] J. Stutz. _Limitations of Information Flows_. Feb. 19, 2021. URL: [https://blog.openmined.orghttps://blog.openmined.orghttps://blog.openmined.orghttps://blog.openmined.org/limitations-of-information-flows/](https://blog.openmined.org/limitations-of-information-flows/) (visited on 05/17/2021).
+\[45\] J. Stutz. _Limitations of Information Flows_. Feb. 19, 2021. URL: [/blog//blog//blog//blog/limitations-of-information-flows/) (visited on 05/17/2021).
 
-\[46\] J. Stutz. _Society Runs on Information Flows_. Feb. 11, 2021. URL: [https://blog.openmined.orghttps://blog.openmined.orghttps://blog.openmined.orghttps://blog.openmined.org/society-runs-on-information-flows/](https://blog.openmined.org/society-runs-on-information-flows/) (visited on 06/01/2021).
+\[46\] J. Stutz. _Society Runs on Information Flows_. Feb. 11, 2021. URL: [/blog//blog//blog//blog/society-runs-on-information-flows/) (visited on 06/01/2021).
 
-\[47\] J. Stutz. _Structured Transparency: Ensuring Input and Output Privacy_. Mar. 14, 2021. URL: [https://blog.openmined.orghttps://blog.openmined.orghttps://blog.openmined.orghttps://blog.openmined.org/structured-transparency-input-output-privacy/](https://blog.openmined.org/structured-transparency-input-output-privacy/) (visited on 05/14/2021).
+\[47\] J. Stutz. _Structured Transparency: Ensuring Input and Output Privacy_. Mar. 14, 2021. URL: [/blog//blog//blog//blog/structured-transparency-input-output-privacy/) (visited on 05/14/2021).
 
 \[48\] A. Trask, E. Bluemke, B. Garfinkel, C. G. Cuervas-Mons, and A. Dafoe. _Beyond Privacy Trade-offs with Structured Transparency_. 2020. arXiv: 2012.08347 \[cs.CR\]. URL: [https://arxiv.org/abs/2012.08347](https://arxiv.org/abs/2012.08347).
 
@@ -236,7 +236,7 @@ _Big thanks to [**Tinja Pitkämäki**](https://twitter.com/TinjaPitkamaki) (Univ
 
 \[53\] N. Vincent, H. Li, N. Tilly, S. Chancellor, and B. Hecht. _Data Leverage: A Framework for Empowering the Public in its Relationship with Technology Companies_. 2021. arXiv: 2012.09995 \[cs.CY\]. URL: [https://arxiv.org/abs/2012.09995](https://arxiv.org/abs/2012.09995).
 
-\[54\] P. Vinod. _Privacy-Preserving AI Summary: MIT Deep Learning Series_. Apr. 30, 2020. URL: [https://blog.openmined.orghttps://blog.openmined.orghttps://blog.openmined.orghttps://blog.openmined.org/privacy-preserving-ai-a-birds-eye-view/](https://blog.openmined.org/privacy-preserving-ai-a-birds-eye-view/) (visited on 06/03/2021).
+\[54\] P. Vinod. _Privacy-Preserving AI Summary: MIT Deep Learning Series_. Apr. 30, 2020. URL: [/blog//blog//blog//blog/privacy-preserving-ai-a-birds-eye-view/) (visited on 06/03/2021).
 
 \[55\] J. Xu, B. S. Glicksberg, C. Su, P. Walker, J. Bian, and F. Wang. “Federated learning for healthcare informatics”. In: _Journal of Healthcare Informatics Research_ 5.1 (2021), pp. 1–19. DOI: 10.1007/s41666-020-00082-4. URL: [https://link.springer.com/article/10.1007/s41666-020-00082-4](https://link.springer.com/article/10.1007/s41666-020-00082-4).
 

@@ -14,7 +14,7 @@ legacyId: 2027
 
 ## ****Beta Bootcamp’s Tech Team****
 
-This month we’re highlighting seven contributors who worked together on [Beta Bootcamp’s](https://blog.openmined.org/announcing-the-first-openmined-boot-camp/) tech team. ‌
+This month we’re highlighting seven contributors who worked together on [Beta Bootcamp’s](/blog/announcing-the-first-openmined-boot-camp/) tech team. ‌
 
 <figure class="">
 

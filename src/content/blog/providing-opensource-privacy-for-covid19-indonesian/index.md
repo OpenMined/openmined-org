@@ -9,7 +9,7 @@ draft: false
 legacyId: 2394
 ---
 
-_Kami mengucapakan terima kasih pada Ellyana Linden ([github](https://github.com/ellyanalinden) , [LinkedIn](http://linkedin.com/in/ellyana-linden/))  untuk terjemahan ini._ ________[Click here for English.](https://blog.openmined.org/providing-opensource-privacy-for-covid19/)________
+_Kami mengucapakan terima kasih pada Ellyana Linden ([github](https://github.com/ellyanalinden) , [LinkedIn](http://linkedin.com/in/ellyana-linden/))  untuk terjemahan ini._ ________[Click here for English.](/blog/providing-opensource-privacy-for-covid19/)________
 
 ---
 
@@ -71,9 +71,9 @@ Untuk diperhatikan, OpenMined tidak bertujuan untuk membangun satu aplikasi tert
 
 ## **Untuk developers:**
 
-•             Baca dokumen kami  dengan saran-saran teknis, [Maximising Privacy and Effectiveness in COVID-19 Apps.](https://blog.openmined.org/covid-app-privacy-advice/)
+•             Baca dokumen kami  dengan saran-saran teknis, [Maximising Privacy and Effectiveness in COVID-19 Apps.](/blog/covid-app-privacy-advice/)
 
-•             Jika anda mempunyai pertanyaan atau membutuhkan bantuan, anda dapat bertanya di [Covid-19 Technical Collaboration Slack Channel](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1).
+•             Jika anda mempunyai pertanyaan atau membutuhkan bantuan, anda dapat bertanya di [Covid-19 Technical Collaboration Slack Channel](/slack/).
 
 Github Repositori terkait:
 
@@ -89,13 +89,13 @@ Github Repositori terkait:
 
 ### **Untuk pejabat pemerintahan yang bertugas mengesahkan/ tidak mengesahkan aplikasi:**
 
-•             Jika anda mempunyai pertanyaan mengenai aplikasi yang anda sahkan atau pertanyaan terkait privasi pada aplikasi COVID-19, anda dapat bertanya pada kami melalui [**Covid-19 Technical Collaboration Channel**](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1) atau email covid@openmined.org.
+•             Jika anda mempunyai pertanyaan mengenai aplikasi yang anda sahkan atau pertanyaan terkait privasi pada aplikasi COVID-19, anda dapat bertanya pada kami melalui [**Covid-19 Technical Collaboration Channel**](/slack/) atau email covid@openmined.org.
 
 ### **Untuk tenaga ahli dibidang privasi dan keamanan siber yang membutuhkan bantuan:**
 
-•             Dokumen kami dengan saran-saran teknis, [Maximising Privacy and Effectiveness in COVID-19 Apps.](https://blog.openmined.org/covid-app-privacy-advice/)
+•             Dokumen kami dengan saran-saran teknis, [Maximising Privacy and Effectiveness in COVID-19 Apps.](/blog/covid-app-privacy-advice/)
 
-•             Jika anda mempunyai rekomendasi untuk menambah/mensunting blogpost ini atau ingin membantu kami, anda dapat menulis di [Covid-19 Technical Collaboration Slack Channel](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1).
+•             Jika anda mempunyai rekomendasi untuk menambah/mensunting blogpost ini atau ingin membantu kami, anda dapat menulis di [Covid-19 Technical Collaboration Slack Channel](/slack/).
 
 ### **Untuk donatur:**
 

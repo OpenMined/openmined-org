@@ -20,7 +20,7 @@ legacyId: 1708
 
 **Confidential computing explained:**
 
-[Part 1 : introduction](https://blog.openmined.org/confidential-computing-explained-part-1-introduction/)
+[Part 1 : introduction](/blog/confidential-computing-explained-part-1-introduction/)
 
 Part 2 : attestation
 

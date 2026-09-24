@@ -21,7 +21,7 @@ Imagine you have spent years curating a dataset, and you want to share it with t
 
 [PySyft 0.9](https://github.com/openmined/syft "PySyft GitHub repo") is an open source stack of tools that provides a comprehensive solution for data privacy and governance. This version introduces several new features and improvements, moving beyond the focus of past releases as Federated Learning library.
 
-**Enhanced Privacy**: PySyft protects privacy by enabling data scientists to work on data remotely, with the ability to integrate multiple [PETs](https://blog.openmined.org/tag/privacy/) to adapt to different privacy requirements (Read more on this [paper](https://arxiv.org/abs/2012.08347)).
+**Enhanced Privacy**: PySyft protects privacy by enabling data scientists to work on data remotely, with the ability to integrate multiple [PETs](/blog/tag/privacy/) to adapt to different privacy requirements (Read more on this [paper](https://arxiv.org/abs/2012.08347)).
 
 **Robust Security, with Datasites**: Datasites are servers for non-public data that maintain strict control over data access and use. Datasites can be deployed on local computers, in a cluster, or in the cloud. And for more stringent security, Datasites support air-gapped configuration to separate the prototyping environment from code execution.
 

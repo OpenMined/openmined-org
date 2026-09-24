@@ -14,7 +14,7 @@ legacyId: 1405
 
 This post is a continuation of  
 [“Remote Data Science  
-Part 1: Today’s privacy challenges in BigData”](https://blog.openmined.org/remote-data-science-part-1-todays-privacy-challenges-in-bigdata-2/).  
+Part 1: Today’s privacy challenges in BigData”](/blog/remote-data-science-part-1-todays-privacy-challenges-in-bigdata-2/).  
 The previous blog talks about the importance of understanding **_privacy challenges in BigData_** and explains how “Remote Data Science” enables **_three privacy guarantees_** for the data scientist and the data owner.
 
 This blog explains the different components of Remote Data Science. Visualise a single domain in Federated learning(FL) Infrastructure. Understand “Model-centric FL” and “Data-centric FL” while both are deployable in Remote Data Science Architecture.
@@ -110,7 +110,7 @@ E.g.,95% of cancer screening results in false positives. It needs more data from
 6\. [“Everyone wants to do the model work, not the data work”: Data Cascades in High-Stakes AI  
 ](https://storage.googleapis.com/pub-tools-public-publication-data/pdf/0d556e45afc54afeb2eb6b51a9bc1827b9961ff4.pdf)  
   
-7\. [Understanding the types of Federated learning.](https://blog.openmined.org/federated-learning-types/)  
+7\. [Understanding the types of Federated learning.](/blog/federated-learning-types/)  
   
 8\. [What can Data-Centric AI Learn from Data and ML Engineering?](https://arxiv.org/pdf/2112.06439.pdf)  
   
@@ -122,4 +122,4 @@ E.g.,95% of cancer screening results in false positives. It needs more data from
 11\. [OpenMined – PySyft Github Library  
 ](https://github.com/OpenMined/PySyft)  
   
-12\. [Privacy Series Basics : Definition](https://blog.openmined.org/privacy-series-basics-definition/)
+12\. [Privacy Series Basics : Definition](/blog/privacy-series-basics-definition/)

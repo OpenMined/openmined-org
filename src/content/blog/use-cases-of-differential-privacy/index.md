@@ -186,4 +186,4 @@ Additional resource: [Differential privacy: its technological prescriptive using
 -   [Uber SQL Differential Privacy](https://github.com/uber-archive/sql-differential-privacy)
 -   [TensorFlow – Differential Privacy](https://blog.tensorflow.org/2019/03/introducing-tensorflow-privacy-learning.html?m=1)
 -   [Google’s C++ Differential Privacy library](https://github.com/google/differential-privacy)
--   [OpenMined Differential Privacy](https://blog.openmined.org/making-algorithms-private/)
+-   [OpenMined Differential Privacy](/blog/making-algorithms-private/)

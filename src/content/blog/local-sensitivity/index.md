@@ -101,7 +101,7 @@ At a first glance, the bounded local and global sensitivities seem equal, but if
 
 ### Notebook
 
-I use the same datasets as in the previous [blog post](https://blog.openmined.org/global-sensitivity/).
+I use the same datasets as in the previous [blog post](/blog/global-sensitivity/).
 
 Here is the code for calculating the local sensitivity for unbounded DP:
 

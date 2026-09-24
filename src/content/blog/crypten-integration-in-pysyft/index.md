@@ -17,11 +17,11 @@ legacyId: 2140
 
 **_Update as of November 18, 2021: The version of PySyft mentioned in this post has been deprecated. Any implementations using this older version of PySyft are unlikely to work. Stay tuned for the release of PySyft 0.6.0, a data centric library for use in production targeted for release in early December._**
 
-After announcing the [project for CrypTen integration](https://blog.openmined.org/openmined-pytorch-fellowship-crypten-project/) in December 2019, we are now pleased to share the different outcomes of the project. We start with a quick overview of what CrypTen is, then jump into the use case that the integration is about. Next we look at the technical aspects and challenges of the project. Finally, we go through a demo and do some benchmarks.
+After announcing the [project for CrypTen integration](/blog/openmined-pytorch-fellowship-crypten-project/) in December 2019, we are now pleased to share the different outcomes of the project. We start with a quick overview of what CrypTen is, then jump into the use case that the integration is about. Next we look at the technical aspects and challenges of the project. Finally, we go through a demo and do some benchmarks.
 
 ## CrypTen
 
-[CrypTen](https://github.com/facebookresearch/CrypTen) is a framework developed by [Facebook Research](https://research.fb.com/) for Privacy Preserving Machine Learning built on PyTorch. Its goal is to make secure computing techniques accessible to Machine Learning practitioners and efficient for server to server interactions. It currently implements [Secure Multi-Party Computation](https://blog.openmined.org/what-is-secure-multi-party-computation/) as its secure computing backend. More information can be found on the [project repo on Github](https://github.com/facebookresearch/CrypTen).
+[CrypTen](https://github.com/facebookresearch/CrypTen) is a framework developed by [Facebook Research](https://research.fb.com/) for Privacy Preserving Machine Learning built on PyTorch. Its goal is to make secure computing techniques accessible to Machine Learning practitioners and efficient for server to server interactions. It currently implements [Secure Multi-Party Computation](/blog/what-is-secure-multi-party-computation/) as its secure computing backend. More information can be found on the [project repo on Github](https://github.com/facebookresearch/CrypTen).
 
 ## Use Case
 

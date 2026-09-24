@@ -11,9 +11,9 @@ draft: false
 legacyId: 2149
 ---
 
-__****This post is part of our [Privacy-Preserving Data Science, Explained](https://blog.openmined.org/private-machine-learning-explained/) series.****__
+__****This post is part of our [Privacy-Preserving Data Science, Explained](/blog/private-machine-learning-explained/) series.****__
 
-In a [previous post](https://blog.openmined.org/diffie-hellman-key-exchange/) we looked at the Diffie-Hellman key exchange protocol, which two parties can use to agree upon a secret key without an eavesdropper discovering what that key is. We saw [previously](https://blog.openmined.org/private-set-intersection-with-the-paillier-cryptosystem/) how a private set intersection (PSI) protocol could be built on top of the [Paillier cryptosystem](https://blog.openmined.org/the-paillier-cryptosystem/). In this post, we’ll see how to do the same thing based on Diffie-Hellman instead.
+In a [previous post](/blog/diffie-hellman-key-exchange/) we looked at the Diffie-Hellman key exchange protocol, which two parties can use to agree upon a secret key without an eavesdropper discovering what that key is. We saw [previously](/blog/private-set-intersection-with-the-paillier-cryptosystem/) how a private set intersection (PSI) protocol could be built on top of the [Paillier cryptosystem](/blog/the-paillier-cryptosystem/). In this post, we’ll see how to do the same thing based on Diffie-Hellman instead.
 
 ## The protocol
 

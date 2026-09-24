@@ -80,7 +80,7 @@ With this rapid increase in privacy regulation, investing _now_ in best practice
 
 Privacy-enchancing technologies are rapidly maturing and gaining admiration from regulators. The UK’s Information Commissioner’s Office [listed Federated Learning](https://ico.org.uk/media/about-the-ico/consultations/2617219/guidance-on-the-ai-auditing-framework-draft-for-consultation.pdf) as a tool that can meaningfully contribute to data minimization efforts. There are three best-of-breed open source projects we recommend evaluating:
 
--   [OpenMined](https://www.openmined.org/) Homomorphic Encryption, MPC, Differential Privacy, and Federated Learning
+-   [OpenMined](https://openmined.org/) Homomorphic Encryption, MPC, Differential Privacy, and Federated Learning
 -   [White Noise](https://cloudblogs.microsoft.com/opensource/2020/05/19/new-differential-privacy-platform-microsoft-harvard-opendp/) Differential Privacy by Microsoft and Sarah Bird
 -   [TensorFlow Federated](https://www.tensorflow.org/federated) Learning by Google
 
