@@ -451,6 +451,7 @@ const MODES = [
         resetSubmit();
         dialog.showModal();
         document.body.style.overflow = 'hidden';
+        (window as any).plausible?.('Donate Opened', { props: { page: window.location.pathname } });
       }
     };
     const close = () => {
@@ -543,7 +544,16 @@ const MODES = [
         });
         const data = await res.json();
         if (res.ok && data.checkout_url) {
-          window.location.href = data.checkout_url;
+          // Hold the redirect until the event is sent (Plausible's `callback`),
+          // with a short fallback so a blocked/absent script never stalls checkout.
+          // Frequency only — amounts stay out of analytics.
+          let left = false;
+          const go = () => { if (!left) { left = true; window.location.href = data.checkout_url; } };
+          (window as any).plausible?.('Donate Checkout Started', {
+            props: { frequency: mode === 'monthly' ? 'monthly' : 'one-time' },
+            callback: go,
+          });
+          setTimeout(go, 600);
           return; // leave the button disabled through the redirect
         }
         errorEl.textContent = data.message || 'Something went wrong. Please try again.';

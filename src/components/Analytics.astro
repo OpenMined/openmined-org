@@ -25,6 +25,10 @@
 import { PLAUSIBLE_DOMAIN, PLAUSIBLE_SRC, ANALYTICS_HOSTS } from '@data/analytics.mjs';
 ---
 <script is:inline define:vars={{ PLAUSIBLE_DOMAIN, PLAUSIBLE_SRC, ANALYTICS_HOSTS }}>
+  // Plausible's standard queue stub: custom-event calls made before (or without)
+  // the script queue here instead of throwing. Off-production the script never
+  // loads, so the queue simply never flushes — events are a no-op there.
+  window.plausible = window.plausible || function () { (window.plausible.q = window.plausible.q || []).push(arguments); };
   (function () {
     // Production hostnames only. `?analytics=force` overrides, for deliberate
     // testing on a preview or localhost — note a forced hit is a REAL hit in the
