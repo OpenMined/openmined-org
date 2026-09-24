@@ -12,7 +12,7 @@ legacyId: 1465
 
 Part 2: Where does synthetic data stand when it comes to the laws that protect user privacy?
 
-In [a previous blog](https://blog.openmined.org/how-synthetic-data-can-leak-your-information/), we saw that synthetic data is as vulnerable to disclosures as real-world datasets. The simple logic that synthetic datasets need to serve statistical analysis results in models that can be trained and used to gain meaningful information from them as well. This is particularly true if the data was synthesized to retain the original relationships of its seed.
+In [a previous blog](/blog/how-synthetic-data-can-leak-your-information/), we saw that synthetic data is as vulnerable to disclosures as real-world datasets. The simple logic that synthetic datasets need to serve statistical analysis results in models that can be trained and used to gain meaningful information from them as well. This is particularly true if the data was synthesized to retain the original relationships of its seed.
 
 The sharing of models trained on sensitive data is, therefore, a critical issue as well. Historically, differential privacy has proven to be effective in not only data protection but also to answer model access requirements. Synthetic data further protected with guarantees of differential privacy, therefore, emerged as a popular solution. Here we will discuss the legality of synthetic data in its untouched glory and for the case when it has been enhanced with differential privacy.
 

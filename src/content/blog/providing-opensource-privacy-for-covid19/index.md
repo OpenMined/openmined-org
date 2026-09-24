@@ -10,7 +10,7 @@ draft: false
 legacyId: 2419
 ---
 
-_Read this post in: [Hindi](https://blog.openmined.org/providing-opensource-privacy-for-covid19-hindi/), [Portuguese](https://blog.openmined.org/providing-opensource-privacy-for-covid19-portuguese/), [Spanish](https://blog.openmined.org/providing-opensource-privacy-for-covid19-spanish/), [Italian](https://blog.openmined.org/providing-opensource-privacy-for-covid19-italian/), [Korean](https://blog.openmined.org/providing-opensource-privacy-for-covid19-korean/), [Romanian](https://blog.openmined.org/providing-opensource-privacy-for-covid19-romanian/), [Pidgin](https://blog.openmined.org/providing-opensource-privacy-for-covid19-pidgin/), [Turkish,](https://blog.openmined.org/providing-opensource-privacy-for-covid19-turkish/) [Marathi](https://blog.openmined.org/providing-opensource-privacy-for-covid19-marathi/), [Japanese](https://blog.openmined.org/providing-opensource-privacy-for-covid19-japanese/), [French](https://blog.openmined.org/providing-opensource-privacy-for-covid19-french/), [Bengali](https://blog.openmined.org/providing-opensource-privacy-for-covid19-bengali/), [Swedish](https://blog.openmined.org/providing-opensource-privacy-for-covid19-swedish/), [Indonesian](https://blog.openmined.org/providing-opensource-privacy-for-covid19-indonesian/), [Farsi](https://blog.openmined.org/providing-opensource-privacy-for-covid19-farsi/)_
+_Read this post in: [Hindi](/blog/providing-opensource-privacy-for-covid19-hindi/), [Portuguese](/blog/providing-opensource-privacy-for-covid19-portuguese/), [Spanish](/blog/providing-opensource-privacy-for-covid19-spanish/), [Italian](/blog/providing-opensource-privacy-for-covid19-italian/), [Korean](https://blog.openmined.org/providing-opensource-privacy-for-covid19-korean/), [Romanian](/blog/providing-opensource-privacy-for-covid19-romanian/), [Pidgin](/blog/providing-opensource-privacy-for-covid19-pidgin/), [Turkish,](/blog/providing-opensource-privacy-for-covid19-turkish/) [Marathi](/blog/providing-opensource-privacy-for-covid19-marathi/), [Japanese](/blog/providing-opensource-privacy-for-covid19-japanese/), [French](/blog/providing-opensource-privacy-for-covid19-french/), [Bengali](/blog/providing-opensource-privacy-for-covid19-bengali/), [Swedish](/blog/providing-opensource-privacy-for-covid19-swedish/), [Indonesian](/blog/providing-opensource-privacy-for-covid19-indonesian/), [Farsi](/blog/providing-opensource-privacy-for-covid19-farsi/)_
 
 ---
 
@@ -20,11 +20,11 @@ _Read this post in: [Hindi](https://blog.openmined.org/providing-opensource-priv
 
 ****OpenMined is a community of 7,300+ engineers, researchers, writers, and developers dedicated to lowering the barrier-to-entry to private AI technologies through open-source code and free education.****
 
-**We are giving [technical advice](https://blog.openmined.org/covid-app-privacy-advice/), [open-source code](https://github.com/OpenMined), and [support on Slack](https://join.slack.com/t/openmined/shared_invite/zt-deu0kql0-kn~hh1CM3LdME6WORkIp6g) to help app developers worldwide protect the privacy of user-base.**
+**We are giving [technical advice](/blog/covid-app-privacy-advice/), [open-source code](https://github.com/OpenMined), and [support on Slack](/slack/) to help app developers worldwide protect the privacy of user-base.**
 
 ---
 
-**UPDATE:** Our community is working on four main open-source projects relating to pandemic-tech: a white label COVID Alert App, private set intersection, a differential privacy wrapper, and private identity. [**Read more about these here.**](https://blog.openmined.org/openmineds-efforts-for-the-coronavirus-pandemic/)
+**UPDATE:** Our community is working on four main open-source projects relating to pandemic-tech: a white label COVID Alert App, private set intersection, a differential privacy wrapper, and private identity. [**Read more about these here.**](/blog/openmineds-efforts-for-the-coronavirus-pandemic/)
 
 ---
 
@@ -41,7 +41,7 @@ OpenMined is **providing our expertise, open-source code, educational materials,
 **Specifically, OpenMined is working to:**
 
 -   **[Provide the free, open-source code](https://github.com/OpenMined)** for implementing the necessary privacy preserving techniques. To serve as many requirements as possible, the code base includes both individual components and white-label applications.
--   [**Provide education for all**](https://blog.openmined.org/covid-app-privacy-advice/) app makers and personnel responsible for vetting apps on behalf of their local jurisdiction about how these apps should and can be built in a way that protects citizen data and the private information it contains.
+-   [**Provide education for all**](/blog/covid-app-privacy-advice/) app makers and personnel responsible for vetting apps on behalf of their local jurisdiction about how these apps should and can be built in a way that protects citizen data and the private information it contains.
 
 ### These apps are urgently needed. Why care about privacy right now?  
 
@@ -73,9 +73,9 @@ Furthermore, by providing our open-source code we help developers two-fold:
 
 ### For developers:  
 
--   Read our live document with technical advice, **[Maximising Privacy and Effectiveness in COVID-19 Apps.](https://blog.openmined.org/covid-app-privacy-advice/)**
--   ****[If you have questions or need assistance, post in the Covid-19 Technical Collaboration Slack Channel.](https://join.slack.com/t/openmined/shared_invite/zt-deu0kql0-kn~hh1CM3LdME6WORkIp6g)****
--   **UPDATE:** Our community is working on four main open-source projects relating to pandemic-tech: a white label COVID Alert App, private set intersection, a differential privacy wrapper, and private identity. [**Read more about these here.**](https://blog.openmined.org/openmineds-efforts-for-the-coronavirus-pandemic/)
+-   Read our live document with technical advice, **[Maximising Privacy and Effectiveness in COVID-19 Apps.](/blog/covid-app-privacy-advice/)**
+-   ****[If you have questions or need assistance, post in the Covid-19 Technical Collaboration Slack Channel.](/slack/)****
+-   **UPDATE:** Our community is working on four main open-source projects relating to pandemic-tech: a white label COVID Alert App, private set intersection, a differential privacy wrapper, and private identity. [**Read more about these here.**](/blog/openmineds-efforts-for-the-coronavirus-pandemic/)
 
 **Relevant ****Github Repositories****:**
 
@@ -87,13 +87,13 @@ Furthermore, by providing our open-source code we help developers two-fold:
 
 ### For government officials who approve/disapprove apps:  
 
--   ****If you have questions about an app that you are approving or have any questions about privacy in COVID-19 apps, ask us in the [Covid-19 Technical Collaboration Channel](https://join.slack.com/t/openmined/shared_invite/zt-deu0kql0-kn~hh1CM3LdME6WORkIp6g) or email [covid@openmined.org](mailto:covid@openmined.org).****
+-   ****If you have questions about an app that you are approving or have any questions about privacy in COVID-19 apps, ask us in the [Covid-19 Technical Collaboration Channel](/slack/) or email [covid@openmined.org](mailto:covid@openmined.org).****
 
 ### For privacy and security experts looking to help:  
 
--   Our live document with technical advice, **[Maximising Privacy and Effectiveness in COVID-19 Apps.](https://blog.openmined.org/covid-app-privacy-advice/)**
--   ****If you have recommended additions/edits to this blogpost or want to help us out, post in the [Covid-19 Technical Collaboration Slack Channel](https://join.slack.com/t/openmined/shared_invite/zt-deu0kql0-kn~hh1CM3LdME6WORkIp6g).****
--   **UPDATE:** Our community is working on four main open-source projects relating to pandemic-tech: a white label COVID Alert App, private set intersection, a differential privacy wrapper, and private identity. [**Read more about these here.**](https://blog.openmined.org/openmineds-efforts-for-the-coronavirus-pandemic/)
+-   Our live document with technical advice, **[Maximising Privacy and Effectiveness in COVID-19 Apps.](/blog/covid-app-privacy-advice/)**
+-   ****If you have recommended additions/edits to this blogpost or want to help us out, post in the [Covid-19 Technical Collaboration Slack Channel](/slack/).****
+-   **UPDATE:** Our community is working on four main open-source projects relating to pandemic-tech: a white label COVID Alert App, private set intersection, a differential privacy wrapper, and private identity. [**Read more about these here.**](/blog/openmineds-efforts-for-the-coronavirus-pandemic/)
 
 ### For donors:  
 

@@ -9,7 +9,7 @@ draft: false
 legacyId: 2413
 ---
 
-_Mulțumim Mădălin Mămuleanu pentru traducere!_ __[Click here for English.](https://blog.openmined.org/providing-opensource-privacy-for-covid19/)__
+_Mulțumim Mădălin Mămuleanu pentru traducere!_ __[Click here for English.](/blog/providing-opensource-privacy-for-covid19/)__
 
 ---
 
@@ -70,8 +70,8 @@ Ce ne propunem noi la OpenMined:
 
 ### Pentru dezvoltatori:  
 
--   Citește documentul nostru live cu sfaturi tehnice, **[Maximising Privacy and Effectiveness in COVID-19 Apps.](https://blog.openmined.org/covid-app-privacy-advice/)**
--   Dacă ai întrebări sau ai nevoie de ajutor, poți posta în [Covid-19 Technical Collaboration Slack Channel](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1).
+-   Citește documentul nostru live cu sfaturi tehnice, **[Maximising Privacy and Effectiveness in COVID-19 Apps.](/blog/covid-app-privacy-advice/)**
+-   Dacă ai întrebări sau ai nevoie de ajutor, poți posta în [Covid-19 Technical Collaboration Slack Channel](/slack/).
 
 **Repository Github:**
 
@@ -83,12 +83,12 @@ Ce ne propunem noi la OpenMined:
 
 ### Pentru funcționarii guvernamentali care aprobă / resping aplicațiile:
 
--   Dacă aveți întrebări despre o aplicație pe care o aprobați sau aveți întrebări despre confidențialitate în aplicațiile COVID-19, întrebați-ne în [Covid-19 Technical Collaboration Channel](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1) sau prin e-mail la: covid@openmined.org
+-   Dacă aveți întrebări despre o aplicație pe care o aprobați sau aveți întrebări despre confidențialitate în aplicațiile COVID-19, întrebați-ne în [Covid-19 Technical Collaboration Channel](/slack/) sau prin e-mail la: covid@openmined.org
 
 **Pentru experții în confidențialitate și securitate care doresc să ajute:**
 
--   Documentul nostru cu sfaturi tehnice, **[Maximising Privacy and Effectiveness in COVID-19 Apps.](https://blog.openmined.org/covid-app-privacy-advice/)**
--   Dacă ați recomandat adăugări / modificări la această postare pe blog sau doriți să ne ajutați, publicați în [Covid-19 Technical Collaboration Slack Channel](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1)
+-   Documentul nostru cu sfaturi tehnice, **[Maximising Privacy and Effectiveness in COVID-19 Apps.](/blog/covid-app-privacy-advice/)**
+-   Dacă ați recomandat adăugări / modificări la această postare pe blog sau doriți să ne ajutați, publicați în [Covid-19 Technical Collaboration Slack Channel](/slack/)
 
 ### Pentru sponsori:  
 

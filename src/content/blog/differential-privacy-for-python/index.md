@@ -10,7 +10,7 @@ draft: false
 legacyId: 2198
 ---
 
-The [compelling use cases](https://blog.openmined.org/use-cases-of-differential-privacy/) for differential privacy are growing each day. Engineers at OpenMined have been busy building libraries to improve developer accessibility to industry tested implementations.
+The [compelling use cases](/blog/use-cases-of-differential-privacy/) for differential privacy are growing each day. Engineers at OpenMined have been busy building libraries to improve developer accessibility to industry tested implementations.
 
 In this latest instalment of OpenMined Dev Diaries we talk to [Chinmay Shah](https://twitter.com/chinmayshah899), Python lead for OpenMined’s Differential Privacy team about his experiences building [PyDP](https://github.com/OpenMined/pydp), a Python API for Google’s [Differential Privacy library](https://github.com/google/differential-privacy).
 
@@ -34,4 +34,4 @@ Beyond [PyDP](https://github.com/OpenMined/pydp), we plan to develop plugins for
 
 ### How you can help!
 
-If you want to start contributing to PyDP, why not try your hand at a [good first issue](https://github.com/openmined/pydp/issues?q=is%3Aissue+is%3Aopen+label%3A%22Good+first+issue+%3Amortar_board%3A%22)?  Feel free to join in the conversation on our [Slack community](https://join.slack.com/t/openmined/shared_invite/zt-een94bc6-6ErpR~73SFAdNu5~QH7tlg) as well. Join #lib\_pydp to get started!
+If you want to start contributing to PyDP, why not try your hand at a [good first issue](https://github.com/openmined/pydp/issues?q=is%3Aissue+is%3Aopen+label%3A%22Good+first+issue+%3Amortar_board%3A%22)?  Feel free to join in the conversation on our [Slack community](/slack/) as well. Join #lib\_pydp to get started!

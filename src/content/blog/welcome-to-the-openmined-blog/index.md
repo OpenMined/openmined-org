@@ -20,7 +20,7 @@ The Weekly Dig is where OpenMined members write up summaries of various developm
 
 ### OpenMined Blog
 
-The [official OpenMined blog](https://blog.openmined.org) will include a list of general announcements, tutorials, and other community news. This is the “source of truth” for all things OpenMined. Naturally, we will still have our Slack channel which at the time of this post has well over 2,300 members in it. Not bad for our first ten months!
+The [official OpenMined blog](/blog/) will include a list of general announcements, tutorials, and other community news. This is the “source of truth” for all things OpenMined. Naturally, we will still have our Slack channel which at the time of this post has well over 2,300 members in it. Not bad for our first ten months!
 
 Slack will continue to be where daily discussion of the OpenMined platform happens, while the blog will serve as a place for official announcements.
 

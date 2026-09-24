@@ -178,7 +178,7 @@ The answer to this is would be, **Local DP** is great for **individual responses
 -   Join the [OpenMined Slack](https://openmined.slack.com/join/shared_invite/zt-een94bc6-6ErpR~73SFAdNu5~QH7tlg#/)
 -   Check out [OpenMined Welcome Package!](https://github.com/OpenMined/OM-Welcome-Package)
 -   Join the right channels that interests you (eg: #lib\_pydp )
--   Check out – [Roadmap to Differential Privacy for All](https://blog.openmined.org/making-algorithms-private/)
+-   Check out – [Roadmap to Differential Privacy for All](/blog/making-algorithms-private/)
 -   Join a [Mentorship Program](https://docs.google.com/forms/d/e/1FAIpQLSe1dZjZVFwJhYe9LxMW6BXnEoJnqOoWIkyyplGQTnASDLCKKA/viewform) if you need some guidance.
 -   Check out the [Good First Issues](https://github.com/OpenMined/PyDP/issues?q=is%3Aissue+is%3Aopen+label%3A%22Good+first+issue+%3Amortar_board%3A%22) and jump right in!
 

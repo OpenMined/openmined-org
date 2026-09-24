@@ -9,7 +9,7 @@ draft: false
 legacyId: 1881
 ---
 
-In the [first post](https://blog.openmined.org/society-runs-on-information-flows/) of the Private AI series we covered information flows and how they are fundamental to our society and human collaboration. We also learned about how information flows are often broken today because of the privacy-transparency trade-off.
+In the [first post](/blog/society-runs-on-information-flows/) of the Private AI series we covered information flows and how they are fundamental to our society and human collaboration. We also learned about how information flows are often broken today because of the privacy-transparency trade-off.
 
 > To make the matter less abstract, you can replace “information flows” with your favorite example. Take _democracy_, _scientific research_, or _communities working together to help the environment_.
 
@@ -115,7 +115,7 @@ There is a new class of technologies that allows this, and we will learn about i
 
 This lesson explored the three major technical problems that underlie the privacy-transparency trade-off. The copy problem, the bundling problem, and the recursive enforcement problem.
 
-In this article and the [last one](https://blog.openmined.org/society-runs-on-information-flows/) we learned about the _problems_ of today’s information flows. In the next blog post we will begin to learn about _solutions_!
+In this article and the [last one](/blog/society-runs-on-information-flows/) we learned about the _problems_ of today’s information flows. In the next blog post we will begin to learn about _solutions_!
 
 ---
 

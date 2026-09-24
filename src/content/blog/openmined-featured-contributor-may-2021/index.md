@@ -52,7 +52,7 @@ Github: [@tcp](https://github.com/tcp)  |  Twitter: [@1tcp](https://twitter.co
 
 ****************And what are you working on now?****************
 
-> _“_I’m basically “taking over” OpenMined’s web platforms — [OpenMined Education](https://courses.openmined.org), [the website](https://www.openmined.org/), [PyGrid Admin](https://github.com/openmined/pygrid-admin), [this blog](https://blog.openmined.org/)! — and leading the transition to new versions of these platforms or creating new web applications. Plus, the Web and Mobile team is developing many other web applications that will be unveiled in the next couple of months. These are very exciting times!
+> _“_I’m basically “taking over” OpenMined’s web platforms — [OpenMined Education](https://courses.openmined.org), [the website](https://openmined.org/), [PyGrid Admin](https://github.com/openmined/pygrid-admin), [this blog](/blog/)! — and leading the transition to new versions of these platforms or creating new web applications. Plus, the Web and Mobile team is developing many other web applications that will be unveiled in the next couple of months. These are very exciting times!
 > 
 > If you want to jump in and help us develop our web platforms, please reach out in the #web-and-mobile channel on Slack!_“_
 

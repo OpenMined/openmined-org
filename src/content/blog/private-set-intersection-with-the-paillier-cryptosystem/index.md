@@ -10,9 +10,9 @@ draft: false
 legacyId: 2153
 ---
 
-__****This post is part of our [Privacy-Preserving Data Science, Explained](https://blog.openmined.org/private-machine-learning-explained/) series.****__
+__****This post is part of our [Privacy-Preserving Data Science, Explained](/blog/private-machine-learning-explained/) series.****__
 
-In a [previous post](https://blog.openmined.org/the-paillier-cryptosystem/) we looked at the Paillier cryptosystem, which is a partial homomorphic encryption scheme enabling the addition of two ciphertexts as well as the multiplication of a ciphertext by a plaintext. In this post we’ll see how a [private set intersection](https://en.wikipedia.org/wiki/Private_set_intersection) protocol can be built using the Paillier cryptosystem.
+In a [previous post](/blog/the-paillier-cryptosystem/) we looked at the Paillier cryptosystem, which is a partial homomorphic encryption scheme enabling the addition of two ciphertexts as well as the multiplication of a ciphertext by a plaintext. In this post we’ll see how a [private set intersection](https://en.wikipedia.org/wiki/Private_set_intersection) protocol can be built using the Paillier cryptosystem.
 
 ## Private set intersection
 
@@ -53,7 +53,7 @@ If it isn’t important to Alice which specific elements make up the intersectio
 
 ## Code
 
-As with the previous post, I have implemented PSI with Paillier in [my learning repository](https://github.com/willclarktech/privacy-implementations). Instructions for downloading and setting up the repository are in [the previous post](https://blog.openmined.org/the-paillier-cryptosystem/).
+As with the previous post, I have implemented PSI with Paillier in [my learning repository](https://github.com/willclarktech/privacy-implementations). Instructions for downloading and setting up the repository are in [the previous post](/blog/the-paillier-cryptosystem/).
 
 **WARNING: This library is not recommended for production use. It was written for learning purposes only.**
 

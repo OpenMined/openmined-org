@@ -9,11 +9,11 @@ draft: false
 legacyId: 1652
 ---
 
-The [first post](https://blog.openmined.org/society-runs-on-information-flows/) of the Private AI series was all about information flows and how they are fundamental to our society. We also learned about how information flows are often broken today because of the privacy-transparency trade-off.
+The [first post](/blog/society-runs-on-information-flows/) of the Private AI series was all about information flows and how they are fundamental to our society. We also learned about how information flows are often broken today because of the privacy-transparency trade-off.
 
-In the [second post](https://blog.openmined.org/limitations-of-information-flows/) we discussed which technical problems exactly are underlying the privacy-transparency trade-off.
+In the [second post](/blog/limitations-of-information-flows/) we discussed which technical problems exactly are underlying the privacy-transparency trade-off.
 
-In the [third post](https://blog.openmined.org/structured-transparency-input-output-privacy/) we were introduced to the concept of **structured transparency**. We learned about input and output privacy, two of the five guarantees of structured transparency.
+In the [third post](/blog/structured-transparency-input-output-privacy/) we were introduced to the concept of **structured transparency**. We learned about input and output privacy, two of the five guarantees of structured transparency.
 
 Today, in post four, we continue with structured transparency, covering input and output **verification** as well as **flow governance**.
 

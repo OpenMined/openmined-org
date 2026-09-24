@@ -66,7 +66,7 @@ The final step is to install PySyft. To do this run the following command:
 
 $ pip install syft
 
-This will auto-install all dependencies required to run the tutorials and examples on the [OpenMined website](https://www.openmined.org/) and [PySyft GitHub page](https://github.com/OpenMined/PySyft).
+This will auto-install all dependencies required to run the tutorials and examples on the [OpenMined website](https://openmined.org/) and [PySyft GitHub page](https://github.com/OpenMined/PySyft).
 
 **4\. ****Test Installation******
 

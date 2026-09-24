@@ -14,11 +14,11 @@ _Right now, COVID-19 apps are being built around the world to help societies mit
 
 _Data privacy is crucial for these apps. Not only is privacy a human right, but it is also needed for establishing trust — and therefore, compliance — in these COVID-19 apps._
 
-_OpenMined is a community of 7,300+ engineers, researchers, writers, and developers dedicated to lowering the barrier-to-entry to private AI technologies. We are giving_ [_technical advice_](https://blog.openmined.org/covid-app-privacy-advice/)_,_ [_open-source code_](https://github.com/OpenMined)_, and [support on Slack](https://join.slack.com/t/openmined/shared_invite/zt-deu0kql0-kn~hh1CM3LdME6WORkIp6g) to help app developers worldwide protect the privacy of their user-base._
+_OpenMined is a community of 7,300+ engineers, researchers, writers, and developers dedicated to lowering the barrier-to-entry to private AI technologies. We are giving_ [_technical advice_](/blog/covid-app-privacy-advice/)_,_ [_open-source code_](https://github.com/OpenMined)_, and [support on Slack](/slack/) to help app developers worldwide protect the privacy of their user-base._
 
-[_Read our original announcement here._](https://blog.openmined.org/providing-opensource-privacy-for-covid19/)
+[_Read our original announcement here._](/blog/providing-opensource-privacy-for-covid19/)
 
-_Read our advice for [Maximizing Privacy and Effectiveness in COVID-19 Apps](https://blog.openmined.org/covid-app-privacy-advice/)._
+_Read our advice for [Maximizing Privacy and Effectiveness in COVID-19 Apps](/blog/covid-app-privacy-advice/)._
 
 ---
 
@@ -99,7 +99,7 @@ The Private Identity project is split into two:
 
 ### Want to help?
 
-If you would like to help construct or use these projects, join one of the following slack channels on [OpenMined’s Slack Team](https://join.slack.com/t/openmined/shared_invite/zt-deu0kql0-kn~hh1CM3LdME6WORkIp6g).
+If you would like to help construct or use these projects, join one of the following slack channels on [OpenMined’s Slack Team](/slack/).
 
 -   #covid\_alert – development and use of the covid alert app.
 -   #covid\_dp\_lib\_wrapping – work on building DP libraries

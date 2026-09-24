@@ -118,6 +118,8 @@ export default defineConfig({
         // them without sitemapping them (parity), and most are thin (59 of 114
         // authors have a single post). Decision 2026-08-13, see LAUNCH.md.
         !page.includes('/blog/author/') &&
+        // Post-payment confirmation — noindex, not a destination.
+        !page.includes('/donate/thank-you') &&
         // Unlisted posts — live URLs deliberately absent from every discovery
         // surface (see the unlistedPaths scan above).
         !unlistedPaths.some((p) => page.includes(p)),

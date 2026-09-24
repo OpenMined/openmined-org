@@ -43,7 +43,7 @@ Our first deadline which we will pursue as a research community is NeurIPS 2020.
 
 If you would like to join this community as either a Research Scientist or a Research Engineer, you may do so by filling out the corresponding application below:
 
--   [Apply to be a Research Engineer](https://blog.openmined.org/apply-to-be-an-openmined-research-engineer/)
--   [Apply to be a Research Scientist](https://blog.openmined.org/apply-to-be-an-openmined-research-scientist/)
+-   [Apply to be a Research Engineer](/blog/apply-to-be-an-openmined-research-engineer/)
+-   [Apply to be a Research Scientist](/blog/apply-to-be-an-openmined-research-scientist/)
 
 I will be leading several research projects myself which have significant engineering components. I look forward to collaborating with you!

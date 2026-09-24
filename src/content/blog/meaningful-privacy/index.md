@@ -48,4 +48,4 @@ _**“Encrypting your cake and eating it too”  approach to privacy!**_
 
 **The best way to keep up to date on the latest advancements is to join our community at** [**slack.openmined.org**](http://slack.openmined.org/)
 
-_OpenMined – Since  2017, has been led by Andrew W. Trask, University of Oxford PhD student studying Privacy and AI. OpenMined is an open source community of over 8000+ researchers, engineers, mentors and enthusiasts dedicated to making the concepts and tools necessary for privacy preserving AI to reach mainstream adoption. Most recently, this year they were named a **UN Digital Public Good**. Website:_ [_OpenMined.org_](https://www.openmined.org/)
+_OpenMined – Since  2017, has been led by Andrew W. Trask, University of Oxford PhD student studying Privacy and AI. OpenMined is an open source community of over 8000+ researchers, engineers, mentors and enthusiasts dedicated to making the concepts and tools necessary for privacy preserving AI to reach mainstream adoption. Most recently, this year they were named a **UN Digital Public Good**. Website:_ [_OpenMined.org_](https://openmined.org/)

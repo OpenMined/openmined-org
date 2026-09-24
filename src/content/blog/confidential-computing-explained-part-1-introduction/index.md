@@ -22,7 +22,7 @@ legacyId: 1761
 
 Part 1 : introduction
 
-[Part 2 : attestation](https://blog.openmined.org/confidential-computing-explained-part-2-attestation/)
+[Part 2 : attestation](/blog/confidential-computing-explained-part-2-attestation/)
 
 **I — Introduction**
 

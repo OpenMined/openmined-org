@@ -10,7 +10,7 @@ draft: false
 legacyId: 1827
 ---
 
-We’re are very excited to announce that [OpenMined](https://www.openmined.org/) was yet again selected as a mentor organization for [Google Summer of Code (GSoC 2021)](https://summerofcode.withgoogle.com/organizations/5448485970640896/)! This post contains information for students interested in participating in the program. GSoC applicants are welcome to propose other interesting ideas as well and check if a mentor can help take ideation further. If you propose a project of your own, please message in the [#gsoc](http://slack.openmined.org) channel on OpenMined’s [Slack](http://slack.openmined.org).
+We’re are very excited to announce that [OpenMined](https://openmined.org/) was yet again selected as a mentor organization for [Google Summer of Code (GSoC 2021)](https://summerofcode.withgoogle.com/organizations/5448485970640896/)! This post contains information for students interested in participating in the program. GSoC applicants are welcome to propose other interesting ideas as well and check if a mentor can help take ideation further. If you propose a project of your own, please message in the [#gsoc](http://slack.openmined.org) channel on OpenMined’s [Slack](http://slack.openmined.org).
 
 ## About OpenMined
 

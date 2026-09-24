@@ -52,7 +52,7 @@ GitHub: [@souravcipher](https://github.com/souravcipher)  | Slack: [@Sourav](ht
 
 ****What would you say to someone who wants to start contributing?****
 
-> “If someone is new to OpenMined I will recommend to visit the [OpenMined Website](https://www.openmined.org/) and [GitHub Repositories](https://github.com/OpenMined) and join the [OpenMined Slack Community](http://slack.openmined.org)! The community is super awesome and amazing, just feel free to ask questions in Slack!
+> “If someone is new to OpenMined I will recommend to visit the [OpenMined Website](https://openmined.org/) and [GitHub Repositories](https://github.com/OpenMined) and join the [OpenMined Slack Community](http://slack.openmined.org)! The community is super awesome and amazing, just feel free to ask questions in Slack!
 > 
 > We at OpenMined have awesome mentors who have been continuously working hard to guide their mentees and help to achieve their goals, whether it’s getting started to contributing to a project, learning about a particular part of the code base, joining a dev or community team or learning something new!
 > 
@@ -60,4 +60,4 @@ GitHub: [@souravcipher](https://github.com/souravcipher)  | Slack: [@Sourav](ht
 
 **Please recommend one interesting book, podcast or resource to the OpenMined community.**
 
-> “I’m currently reading a book [Grokking Machine Learning](https://www.manning.com/books/grokking-machine-learning?query=grokking%20mach) by [Luis G. Serrano](https://twitter.com/luis_likes_math?lang=en) it’s awesome! I also recommend the book [Grokking Deep Learning](https://www.manning.com/books/grokking-deep-learning) by [Andrew Trask](https://twitter.com/iamtrask),  [Podcast](https://www.youtube.com/user/lexfridman/videos) by [Lex Fridman](https://twitter.com/lexfridman) is awesome and [OpenMined Blogs](https://blog.openmined.org/). You can also find more recommendations on [my page](https://souravcipher.github.io/resources/)!”
+> “I’m currently reading a book [Grokking Machine Learning](https://www.manning.com/books/grokking-machine-learning?query=grokking%20mach) by [Luis G. Serrano](https://twitter.com/luis_likes_math?lang=en) it’s awesome! I also recommend the book [Grokking Deep Learning](https://www.manning.com/books/grokking-deep-learning) by [Andrew Trask](https://twitter.com/iamtrask),  [Podcast](https://www.youtube.com/user/lexfridman/videos) by [Lex Fridman](https://twitter.com/lexfridman) is awesome and [OpenMined Blogs](/blog/). You can also find more recommendations on [my page](https://souravcipher.github.io/resources/)!”

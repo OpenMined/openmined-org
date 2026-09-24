@@ -12,7 +12,7 @@ legacyId: 2017
 <!-- TODO(a11y): 1 localized body image(s) have empty alt text -->
 
 
-__**This post is part of our [Privacy-Preserving Data Science, Explained](https://blog.openmined.org/private-machine-learning-explained/) series.**__
+__**This post is part of our [Privacy-Preserving Data Science, Explained](/blog/private-machine-learning-explained/) series.**__
 
 With the advancements in the field of Artificial Intelligence, our economy has become increasingly data-driven. Organisations harvest our data en mass in order to tap into information held between the data points.  For this reason, there’s an ever growing economic incentive for organisations to store your digital footprint as you participate in their technological ecosystem. Surveillance capitalists may use this data to learn what makes us tick, generating revenue through targeted online advertising. While this is relatively innocuous, this technology has since been adapted into far more insidious sectors than retail. The previous 10 years has seen use of these scalable tools of mass persuasion in order to [undermine democracy](https://www.theguardian.com/news/series/cambridge-analytica-files/all) and even as an [incitement to violence](https://www.bbc.co.uk/news/world-asia-46105934).
 

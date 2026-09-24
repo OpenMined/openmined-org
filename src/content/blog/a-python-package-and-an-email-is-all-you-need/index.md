@@ -34,7 +34,7 @@ Let’s see how to work with multiple medical datasets while maintaining privacy
 
 ### 1\. Install PySyft
 
-First, install PySyft. We will use the latest stable release available at the time of writing (See the announcement [post](https://blog.openmined.org/announcing-pysyft-09/ "Announcing PySyft 0.9.0"))
+First, install PySyft. We will use the latest stable release available at the time of writing (See the announcement [post](/blog/announcing-pysyft-09/ "Announcing PySyft 0.9.0"))
 
 ```python
 $ pip install syft==0.9.0

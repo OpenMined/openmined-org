@@ -83,7 +83,7 @@ const cards = await Promise.all(entries.map(resolveCard));
   <section class="cat-archive container content-top-rule">
     <BlogCategoryNav categories={navCats} active={category} />
 
-    <BlogToolbar heading={label} count={count} scope={{ cat: category, exclude }} />
+    <BlogToolbar headingAs="h1" heading={label} count={count} scope={{ cat: category, exclude }} />
 
     <div class="blog-grid">
       {cards.map((c) => (

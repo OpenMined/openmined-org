@@ -80,12 +80,12 @@ highly sensitive and need more complex algorithms. More specifically, if a query
 
 ---
 
-To get a better understanding of how bounds on noise to be added to query results can be applied, we suggest that you read [this paper review](https://blog.openmined.org/choosing-epsilon/).
+To get a better understanding of how bounds on noise to be added to query results can be applied, we suggest that you read [this paper review](/blog/choosing-epsilon/).
 
 **Sources:**
 
 -   [Data Privacy: Definitions and Techniques](https://www.worldscientific.com/doi/abs/10.1142/S0218488512400247)
 -   [Differential Privacy: Now it’s Getting Personal](https://dl.acm.org/doi/abs/10.1145/2775051.2677005)
 -   [The Algorithmic Foundations of Differential Privacy](https://www.cis.upenn.edu/~aaroth/Papers/privacybook.pdf)
--   [Global Sensitivity From Scratch](https://blog.openmined.org/global-sensitivity/)
--   [Local sensitivity for differential privacy from scratch](https://blog.openmined.org/local-sensitivity/)
+-   [Global Sensitivity From Scratch](/blog/global-sensitivity/)
+-   [Local sensitivity for differential privacy from scratch](/blog/local-sensitivity/)

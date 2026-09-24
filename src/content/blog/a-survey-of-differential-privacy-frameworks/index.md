@@ -26,7 +26,7 @@ DP works by adding statistical noise to the data (either to their inputs or to t
 
 ![](./media/om-what-is-differential-privacy-graphics-graphic-1-1-04.png)
 
-<figcaption><em>Global vs Local Differential Privacy. </em><a href="https://blog.openmined.org/basics-local-differential-privacy-vs-global-differential-privacy/"><em>Source</em></a><em>.</em></figcaption></figure>
+<figcaption><em>Global vs Local Differential Privacy. </em><a href="/blog/basics-local-differential-privacy-vs-global-differential-privacy/"><em>Source</em></a><em>.</em></figcaption></figure>
 
 To help individuals and organizations implement differential privacy in their models, several popular companies have developed and released differential privacy tools and libraries that can be used in different programming languages, such as C++, Go, and Python. These tools and libraries are designed to make it easier for developers to implement differential privacy in their applications and systems, without the need for extensive knowledge of the underlying mathematical concepts.
 
@@ -68,7 +68,7 @@ Several libraries and tools are commonly used for implementing differential priv
     Learn more about OpenDP [here](https://opendp.org/about).
     
 7.  [Openmined/PyDP](https://github.com/OpenMined/PyDP) – PyDp is a python wrapper for Google’s DIfferential Privacy project created by OpenMined. The OpenDP Library offers a collection of algorithms that are ε-differentially private, which can be used to generate aggregate statistics from data sets containing confidential or sensitive information. This means that with PyDP, one can control the level of privacy and precision of their Python-based models.  
-    Learn more about [Openmined](https://www.openmined.org) and [PyDP](https://github.com/OpenMined/PyDP).
+    Learn more about [Openmined](https://openmined.org) and [PyDP](https://github.com/OpenMined/PyDP).
     
 
 ## Closing Thoughts

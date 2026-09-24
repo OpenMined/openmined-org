@@ -60,7 +60,7 @@ SGX enclaves are built, which allow secure encrypted computation in the memory s
 
 ## Data Selection and Federated Training Workstream
 
-When validation isn’t enough and federated training needs to be done upon multiple data sets, [OpenMined](https://www.openmined.org/) comes to the rescue. The individual nodes that hold the data local to the data owner’s own infrastructure can be connected through [PyGrid](https://blog.openmined.org/what-is-pygrid-demo/) to:
+When validation isn’t enough and federated training needs to be done upon multiple data sets, [OpenMined](https://openmined.org/) comes to the rescue. The individual nodes that hold the data local to the data owner’s own infrastructure can be connected through [PyGrid](/blog/what-is-pygrid-demo/) to:
 
 -   Find the right data sets without compromising privacy
 -   Train simultaneously on multiple data sets without sharing data

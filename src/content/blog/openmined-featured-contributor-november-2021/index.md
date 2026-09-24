@@ -42,7 +42,7 @@ LinkedIN:[@gonzalo-munilla](https://www.linkedin.com/in/gonzalo-munilla/)  |  
 
 ********What was the first thing you started working on within OpenMined?********
 
-> “At OpenMined I focused on writing differential privacy code tutorials; you may find them in this [link](https://blog.openmined.org/author/gonzalo/). My favorite tutorial is based on a paper from Jaewoo Lee et al., which I implemented from scratch; it is called “[Differential Identifiability](https://blog.openmined.org/differential-identifiability/)”—looking forward to what is next!”
+> “At OpenMined I focused on writing differential privacy code tutorials; you may find them in this [link](/blog/author/gonzalo/). My favorite tutorial is based on a paper from Jaewoo Lee et al., which I implemented from scratch; it is called “[Differential Identifiability](/blog/differential-identifiability/)”—looking forward to what is next!”
 
 ********And what are you working on now?********
 

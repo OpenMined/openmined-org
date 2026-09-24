@@ -61,7 +61,7 @@ Our overall modelling pipeline consists of the following two steps:
 
 ### Identifying overlapping customers using PSI
 
-Overlapping customers are obtained by using private set intersection (PSI), a multi-party computation cryptographic technique which enables two parties each with a set of elements to compute the overlap (intersection) of these elements, without exposing anything to each other except for the elements in the intersection. We use RSA-based PSI protocol described in [\[4\]](https://blog.openmined.org/private-set-intersection/), and only share encrypted customer ids. This prevents each party from learning about customers who are exclusive to the other party, while allowing secure identification of the overlapping customers.
+Overlapping customers are obtained by using private set intersection (PSI), a multi-party computation cryptographic technique which enables two parties each with a set of elements to compute the overlap (intersection) of these elements, without exposing anything to each other except for the elements in the intersection. We use RSA-based PSI protocol described in [\[4\]](/blog/private-set-intersection/), and only share encrypted customer ids. This prevents each party from learning about customers who are exclusive to the other party, while allowing secure identification of the overlapping customers.
 
 Let us consider that MTN has a set of customer ids X and Ayoba has a set of customer ids Y. MTN generates a public key P\_M and a private key S\_M. The public key is shared with Ayoba. Using PSI, the overlapping customers are obtained and revealed to both parties. The detailed steps of our PSI protocol is presented in Fig 4.
 
@@ -107,8 +107,8 @@ Ayoba churn propensity model pilot proves that federated models can be launched 
 
 1.  [The consumer-data opportunity and the privacy imperative](https://www.mckinsey.com/business-functions/risk-and-resilience/our-insights/the-consumer-data-opportunity-and-the-privacy-imperative)
 2.  [Pyvertical: A vertical federated learning framework for multi-headed splitnn](https://arxiv.org/abs/2104.00489)
-3.  [GitHub – OpenMined/PySyft: A library for answering questions using data you cannot see](https://blog.openmined.org/p/5ac5d95c-c493-43c8-ad06-b0c29aade543/GitHub%20-%20OpenMined/PySyft:%20A%20library%20for%20answering%20questions%20using%20data%20you%20cannot%20see)
-4.  [Private set intersection for COVID-19 corona contact tracing apps](https://blog.openmined.org/private-set-intersection/)
+3.  [GitHub – OpenMined/PySyft: A library for answering questions using data you cannot see](https://github.com/OpenMined/PySyft)
+4.  [Private set intersection for COVID-19 corona contact tracing apps](/blog/private-set-intersection/)
 
 ## Contributors
 

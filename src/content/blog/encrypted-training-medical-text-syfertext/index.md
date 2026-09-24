@@ -14,7 +14,7 @@ legacyId: 2170
 
 **Author:**
 
--   Carlos Salgado – [email](mailto:csalgado@uwo.ca) | [GitHub](https://github.com/socd06) | [LinkedIn](https://blog.openmined.org/encrypted-training-medical-text-syfertext/www.linkedin.com/in/eng-socd)
+-   Carlos Salgado – [email](mailto:csalgado@uwo.ca) | [GitHub](https://github.com/socd06) | [LinkedIn](https://www.linkedin.com/in/eng-socd)
 
 ---
 
@@ -640,14 +640,14 @@ writer.close()
 
 We can see that the model consistently achieved around 80% validation accuracy while the loss was reduced, but did not tend to cero. This can be attributed to several things, for example, to the use of a MSE optimizer since better optimizers are not yet available for this framework. These results did not improve neither by increasing epoch quantity nor by reducing the learning rate or batch size hyperparameters. We can make the assumption that a different, deeper network architecture (CNN or RNN) could potencially increase the model accuracy while at the same time reducing loss but in turn would escalate training time considerably.
 
-SyferText and PySyft are still in development, therefore, inference and deployment of these models is still not documented and can actually be dangerous if used to protect data in production scenarios. We recommend you to stay tuned to the [blog](https://blog.openmined.org/), to **Star** [OpenMined](https://github.com/OpenMined/) repositories and also to **Follow** blog authors to stay up-to-date with the latest experiments and implementations.
+SyferText and PySyft are still in development, therefore, inference and deployment of these models is still not documented and can actually be dangerous if used to protect data in production scenarios. We recommend you to stay tuned to the [blog](/blog/), to **Star** [OpenMined](https://github.com/OpenMined/) repositories and also to **Follow** blog authors to stay up-to-date with the latest experiments and implementations.
 
 ## References
 
 1.  [Sentiment Classification for Restaurant Reviews using CNN in PyTorch](https://towardsdatascience.com/sentiment-classification-using-cnn-in-pytorch-fba3c6840430)
 2.  [Discovering Related Clinical Concepts Using Large Amounts of Clinical Notes](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5015701/)
 3.  [Sentiment Classification – Private Datasets – (Training)](https://github.com/OpenMined/SyferText/blob/master/tutorials/usecases/UC01%20-%20Sentiment%20Classifier%20-%20Private%20Datasets%20-%20\(Secure%20Training\).ipynb)
-4.  [Encrypted Training on MNIST](https://blog.openmined.org/encrypted-training-on-mnist/)
+4.  [Encrypted Training on MNIST](/blog/encrypted-training-on-mnist/)
 5.  [CNN Text Classification using Pytorch](https://github.com/Shawn1993/cnn-text-classification-pytorch)
 
 ## Time to Join the Community!

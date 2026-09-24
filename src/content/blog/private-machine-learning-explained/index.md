@@ -26,19 +26,19 @@ Private and secure ML is performed in practice using a combination of techniques
 
 Want to go straight to the deep-dives? Here’s a shortcut:
 
--   **[What is Federated Learning?](https://blog.openmined.org/what-is-federated-learning/)**
--   [**What is Differential Privacy by Shuffling?**](https://blog.openmined.org/differential-privacy-by-shuffling/)
--   **[What is Homomorphic Encryption?](https://blog.openmined.org/what-is-homomorphic-encryption/)**
--   [**What is the Paillier Cryptosystem?**](https://blog.openmined.org/the-paillier-cryptosystem/)
--   **[What is Private Set Intersection?](https://blog.openmined.org/private-set-intersection/)**
--   **[Private Set Intersection with the Paillier Cryptosystem](https://blog.openmined.org/private-set-intersection-with-the-paillier-cryptosystem/)**
--   [**What is the Diffie-Hellman key exchange protocol?**](https://blog.openmined.org/diffie-hellman-key-exchange/)
--   **[Private Set Intersection with Diffie-Hellman](https://blog.openmined.org/private-set-intersection-with-diffie-hellman/)**
--   [**What is a Split Neural Network?**](https://blog.openmined.org/split-neural-networks-on-pysyft/)
--   [**What is PyVertical?**](https://blog.openmined.org/what-is-pyvertical/)
--   **[What is Secure Multi-Party Computation?](https://blog.openmined.org/what-is-secure-multi-party-computation/)**
--   **[What is CrypTen? / CrypTen Integration into PySyft](https://blog.openmined.org/crypten-integration-in-pysyft/)**
--   [**What is Encrypted Machine Learning as a Service?**](https://blog.openmined.org/what-is-encrypted-machine-learning-as-a-service/)
+-   **[What is Federated Learning?](/blog/what-is-federated-learning/)**
+-   [**What is Differential Privacy by Shuffling?**](/blog/differential-privacy-by-shuffling/)
+-   **[What is Homomorphic Encryption?](/blog/what-is-homomorphic-encryption/)**
+-   [**What is the Paillier Cryptosystem?**](/blog/the-paillier-cryptosystem/)
+-   **[What is Private Set Intersection?](/blog/private-set-intersection/)**
+-   **[Private Set Intersection with the Paillier Cryptosystem](/blog/private-set-intersection-with-the-paillier-cryptosystem/)**
+-   [**What is the Diffie-Hellman key exchange protocol?**](/blog/diffie-hellman-key-exchange/)
+-   **[Private Set Intersection with Diffie-Hellman](/blog/private-set-intersection-with-diffie-hellman/)**
+-   [**What is a Split Neural Network?**](/blog/split-neural-networks-on-pysyft/)
+-   [**What is PyVertical?**](/blog/what-is-pyvertical/)
+-   **[What is Secure Multi-Party Computation?](/blog/what-is-secure-multi-party-computation/)**
+-   **[What is CrypTen? / CrypTen Integration into PySyft](/blog/crypten-integration-in-pysyft/)**
+-   [**What is Encrypted Machine Learning as a Service?**](/blog/what-is-encrypted-machine-learning-as-a-service/)
 
 ---
 
@@ -52,9 +52,9 @@ Instead of moving the data to the model, copies of the global model are sent to 
 
 This preserves privacy in the sense that the data has not been moved from the device. However, there is still a limitation: the content of the local data can [sometimes be inferred](https://arxiv.org/pdf/1812.00535.pdf) from the weight updates or improvements in the model. While individual clients are not able to reconstruct samples, an “honest-but-curious” server could. To prevent the possibility of inferring personal characteristics from the data, further techniques can be employed, such as differential privacy or encrypted computation.
 
-For more information and a code demonstration, see [**What is Federated Learning?**](https://blog.openmined.org/what-is-federated-learning/)
+For more information and a code demonstration, see [**What is Federated Learning?**](/blog/what-is-federated-learning/)
 
-**There are, of course, some variations of federated learning** – if you’re interested, [learn more about **the difference between ‘model-centric’ and ‘data-centric’** federated learning here](https://blog.openmined.org/announcing-new-libraries-for-fl-on-web-and-mobile/). The description above focused on ‘data-centric’.
+**There are, of course, some variations of federated learning** – if you’re interested, [learn more about **the difference between ‘model-centric’ and ‘data-centric’** federated learning here](/blog/announcing-new-libraries-for-fl-on-web-and-mobile/). The description above focused on ‘data-centric’.
 
 You can check out [**OpenMined’s library for federated learning, PySyft, on GitHub.**](https://github.com/OpenMined/PySyft)
 
@@ -86,7 +86,7 @@ For more information, check out the [**PyDP repo on Github**](https://github.com
 
 Differential privacy has been established as the gold standard for measuring and guaranteeing data privacy, but putting it into practice has [proved challenging until recently](https://journalprivacyconfidentiality.org/index.php/jpc/article/view/689). Practitioners often face a difficult choice between privacy and accuracy. Privacy amplification by shuffling is a relatively new idea that aims to provide greater accuracy while preserving privacy by shuffling batches of similar data. This approach has the potential to allow for richer, more reliable data analysis while preserving privacy.
 
-For a more in-depth explanation, see [**What is Differential Privacy by Shuffling?**](https://blog.openmined.org/differential-privacy-by-shuffling/)
+For a more in-depth explanation, see [**What is Differential Privacy by Shuffling?**](/blog/differential-privacy-by-shuffling/)
 
 ### Homomorphic Encryption
 
@@ -94,18 +94,18 @@ For a more in-depth explanation, see [**What is Differential Privacy by Shufflin
 
 Homomorphic encryption (HE), as opposed to traditional encryption methods, allows meaningful calculations to be performed on encrypted data. When using homomorphic encryption, data can be encrypted by its owner and sent to the model owner to run computation. For example, it would apply a trained classification model to encrypted patient data, and send back the encrypted result (e.g. a prediction of a disease) back to the patient. Notably, the model weights don’t need to be encrypted here as the computation happens on the model owner’s side. There are currently restrictions on the type of calculations that can be performed using homomorphic encryption, and the computation performance is still very far from traditional techniques.
 
-For more information and a code demonstration, see [**What is Homomorphic Encryption?**](https://blog.openmined.org/what-is-homomorphic-encryption/)
+For more information and a code demonstration, see [**What is Homomorphic Encryption?**](/blog/what-is-homomorphic-encryption/)
 
 You can check out [**OpenMined’s TenSEAL library for doing homomorphic encryption operations on tensors on GitHub.**](https://github.com/OpenMined/TenSEAL)
 
-You might also be interested in: **[Homomorphic Encryption in PySyft with SEAL and PyTorch](https://blog.openmined.org/ckks-homomorphic-encryption-pytorch-pysyft-seal/), [Build an Homomorphic Encryption Scheme from Scratch with Python](https://blog.openmined.org/build-an-homomorphic-encryption-scheme-from-scratch-with-python/)**
+You might also be interested in: **[Homomorphic Encryption in PySyft with SEAL and PyTorch](/blog/ckks-homomorphic-encryption-pytorch-pysyft-seal/), [Build an Homomorphic Encryption Scheme from Scratch with Python](/blog/build-an-homomorphic-encryption-scheme-from-scratch-with-python/)**
 
 **The [Paillier cryptosystem](https://en.wikipedia.org/wiki/Paillier_cryptosystem)**, invented by Pascal Paillier in 1999, is a partial homomorphic encryption scheme which allows two types of computation:
 
 -   addition of two ciphertexts
 -   multiplication of a ciphertext by a plaintext number
 
-For a detailed explanation, please see [**What is the Paillier Cryptosystem?**](https://blog.openmined.org/the-paillier-cryptosystem/)
+For a detailed explanation, please see [**What is the Paillier Cryptosystem?**](/blog/the-paillier-cryptosystem/)
 
 ### What is Private Set Intersection?
 
@@ -113,15 +113,15 @@ For a detailed explanation, please see [**What is the Paillier Cryptosystem?**](
 
 Private set intersection (PSI) is a powerful cryptographic technique which enables two parties, which both have a set of data points, to compare these data sets without exposing their raw data to the other party (thus sacrificing their individual data privacy). In other words, PSI allows us to test whether the parties share a common datapoint (such as a location, ID, etc) – the result is a third data set with only those elements, which both parties have in common.
 
-For more information and a code demonstration, see [**What is Private Set Intersection?**](https://blog.openmined.org/private-set-intersection/)
+For more information and a code demonstration, see [**What is Private Set Intersection?**](/blog/private-set-intersection/)
 
 You can also check out **[OpenMined’s PSI library on GitHub](https://github.com/OpenMined/PSI).**
 
-You might also like to see how a PSI protocol can be built using the Paillier cryptosystem in **[Private Set Intersection with the Paillier Cryptosystem](https://blog.openmined.org/private-set-intersection-with-the-paillier-cryptosystem/).**
+You might also like to see how a PSI protocol can be built using the Paillier cryptosystem in **[Private Set Intersection with the Paillier Cryptosystem](/blog/private-set-intersection-with-the-paillier-cryptosystem/).**
 
-The **Diffie-Hellman key exchange protocol** allows two parties to agree on a single secret without an eavesdropper discovering what it is, and without revealing their respective private keys to each other. For more detail, please see [**What is the Diffie-Hellman key exchange protocol?**](https://blog.openmined.org/diffie-hellman-key-exchange/)
+The **Diffie-Hellman key exchange protocol** allows two parties to agree on a single secret without an eavesdropper discovering what it is, and without revealing their respective private keys to each other. For more detail, please see [**What is the Diffie-Hellman key exchange protocol?**](/blog/diffie-hellman-key-exchange/)
 
-You might also like to see how a PSI protocol can be built using the Diffie-Hellman key exchange protocol in **[Private Set Intersection with Diffie-Hellman.](https://blog.openmined.org/private-set-intersection-with-diffie-hellman/)**
+You might also like to see how a PSI protocol can be built using the Diffie-Hellman key exchange protocol in **[Private Set Intersection with Diffie-Hellman.](/blog/private-set-intersection-with-diffie-hellman/)**
 
 ### What is Secure Multi-Party Computation?
 
@@ -129,29 +129,29 @@ You might also like to see how a PSI protocol can be built using the Diffie-Hell
 
 Secure multi-party computation (SMPC), in turn, is a method that allows separate parties to jointly compute a common function while keeping both the inputs and the function parameters private. It allows a model to be trained or applied to data from different sources without disclosing the training data items or the model’s weights. It relies on building shares of some value, which, when summed, reconstruct the original value. SMPC is computationally less intensive than HE, but requires a lot of communication between the parties, so bandwidth can be a bottleneck.
 
-For more information and a code demonstration, see **[What is Secure Multi-Party Computation?](https://blog.openmined.org/what-is-secure-multi-party-computation/)**
+For more information and a code demonstration, see **[What is Secure Multi-Party Computation?](/blog/what-is-secure-multi-party-computation/)**
 
 ### What is CrypTen?
 
 **In short: [CrypTen](https://github.com/facebookresearch/CrypTen) is a framework developed by [Facebook Research](https://research.fb.com/) for Privacy Preserving Machine Learning built on PyTorch.**
 
-The goal of CrypTen is to make secure computing techniques accessible to Machine Learning practitioners and efficient for server to server interactions. It currently implements [Secure Multi-Party Computation](https://blog.openmined.org/what-is-secure-multi-party-computation/) as its secure computing backend. More information can be found on the [project repo on Github](https://github.com/facebookresearch/CrypTen).
+The goal of CrypTen is to make secure computing techniques accessible to Machine Learning practitioners and efficient for server to server interactions. It currently implements [Secure Multi-Party Computation](/blog/what-is-secure-multi-party-computation/) as its secure computing backend. More information can be found on the [project repo on Github](https://github.com/facebookresearch/CrypTen).
 
-For more information, see **[What is CrypTen? / CrypTen Integration into PySyft](https://blog.openmined.org/crypten-integration-in-pysyft/)**
+For more information, see **[What is CrypTen? / CrypTen Integration into PySyft](/blog/crypten-integration-in-pysyft/)**
 
 ### What is a Split Neural Network (SplitNN)?
 
 **In short: The training of the neural network (NN) is ‘split’ across two or more hosts.**
 
-Traditionally, [PySyft](https://www.openmined.org/) has been used to facilitate [federated learning](https://blog.openmined.org/upgrade-to-federated-learning-in-10-lines/). However, we can also leverage the tools included in this framework to implement distributed neural networks. These allow for researchers to process data held remotely and compute predictions in a radically decentralised way.
+Traditionally, [PySyft](https://openmined.org/) has been used to facilitate [federated learning](/blog/upgrade-to-federated-learning-in-10-lines/). However, we can also leverage the tools included in this framework to implement distributed neural networks. These allow for researchers to process data held remotely and compute predictions in a radically decentralised way.
 
-For more information and a code demonstration, see **[What is a Split Neural Network?](https://blog.openmined.org/split-neural-networks-on-pysyft/)**
+For more information and a code demonstration, see **[What is a Split Neural Network?](/blog/split-neural-networks-on-pysyft/)**
 
 ### What is PyVertical?
 
 **In short: [PyVertical](https://github.com/OpenMined/PyVertical) uses private set intersection ([PSI](https://www.github.com/OpenMined/PSI)) to link datasets in a privacy-preserving way. We train SplitNNs on the vertically partitioned data to ensure the data remains separated throughout the entire process.**
 
-For a detailed explanation, please see [**What is PyVertical?**](https://blog.openmined.org/what-is-pyvertical/)
+For a detailed explanation, please see [**What is PyVertical?**](/blog/what-is-pyvertical/)
 
 ### What are Zero Knowledge Proofs?
 
@@ -169,7 +169,7 @@ Stay tuned for _What are Zero Knowledge Proofs?_ In the meantime, you can check 
 
 Today, some cloud operators are offering Machine Learning as a Service(MLaaS). Service providers don’t want to open up about their model, which are black boxes to the customers. Vice versa, due to data sensitivity, customers may not be interested to share their raw data through API calls. **Encrypted Machine Learning can help protect the data and the model by encryption.**
 
-For more information, see [**What is Encrypted Machine Learning as a Service?**](https://blog.openmined.org/what-is-encrypted-machine-learning-as-a-service/)
+For more information, see [**What is Encrypted Machine Learning as a Service?**](/blog/what-is-encrypted-machine-learning-as-a-service/)
 
 ---
 
@@ -179,19 +179,19 @@ In this blog series, we’ll show how federated learning can provide us the data
 
 These links will have plenty of code snippets to get you started with your use case, and links to other resources to go into the weeds of privacy-preserving ML.
 
--   **[What is Federated Learning?](https://blog.openmined.org/what-is-federated-learning/)**
--   [**What is Differential Privacy by Shuffling?**](https://blog.openmined.org/differential-privacy-by-shuffling/)
--   **[What is Homomorphic Encryption?](https://blog.openmined.org/what-is-homomorphic-encryption/)**
--   [**What is the Paillier Cryptosystem?**](https://blog.openmined.org/the-paillier-cryptosystem/)
--   **[What is Private Set Intersection?](https://blog.openmined.org/private-set-intersection/)**
--   **[Private Set Intersection with the Paillier Cryptosystem](https://blog.openmined.org/private-set-intersection-with-the-paillier-cryptosystem/)**
--   [**What is the Diffie-Hellman key exchange protocol?**](https://blog.openmined.org/diffie-hellman-key-exchange/)
--   **[Private Set Intersection with Diffie-Hellman](https://blog.openmined.org/private-set-intersection-with-diffie-hellman/)**
--   [**What is a Split Neural Network?**](https://blog.openmined.org/split-neural-networks-on-pysyft/)
--   [**What is PyVertical?**](https://blog.openmined.org/what-is-pyvertical/)
--   **[What is Secure Multi-Party Computation?](https://blog.openmined.org/what-is-secure-multi-party-computation/)**
--   **[What is CrypTen? / CrypTen Integration into PySyft](https://blog.openmined.org/crypten-integration-in-pysyft/)**
--   [**What is Encrypted Machine Learning as a Service?**](https://blog.openmined.org/what-is-encrypted-machine-learning-as-a-service/)
+-   **[What is Federated Learning?](/blog/what-is-federated-learning/)**
+-   [**What is Differential Privacy by Shuffling?**](/blog/differential-privacy-by-shuffling/)
+-   **[What is Homomorphic Encryption?](/blog/what-is-homomorphic-encryption/)**
+-   [**What is the Paillier Cryptosystem?**](/blog/the-paillier-cryptosystem/)
+-   **[What is Private Set Intersection?](/blog/private-set-intersection/)**
+-   **[Private Set Intersection with the Paillier Cryptosystem](/blog/private-set-intersection-with-the-paillier-cryptosystem/)**
+-   [**What is the Diffie-Hellman key exchange protocol?**](/blog/diffie-hellman-key-exchange/)
+-   **[Private Set Intersection with Diffie-Hellman](/blog/private-set-intersection-with-diffie-hellman/)**
+-   [**What is a Split Neural Network?**](/blog/split-neural-networks-on-pysyft/)
+-   [**What is PyVertical?**](/blog/what-is-pyvertical/)
+-   **[What is Secure Multi-Party Computation?](/blog/what-is-secure-multi-party-computation/)**
+-   **[What is CrypTen? / CrypTen Integration into PySyft](/blog/crypten-integration-in-pysyft/)**
+-   [**What is Encrypted Machine Learning as a Service?**](/blog/what-is-encrypted-machine-learning-as-a-service/)
 
 ---
 

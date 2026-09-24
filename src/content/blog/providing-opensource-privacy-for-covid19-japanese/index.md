@@ -9,7 +9,7 @@ draft: false
 legacyId: 2401
 ---
 
-**私たちは翻訳を行ってくれた大橋功に心から感謝します。**________[Click here for English.](https://blog.openmined.org/providing-opensource-privacy-for-covid19/)________
+**私たちは翻訳を行ってくれた大橋功に心から感謝します。**________[Click here for English.](/blog/providing-opensource-privacy-for-covid19/)________
 
 ---
 
@@ -70,9 +70,9 @@ OpenMinedは何をしようとしているのか
 
 ### 開発者:
 
-まずは、[Maximising Privacy and Effectiveness in COVID-19 Apps](https://blog.openmined.org/covid-app-privacy-advice/)のドキュメントを一読ください。
+まずは、[Maximising Privacy and Effectiveness in COVID-19 Apps](/blog/covid-app-privacy-advice/)のドキュメントを一読ください。
 
--   ****もし、質問や助けが必要な場合は、[Covid-19 Technical Collaboration Slack Channel](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1)へ質問を投げてみてください。****
+-   ****もし、質問や助けが必要な場合は、[Covid-19 Technical Collaboration Slack Channel](/slack/)へ質問を投げてみてください。****
 -   ******Github Repositories******
 -   ****[**https://github.com/OpenMined/private-identity-server**](https://github.com/OpenMined/private-identity-server)****
 -   ****[**https://github.com/OpenMined/PyDP**](https://github.com/OpenMined/PyDP)****
@@ -82,12 +82,12 @@ OpenMinedは何をしようとしているのか
 
 ### アプリの承認／否認を行う国、地方自治体の方  
 
--   ****承認すべきか検討中のアプリがある、あるいはプライバシーに配慮したアプリについて質問のある方は、Slackのチェン寝る [Covid-19 Technical Collaboration Channel](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1) か [covid@openmined.org](mailto:covid@openmined.org)へメールを送ってください。****
+-   ****承認すべきか検討中のアプリがある、あるいはプライバシーに配慮したアプリについて質問のある方は、Slackのチェン寝る [Covid-19 Technical Collaboration Channel](/slack/) か [covid@openmined.org](mailto:covid@openmined.org)へメールを送ってください。****
 
 ### プライバシーとセキュリティの専門家の方で力になりたい方は：  
 
--   まずは、[Maximising Privacy and Effectiveness in COVID-19 Apps](https://blog.openmined.org/covid-app-privacy-advice/)のドキュメント一読ください。
--   フィードバックやブログなどが、提案のある方はある場合はSlackチャンネル [Covid-19 Technical Collaboration Slack Channel](https://join.slack.com/share/I010QJ4UVC6/TvEmflnmtVapKqxMU2Tczij5/enQtMTAyNDYxNjk4MTQxNC1iYjI1ZDczMGE2MmNkODIyZWQzNDliNzlmMjcwYjNkOGYyYTU2YTkyZmE0NmFlYmRjYmYwMzAwY2ZmZGE0MjU1)へポストしてください
+-   まずは、[Maximising Privacy and Effectiveness in COVID-19 Apps](/blog/covid-app-privacy-advice/)のドキュメント一読ください。
+-   フィードバックやブログなどが、提案のある方はある場合はSlackチャンネル [Covid-19 Technical Collaboration Slack Channel](/slack/)へポストしてください
 
 ### 寄付:  
 

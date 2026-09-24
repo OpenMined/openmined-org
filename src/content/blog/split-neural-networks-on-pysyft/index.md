@@ -29,11 +29,11 @@ For these reasons, centralised learning architectures have become either an impe
 
 The tech sector still races to catch up with one of the landmark innovations of our time; blockchain. However, while distributed ledger technology is going to be at the core of the next generation of the internet, it only marks the start of a greater transformation in system architectures. The genie which has left the bottle here is ****decentralisation****.
 
-This principle has been adopted in order to build tools where the decentralisation of resources and multi-owner governance enshrine the citizens right to privacy and security. This opens the door to innovation through an information resource which has previously been inaccessible; private data. A community at the front of this transformation is OpenMined. Their private AI tool is called [PySyft](https://www.openmined.org/).
+This principle has been adopted in order to build tools where the decentralisation of resources and multi-owner governance enshrine the citizens right to privacy and security. This opens the door to innovation through an information resource which has previously been inaccessible; private data. A community at the front of this transformation is OpenMined. Their private AI tool is called [PySyft](https://openmined.org/).
 
 ## Split Neural Network
 
-Traditionally, [PySyft](https://www.openmined.org/) has been used to facilitate [federated learning](https://blog.openmined.org/upgrade-to-federated-learning-in-10-lines/). However, we can also leverage the tools included in this framework to implement distributed neural networks. These allow for researchers to process data held remotely and compute predictions in a radically decentralised way. First introduced by MIT in December 2018, SplitNNs represent a brand new architectural mechanic for privacy-preserving ML researchers to play with.
+Traditionally, [PySyft](https://openmined.org/) has been used to facilitate [federated learning](/blog/upgrade-to-federated-learning-in-10-lines/). However, we can also leverage the tools included in this framework to implement distributed neural networks. These allow for researchers to process data held remotely and compute predictions in a radically decentralised way. First introduced by MIT in December 2018, SplitNNs represent a brand new architectural mechanic for privacy-preserving ML researchers to play with.
 
 ### What is a SplitNN?
 
