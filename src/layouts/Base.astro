@@ -275,6 +275,34 @@ const trail = breadcrumbs ?? [
       })();
     </script>
 
+    <script is:inline>
+      // Scroll reveal — adds `.is-revealed` (once) to each `[data-reveal]` when
+      // it first enters the viewport (paired with `.js [data-reveal]` in
+      // global.css; opt-in, sibling of the load-in fade above). Elements
+      // already in the first viewport reveal immediately on the IO's first
+      // callback, so nothing above the fold waits for a scroll. No
+      // IntersectionObserver (or reduced motion) → reveal everything now.
+      (function () {
+        var els = document.querySelectorAll('[data-reveal]');
+        if (!els.length) return;
+        var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduce || !('IntersectionObserver' in window)) {
+          els.forEach(function (el) { el.classList.add('is-revealed'); });
+          return;
+        }
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (!e.isIntersecting) return;
+            var d = e.target.getAttribute('data-reveal-delay');
+            if (d) e.target.style.setProperty('--reveal-delay', d + 'ms');
+            e.target.classList.add('is-revealed');
+            io.unobserve(e.target);
+          });
+        }, { rootMargin: '0px 0px -8% 0px' });
+        els.forEach(function (el) { io.observe(el); });
+      })();
+    </script>
+
     {/* Ionicons web-component loader — opt-in per page (default off). Site chrome
         and shared components use local inlined SVGs (@elements/Icon); this only
         loads for a page that sets `ionicons` to render a novel one-off glyph. */}

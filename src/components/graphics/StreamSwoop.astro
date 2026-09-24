@@ -1,0 +1,74 @@
+---
+/**
+ * StreamSwoop — the animated rainbow stream (StreamEmbed) in HeroSwoop's
+ * position: full-bleed, bottom-anchored under a SimpleHero, zero layout
+ * height, at --z-below so hero content and following sections paint above.
+ *
+ * Geometry: the stream renders at a 2:1 aspect (height = 50vw). Bleed 0.55
+ * mirrors the home hero's stream presence (bottom offset 0.59 there): the
+ * visible band above the hero's bottom edge is ~0.45 × 50vw, and the hero
+ * must RESERVE real space for it (padBottom on SimpleHero — the 8/2026
+ * lesson: a big bleed with no reserved space leaves the band "barely seen"
+ * under the next section's background).
+ *
+ * Perf: StreamEmbed carries its own guards (init gated on first paint + two
+ * on-time frames; one static frame on software renderers / reduced motion) —
+ * see its header and AGENTS.md → WebGL embeds. Desktop-only like HeroSwoop
+ * (hidden ≤991px), which also keeps phones from paying for a GL context.
+ */
+import StreamEmbed from '@components/graphics/StreamEmbed.astro';
+
+interface Props {
+  /** Unique per page — the embed div's id. */
+  id: string;
+  /** Fraction of the stream's height pushed below the hero's bottom edge. */
+  bleed?: number;
+}
+const { id, bleed = 0.55 } = Astro.props;
+---
+
+<div class="stream-swoop" aria-hidden="true" data-fade style={`--stream-bleed:${bleed};`} data-stream-parallax>
+  <StreamEmbed id={id} />
+</div>
+
+<script is:inline>
+  // Subtle scroll parallax: the stream drifts up slightly slower than the
+  // page (transform-only, rAF-throttled). Skipped under reduced motion and
+  // wherever the wrapper is display:none (≤991px — offsetParent is null).
+  (function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var el = document.querySelector('[data-stream-parallax]');
+    if (!el) return;
+    var inner = el.firstElementChild;
+    if (!inner) return;
+    var ticking = false;
+    function frame() {
+      ticking = false;
+      if (el.offsetParent === null) { inner.style.transform = ''; return; }
+      var y = Math.min(window.scrollY * 0.08, 160);
+      inner.style.transform = 'translateY(' + y.toFixed(1) + 'px)';
+    }
+    window.addEventListener('scroll', function () {
+      if (!ticking) { ticking = true; requestAnimationFrame(frame); }
+    }, { passive: true });
+  })();
+</script>
+
+<style>
+  .stream-swoop {
+    position: absolute;
+    width: 100vw;
+    left: 50%;
+    margin-left: -50vw;
+    bottom: 0;
+    z-index: var(--z-below);
+    pointer-events: none;
+    /* the stream is 2:1 — height 50vw; push bleed × that below the hero edge */
+    transform: translateY(calc(100vw / 2 * var(--stream-bleed)));
+  }
+
+  /* desktop-only, matching HeroSwoop */
+  @media (max-width: 991px) {
+    .stream-swoop { display: none; }
+  }
+</style>
