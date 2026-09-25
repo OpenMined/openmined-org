@@ -40,8 +40,8 @@ import Text from '@ui/Text.astro';
           </Text>
 
           <Text as="p" class="home-hero__taglines">
-            -> Unlock insights from data you can't access.<br />
-            -> Create value from data you can't share.
+            <span class="home-hero__tagline">-> Unlock insights from data you can't access.</span>
+            <span class="home-hero__tagline">-> Create value from data you can't share.</span>
           </Text>
 
           <div class="home-hero__hwh">
@@ -129,6 +129,15 @@ import Text from '@ui/Text.astro';
 
   .home-hero__taglines {
     margin-bottom: var(--spacing-4XL); /* live: 40px */
+  }
+  /* One block per tagline, balanced: a full line wherever it fits, two even
+     lines on narrow phones (never a lone last word). Replaces a <br> inside one
+     `text-wrap: pretty` paragraph — that paragraph is shrink-to-fit (flex-start
+     column), so each tagline exactly filled it and WebKit's pretty pass broke
+     "can't access." onto its own line. */
+  .home-hero__tagline {
+    display: block;
+    text-wrap: balance;
   }
 
   /* "How We Help: Publishers Creators …" row */
