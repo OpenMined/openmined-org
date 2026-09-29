@@ -23,11 +23,15 @@ interface Props {
   id: string;
   /** Fraction of the stream's height pushed below the hero's bottom edge. */
   bleed?: number;
+  /** Paint over the NEXT section too — the homepage stream's layering
+   *  (HomeHero: z 1 over both sections' backgrounds, under the content). Here
+   *  z 0, since SimpleHero's content sits at z 1. Unmasked, like home. */
+  overlay?: boolean;
 }
-const { id, bleed = 0.55 } = Astro.props;
+const { id, bleed = 0.55, overlay = false } = Astro.props;
 ---
 
-<div class="stream-swoop" aria-hidden="true" data-fade style={`--stream-bleed:${bleed};`} data-stream-parallax>
+<div class:list={['stream-swoop', { 'stream-swoop--overlay': overlay }]} aria-hidden="true" data-fade style={`--stream-bleed:${bleed};`} data-stream-parallax>
   <StreamEmbed id={id} />
 </div>
 
@@ -67,6 +71,7 @@ const { id, bleed = 0.55 } = Astro.props;
     transform: translateY(calc(100vw / 2 * var(--stream-bleed)));
   }
 
+  .stream-swoop--overlay { z-index: 0; }
   /* desktop-only, matching HeroSwoop */
   @media (max-width: 991px) {
     .stream-swoop { display: none; }

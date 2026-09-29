@@ -30,7 +30,7 @@ import { postSlug } from '@utils/posts';
 const pillars = [
   { title: 'Network-sourced AI', href: '/blog/network-sourced-ai/', cta: 'Read about NSAI', body: 'Intelligence composed live over a network, rather than bundling all data, compute, and algorithms into a single centralized source owned by one entity. A conventional AI system is a trained model plus, optionally, a RAG layer over data that happens to be colocated or on the internet. NSAI decentralizes both halves. The model context can come from many independent data owners, and the model itself can be an ensemble of models from many independent owners.' },
   { title: 'Attribution-based control', href: '/attribution-based-control/', cta: 'Read about ABC', body: 'A relationship between sources of AI-related data, compute, and talent and the AI users receiving predictions. These two groups each have ABC when resource owners dynamically control how much intelligence to give each AI prediction they support, and AI users dynamically control which resource providers they want to rely on for each AI prediction.' },
-  { title: 'Structured transparency', href: '/blog/structured-transparency/', cta: 'Read about structured transparency', body: 'A framework for governing information flows so that parties can collaborate on data without giving up control of it. It names five guarantees a flow can need: input privacy, output privacy, input verification, output verification, and flow governance. Privacy-enhancing technologies (PETs) are the mechanisms that supply those guarantees, and ST provides a vocabulary for saying which ones a given flow is missing.' },
+  { title: 'Structured transparency', href: '/blog/structured-transparency-input-output-privacy/', cta: 'Read about structured transparency', body: 'A framework for governing information flows so that parties can collaborate on data without giving up control of it. It names five guarantees a flow can need: input privacy, output privacy, input verification, output verification, and flow governance. Privacy-enhancing technologies (PETs) are the mechanisms that supply those guarantees, and ST provides a vocabulary for saying which ones a given flow is missing.' },
 ];
 
 const themes = [
@@ -68,7 +68,7 @@ const cohort = [
     ],
   },
   {
-    heading: 'Academic Partner Mentors',
+    heading: 'Academic Mentors',
     people: [
       { name: 'Niloofar Mireshghallah', affiliation: 'Assistant Professor — Carnegie Mellon University', photo: '/images/research/niloofar-mireshghallah.jpg', bio: [
         'Niloofar Mireshghallah is an Assistant Professor at Carnegie Mellon University, with appointments in the Engineering & Public Policy Department and Language Technologies Institute, as well as a courtesy appointment in the Software and Societal Systems Department. She is also a core member of CyLab, where she leads the Looni Lab. Her research sits at the intersection of privacy, machine learning, and the societal implications of AI, with a particular focus on contextual integrity, information-flow norms, natural language processing, LLM reasoning, and AI for science, including chemistry and drug discovery. Her work explores the relationship between data, its influence on machine learning models, and the expectations of the people and communities who generate, regulate, and use that data. She is particularly interested in developing technical approaches to privacy and security that account for the social and normative contexts in which AI systems operate.',
@@ -83,7 +83,7 @@ const cohort = [
   {
     heading: 'Research Affiliates',
     people: [
-      { name: 'Kyoko Eng', affiliation: 'Interaction Designer — Nashville', photo: '/images/research/kyoko-eng.jpg', bio: 'Kyoko Eng is a Nashville-based interaction designer. Her practice explores the problem spaces of Privacy and AI, Constructive Communication, and the Public and Private Self. Drawing from participatory design, critical design theory, and ethnographic research practices, she investigates how we might cultivate greater literacy, agency, and contextual awareness within our digital interactions.' },
+      { name: 'Kyoko Eng', affiliation: 'Interaction Designer', photo: '/images/research/kyoko-eng.jpg', bio: 'Kyoko Eng is a Nashville-based interaction designer. Her practice explores the problem spaces of Privacy and AI, Constructive Communication, and the Public and Private Self. Drawing from participatory design, critical design theory, and ethnographic research practices, she investigates how we might cultivate greater literacy, agency, and contextual awareness within our digital interactions.' },
     ],
   },
 ];
@@ -112,8 +112,6 @@ const recent = (await getCollection('blog', ({ data }) =>
   description="OpenMined builds open-source infrastructure that lets AI systems use data without anyone having to hand it over. Our research asks what becomes possible when that infrastructure exists."
 >
   <SimpleHero
-    eyebrow="OpenMined Research"
-    eyebrowItalic
     heading="Research at OpenMined"
     headingMax={48}
     headingMeasure="20em"
@@ -121,14 +119,14 @@ const recent = (await getCollection('blog', ({ data }) =>
     ledeMeasure="38em"
     contentWidth="col-10"
     contentGap="tight"
-    padBottom="calc(var(--spacing-max) * 2)"
+    padBottom="var(--spacing-max)"
   >
     <p class="hero-questions"><em><span>Who gets to know what?</span> <span>Who gets paid?</span> <span>Who gets to say no?</span></em></p>
     <Fragment slot="actions">
       <Button href="#fellows">Meet the fellows</Button>
       <Button variant="outline" href="#interest">Express interest</Button>
     </Fragment>
-    <StreamSwoop slot="swoop" id="stream-embed-research" bleed={0.4} />
+    <StreamSwoop slot="swoop" id="stream-embed-research" bleed={0.59} overlay />
   </SimpleHero>
 
   <!-- 2 · What we're working on — the three pillars -->
@@ -225,6 +223,14 @@ const recent = (await getCollection('blog', ({ data }) =>
 </Page>
 
 <style>
+  /* The homepage stream's composition (HomeHero): the hero reserves
+     --spacing-max below its content and --spacing-max of margin after it;
+     the stream bleeds 0.59 of its height below the hero, over the next
+     section's background. Desktop only, like the stream itself. */
+  @media (min-width: 992px) {
+    :global(.simple-hero) { margin-bottom: var(--spacing-max); }
+  }
+
   /* The three questions under the hero lede: the same size, set apart by
      italic and headline ink. */
   .hero-questions { color: var(--text-headline); }
