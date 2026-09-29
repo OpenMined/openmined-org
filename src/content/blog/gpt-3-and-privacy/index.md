@@ -3,7 +3,7 @@ title: "GPT-3 is incredible. Privacy will make it truly realizable."
 slug: gpt-3-and-privacy
 date: 2020-08-20T23:15:38
 updated: 2025-03-10T16:14:18
-categories: [research]
+categories: [policy]
 tags: [privacy-enhancing-technologies-pets]
 authors: [sachin-deshpande]
 draft: false
