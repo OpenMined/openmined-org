@@ -18,7 +18,7 @@ import Page from '@layouts/Page.astro';
 import SimpleHero from '@components/sections/hero/SimpleHero.astro';
 import StreamSwoop from '@components/graphics/StreamSwoop.astro';
 import ContentSection from '@components/sections/ContentSection.astro';
-import Icon from '@elements/Icon.astro';
+import IconCard from '@elements/IconCard.astro';
 import PostCard from '@elements/PostCard.astro';
 import CtaSection from '@components/sections/cta/CtaSection.astro';
 import FormEmbed from '@elements/FormEmbed.astro';
@@ -34,11 +34,11 @@ const pillars = [
 ];
 
 const themes = [
-  { icon: 'iconoir-network', art: '/images/research/themes/protocols-networks-power.jpg', title: 'Protocols, Networks & Power', question: 'How can technical infrastructure distribute rather than concentrate power?' },
-  { icon: 'iconoir-doc-magnifying-glass', art: '/images/research/themes/secure-audits.jpg', title: 'Secure Audits & External Oversight', question: 'How should increasingly powerful AI systems be evaluated and governed?' },
-  { icon: 'iconoir-cpu', art: '/images/research/themes/emerging-architectures.jpg', title: 'Emerging AI Architectures', question: 'How will model routing, ensembles, fusions, and multi-agent systems change who can develop a frontier AI system?' },
-  { icon: 'iconoir-copyright', art: '/images/research/themes/copyright-value-data.jpg', title: 'Copyright & the Value of Data', question: 'How should society understand economic value and the price of digital goods in the AI era?' },
-  { icon: 'iconoir-community', art: '/images/research/themes/alternative-ownership.jpg', title: 'Alternative Ownership, Governance & Business Models', question: 'What alternatives exist to conventional models of technology ownership?' },
+  { icon: 'iconoir-network', title: 'Protocols, Networks & Power', question: 'How can technical infrastructure distribute rather than concentrate power?' },
+  { icon: 'iconoir-doc-magnifying-glass', title: 'Secure Audits & External Oversight', question: 'How should increasingly powerful AI systems be evaluated and governed?' },
+  { icon: 'iconoir-cpu', title: 'Emerging AI Architectures', question: 'How will model routing, ensembles, fusions, and multi-agent systems change who can develop a frontier AI system?' },
+  { icon: 'iconoir-copyright', title: 'Copyright & the Value of Data', question: 'How should society understand economic value and the price of digital goods in the AI era?' },
+  { icon: 'iconoir-community', title: 'Alternative Ownership, Governance & Business Models', question: 'What alternatives exist to conventional models of technology ownership?' },
 ];
 
 const fellowsReceive = [
@@ -134,7 +134,6 @@ const recent = (await getCollection('blog', ({ data }) =>
   <!-- 2 · What we're working on — the three pillars -->
   <div id="about">
     <ContentSection surface="dim" as="h4" width="col-10" align="left" headGap="tight" heading="What we’re working on">
-      <p class="pillars-questions" data-reveal><em>Who gets to know what? Who gets paid? Who gets to say no?</em></p>
       <p class="pillars-lead" data-reveal>We work across 3 primary pillars.</p>
       <div class="pillars-grid">
         {pillars.map((pl, i) => (
@@ -161,15 +160,10 @@ const recent = (await getCollection('blog', ({ data }) =>
     >
       <div class="themes-grid">
         {themes.map((t, i) => (
-          <div class="theme-card" data-reveal data-reveal-delay={i * 70}>
-            <img class="theme-card__art" src={t.art} alt="" width="1400" height="786" loading="lazy" data-fade />
-            <div class="theme-card__body">
-              <div class="theme-card__head">
-                <Icon name={t.icon} size={20} class="theme-card__icon" />
-                <h5>{t.title}</h5>
-              </div>
+          <div class="theme-cell" data-reveal data-reveal-delay={i * 70}>
+            <IconCard icon={t.icon} iconSize={40} layout="stacked" surface="dim" title={t.title}>
               <p>{t.question}</p>
-            </div>
+            </IconCard>
           </div>
         ))}
       </div>
@@ -229,7 +223,6 @@ const recent = (await getCollection('blog', ({ data }) =>
 
 <style>
   /* ── Pillars ───────────────────────────────────────────────────────── */
-  .pillars-questions { margin: 0 0 var(--spacing-S); font-size: 21px; color: var(--text-headline); }
   .pillars-lead { margin: 0 0 var(--spacing-3XL); }
   .pillars-grid {
     display: grid;
@@ -280,55 +273,31 @@ const recent = (await getCollection('blog', ({ data }) =>
     .pillar:nth-child(3) { grid-column: auto; }
   }
 
-  /* ── Research themes grid ──────────────────────────────────────────
-     Five cards composed on a 6-track grid: three across the top (span 2),
-     two wider beneath (span 3) — a deliberate 3/2 composition instead of a
-     grid that orphans a short last row. Children are component roots, so
-     the selectors reach them via :global. */
+  /* ── Research themes: icon-led cards (IconCard, stacked) ──────────────
+     Five cards on a 6-track grid: three across the top (span 2), two wider
+     beneath (span 3), so the fifth never orphans a short last row. The cell
+     stretches its card so every card in a row shares one height. */
   .themes-grid {
     display: grid;
     grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: var(--spacing-XL);
   }
-  .theme-card { grid-column: span 2; }
-  .theme-card:nth-child(n + 4) { grid-column: span 3; }
-
-  /* The card: generated series artwork as a banner, icon + title, question.
-     Art is CSS-cropped (aspect-ratio box + cover) per the images rule. */
-  .theme-card {
-    background-color: var(--surface-background-dim);
-    border-radius: var(--border-radius-S);
-    overflow: hidden;
-  }
-  .theme-card__art {
-    width: 100%;
-    height: auto; /* release the attribute height so aspect-ratio governs */
-    aspect-ratio: 16 / 6;
-    object-fit: cover;
-  }
-  .theme-card__body { padding: var(--spacing-2XL); }
-  .theme-card__head {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-M);
-    margin-bottom: var(--spacing-M);
-    color: var(--text-headline); /* currentColor for the icon */
-  }
-  .theme-card__head h5 { margin: 0; }
-  .theme-card__icon { flex: none; }
-  .theme-card__body p { margin: 0; }
+  .theme-cell { grid-column: span 2; display: flex; }
+  .theme-cell:nth-child(n + 4) { grid-column: span 3; }
+  .theme-cell > :global(.icon-card) { flex: 1; }
+  .theme-cell :global(.icon-card__body p) { margin: 0; }
 
 
 
   @media (max-width: 991px) {
     .themes-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .theme-card,
-    .theme-card:nth-child(n + 4) { grid-column: auto; }
+    .theme-cell,
+    .theme-cell:nth-child(n + 4) { grid-column: auto; }
     /* five cards on two tracks: the last spans both, so no half-empty row */
-    .theme-card:nth-child(5) { grid-column: span 2; }
+    .theme-cell:nth-child(5) { grid-column: span 2; }
   }
   @media (max-width: 767px) {
     .themes-grid { grid-template-columns: 1fr; }
-    .theme-card:nth-child(5) { grid-column: auto; }
+    .theme-cell:nth-child(5) { grid-column: auto; }
   }
 </style>
