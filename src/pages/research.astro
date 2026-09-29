@@ -18,7 +18,7 @@ import Page from '@layouts/Page.astro';
 import SimpleHero from '@components/sections/hero/SimpleHero.astro';
 import StreamSwoop from '@components/graphics/StreamSwoop.astro';
 import ContentSection from '@components/sections/ContentSection.astro';
-import IconCard from '@elements/IconCard.astro';
+import Icon from '@elements/Icon.astro';
 import PostCard from '@elements/PostCard.astro';
 import CtaSection from '@components/sections/cta/CtaSection.astro';
 import FormEmbed from '@elements/FormEmbed.astro';
@@ -128,7 +128,7 @@ const recent = (await getCollection('blog', ({ data }) =>
       <Button href="#fellows">Meet the fellows</Button>
       <Button variant="outline" href="#interest">Express interest</Button>
     </Fragment>
-    <StreamSwoop slot="swoop" id="stream-embed-research" />
+    <StreamSwoop slot="swoop" id="stream-embed-research" bleed={0.4} />
   </SimpleHero>
 
   <!-- 2 · What we're working on — the three pillars -->
@@ -158,15 +158,17 @@ const recent = (await getCollection('blog', ({ data }) =>
       intro="OpenMined Research focuses on 5 distinct areas for deeper exploration."
       introMeasure="45em"
     >
-      <div class="themes-grid">
-        {themes.map((t, i) => (
-          <div class="theme-cell" data-reveal data-reveal-delay={i * 70}>
-            <IconCard icon={t.icon} iconSize={40} layout="stacked" surface="dim" title={t.title}>
-              <p>{t.question}</p>
-            </IconCard>
+      <dl class="areas" data-reveal>
+        {themes.map((t) => (
+          <div class="areas__row">
+            <dt class="areas__name">
+              <Icon name={t.icon} size={22} class="areas__icon" />
+              <span>{t.title}</span>
+            </dt>
+            <dd class="areas__question">{t.question}</dd>
           </div>
         ))}
-      </div>
+      </dl>
     </ContentSection>
   </div>
 
@@ -273,31 +275,52 @@ const recent = (await getCollection('blog', ({ data }) =>
     .pillar:nth-child(3) { grid-column: auto; }
   }
 
-  /* ── Research themes: icon-led cards (IconCard, stacked) ──────────────
-     Five cards on a 6-track grid: three across the top (span 2), two wider
-     beneath (span 3), so the fifth never orphans a short last row. The cell
-     stretches its card so every card in a row shares one height. */
-  .themes-grid {
-    display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: var(--spacing-XL);
+  /* ── Research areas: a ruled ledger, not cards ──────────────────────────
+     The homepage's bordered-rows device (HomeFederatedNetwork): one bordered
+     frame, hairline rules between rows. Area name (with its line icon) left,
+     the framing question right as reading text — the register of an
+     institute's research-areas listing rather than feature cards. A <dl>:
+     each area defines its question. Unnumbered — the areas aren't a sequence. */
+  .areas {
+    margin: 0;
+    border: var(--border-strong);
+    border-radius: var(--border-radius-S);
   }
-  .theme-cell { grid-column: span 2; display: flex; }
-  .theme-cell:nth-child(n + 4) { grid-column: span 3; }
-  .theme-cell > :global(.icon-card) { flex: 1; }
-  .theme-cell :global(.icon-card__body p) { margin: 0; }
+  .areas__row {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    column-gap: var(--spacing-5XL);
+    padding: var(--spacing-3XL) var(--spacing-4XL);
+  }
+  /* Headline ink at low opacity: a quiet rule that still reads on the dark
+     surface, where --border-subtle all but disappears. */
+  .areas__row + .areas__row { border-top: 1px solid color-mix(in srgb, var(--text-headline) 16%, transparent); }
+  .areas__name {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-L);
+    margin: 0;
+    font-family: var(--font-secondary);
+    font-size: clamp(var(--h5-min), 1.62vw, var(--h5-max));
+    line-height: 1.35;
+    color: var(--text-headline);
+    text-wrap: balance;
+  }
+  .areas__icon { flex: none; margin-top: 0.15em; color: var(--text-subtle); }
+  .areas__question {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--text-body);
+    text-wrap: pretty;
+  }
 
 
 
   @media (max-width: 991px) {
-    .themes-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .theme-cell,
-    .theme-cell:nth-child(n + 4) { grid-column: auto; }
-    /* five cards on two tracks: the last spans both, so no half-empty row */
-    .theme-cell:nth-child(5) { grid-column: span 2; }
   }
   @media (max-width: 767px) {
-    .themes-grid { grid-template-columns: 1fr; }
-    .theme-cell:nth-child(5) { grid-column: auto; }
+    .areas__row { grid-template-columns: 1fr; row-gap: var(--spacing-M); padding: var(--spacing-2XL); }
+    .areas__question { font-size: 16px; padding-left: calc(22px + var(--spacing-L)); }
   }
 </style>
