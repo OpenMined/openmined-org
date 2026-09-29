@@ -23,17 +23,15 @@ interface Props {
   id: string;
   /** Fraction of the stream's height pushed below the hero's bottom edge. */
   bleed?: number;
-  /** Paint over the NEXT section too (z 0: above both sections' backgrounds,
-   *  still under the hero content at z 1), so no section edge cuts the stream.
-   *  A mask dissolves it: fully visible through the hero's bottom edge, then
-   *  transparent `overlay` px below it — keep that under the next section's
-   *  top padding so the stream clears that section's content. */
-  overlay?: number;
+  /** Paint over the NEXT section too — the homepage stream's layering
+   *  (HomeHero: z 1 over both sections' backgrounds, under the content). Here
+   *  z 0, since SimpleHero's content sits at z 1. Unmasked, like home. */
+  overlay?: boolean;
 }
-const { id, bleed = 0.55, overlay } = Astro.props;
+const { id, bleed = 0.55, overlay = false } = Astro.props;
 ---
 
-<div class:list={['stream-swoop', { 'stream-swoop--overlay': overlay !== undefined }]} aria-hidden="true" data-fade style={`--stream-bleed:${bleed};${overlay !== undefined ? `--stream-overlay:${overlay}px;` : ''}`} data-stream-parallax>
+<div class:list={['stream-swoop', { 'stream-swoop--overlay': overlay }]} aria-hidden="true" data-fade style={`--stream-bleed:${bleed};`} data-stream-parallax>
   <StreamEmbed id={id} />
 </div>
 
@@ -73,12 +71,7 @@ const { id, bleed = 0.55, overlay } = Astro.props;
     transform: translateY(calc(100vw / 2 * var(--stream-bleed)));
   }
 
-  .stream-swoop--overlay {
-    z-index: 0;
-    /* the hero's edge sits (1 - bleed) of the way down the stream */
-    -webkit-mask-image: linear-gradient(to bottom, #000 calc((1 - var(--stream-bleed)) * 100%), transparent calc((1 - var(--stream-bleed)) * 100% + var(--stream-overlay)));
-    mask-image: linear-gradient(to bottom, #000 calc((1 - var(--stream-bleed)) * 100%), transparent calc((1 - var(--stream-bleed)) * 100% + var(--stream-overlay)));
-  }
+  .stream-swoop--overlay { z-index: 0; }
   /* desktop-only, matching HeroSwoop */
   @media (max-width: 991px) {
     .stream-swoop { display: none; }
