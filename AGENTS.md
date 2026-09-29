@@ -431,7 +431,9 @@ Reference `BlogPost.astro → searchThumb` (height-only, cropped by `search.astr
 ## WebGL embeds
 
 Two components ship WebGL — `components/graphics/DiamondEmbed.astro` and
-`StreamEmbed.astro`, both only on `/` (via `HomeHero.astro`) and `/style-guide/`.
+`StreamEmbed.astro`: on `/` (via `HomeHero.astro`), `/style-guide/`, and — the
+stream, in the hero-swoop position via `graphics/StreamSwoop.astro` — on
+`/research/` (desktop-only there; ≤991px renders no embed at all).
 Their scripts are `is:inline` and cannot import, so the guards below exist as two
 hand-synced copies; DiamondEmbed's comments carry the measurements.
 

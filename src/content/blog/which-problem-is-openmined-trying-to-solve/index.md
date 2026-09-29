@@ -3,7 +3,7 @@ title: "Companies have too much access to our data, while  researchers often hav
 slug: which-problem-is-openmined-trying-to-solve
 date: 2020-09-21T15:23:54
 updated: 2025-03-10T16:19:34
-categories: [research]
+categories: [policy]
 tags: [remote-data-science]
 authors: [emma-bluemke]
 draft: false

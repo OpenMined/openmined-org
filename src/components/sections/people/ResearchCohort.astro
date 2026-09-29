@@ -1,0 +1,165 @@
+---
+/**
+ * ResearchCohort — the /research/ roster, and the page's one bold element:
+ * per-person editorial rows (portrait column | name + affiliation + bio)
+ * rather than a card grid, so each fellow reads like a directory entry in a
+ * research institution's roster. Data lives in the page (research.astro) —
+ * this file owns only the presentation.
+ *
+ * Portraits render in full color (decided 2026-09-10 — a hover reveal was
+ * tried and cut: no functionality sat behind it, so the interaction promised
+ * more than it delivered). Crops happen in CSS (`object-fit: cover`); source
+ * files keep their native aspect per the images rule.
+ *
+ * Hairlines divide people within a group; groups open with a heading over a
+ * strong rule (the .section-divider language). Names balance and bios wrap
+ * pretty — the no-widows rule, enforced structurally.
+ */
+interface Person {
+  name: string;
+  /** /images/research/<slug>.jpg — public/ path, served as-is. Omitted when
+   *  no headshot exists yet → initials fallback (same pattern as TeamList /
+   *  SpeakerRoster). */
+  photo?: string;
+  /** One-line role + institution, fact-lifted from the bio. Omitted when the
+   *  bio names no institution — never invented. */
+  affiliation?: string;
+  /** One string per paragraph when a bio runs to more than one. */
+  bio: string | string[];
+  /** Institution mark: `id` of a single-colour SVG in public/logos/institutions/
+   *  (ink = currentColor, knockouts = --logo-knockout), `name` for its label,
+   *  `h` an optical height in px — the marks' proportions differ too much for
+   *  one height to read as one size. */
+  logo?: { id: string; name: string; h: number };
+}
+interface Group {
+  heading: string;
+  people: Person[];
+}
+interface Props {
+  groups: Group[];
+  /** Section anchor. */
+  id?: string;
+  eyebrow?: string;
+  heading?: string;
+  intro?: string;
+}
+const { groups, id = 'fellows', eyebrow, heading, intro } = Astro.props;
+const initials = (name: string) =>
+  name.split(/\s+/).map((part) => part[0]).slice(0, 2).join('').toUpperCase();
+const paragraphs = (bio: string | string[]) => (Array.isArray(bio) ? bio : [bio]);
+const LOGOS = import.meta.glob('../../../../public/logos/institutions/*.svg', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+}) as Record<string, string>;
+const logoSvg = (id: string) => {
+  const raw = LOGOS[`../../../../public/logos/institutions/${id}.svg`];
+  if (!raw) throw new Error(`ResearchCohort: no institution logo "${id}" in public/logos/institutions/`);
+  return raw;
+};
+---
+
+<section class="cohort" id={id}>
+  <div class="container cohort__container">
+    {(eyebrow || heading || intro) && (
+      <header class="cohort__head" data-reveal>
+        {eyebrow && <p class="cohort__eyebrow text-eyebrow">{eyebrow}</p>}
+        {heading && <h4 class="cohort__heading">{heading}</h4>}
+        {intro && <p class="cohort__intro measure" style="--measure: 45em;">{intro}</p>}
+      </header>
+    )}
+    {groups.map((g) => (
+      <div class="cohort__group">
+        <h5 class="cohort__group-heading">{g.heading}</h5>
+        <div class="cohort__people">
+          {g.people.map((p) => (
+            <article class="cohort__person" data-reveal>
+              {p.photo
+                ? <img class="cohort__photo" src={p.photo} alt={`Portrait of ${p.name}`} width="200" height="200" loading="lazy" data-fade />
+                : <span class="cohort__photo cohort__photo--fallback" aria-hidden="true">{initials(p.name)}</span>}
+              <div class="cohort__text">
+                <h4>{p.name}</h4>
+                {p.affiliation && <p class="cohort__affiliation">{p.affiliation}</p>}
+                {p.logo && (
+                  <span class="cohort__logo" role="img" aria-label={p.logo.name} style={`--logo-h:${p.logo.h}px`} set:html={logoSvg(p.logo.id)} />
+                )}
+                <div class="cohort__bio measure" style="--measure: 42em;">
+                  {paragraphs(p.bio).map((para) => <p>{para}</p>)}
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .cohort { margin-block: var(--spacing-full); }
+  .cohort__container { max-width: var(--col-10); }
+  .cohort__group + .cohort__group { margin-top: var(--spacing-full); }
+  .cohort__group-heading {
+    margin-bottom: var(--spacing-XL);
+    padding-bottom: var(--spacing-L);
+    border-bottom: var(--border-strong);
+  }
+
+  .cohort__person {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: var(--spacing-3XL);
+    padding-block: var(--spacing-3XL);
+  }
+  .cohort__person + .cohort__person { border-top: var(--border-subtle); }
+
+  .cohort__photo {
+    width: 200px;
+    height: 200px;
+    object-fit: cover; /* crop in CSS — sources keep native aspect (images rule) */
+    border-radius: var(--border-radius-S);
+  }
+
+  .cohort__text h4 {
+    margin: 0 0 var(--spacing-XS);
+  }
+  .cohort__affiliation {
+    margin: 0 0 var(--spacing-XL);
+    color: var(--text-subtle);
+  }
+  /* Institution mark: single colour (text ink), knockouts painted with the
+     section's own surface so negative space reads in both themes. Sits under
+     the affiliation line; the affiliation's own bottom gap moves below it. */
+  .cohort__logo {
+    display: block;
+    height: var(--logo-h);
+    margin: 0 0 var(--spacing-XL);
+    color: var(--text-headline);
+    --logo-knockout: var(--surface-background-default);
+  }
+  .cohort__logo :global(svg) { height: 100%; width: auto; display: block; }
+  .cohort__affiliation:has(+ .cohort__logo) { margin-bottom: var(--spacing-M); }
+  .cohort__bio p { margin: 0; }
+  .cohort__bio p + p { margin-top: var(--spacing-L); }
+
+  .cohort__photo--fallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--surface-foreground-low);
+    color: var(--text-subtle);
+    font-weight: 500;
+    font-size: 40px;
+  }
+
+  .cohort__head { margin-bottom: var(--spacing-5XL); }
+  .cohort__eyebrow { margin: 0 0 var(--spacing-S); }
+  .cohort__heading { margin: 0; }
+  .cohort__intro { margin: var(--spacing-L) 0 0; }
+
+  @media (max-width: 767px) {
+    .cohort__person { grid-template-columns: 1fr; gap: var(--spacing-XL); }
+    .cohort__photo { width: 160px; height: 160px; }
+  }
+</style>
