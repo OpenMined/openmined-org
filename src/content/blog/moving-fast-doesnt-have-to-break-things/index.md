@@ -4,7 +4,7 @@ slug: moving-fast-doesnt-have-to-break-things
 titleMax: 36
 date: 2026-05-22T08:00:00
 updated: 2026-05-22T19:45:34
-categories: [research, policy]
+categories: [policy]
 tags: [ai-safety, privacy-enhancing-technologies-pets, structured-transparency, attribution-based-control]
 authors: [noah-ringler]
 cover: ./cover.jpg

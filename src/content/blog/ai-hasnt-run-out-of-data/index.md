@@ -4,7 +4,7 @@ slug: ai-hasnt-run-out-of-data
 titleMax: 56
 date: 2025-12-01T14:14:15
 updated: 2025-12-03T13:26:25
-categories: [research, policy]
+categories: [policy]
 tags: [ai-ethics, privacy-enhancing-technologies-pets, large-language-models-llms]
 authors: [jack-hardinges]
 cover: ./cover.jpg
