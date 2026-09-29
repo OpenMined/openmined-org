@@ -139,9 +139,10 @@ const recent = (await getCollection('blog', ({ data }) =>
       <div class="pillars-grid">
         {pillars.map((pl, i) => (
           <article class="pillar" data-reveal data-reveal-delay={i * 70}>
+            <span class="pillar__diamond" aria-hidden="true" style={`--flow-offset:${i}`}></span>
             <h5 class="pillar__title">{pl.title}</h5>
             <p class="pillar__body">{pl.body}</p>
-            <div class="pillar__cta"><Button variant="outline" href={pl.href}>{pl.cta}</Button></div>
+            <div class="pillar__cta"><Button href={pl.href}>{pl.cta}</Button></div>
           </article>
         ))}
       </div>
@@ -238,20 +239,68 @@ const recent = (await getCollection('blog', ({ data }) =>
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--spacing-XL);
   }
-  /* The pillars band is dim (it also paints over the hero stream's tail, as
-     the first band after the hero did before), so cards sit one step lighter. */
+  /* Outlined, not filled: the card body is the band's own surface, and a
+     softened headline-ink rule draws the card (lighter than --border-strong,
+     which read too heavy on the areas ledger). */
   .pillar {
     display: flex;
     flex-direction: column;
     padding: var(--spacing-3XL);
     border-radius: var(--border-radius-S);
-    background-color: var(--surface-background-default);
+    border: 1px solid color-mix(in srgb, var(--text-headline) 28%, transparent);
   }
   .pillar__title { margin: 0 0 var(--spacing-L); }
   .pillar__body { margin: 0; }
   /* Pinned to the card foot, so the three CTAs share a baseline whatever
      each body's length. */
   .pillar__cta { margin-top: auto; padding-top: var(--spacing-3XL); }
+
+
+  /* ── Pillar diamonds: the stream's spectrum, flowing ────────────────────
+     A sharp brand diamond above each pillar title, filled with the hero
+     stream's hues. The fill is ONE horizontal tile holding the full spectrum
+     (it ends on the colour it starts with), repeated and slid exactly one
+     tile width per loop — so the flow is seamless, with no cut at the wrap.
+     Each card starts a third of the way further along the spectrum, so
+     left→right the three read warm → violet → cool, echoing the stream above.
+     A soft glow in the same colours; static under reduced motion. */
+  .pillar__diamond {
+    --flow-dur: 16s;
+    --flow-tile: 176px; /* 8× the diamond: one hue family at a time */
+    position: relative;
+    display: block;
+    width: 22px;
+    height: 22px;
+    margin: var(--spacing-XS) 0 var(--spacing-2XL) var(--spacing-XS);
+    transform: rotate(45deg);
+    background-image: linear-gradient(90deg,
+      var(--color-gold-500), var(--color-orange-500), var(--color-red-500),
+      var(--color-violet-500), var(--color-blue-500), var(--color-teal-500),
+      var(--color-green-500), var(--color-gold-500));
+    background-size: var(--flow-tile) 100%;
+    background-repeat: repeat-x;
+    animation: pillar-flow var(--flow-dur) linear infinite;
+    animation-delay: calc(var(--flow-offset) * var(--flow-dur) * -0.3);
+  }
+  .pillar__diamond::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: inherit;
+    animation: inherit;
+    filter: blur(7px);
+    opacity: 0.35;
+    z-index: -1;
+  }
+  @keyframes pillar-flow {
+    from { background-position-x: 0; }
+    to   { background-position-x: calc(-1 * var(--flow-tile)); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pillar__diamond,
+    .pillar__diamond::after { animation: none; }
+    .pillar__diamond { background-position-x: calc(var(--flow-offset) * var(--flow-tile) * -0.3); }
+  }
 
   /* ── Fellowship: program | what fellows receive ────────────────────── */
   .fellowship-grid {
