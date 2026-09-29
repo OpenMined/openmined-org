@@ -144,6 +144,9 @@
   padding-left: var(--spacing-XS); /* live: 5px, snapped */
 }
 .hs-form :is(label, .hs-field-desc):has(span:empty) { margin-bottom: 0; }
+/* Checkbox / radio group labels sit flush with their options. The 5px inset
+   above reads as a stray indent over a column of boxes that start at 0. */
+.hs-form :is(.hs-fieldtype-checkbox, .hs-fieldtype-radio) > label { padding-left: 0; }
 
 /* !important: v2.js injects a per-instance rule setting `.input { margin: 0 8px 0 0 }`
    (an 8px gutter) at higher specificity — it both bloats the form-columns-2 column
