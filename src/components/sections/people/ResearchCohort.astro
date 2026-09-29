@@ -26,6 +26,11 @@ interface Person {
   affiliation?: string;
   /** One string per paragraph when a bio runs to more than one. */
   bio: string | string[];
+  /** Institution mark: `id` of a single-colour SVG in public/logos/institutions/
+   *  (ink = currentColor, knockouts = --logo-knockout), `name` for its label,
+   *  `h` an optical height in px — the marks' proportions differ too much for
+   *  one height to read as one size. */
+  logo?: { id: string; name: string; h: number };
 }
 interface Group {
   heading: string;
@@ -43,6 +48,16 @@ const { groups, id = 'fellows', eyebrow, heading, intro } = Astro.props;
 const initials = (name: string) =>
   name.split(/\s+/).map((part) => part[0]).slice(0, 2).join('').toUpperCase();
 const paragraphs = (bio: string | string[]) => (Array.isArray(bio) ? bio : [bio]);
+const LOGOS = import.meta.glob('../../../../public/logos/institutions/*.svg', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+}) as Record<string, string>;
+const logoSvg = (id: string) => {
+  const raw = LOGOS[`../../../../public/logos/institutions/${id}.svg`];
+  if (!raw) throw new Error(`ResearchCohort: no institution logo "${id}" in public/logos/institutions/`);
+  return raw;
+};
 ---
 
 <section class="cohort" id={id}>
@@ -66,6 +81,9 @@ const paragraphs = (bio: string | string[]) => (Array.isArray(bio) ? bio : [bio]
               <div class="cohort__text">
                 <h4>{p.name}</h4>
                 {p.affiliation && <p class="cohort__affiliation">{p.affiliation}</p>}
+                {p.logo && (
+                  <span class="cohort__logo" role="img" aria-label={p.logo.name} style={`--logo-h:${p.logo.h}px`} set:html={logoSvg(p.logo.id)} />
+                )}
                 <div class="cohort__bio measure" style="--measure: 42em;">
                   {paragraphs(p.bio).map((para) => <p>{para}</p>)}
                 </div>
@@ -110,6 +128,18 @@ const paragraphs = (bio: string | string[]) => (Array.isArray(bio) ? bio : [bio]
     margin: 0 0 var(--spacing-XL);
     color: var(--text-subtle);
   }
+  /* Institution mark: single colour (text ink), knockouts painted with the
+     section's own surface so negative space reads in both themes. Sits under
+     the affiliation line; the affiliation's own bottom gap moves below it. */
+  .cohort__logo {
+    display: block;
+    height: var(--logo-h);
+    margin: 0 0 var(--spacing-XL);
+    color: var(--text-headline);
+    --logo-knockout: var(--surface-background-default);
+  }
+  .cohort__logo :global(svg) { height: 100%; width: auto; display: block; }
+  .cohort__affiliation:has(+ .cohort__logo) { margin-bottom: var(--spacing-M); }
   .cohort__bio p { margin: 0; }
   .cohort__bio p + p { margin-top: var(--spacing-L); }
 
