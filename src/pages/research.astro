@@ -112,8 +112,6 @@ const recent = (await getCollection('blog', ({ data }) =>
   description="OpenMined builds open-source infrastructure that lets AI systems use data without anyone having to hand it over. Our research asks what becomes possible when that infrastructure exists."
 >
   <SimpleHero
-    eyebrow="OpenMined Research"
-    eyebrowItalic
     heading="Research at OpenMined"
     headingMax={48}
     headingMeasure="20em"
@@ -128,7 +126,7 @@ const recent = (await getCollection('blog', ({ data }) =>
       <Button href="#fellows">Meet the fellows</Button>
       <Button variant="outline" href="#interest">Express interest</Button>
     </Fragment>
-    <StreamSwoop slot="swoop" id="stream-embed-research" bleed={0.4} />
+    <StreamSwoop slot="swoop" id="stream-embed-research" bleed={0.4} overlay={80} />
   </SimpleHero>
 
   <!-- 2 · What we're working on — the three pillars -->
@@ -225,6 +223,14 @@ const recent = (await getCollection('blog', ({ data }) =>
 </Page>
 
 <style>
+  /* With the stream overlaying it (StreamSwoop overlay), the pillars band
+     also fades its own surface in across its top padding, so the surface
+     step from the hero's background leaves no edge either. */
+  #about :global(.content-section--dim) {
+    background-color: transparent;
+    background-image: linear-gradient(to bottom, transparent, var(--surface-background-dim) var(--spacing-full));
+  }
+
   /* The three questions under the hero lede: the same size, set apart by
      italic and headline ink. */
   .hero-questions { color: var(--text-headline); }
