@@ -124,6 +124,7 @@ const recent = (await getCollection('blog', ({ data }) =>
     contentGap="tight"
     padBottom="calc(var(--spacing-max) * 2)"
   >
+    <p class="hero-questions"><em><span>Who gets to know what?</span> <span>Who gets paid?</span> <span>Who gets to say no?</span></em></p>
     <Fragment slot="actions">
       <Button href="#fellows">Meet the fellows</Button>
       <Button variant="outline" href="#interest">Express interest</Button>
@@ -224,6 +225,12 @@ const recent = (await getCollection('blog', ({ data }) =>
 </Page>
 
 <style>
+  /* The three questions under the hero lede: the same size, set apart by
+     italic and headline ink. */
+  .hero-questions { color: var(--text-headline); }
+  /* Lines break between questions, never inside one. */
+  .hero-questions span { white-space: nowrap; }
+
   /* ── Pillars ───────────────────────────────────────────────────────── */
   .pillars-lead { margin: 0 0 var(--spacing-3XL); }
   .pillars-grid {
