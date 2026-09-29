@@ -376,10 +376,7 @@
   height: 16px;
   border-radius: var(--border-radius-XS);
   background-color: var(--color-grayscale-50);
-  /* Inset themed ring: the light box vanished on light surfaces (white on
-     near-white). --text-subtle clears 3:1 non-text contrast on light and reads
-     as a soft edge on dark. Inset, so it costs no layout. */
-  box-shadow: inset 0 0 0 1px var(--text-subtle), var(--shadow-sm);
+  box-shadow: var(--shadow-sm);
 }
 /* Keyboard focus ring. The real <input> is `opacity: 0` (above) — still focusable,
    but its own outline paints on a transparent box, so tabbing through a checkbox
