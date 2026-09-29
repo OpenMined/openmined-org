@@ -28,9 +28,9 @@ import Link from '@ui/Link.astro';
 import { postSlug } from '@utils/posts';
 
 const pillars = [
-  { title: 'Network-sourced AI', href: '/blog/network-sourced-ai/', body: 'Intelligence composed live over a network, rather than bundling all data, compute, and algorithms into a single centralized source owned by one entity. A conventional AI system is a trained model plus, optionally, a RAG layer over data that happens to be colocated or on the internet. NSAI decentralizes both halves. The model context can come from many independent data owners, and the model itself can be an ensemble of models from many independent owners.' },
-  { title: 'Attribution-based control', href: '/attribution-based-control/', body: 'A relationship between sources of AI-related data, compute, and talent and the AI users receiving predictions. These two groups each have ABC when resource owners dynamically control how much intelligence to give each AI prediction they support, and AI users dynamically control which resource providers they want to rely on for each AI prediction.' },
-  { title: 'Structured transparency', href: '/blog/structured-transparency/', body: 'A framework for governing information flows so that parties can collaborate on data without giving up control of it. It names five guarantees a flow can need: input privacy, output privacy, input verification, output verification, and flow governance. Privacy-enhancing technologies (PETs) are the mechanisms that supply those guarantees, and ST provides a vocabulary for saying which ones a given flow is missing.' },
+  { title: 'Network-sourced AI', href: '/blog/network-sourced-ai/', cta: 'Read about NSAI', body: 'Intelligence composed live over a network, rather than bundling all data, compute, and algorithms into a single centralized source owned by one entity. A conventional AI system is a trained model plus, optionally, a RAG layer over data that happens to be colocated or on the internet. NSAI decentralizes both halves. The model context can come from many independent data owners, and the model itself can be an ensemble of models from many independent owners.' },
+  { title: 'Attribution-based control', href: '/attribution-based-control/', cta: 'Read about ABC', body: 'A relationship between sources of AI-related data, compute, and talent and the AI users receiving predictions. These two groups each have ABC when resource owners dynamically control how much intelligence to give each AI prediction they support, and AI users dynamically control which resource providers they want to rely on for each AI prediction.' },
+  { title: 'Structured transparency', href: '/blog/structured-transparency/', cta: 'Read about ST', body: 'A framework for governing information flows so that parties can collaborate on data without giving up control of it. It names five guarantees a flow can need: input privacy, output privacy, input verification, output verification, and flow governance. Privacy-enhancing technologies (PETs) are the mechanisms that supply those guarantees, and ST provides a vocabulary for saying which ones a given flow is missing.' },
 ];
 
 const themes = [
@@ -138,9 +138,9 @@ const recent = (await getCollection('blog', ({ data }) =>
       <div class="pillars-grid">
         {pillars.map((pl, i) => (
           <article class="pillar" data-reveal data-reveal-delay={i * 70}>
-            <p class="pillar__index text-eyebrow">Pillar {i + 1}</p>
-            <h5 class="pillar__title"><a href={pl.href}>{pl.title}</a></h5>
+            <h5 class="pillar__title">{pl.title}</h5>
             <p class="pillar__body">{pl.body}</p>
+            <div class="pillar__cta"><Button variant="outline" href={pl.href}>{pl.cta}</Button></div>
           </article>
         ))}
       </div>
@@ -162,7 +162,7 @@ const recent = (await getCollection('blog', ({ data }) =>
         {themes.map((t) => (
           <div class="areas__row">
             <dt class="areas__name">
-              <Icon name={t.icon} size={22} class="areas__icon" />
+              <span class="areas__tile" aria-hidden="true"><Icon name={t.icon} size={28} /></span>
               <span>{t.title}</span>
             </dt>
             <dd class="areas__question">{t.question}</dd>
@@ -234,13 +234,17 @@ const recent = (await getCollection('blog', ({ data }) =>
   /* The pillars band is dim (it also paints over the hero stream's tail, as
      the first band after the hero did before), so cards sit one step lighter. */
   .pillar {
-    padding: var(--spacing-2XL);
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-3XL);
     border-radius: var(--border-radius-S);
     background-color: var(--surface-background-default);
   }
-  .pillar__index { margin: 0 0 var(--spacing-S); }
-  .pillar__title { margin: 0 0 var(--spacing-M); }
+  .pillar__title { margin: 0 0 var(--spacing-L); }
   .pillar__body { margin: 0; }
+  /* Pinned to the card foot, so the three CTAs share a baseline whatever
+     each body's length. */
+  .pillar__cta { margin-top: auto; padding-top: var(--spacing-3XL); }
 
   /* ── Fellowship: program | what fellows receive ────────────────────── */
   .fellowship-grid {
@@ -283,22 +287,33 @@ const recent = (await getCollection('blog', ({ data }) =>
      each area defines its question. Unnumbered — the areas aren't a sequence. */
   .areas {
     margin: 0;
-    border: var(--border-strong);
-    border-radius: var(--border-radius-S);
+    border-top: 1px solid color-mix(in srgb, var(--text-headline) 16%, transparent);
   }
   .areas__row {
     display: grid;
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-    column-gap: var(--spacing-5XL);
-    padding: var(--spacing-3XL) var(--spacing-4XL);
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    align-items: center;
+    column-gap: var(--spacing-3XL);
+    padding-block: var(--spacing-3XL);
+    /* Headline ink at low opacity: a quiet rule that still reads on the dark
+       surface, where --border-subtle all but disappears. */
+    border-bottom: 1px solid color-mix(in srgb, var(--text-headline) 16%, transparent);
   }
-  /* Headline ink at low opacity: a quiet rule that still reads on the dark
-     surface, where --border-subtle all but disappears. */
-  .areas__row + .areas__row { border-top: 1px solid color-mix(in srgb, var(--text-headline) 16%, transparent); }
+  .areas__tile {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: var(--border-radius-M);
+    background-color: var(--surface-background-dim);
+    color: var(--text-headline);
+  }
   .areas__name {
     display: flex;
-    align-items: flex-start;
-    gap: var(--spacing-L);
+    align-items: center;
+    gap: var(--spacing-2XL);
     margin: 0;
     font-family: var(--font-secondary);
     font-size: clamp(var(--h5-min), 1.62vw, var(--h5-max));
@@ -306,7 +321,6 @@ const recent = (await getCollection('blog', ({ data }) =>
     color: var(--text-headline);
     text-wrap: balance;
   }
-  .areas__icon { flex: none; margin-top: 0.15em; color: var(--text-subtle); }
   .areas__question {
     margin: 0;
     font-size: 18px;
@@ -320,7 +334,9 @@ const recent = (await getCollection('blog', ({ data }) =>
   @media (max-width: 991px) {
   }
   @media (max-width: 767px) {
-    .areas__row { grid-template-columns: 1fr; row-gap: var(--spacing-M); padding: var(--spacing-2XL); }
-    .areas__question { font-size: 16px; padding-left: calc(22px + var(--spacing-L)); }
+    .areas__row { grid-template-columns: 1fr; row-gap: var(--spacing-L); padding-block: var(--spacing-2XL); }
+    .areas__name { gap: var(--spacing-L); }
+    .areas__tile { width: 48px; height: 48px; }
+    .areas__question { font-size: 16px; }
   }
 </style>
