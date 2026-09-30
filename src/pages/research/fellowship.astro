@@ -4,12 +4,13 @@
  * its inaugural cohort. Split out of /research/ (Lacey ↔ Bennett 9/30: the
  * research page "stops after research themes" and "meet the fellows goes to a
  * nested page"), with the copy, roster and styles moved over unchanged from
- * Lacey's page doc ("[WIP] Fellows Bio", 9/25). The research grant program is
+ * Lacey's page doc ("[WIP] Fellows Bio", 9/25) — except that affiliations drop
+ * the "— Institution" tail wherever the card shows the institution's logo
+ * (Lacey, 9/30: it read redundant). The research grant program is
  * a different program: /research/grants/.
  *
  * Bands: hero with the animated stream (as /research/) → how the fellowship
- * works (dim) → cohort roster → interest form (the Research Interest form, the
- * same intake as /research/).
+ * works (dim) → cohort roster → next-cohort waitlist form.
  */
 import Page from '@layouts/Page.astro';
 import SimpleHero from '@components/sections/hero/SimpleHero.astro';
@@ -34,27 +35,27 @@ const cohort = [
   {
     heading: 'PhD Fellows',
     people: [
-      { name: 'Seungeun Lee', logo: { id: 'nyu', name: 'New York University', h: 32 }, affiliation: 'PhD student, Computer Science — New York University', photo: '/images/research/seungeun-lee.jpg', bio: 'Seungeun Lee is a PhD student in Computer Science at New York University, advised by Prof. Julia Stoyanovich at the Center for Responsible AI. She tries to make machine learning systems more explainable and trustworthy. Broadly, she is interested in designing AI that remains reliable as data, environments, and people change, both in practice and theory.' },
-      { name: 'Victor Ojewale', logo: { id: 'brown', name: 'Brown University', h: 44 }, affiliation: 'PhD candidate, Computer Science — Brown University', photo: '/images/research/victor-ojewale.jpg', bio: 'Victor Ojewale is a Ph.D. candidate in Computer Science at Brown University, affiliated with the Center for Technological Responsibility. His research builds evaluation and audit infrastructure for large language models and the agents built on them, with a focus on moving evaluation out of the sandbox and toward the communities that actually use these systems. He has developed community-centered evaluation infrastructure for LLMs, multilingual functional evaluations, and measures of when agents should act versus defer, and has co-authored regulatory filings to NIST, NTIA, and the European Commission. He was previously a researcher with the Mozilla Open Source Audit Tooling Project.' },
-      { name: 'Ben Bucknall', logo: { id: 'oxford', name: 'University of Oxford', h: 34 }, affiliation: 'DPhil student — University of Oxford', photo: '/images/research/ben-bucknall.jpg', bio: 'Ben Bucknall is a DPhil (PhD) student at the University of Oxford, and an affiliate at the Oxford Martin AI Governance Initiative, where his work focuses on technical AI governance. He was previously a visiting student researcher at Stanford University, a chapter lead for the 2026 International AI Safety Report, and organiser of the ICML workshop on technical AI governance research. Before his DPhil, Ben worked as a research scholar at GovAI and technical advisor in the UK AI Security Institute. His current research centres around the governance of AI agent protocols and assurance of model versioning.' },
-      { name: 'Peihan Liu', logo: { id: 'columbia', name: 'Columbia University', h: 32 }, affiliation: 'PhD student, Computer Science — Columbia University', photo: '/images/research/peihan-liu.jpg', bio: 'Peihan Liu is a PhD student in Computer Science at Columbia University, advised by Rachel Cummings and Roxana Geambasu. His research focuses on trustworthy machine learning, with an emphasis on differential privacy and the foundations of modern machine learning.' },
+      { name: 'Seungeun Lee', logo: { id: 'nyu', name: 'New York University', h: 32 }, affiliation: 'PhD student, Computer Science', photo: '/images/research/seungeun-lee.jpg', bio: 'Seungeun Lee is a PhD student in Computer Science at New York University, advised by Prof. Julia Stoyanovich at the Center for Responsible AI. She tries to make machine learning systems more explainable and trustworthy. Broadly, she is interested in designing AI that remains reliable as data, environments, and people change, both in practice and theory.' },
+      { name: 'Victor Ojewale', logo: { id: 'brown', name: 'Brown University', h: 44 }, affiliation: 'PhD candidate, Computer Science', photo: '/images/research/victor-ojewale.jpg', bio: 'Victor Ojewale is a Ph.D. candidate in Computer Science at Brown University, affiliated with the Center for Technological Responsibility. His research builds evaluation and audit infrastructure for large language models and the agents built on them, with a focus on moving evaluation out of the sandbox and toward the communities that actually use these systems. He has developed community-centered evaluation infrastructure for LLMs, multilingual functional evaluations, and measures of when agents should act versus defer, and has co-authored regulatory filings to NIST, NTIA, and the European Commission. He was previously a researcher with the Mozilla Open Source Audit Tooling Project.' },
+      { name: 'Ben Bucknall', logo: { id: 'oxford', name: 'University of Oxford', h: 34 }, affiliation: 'DPhil student', photo: '/images/research/ben-bucknall.jpg', bio: 'Ben Bucknall is a DPhil (PhD) student at the University of Oxford, and an affiliate at the Oxford Martin AI Governance Initiative, where his work focuses on technical AI governance. He was previously a visiting student researcher at Stanford University, a chapter lead for the 2026 International AI Safety Report, and organiser of the ICML workshop on technical AI governance research. Before his DPhil, Ben worked as a research scholar at GovAI and technical advisor in the UK AI Security Institute. His current research centres around the governance of AI agent protocols and assurance of model versioning.' },
+      { name: 'Peihan Liu', logo: { id: 'columbia', name: 'Columbia University', h: 32 }, affiliation: 'PhD student, Computer Science', photo: '/images/research/peihan-liu.jpg', bio: 'Peihan Liu is a PhD student in Computer Science at Columbia University, advised by Rachel Cummings and Roxana Geambasu. His research focuses on trustworthy machine learning, with an emphasis on differential privacy and the foundations of modern machine learning.' },
     ],
   },
   {
     heading: 'Predoctoral Fellows',
     people: [
-      { name: 'Hannah Ismael', logo: { id: 'mozilla-foundation', name: 'Mozilla Foundation', h: 28 }, affiliation: 'Senior Program Associate — Mozilla Foundation', photo: '/images/research/hannah-ismael.jpg', bio: 'Hannah Ismael is a Senior Program Associate at Mozilla Foundation. She is interested in how law and policy can enable publicly accountable governance of AI, and in where existing frameworks fall short of creating a technological ecosystem that meaningfully balances privacy, transparency, security, and innovation. These questions have led her to explore intellectual property, privacy, and antitrust law, as well as the broader political and geopolitical forces shaping AI policy. Her work has been featured in ACM and JIGS and has contributed to partnerships with governments, nonprofits, and think tanks in pursuit of more equitable benefit-sharing and participatory governance.' },
+      { name: 'Hannah Ismael', logo: { id: 'mozilla-foundation', name: 'Mozilla Foundation', h: 28 }, affiliation: 'Senior Program Associate', photo: '/images/research/hannah-ismael.jpg', bio: 'Hannah Ismael is a Senior Program Associate at Mozilla Foundation. She is interested in how law and policy can enable publicly accountable governance of AI, and in where existing frameworks fall short of creating a technological ecosystem that meaningfully balances privacy, transparency, security, and innovation. These questions have led her to explore intellectual property, privacy, and antitrust law, as well as the broader political and geopolitical forces shaping AI policy. Her work has been featured in ACM and JIGS and has contributed to partnerships with governments, nonprofits, and think tanks in pursuit of more equitable benefit-sharing and participatory governance.' },
       { name: 'Ayana Hussain', photo: '/images/research/ayana-hussain.jpg', bio: 'Ayana Hussain is interested in privacy-preserving machine learning and AI safety, particularly in how individuals and communities can exercise agency and influence over algorithms, models, and digital platforms. Her research explores how individuals can control whether and how their data is shared, as well as how groups can use algorithmic collective action to influence computational technologies. She is also interested in how communities can organize to resist technological harms, particularly those involving AI-enabled misinformation and surveillance, and in how influence over increasingly powerful AI technologies can be distributed more widely.' },
     ],
   },
   {
     heading: 'Academic Mentors',
     people: [
-      { name: 'Niloofar Mireshghallah', logo: { id: 'cmu', name: 'Carnegie Mellon University', h: 18 }, affiliation: 'Assistant Professor — Carnegie Mellon University', photo: '/images/research/niloofar-mireshghallah.jpg', bio: [
+      { name: 'Niloofar Mireshghallah', logo: { id: 'cmu', name: 'Carnegie Mellon University', h: 18 }, affiliation: 'Assistant Professor', photo: '/images/research/niloofar-mireshghallah.jpg', bio: [
         'Niloofar Mireshghallah is an Assistant Professor at Carnegie Mellon University, with appointments in the Engineering & Public Policy Department and Language Technologies Institute, as well as a courtesy appointment in the Software and Societal Systems Department. She is also a core member of CyLab, where she leads the Looni Lab. Her research sits at the intersection of privacy, machine learning, and the societal implications of AI, with a particular focus on contextual integrity, information-flow norms, natural language processing, LLM reasoning, and AI for science, including chemistry and drug discovery. Her work explores the relationship between data, its influence on machine learning models, and the expectations of the people and communities who generate, regulate, and use that data. She is particularly interested in developing technical approaches to privacy and security that account for the social and normative contexts in which AI systems operate.',
         'Prior to joining Carnegie Mellon, she was a Founding Member of Technical Staff at humans&, a Research Scientist with Meta AI’s FAIR Alignment group, and a postdoctoral scholar at the University of Washington. She received her PhD from UC San Diego and has also conducted research with Microsoft Research on differential privacy, model compression, and data synthesis. Her work has been recognized with the NCWIT Collegiate Award and the Rising Star in Adversarial ML Award.',
       ] },
-      { name: 'Nick Vincent', logo: { id: 'sfu', name: 'Simon Fraser University', h: 32 }, affiliation: 'Assistant Professor, Computing Science — Simon Fraser University', photo: '/images/research/nick-vincent.jpg', bio: [
+      { name: 'Nick Vincent', logo: { id: 'sfu', name: 'Simon Fraser University', h: 32 }, affiliation: 'Assistant Professor, Computing Science', photo: '/images/research/nick-vincent.jpg', bio: [
         'Nick Vincent is an Assistant Professor in Computing Science at Simon Fraser University and director of the People- and Data-centric Computing Research Group (PadComp). He studies the content ecosystems and data supply chains that fuel data-dependent technologies like search engines, recommender systems, and generative AI. This involves exploring avenues for people to control how data flows and participate in the governance of AI systems. The overarching goal of this research is to work towards highly capable and widely beneficial AI technologies that mitigate—rather than exacerbate—inequalities in wealth and power. His work is published in responsible AI venues like ACM FAccT and human-computer interaction venues like ACM CHI. His dissertation on data leverage received the 2024 ACM SIGCHI Outstanding Dissertation Award.',
         'Prof. Vincent was previously a postdoc working with the Computational Communication Research Lab at UC Davis and the Social Futures Lab at the University of Washington. He received his PhD from Northwestern University’s Technology and Social Behavior program (a joint degree in computer science and communication), where he worked in the People, Space, and Algorithms Research Group.',
       ] },
@@ -90,7 +91,7 @@ const cohort = [
   >
     <Fragment slot="actions">
       <Button href="#fellows">Meet the fellows</Button>
-      <Button variant="outline" href="#interest">Express interest</Button>
+      <Button variant="outline" href="#interest">Get notified</Button>
     </Fragment>
     <StreamSwoop slot="swoop" id="stream-embed-fellowship" bleed={0.59} overlay />
   </SimpleHero>
@@ -122,9 +123,12 @@ const cohort = [
     intro="As part of OpenMined’s commitment to the next generation of leaders in privacy-preserving AI, we’re proud to introduce the inaugural cohort of the OpenMined Research Fellowship."
   />
 
+  <!-- Next-cohort waitlist: name, email, the list, marketing opt-in. Simpler
+       than /research/'s interest form, which this page no longer duplicates
+       (Lacey, 9/30). #interest kept as the anchor the hero button uses. -->
   <div id="interest" data-reveal>
-    <CtaSection variant="gradient" icon={false} heading="Interested in research?">
-      <FormEmbed slot="form" formId="71e0f542-98b4-4ef6-87de-b3dcf1f8f1a3" />
+    <CtaSection variant="gradient" icon={false} heading="Would you like to be notified when our next cohort opens?">
+      <FormEmbed slot="form" formId="9927157a-5245-4bfb-a7c9-3e04402a7e8b" />
       <Fragment slot="fineprint">
         <p>Submitting confirms you agree with our <a href="/privacy-policy/">privacy policy</a>.</p>
       </Fragment>
