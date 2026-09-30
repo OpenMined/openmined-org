@@ -1,17 +1,18 @@
 ---
 /**
  * /research/ — Research at OpenMined: what the research team works on (three
- * pillars), the five research themes, the OpenMined Research Fellowship and
- * its inaugural cohort, recent research, and an interest form.
+ * pillars), the five research themes, recent research, and an interest form.
+ * The fellowship and its cohort live on /research/fellowship/, the grant
+ * program on /research/grants/ — the hero buttons lead to both (Lacey ↔
+ * Bennett 9/30: "this scrolly page stops after research themes").
  *
  * Copy is verbatim from Lacey's page doc ("[WIP] Fellows Bio", 9/25 — its
  * section text is authoritative over its structure table). The doc's intro
  * line is the hero paragraph. Its FAQ section has no copy yet, so it's left
  * out rather than invented; `@ui/Accordion` is the component when it lands.
  *
- * Bands: hero with the animated stream → pillars → themes (generated art
- * series) → fellowship (dim) → cohort roster → recent research (the research
- * category, newest first) → interest form.
+ * Bands: hero with the animated stream → pillars → themes → recent research
+ * (the research category, newest first) → interest form.
  */
 import { getCollection, getEntry } from 'astro:content';
 import Page from '@layouts/Page.astro';
@@ -22,7 +23,6 @@ import Icon from '@elements/Icon.astro';
 import PostCard from '@elements/PostCard.astro';
 import CtaSection from '@components/sections/cta/CtaSection.astro';
 import FormEmbed from '@elements/FormEmbed.astro';
-import ResearchCohort from '@components/sections/people/ResearchCohort.astro';
 import Button from '@ui/Button.astro';
 import Link from '@ui/Link.astro';
 import { postSlug } from '@utils/posts';
@@ -39,53 +39,6 @@ const themes = [
   { icon: 'iconoir-cpu', title: 'Emerging AI Architectures', question: 'How will model routing, ensembles, fusions, and multi-agent systems change who can develop a frontier AI system?' },
   { icon: 'iconoir-copyright', title: 'Copyright & the Value of Data', question: 'How should society understand economic value and the price of digital goods in the AI era?' },
   { icon: 'iconoir-community', title: 'Alternative Ownership, Governance & Business Models', question: 'What alternatives exist to conventional models of technology ownership?' },
-];
-
-const fellowsReceive = [
-  'An unrestricted research stipend',
-  'Technical mentorship from the OpenMined team',
-  'Access to infrastructure, APIs, and compute for projects',
-  'An all-expenses-paid in-person cohort gathering in New York City',
-  'Conversations with leading industry researchers',
-  'Support to present at conferences and workshops',
-];
-
-const cohort = [
-  {
-    heading: 'PhD Fellows',
-    people: [
-      { name: 'Seungeun Lee', logo: { id: 'nyu', name: 'New York University', h: 32 }, affiliation: 'PhD student, Computer Science — New York University', photo: '/images/research/seungeun-lee.jpg', bio: 'Seungeun Lee is a PhD student in Computer Science at New York University, advised by Prof. Julia Stoyanovich at the Center for Responsible AI. She tries to make machine learning systems more explainable and trustworthy. Broadly, she is interested in designing AI that remains reliable as data, environments, and people change, both in practice and theory.' },
-      { name: 'Victor Ojewale', logo: { id: 'brown', name: 'Brown University', h: 44 }, affiliation: 'PhD candidate, Computer Science — Brown University', photo: '/images/research/victor-ojewale.jpg', bio: 'Victor Ojewale is a Ph.D. candidate in Computer Science at Brown University, affiliated with the Center for Technological Responsibility. His research builds evaluation and audit infrastructure for large language models and the agents built on them, with a focus on moving evaluation out of the sandbox and toward the communities that actually use these systems. He has developed community-centered evaluation infrastructure for LLMs, multilingual functional evaluations, and measures of when agents should act versus defer, and has co-authored regulatory filings to NIST, NTIA, and the European Commission. He was previously a researcher with the Mozilla Open Source Audit Tooling Project.' },
-      { name: 'Ben Bucknall', logo: { id: 'oxford', name: 'University of Oxford', h: 34 }, affiliation: 'DPhil student — University of Oxford', photo: '/images/research/ben-bucknall.jpg', bio: 'Ben Bucknall is a DPhil (PhD) student at the University of Oxford, and an affiliate at the Oxford Martin AI Governance Initiative, where his work focuses on technical AI governance. He was previously a visiting student researcher at Stanford University, a chapter lead for the 2026 International AI Safety Report, and organiser of the ICML workshop on technical AI governance research. Before his DPhil, Ben worked as a research scholar at GovAI and technical advisor in the UK AI Security Institute. His current research centres around the governance of AI agent protocols and assurance of model versioning.' },
-      { name: 'Peihan Liu', logo: { id: 'columbia', name: 'Columbia University', h: 32 }, affiliation: 'PhD student, Computer Science — Columbia University', photo: '/images/research/peihan-liu.jpg', bio: 'Peihan Liu is a PhD student in Computer Science at Columbia University, advised by Rachel Cummings and Roxana Geambasu. His research focuses on trustworthy machine learning, with an emphasis on differential privacy and the foundations of modern machine learning.' },
-    ],
-  },
-  {
-    heading: 'Predoctoral Fellows',
-    people: [
-      { name: 'Hannah Ismael', logo: { id: 'mozilla-foundation', name: 'Mozilla Foundation', h: 28 }, affiliation: 'Senior Program Associate — Mozilla Foundation', photo: '/images/research/hannah-ismael.jpg', bio: 'Hannah Ismael is a Senior Program Associate at Mozilla Foundation. She is interested in how law and policy can enable publicly accountable governance of AI, and in where existing frameworks fall short of creating a technological ecosystem that meaningfully balances privacy, transparency, security, and innovation. These questions have led her to explore intellectual property, privacy, and antitrust law, as well as the broader political and geopolitical forces shaping AI policy. Her work has been featured in ACM and JIGS and has contributed to partnerships with governments, nonprofits, and think tanks in pursuit of more equitable benefit-sharing and participatory governance.' },
-      { name: 'Ayana Hussain', photo: '/images/research/ayana-hussain.jpg', bio: 'Ayana Hussain is interested in privacy-preserving machine learning and AI safety, particularly in how individuals and communities can exercise agency and influence over algorithms, models, and digital platforms. Her research explores how individuals can control whether and how their data is shared, as well as how groups can use algorithmic collective action to influence computational technologies. She is also interested in how communities can organize to resist technological harms, particularly those involving AI-enabled misinformation and surveillance, and in how influence over increasingly powerful AI technologies can be distributed more widely.' },
-    ],
-  },
-  {
-    heading: 'Academic Mentors',
-    people: [
-      { name: 'Niloofar Mireshghallah', logo: { id: 'cmu', name: 'Carnegie Mellon University', h: 18 }, affiliation: 'Assistant Professor — Carnegie Mellon University', photo: '/images/research/niloofar-mireshghallah.jpg', bio: [
-        'Niloofar Mireshghallah is an Assistant Professor at Carnegie Mellon University, with appointments in the Engineering & Public Policy Department and Language Technologies Institute, as well as a courtesy appointment in the Software and Societal Systems Department. She is also a core member of CyLab, where she leads the Looni Lab. Her research sits at the intersection of privacy, machine learning, and the societal implications of AI, with a particular focus on contextual integrity, information-flow norms, natural language processing, LLM reasoning, and AI for science, including chemistry and drug discovery. Her work explores the relationship between data, its influence on machine learning models, and the expectations of the people and communities who generate, regulate, and use that data. She is particularly interested in developing technical approaches to privacy and security that account for the social and normative contexts in which AI systems operate.',
-        'Prior to joining Carnegie Mellon, she was a Founding Member of Technical Staff at humans&, a Research Scientist with Meta AI’s FAIR Alignment group, and a postdoctoral scholar at the University of Washington. She received her PhD from UC San Diego and has also conducted research with Microsoft Research on differential privacy, model compression, and data synthesis. Her work has been recognized with the NCWIT Collegiate Award and the Rising Star in Adversarial ML Award.',
-      ] },
-      { name: 'Nick Vincent', logo: { id: 'sfu', name: 'Simon Fraser University', h: 32 }, affiliation: 'Assistant Professor, Computing Science — Simon Fraser University', photo: '/images/research/nick-vincent.jpg', bio: [
-        'Nick Vincent is an Assistant Professor in Computing Science at Simon Fraser University and director of the People- and Data-centric Computing Research Group (PadComp). He studies the content ecosystems and data supply chains that fuel data-dependent technologies like search engines, recommender systems, and generative AI. This involves exploring avenues for people to control how data flows and participate in the governance of AI systems. The overarching goal of this research is to work towards highly capable and widely beneficial AI technologies that mitigate—rather than exacerbate—inequalities in wealth and power. His work is published in responsible AI venues like ACM FAccT and human-computer interaction venues like ACM CHI. His dissertation on data leverage received the 2024 ACM SIGCHI Outstanding Dissertation Award.',
-        'Prof. Vincent was previously a postdoc working with the Computational Communication Research Lab at UC Davis and the Social Futures Lab at the University of Washington. He received his PhD from Northwestern University’s Technology and Social Behavior program (a joint degree in computer science and communication), where he worked in the People, Space, and Algorithms Research Group.',
-      ] },
-    ],
-  },
-  {
-    heading: 'Research Affiliates',
-    people: [
-      { name: 'Kyoko Eng', affiliation: 'Interaction Designer', photo: '/images/research/kyoko-eng.jpg', bio: 'Kyoko Eng is a Nashville-based interaction designer. Her practice explores the problem spaces of Privacy and AI, Constructive Communication, and the Public and Private Self. Drawing from participatory design, critical design theory, and ethnographic research practices, she investigates how we might cultivate greater literacy, agency, and contextual awareness within our digital interactions.' },
-    ],
-  },
 ];
 
 // Recent research: the `research` category, newest first — the same pool
@@ -123,7 +76,7 @@ const recent = (await getCollection('blog', ({ data }) =>
   >
     <p class="hero-questions"><em><span>Who gets to know what?</span> <span>Who gets paid?</span> <span>Who gets to say no?</span></em></p>
     <Fragment slot="actions">
-      <Button href="#fellows">Meet the fellows</Button>
+      <Button href="/research/fellowship/">Research Fellowship</Button>
       <Button variant="outline" href="/research/grants/">Explore research grants</Button>
       <Button variant="outline" href="#interest">Express interest</Button>
     </Fragment>
@@ -171,33 +124,6 @@ const recent = (await getCollection('blog', ({ data }) =>
       </dl>
     </ContentSection>
   </div>
-
-  <!-- 4 · The fellowship -->
-  <div id="fellowship">
-    <ContentSection surface="dim" eyebrow="The OpenMined Research Fellowship" as="h4" width="col-10" align="left" headGap="tight" heading="How the fellowship works">
-      <div class="fellowship-grid">
-        <div class="fellowship-col" data-reveal>
-          <h5>The program</h5>
-          <p>The inaugural cohort runs for approximately 7 months, from September 2026 through February 2027. Fellows are PhD students and predoctoral researchers who join part-time alongside their existing academic work. The fellowship is designed to give researchers space, resources, and community for ambitious work.</p>
-          <p>Fellows participate in regular cohort discussions and peer feedback sessions, and meet monthly with researchers and practitioners from across the field in a guest conversation series.</p>
-        </div>
-        <div class="fellowship-col" data-reveal data-reveal-delay="70">
-          <h5>What fellows receive</h5>
-          <ul>
-            {fellowsReceive.map((item) => <li>{item}</li>)}
-          </ul>
-        </div>
-      </div>
-    </ContentSection>
-  </div>
-
-  <!-- 5 · Meet the fellows -->
-  <ResearchCohort
-    groups={cohort}
-    eyebrow="Meet the fellows"
-    heading="Inaugural cohort — 2026"
-    intro="As part of OpenMined’s commitment to the next generation of leaders in privacy-preserving AI, we’re proud to introduce the inaugural cohort of the OpenMined Research Fellowship."
-  />
 
   <!-- 6 · Recent research — the research category, newest first -->
   <div id="publications">
@@ -319,17 +245,6 @@ const recent = (await getCollection('blog', ({ data }) =>
     .pillar__diamond { background-position-x: calc(var(--flow-offset) * var(--flow-tile) * -0.3); }
   }
 
-  /* ── Fellowship: program | what fellows receive ────────────────────── */
-  .fellowship-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--spacing-5XL);
-  }
-  .fellowship-col h5 { margin: 0 0 var(--spacing-L); }
-  .fellowship-col p { margin: 0; }
-  .fellowship-col p + p { margin-top: var(--spacing-L); }
-  .fellowship-col ul { margin: 0; }
-
   /* ── Recent research: PostCard grid (same card as the blog listings) ── */
   .research-feed {
     display: grid;
@@ -344,7 +259,6 @@ const recent = (await getCollection('blog', ({ data }) =>
     .pillars-grid,
     .research-feed { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .pillar:nth-child(3) { grid-column: span 2; }
-    .fellowship-grid { grid-template-columns: 1fr; gap: var(--spacing-3XL); }
   }
   @media (max-width: 767px) {
     .pillars-grid,
