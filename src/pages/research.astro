@@ -12,7 +12,8 @@
  * out rather than invented; `@ui/Accordion` is the component when it lands.
  *
  * Bands: hero with the animated stream → pillars → themes → recent research
- * (the research category, newest first) → interest form.
+ * (the research category, newest first) → interest form → research programs
+ * (cards to /research/fellowship/ and /research/grants/).
  */
 import { getCollection, getEntry } from 'astro:content';
 import Page from '@layouts/Page.astro';
@@ -31,6 +32,11 @@ const pillars = [
   { title: 'Network-sourced AI', href: '/blog/network-sourced-ai/', cta: 'Read about NSAI', body: 'Intelligence composed live over a network, rather than bundling all data, compute, and algorithms into a single centralized source owned by one entity. A conventional AI system is a trained model plus, optionally, a RAG layer over data that happens to be colocated or on the internet. NSAI decentralizes both halves. The model context can come from many independent data owners, and the model itself can be an ensemble of models from many independent owners.' },
   { title: 'Attribution-based control', href: '/attribution-based-control/', cta: 'Read about ABC', body: 'A relationship between sources of AI-related data, compute, and talent and the AI users receiving predictions. These two groups each have ABC when resource owners dynamically control how much intelligence to give each AI prediction they support, and AI users dynamically control which resource providers they want to rely on for each AI prediction.' },
   { title: 'Structured transparency', href: '/blog/structured-transparency-input-output-privacy/', cta: 'Read about structured transparency', body: 'A framework for governing information flows so that parties can collaborate on data without giving up control of it. It names five guarantees a flow can need: input privacy, output privacy, input verification, output verification, and flow governance. Privacy-enhancing technologies (PETs) are the mechanisms that supply those guarantees, and ST provides a vocabulary for saying which ones a given flow is missing.' },
+];
+
+const programs = [
+  { title: 'Research Fellowship', href: '/research/fellowship/', cta: 'Meet the fellows', body: 'PhD students and predoctoral researchers who join part-time alongside their academic work, with the space, resources, and community for ambitious research. Meet the inaugural 2026 cohort.' },
+  { title: 'Research Grants', href: '/research/grants/', cta: 'Explore research grants', body: 'Compute, engineering, and evaluation for researchers bringing ensemble and routing methods to today’s frontier models, with a stipend for your time.' },
 ];
 
 const themes = [
@@ -76,9 +82,8 @@ const recent = (await getCollection('blog', ({ data }) =>
   >
     <p class="hero-questions"><em><span>Who gets to know what?</span> <span>Who gets paid?</span> <span>Who gets to say no?</span></em></p>
     <Fragment slot="actions">
-      <Button href="/research/fellowship/">Research Fellowship</Button>
-      <Button variant="outline" href="/research/grants/">Explore research grants</Button>
-      <Button variant="outline" href="#interest">Express interest</Button>
+      <Button href="/research/fellowship/">Fellowship</Button>
+      <Button variant="outline" href="/research/grants/">Grants</Button>
     </Fragment>
     <StreamSwoop slot="swoop" id="stream-embed-research" bleed={0.59} overlay />
   </SimpleHero>
@@ -147,6 +152,22 @@ const recent = (await getCollection('blog', ({ data }) =>
       </Fragment>
     </CtaSection>
   </div>
+
+  <!-- 6 · Research programs — the nested pages -->
+  <div id="programs">
+    <ContentSection as="h4" width="col-10" align="left" headGap="tight" heading="Research programs">
+      <div class="pillars-grid pillars-grid--two">
+        {programs.map((pr, i) => (
+          <article class="pillar" data-reveal data-reveal-delay={i * 70}>
+            <span class="pillar__diamond" aria-hidden="true" style={`--flow-offset:${i}`}></span>
+            <h5 class="pillar__title">{pr.title}</h5>
+            <p class="pillar__body">{pr.body}</p>
+            <div class="pillar__cta"><Button href={pr.href}>{pr.cta}</Button></div>
+          </article>
+        ))}
+      </div>
+    </ContentSection>
+  </div>
 </Page>
 
 <style>
@@ -174,6 +195,8 @@ const recent = (await getCollection('blog', ({ data }) =>
   /* Outlined, not filled: the card body is the band's own surface, and a
      softened headline-ink rule draws the card (lighter than --border-strong,
      which read too heavy on the areas ledger). */
+  /* Research programs: the same outlined cards, two-up. */
+  .pillars-grid--two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pillar {
     display: flex;
     flex-direction: column;
