@@ -195,6 +195,19 @@ const faqs = [
     links.forEach((a, id) => a.toggleAttribute('aria-current', id === current));
   };
   const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+
+  // Keep the sticky index clear of the header, which hides on scroll-down
+  // and returns on scroll-up (Header.astro toggles [data-hidden]).
+  const header = document.querySelector<HTMLElement>('[data-header]');
+  const indexNav = document.querySelector<HTMLElement>('.grants__index');
+  const syncIndex = () => {
+    if (!header || !indexNav) return;
+    const showing = !header.hasAttribute('data-hidden') && getComputedStyle(header).position !== 'static';
+    indexNav.style.setProperty('--index-top', showing ? `${header.offsetHeight}px` : '0px');
+  };
+  if (header) new MutationObserver(syncIndex).observe(header, { attributes: true, attributeFilter: ['data-hidden'] });
+  window.addEventListener('resize', syncIndex, { passive: true });
+  syncIndex();
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', onScroll, { passive: true });
   update();
@@ -255,10 +268,14 @@ const faqs = [
     padding-block: var(--spacing-4XL) var(--spacing-max);
   }
 
+  /* Sticky below the site header while it's showing (it slides back in on
+     scroll-up), and up to the top while it's hidden — --index-top is set by
+     the script from the header's own [data-hidden] state. */
   .grants__index {
     position: sticky;
-    top: var(--spacing-4XL);
+    top: calc(var(--index-top, 0px) + var(--spacing-3XL));
     padding-top: 6px;
+    transition: top 0.3s ease; /* in step with the header's 0.3s slide */
   }
   .grants__index-label {
     margin: 0 0 var(--spacing-L);
@@ -431,6 +448,7 @@ const faqs = [
 
   @media (prefers-reduced-motion: reduce) {
     .grants-progress { display: none; }
+    .grants__index,
     .grants__index a::before,
     .faq summary i::before,
     .faq summary i::after,
