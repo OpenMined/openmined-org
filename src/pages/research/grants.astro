@@ -1,0 +1,476 @@
+---
+/**
+ * /research/grants/ — Research Grants: OpenMined's research grant program for
+ * ensemble and routing methods on current frontier models.
+ *
+ * One long reading page, deliberately — the layout of Irina's "Frontier
+ * Fellowship" draft (OpenMined/screamingface-brand → brand-site/fellowship/
+ * index.html, 9/30): a sticky "On this page" index beside a single measured
+ * reading column, headed sections in one flow, no bands or cards. Copy is
+ * that draft's, per the Lacey ↔ Bennett 1:1 (9/30):
+ *   - hosted here, under Research, titled "Research Grants"
+ *   - fellowship → research grant program, fellows → grantees
+ *     (OM's Research Fellowship is a separate program on /research/)
+ *   - no ScreamingFace naming on the public page: "the ScreamingFace Toolkit"
+ *     → "our toolkit"; the draft's "ScreamingFace is built by" footer is dropped
+ *   - intake is a HubSpot form in the Applying section (not the draft's
+ *     "send your page" link)
+ *
+ * ⚠ STAGING DRAFT — the `.tbd` chips mark copy the draft left unfilled. Every
+ * one must be resolved (or cut) before this ships to production:
+ *   1. "the first verified map of the quality–cost frontier…" (goal)
+ *   2. compute covered per grantee (take-care-of list + FAQ)
+ *   3. the recipe format name, "url4" (take-care-of list)
+ *   4. hours per week (applying + FAQ)
+ *   5. "Nominations of colleagues are welcome." (applying + FAQ)
+ *   6. the launch benchmarks (FAQ)
+ * Also open: the stipend ($2,000 per the draft; Lacey heard $7k) and where
+ * applications route in HubSpot (form is embed-only for now).
+ */
+import Page from '@layouts/Page.astro';
+import FormEmbed from '@elements/FormEmbed.astro';
+import { SITE_URL } from '@data/site.mjs';
+
+const tbd = (s: string) => `<span class="tbd" title="To be decided before launch">${s}</span>`;
+
+const index = [
+  { id: 'top', label: 'Overview' },
+  { id: 'believe', label: 'What we believe' },
+  { id: 'frontier', label: 'The goal' },
+  { id: 'provide', label: 'What we take care of' },
+  { id: 'credit', label: 'How work is credited' },
+  { id: 'apply', label: 'Applying' },
+  { id: 'faq', label: 'FAQ' },
+];
+
+const beliefs = [
+  'The strongest AI systems will be ensembles of many models. The evidence for this is spread across papers that were never measured against each other, and it deserves to be brought together in one place.',
+  'Ensembles and routers should be measured on current models, along the frontier of quality against cost and latency, with results anyone can rerun.',
+  'A method that fails to transfer is a finding. It deserves the same care in reporting as a new state of the art.',
+];
+
+const provisions = [
+  { term: 'Compute', html: `Subsidized inference covering ${tbd('the costs of grant runs / up to $X per grantee')}, so an ensemble can use as many models as the idea needs.` },
+  { term: 'Infrastructure', html: `Our toolkit is open source and runs locally, on your keys or ours. Any ensemble or router becomes a single ${tbd('url4')} recipe that can be rerun, shared and published.` },
+  { term: 'Engineering', html: 'Our engineers work directly with you, extending the toolkit around your method until it expresses the method faithfully.' },
+  { term: 'Evaluation', html: 'Independent re-runs and full cost accounting, so your result stands on its own for anyone who reads it.' },
+  { term: 'Your time', html: 'A $2,000 stipend.' },
+];
+
+const faqs = [
+  { q: 'Who is this for?', a: 'Researchers with published work on ensembles, routing, multi-agent systems, model composition or closely related areas — and people with a well-formed idea in the space and the rigor to test it. If you’ve built a mixture-of-agents system, a router, a cascade, a verifier or a fusion method, this is for you.' },
+  { q: 'Do I need my own compute budget or API keys?', a: `No. Subsidized inference covers ${tbd('the costs of grant runs / up to $X per grantee')}. The toolkit runs on our keys or yours — whichever you prefer — so the cost of running an ensemble across many models is not your problem to solve.` },
+  { q: 'What exactly do I commit to?', a: `The grant runs for 12 weeks, from Nov 1, 2026 to Jan 23, 2027, at roughly ${tbd('X')} hours a week. You bring one method or idea, rebuild it as an open recipe, run it against current models and benchmarks, and publish each result with its full cost and a short technical note under your name.` },
+  { q: 'What’s out of scope?', a: 'Anything that needs pretraining or fine-tuning large models, or that can’t run through the toolkit within the three months. The work is zero-shot and composed from existing models — ensembles, routers, cascades, judges. If you’re set on a method the stack doesn’t support yet, tell us; the team would rather extend the toolkit than turn a good idea away.' },
+  { q: 'What if my reimplementation doesn’t reproduce, or the method doesn’t transfer?', a: 'That’s a finding, and we publish it with the same care as a new state of the art. A method that fails to transfer to current models tells the field something real. Nobody is penalized for an honest negative result — the point is a verified map, and the map needs its dead ends.' },
+  { q: 'I want to reimplement someone else’s paper. How does credit work?', a: 'The original authors are invited to review the implementation before anything is published. Reimplementations are attributed to the original authors first and to the grantee second, and every entry links back to the source paper.' },
+  { q: 'Who owns the results and the IP?', a: 'Recipes, results and code are open source. You keep authorship of your ideas and your notes, and you share authorship of the co-authored cohort paper.' },
+  { q: 'Is there a stipend?', a: 'Yes — a $2,000 stipend for your time, on top of the covered compute, engineering and evaluation.' },
+  { q: 'Can I apply as a team, or nominate a colleague?', a: `${tbd('Nominations of colleagues are welcome.')} If you’d like to apply alongside a collaborator, say so in your application and tell us how you’d split the work.` },
+  { q: 'What models and benchmarks will we work against?', a: `Current frontier models, measured along the frontier of quality against cost and latency. The launch benchmarks are ${tbd('launch benchmarks')}, and every result is published with its full recipe and its full cost in tokens, dollars and time so anyone can rerun it.` },
+  { q: 'When do applications close, and when would I hear back?', a: 'Applications close Oct 23, 2026, and final offers go out by Oct 27, with the cohort starting Nov 1. Strong candidates may hear earlier — we make offers on a rolling basis so the best people don’t have to wait. Tell us the method or idea, why it matters, and link your work — via the <a href="#apply">application</a> above.' },
+];
+---
+
+<Page
+  title="Research Grants"
+  description="OpenMined research grants cover the compute, engineering and evaluation for a small cohort of researchers bringing ensemble and routing methods to today’s frontier models."
+  socialDescription="The strongest AI systems will be ensembles of many models. We cover the compute, engineering and evaluation so a small cohort can prove it on current models."
+  breadcrumbs={[
+    { name: 'Home', item: `${SITE_URL}/` },
+    { name: 'Research', item: `${SITE_URL}/research/` },
+    { name: 'Research Grants' },
+  ]}
+>
+  <div class="grants-progress" aria-hidden="true"><span></span></div>
+
+  <header id="top" class="container grants-hero" data-index-section>
+    <h1 data-fade>Research Grants</h1>
+    <p class="grants-hero__lede measure" data-fade>More and more of what’s possible in AI now depends on how models are combined. There are dozens of capable models, each strong in different places, and prices for comparable quality span an order of magnitude or more.</p>
+  </header>
+
+  <div class="container grants">
+    <nav class="grants__index" aria-label="On this page">
+      <p class="grants__index-label">On this page</p>
+      <ol>
+        {index.map((s) => <li><a href={`#${s.id}`} data-index-link={s.id}>{s.label}</a></li>)}
+      </ol>
+    </nav>
+
+    <article class="grants__read">
+      <section class="grants__section grants__section--open" data-reveal>
+        <p class="grants__lead">Ensemble research saw this coming. Mixture-of-agents, generate-and-rank fusion, self-consistency, multi-agent debate, verifier-guided selection — again and again, a group of models did what no single one could. Routers and cascades proved it from the other side: send each query to the model that fits, and pay for the strongest only when you need it. If you’re reading this, some of that work is probably yours.</p>
+        <p>But nearly all of it ran under tight constraints — the models of the moment, whatever compute a lab could spare, an eval harness built for one paper. Ensembles are expensive by design: every query passes through several models, so testing one on today’s frontier means a real inference bill before you see a single result. Then you have to rebuild the evaluation and find a fair basis for comparison. So the strongest methods have mostly never run on the models where they’d matter most.</p>
+        <p>Our research grants take that wall down. We cover the compute, build the engineering, and run the evaluation — and we make every result credible to anyone who reads it. You bring the idea. We help you find out how far it goes.</p>
+      </section>
+
+      <section id="believe" class="grants__section" data-index-section>
+        <h2 data-reveal>What we believe</h2>
+        <ol class="tenets">
+          {beliefs.map((b, i) => <li data-reveal data-reveal-delay={i * 90}>{b}</li>)}
+        </ol>
+      </section>
+
+      <section id="frontier" class="grants__section" data-index-section>
+        <h2 data-reveal>One goal: to move the frontier.</h2>
+        <blockquote class="grants__pull" data-reveal>The best quality reachable at each level of cost and latency, measured on current models — and put in the open, so it holds for everyone and not just for us.</blockquote>
+        <p data-reveal>Every result is re-run independently and published with its full recipe and its full cost, in tokens, dollars and time. Nothing rests on trust: anyone can verify a state-of-the-art mark by rerunning it. Together, the cohort’s work becomes a co-authored, openly published map — <Fragment set:html={tbd('the first verified map of the quality–cost frontier for ensembles and routers on current models')} /> — a commons that outlasts the cohort and belongs to the field.</p>
+      </section>
+
+      <section id="provide" class="grants__section" data-index-section>
+        <h2 data-reveal>What we take care of</h2>
+        <dl class="provisions">
+          {provisions.map((p, i) => (
+            <div class="provisions__row" data-reveal data-reveal-delay={i * 70}>
+              <dt>{p.term}</dt>
+              <dd set:html={p.html} />
+            </div>
+          ))}
+        </dl>
+      </section>
+
+      <section id="credit" class="grants__section" data-index-section>
+        <h2 data-reveal>How your work is credited</h2>
+        <p data-reveal>When a grantee reimplements a published method, the original authors are invited to review the implementation before anything is published. Reimplementations are attributed to the original authors first and to the grantee second, and every entry links to the source paper.</p>
+        <p data-reveal>Recipes, results and code are open source. You keep authorship of your ideas and your notes, and you share authorship of the cohort paper.</p>
+      </section>
+
+      <section id="apply" class="grants__section" data-index-section>
+        <h2 data-reveal>Applying</h2>
+        <p data-reveal>The grants are open to researchers with published work on ensembles, routing, multi-agent systems, model composition or closely related areas. They are also open to people with a well-formed idea in this space and the rigor to test it. <Fragment set:html={tbd('Nominations of colleagues are welcome.')} /></p>
+        <div class="apply-card" data-reveal>
+          <h3 class="apply-card__title">Tell us three things</h3>
+          <ol class="apply-card__list">
+            <li>the ensemble or routing method you would bring back, or the idea you would test;</li>
+            <li>why it matters;</li>
+            <li>and a link to your relevant work.</li>
+          </ol>
+          <dl class="apply-card__meta">
+            <div><dt>Applications close</dt><dd>Oct 23, 2026</dd></div>
+            <div><dt>Runs</dt><dd>Nov 1, 2026 – Jan 23, 2027</dd></div>
+            <div><dt>Commitment</dt><dd>12 weeks · ~<Fragment set:html={tbd('X')} /> hrs/week</dd></div>
+          </dl>
+          <div class="apply-card__form">
+            <FormEmbed formId="05a6c133-be9b-4927-b971-0d253d2ba5db" />
+            <p class="apply-card__fine">Submitting confirms you agree with our <a href="/privacy-policy/">privacy policy</a>.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="faq" class="grants__section" data-index-section>
+        <h2 data-reveal>FAQ</h2>
+        <div class="faq" data-reveal>
+          {faqs.map((f) => (
+            <details>
+              <summary><span>{f.q}</span><i aria-hidden="true"></i></summary>
+              <div class="faq__a"><p set:html={f.a} /></div>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <footer class="grants__close" data-reveal>
+        <p>A good part of the frontier has already been written down, in papers like yours. We’d like to help you run it.</p>
+      </footer>
+    </article>
+  </div>
+</Page>
+
+<script>
+  // Reading progress + "On this page" state. Progressive enhancement: without
+  // JS the index is plain anchor links and the bar stays empty.
+  const bar = document.querySelector<HTMLElement>('.grants-progress span');
+  const links = new Map<string, HTMLElement>();
+  document.querySelectorAll<HTMLElement>('[data-index-link]').forEach((a) => links.set(a.dataset.indexLink!, a));
+  const sections = [...document.querySelectorAll<HTMLElement>('[data-index-section]')];
+  let ticking = false;
+  const update = () => {
+    ticking = false;
+    const doc = document.documentElement;
+    const max = doc.scrollHeight - window.innerHeight;
+    if (bar) bar.style.transform = `scaleX(${max > 0 ? Math.min(1, window.scrollY / max) : 0})`;
+    const line = window.innerHeight * 0.35;
+    let current = sections[0]?.id;
+    for (const s of sections) if (s.getBoundingClientRect().top <= line) current = s.id;
+    links.forEach((a, id) => a.toggleAttribute('aria-current', id === current));
+  };
+  const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  update();
+</script>
+
+<style>
+  /* ── Reading progress: a hairline across the very top ───────────────── */
+  .grants-progress {
+    position: fixed;
+    inset: 0 0 auto 0;
+    height: 2px;
+    z-index: 1000;
+    pointer-events: none;
+  }
+  .grants-progress span {
+    display: block;
+    height: 100%;
+    background: var(--text-headline);
+    opacity: 0.55;
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+  }
+
+  /* ── Hero: centred title + lede ─────────────────────────────────────── */
+  /* One column axis for the whole page: the hero, the rule under it and
+     the reading column share --read-w and are centred on the page. */
+  .grants-hero {
+    --h1-max: 52px;
+    max-width: var(--read-w);
+    padding-block: var(--spacing-5XL) var(--spacing-4XL);
+    text-align: center;
+    border-bottom: 1px solid color-mix(in srgb, var(--text-headline) 12%, transparent);
+    scroll-margin-top: var(--spacing-5XL);
+  }
+  .grants-hero,
+  .grants { --read-w: 38rem; }
+  .grants-hero h1 { margin: 0 0 var(--spacing-2XL); }
+  /* Body size in headline ink. It bleeds 1rem past the column each side
+     (40rem) so it sets in three lines with "…combined." closing the first —
+     greedy `pretty` wrapping, since `balance` pushes that word down. */
+  .grants-hero__lede {
+    margin: 0 -1rem;
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--text-headline);
+    text-wrap: pretty;
+  }
+
+  /* ── Layout: sticky index | one reading column ──────────────────────── */
+  /* Index in the left gutter, a matching empty track on the right, so the
+     reading column sits on the page's centre line under the hero. */
+  .grants {
+    display: grid;
+    grid-template-columns: 170px minmax(0, var(--read-w)) 170px;
+    justify-content: center;
+    column-gap: var(--spacing-5XL);
+    align-items: start;
+    padding-block: var(--spacing-4XL) var(--spacing-max);
+  }
+
+  .grants__index {
+    position: sticky;
+    top: var(--spacing-4XL);
+    padding-top: 6px;
+  }
+  .grants__index-label {
+    margin: 0 0 var(--spacing-L);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+  }
+  .grants__index ol { list-style: none; margin: 0; padding: 0; border-left: 1px solid color-mix(in srgb, var(--text-headline) 12%, transparent); }
+  .grants__index a {
+    position: relative;
+    display: block;
+    padding: 5px 0 5px var(--spacing-L);
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--text-subtle);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  .grants__index a::before {
+    content: '';
+    position: absolute;
+    left: -1px;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    background: var(--text-headline);
+    transform: scaleY(0);
+    transition: transform 0.25s ease;
+  }
+  .grants__index a:hover { color: var(--text-headline); }
+  .grants__index a[aria-current] { color: var(--text-headline); }
+  .grants__index a[aria-current]::before { transform: scaleY(1); }
+
+  /* ── Reading column: blog-prose scale (16px / 1.75) ─────────────────── */
+  .grants__section {
+    --h2-min: 22px;
+    --h2-max: 26px;
+    padding-top: var(--spacing-5XL);
+    scroll-margin-top: var(--spacing-2XL);
+  }
+  .grants__section--open { padding-top: 0; }
+  .grants__section h2 { margin: 0 0 var(--spacing-2XL); }
+  .grants__section p,
+  .grants__section li,
+  .provisions dd { font-size: 16px; line-height: 1.75; }
+  .grants__section p { margin: 0; }
+  .grants__section p + p { margin-top: var(--spacing-L); }
+  .grants__lead { color: var(--text-headline); }
+
+  /* What we believe: 01 / 02 / 03 */
+  .tenets { list-style: none; margin: 0; padding: 0; counter-reset: tenet; }
+  .tenets li {
+    counter-increment: tenet;
+    display: grid;
+    grid-template-columns: 2.75em minmax(0, 1fr);
+    padding-block: var(--spacing-L);
+    border-top: 1px solid color-mix(in srgb, var(--text-headline) 12%, transparent);
+  }
+  .tenets li:last-child { border-bottom: 1px solid color-mix(in srgb, var(--text-headline) 12%, transparent); }
+  .tenets li::before {
+    content: counter(tenet, decimal-leading-zero);
+    font-family: var(--font-secondary);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-subtle);
+  }
+
+  /* One goal: the statement as a pull quote */
+  .grants__pull {
+    margin: 0 0 var(--spacing-2XL);
+    padding-left: var(--spacing-2XL);
+    border-left: 2px solid var(--text-headline);
+    font-family: var(--font-secondary);
+    font-size: 21px;
+    line-height: 1.5;
+    color: var(--text-headline);
+    text-wrap: pretty;
+  }
+
+  /* What we take care of: term | description, hairline rows */
+  .provisions { margin: 0; }
+  .provisions__row {
+    display: grid;
+    grid-template-columns: 8.5em minmax(0, 1fr);
+    column-gap: var(--spacing-2XL);
+    padding-block: var(--spacing-L);
+    border-top: 1px solid color-mix(in srgb, var(--text-headline) 12%, transparent);
+  }
+  .provisions__row:last-child { border-bottom: 1px solid color-mix(in srgb, var(--text-headline) 12%, transparent); }
+  .provisions dt {
+    margin: 0;
+    font-family: var(--font-secondary);
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--text-headline);
+  }
+  .provisions dd { margin: 0; }
+
+  /* Applying: one quiet card — what to send, the dates, the form */
+  .apply-card {
+    margin-top: var(--spacing-3XL);
+    padding: var(--spacing-3XL);
+    border-radius: var(--border-radius-M);
+    /* A faint ink tint of the page: a touch darker than the page in light
+       (the white fields lift off it) and a touch lighter in dark (the dark
+       fields sink into it) — separation in both themes. */
+    background-color: color-mix(in srgb, var(--text-headline) 4%, var(--surface-background-default));
+    border: 1px solid color-mix(in srgb, var(--text-headline) 8%, transparent);
+  }
+  .apply-card__title { --h3-min: 19px; --h3-max: 21px; margin: 0 0 var(--spacing-L); }
+  .apply-card__list { margin: 0; padding-left: 1.3em; }
+  .apply-card__list li + li { margin-top: 2px; }
+  .apply-card__meta {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: var(--spacing-L);
+    margin: var(--spacing-2XL) 0 0;
+    padding-block: var(--spacing-L);
+    border-block: 1px solid color-mix(in srgb, var(--text-headline) 12%, transparent);
+  }
+  .apply-card__meta dt { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-subtle); }
+  .apply-card__meta dd { margin: 4px 0 0; font-size: 15px; line-height: 1.5; color: var(--text-headline); }
+  .apply-card__form { margin-top: var(--spacing-2XL); }
+  .apply-card__fine { margin-top: var(--spacing-L) !important; font-size: 13px !important; color: var(--text-subtle); }
+
+  /* FAQ: hairline disclosures; the answer eases open where the browser can
+     animate to auto height, and simply appears elsewhere. */
+  .faq { border-top: 1px solid color-mix(in srgb, var(--text-headline) 12%, transparent); interpolate-size: allow-keywords; }
+  .faq details { border-bottom: 1px solid color-mix(in srgb, var(--text-headline) 12%, transparent); }
+  .faq summary {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--spacing-L);
+    padding-block: var(--spacing-L);
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--text-headline);
+    cursor: pointer;
+    list-style: none;
+  }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary:hover span { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  /* +/– drawn from two strokes; the vertical one folds away when open. */
+  .faq summary i { position: relative; flex: none; width: 11px; height: 11px; }
+  .faq summary i::before,
+  .faq summary i::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 5px;
+    width: 11px;
+    height: 1.5px;
+    background: var(--text-subtle);
+    transition: transform 0.25s ease;
+  }
+  .faq summary i::after { transform: rotate(90deg); }
+  .faq details[open] summary i::after { transform: rotate(0deg); }
+  .faq details::details-content {
+    height: 0;
+    overflow: clip;
+    transition: height 0.3s ease, content-visibility 0.3s allow-discrete;
+  }
+  .faq details[open]::details-content { height: auto; }
+  .faq__a p { padding: 0 var(--spacing-3XL) var(--spacing-L) 0; color: var(--text-body); }
+
+  .grants__close { margin-top: var(--spacing-5XL); padding-top: var(--spacing-3XL); border-top: 1px solid color-mix(in srgb, var(--text-headline) 12%, transparent); }
+  .grants__close p { margin: 0; font-family: var(--font-secondary); font-size: 18px; line-height: 1.6; color: var(--text-subtle); text-wrap: balance; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .grants-progress { display: none; }
+    .grants__index a::before,
+    .faq summary i::before,
+    .faq summary i::after,
+    .faq details::details-content { transition: none; }
+  }
+
+  /* ── TBD chips (staging only — see the header comment) ──────────────── */
+  :global(.tbd) {
+    padding: 0 0.3em;
+    border: 1px dashed var(--color-gold-600);
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--color-gold-600) 14%, transparent);
+    color: inherit;
+  }
+  :global(.tbd)::before {
+    content: 'TBD';
+    margin-right: 0.35em;
+    font-size: 0.7em;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    vertical-align: 0.1em;
+    color: var(--color-gold-700);
+  }
+
+  /* ── Narrow: one column, no index ───────────────────────────────────── */
+  @media (max-width: 1199px) {
+    .grants { grid-template-columns: 170px minmax(0, var(--read-w)); }
+  }
+  @media (max-width: 991px) {
+    .grants { grid-template-columns: minmax(0, var(--read-w)); }
+    .grants__index { display: none; }
+  }
+  @media (max-width: 767px) {
+    .grants-hero { padding-block: var(--spacing-4XL) var(--spacing-3XL); }
+    .grants-hero { padding-block: var(--spacing-4XL) var(--spacing-2XL); }
+    .grants { padding-top: var(--spacing-2XL); }
+    .grants__section { padding-top: var(--spacing-4XL); }
+    .grants__pull { font-size: 19px; padding-left: var(--spacing-L); }
+    .provisions__row { grid-template-columns: 1fr; row-gap: 2px; }
+    .apply-card { padding: var(--spacing-2XL) var(--spacing-L); }
+    .apply-card__meta { grid-template-columns: 1fr; }
+  }
+</style>
