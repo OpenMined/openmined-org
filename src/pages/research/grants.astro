@@ -1,81 +1,70 @@
 ---
 /**
- * /research/grants/ — Research Grants: OpenMined's research grant program for
- * ensemble and routing methods on current frontier models.
+ * /research/grants/ — Research Grants: OpenMined's research grant program,
+ * and the call that is currently open (Ensembles & Routing, Winter 2026).
  *
- * One long reading page, deliberately — the layout of Irina's "Frontier
- * Fellowship" draft (OpenMined/screamingface-brand → brand-site/fellowship/
- * index.html, 9/30): a sticky "On this page" index beside a single measured
- * reading column, headed sections in one flow, no bands or cards. Copy is
- * that draft's, per the Lacey ↔ Bennett 1:1 (9/30):
- *   - hosted here, under Research, titled "Research Grants"
- *   - fellowship → research grant program, fellows → grantees
- *     (OM's Research Fellowship is a separate program on /research/)
- *   - no ScreamingFace naming on the public page: "the ScreamingFace Toolkit"
- *     → "our toolkit"; the draft's "ScreamingFace is built by" footer is dropped
- *   - intake is a HubSpot form in the Applying section (not the draft's
- *     "send your page" link)
+ * Built to outlast one call: a generic "Research Grants" hero, then the
+ * current call beneath it, then a "future calls" sign-up. To run a new call,
+ * replace everything from #current-call down to the call FAQ.
  *
- * ⚠ STAGING DRAFT — the `.tbd` chips mark copy the draft left unfilled. Every
+ * One long reading page, deliberately: a sticky "On this page" index beside
+ * a single measured reading column, headed sections in one flow.
+ *
+ * Copy source: the "Research Grants — page copy" Google Doc, as edited by
+ * Lacey and Irina (10/2). It began as Irina's "Frontier Fellowship" draft
+ * (OpenMined/screamingface-brand → brand-site/fellowship/, 9/30). Standing
+ * rules from the Lacey ↔ Bennett 1:1 (9/30): no ScreamingFace naming on the
+ * public page ("our toolkit"), and intake is a HubSpot form.
+ *
+ * ⚠ STAGING DRAFT — the `.tbd` chips mark copy still open in the doc. Every
  * one must be resolved (or cut) before this ships to production:
- *   1. "the first verified map of the quality–cost frontier…" (goal)
- *   2. compute covered per grantee (take-care-of list + FAQ)
- *   3. the recipe format name, "url4" (take-care-of list)
- *   4. hours per week (applying + FAQ)
- *   5. "Nominations of colleagues are welcome." (applying + FAQ)
- *   6. the launch benchmarks (FAQ)
- * Also open: the stipend ($2,000 per the draft; Lacey heard $7k) and where
- * applications route in HubSpot (form is embed-only for now).
+ *   1. "the first verified map of the quality–cost frontier…" (the problem)
+ *   2. compute covered per grantee (what we provide + FAQ)
+ *   3. the recipe format name, "url4" (what we provide) — and whether
+ *      "Our toolkit" links anywhere (Lacey's open comment)
+ *   4. hours per week (how to apply)
+ *   5. the launch benchmarks (FAQ)
+ * Also open: where applications route in HubSpot (both forms are embed-only).
  */
 import Page from '@layouts/Page.astro';
 import FormEmbed from '@elements/FormEmbed.astro';
+import Button from '@ui/Button.astro';
 import { SITE_URL } from '@data/site.mjs';
 
 const tbd = (s: string) => `<span class="tbd" title="To be decided before launch">${s}</span>`;
 
 const index = [
-  { id: 'top', label: 'Overview' },
-  { id: 'believe', label: 'What we believe' },
-  { id: 'frontier', label: 'The goal' },
-  { id: 'provide', label: 'What we take care of' },
-  { id: 'credit', label: 'How work is credited' },
-  { id: 'apply', label: 'Applying' },
+  { id: 'current-call', label: 'Current call' },
+  { id: 'problem', label: 'The problem' },
+  { id: 'aim', label: 'What this call seeks' },
+  { id: 'provide', label: 'What we provide' },
+  { id: 'who', label: 'Who it’s for' },
+  { id: 'work', label: 'What you’d do' },
+  { id: 'credit', label: 'Credit and IP' },
+  { id: 'apply', label: 'How to apply' },
   { id: 'faq', label: 'FAQ' },
-];
-
-const beliefs = [
-  'The strongest AI systems will be ensembles of many models. The evidence for this is spread across papers that were never measured against each other, and it deserves to be brought together in one place.',
-  'Ensembles and routers should be measured on current models, along the frontier of quality against cost and latency, with results anyone can rerun.',
-  'A method that fails to transfer is a finding. It deserves the same care in reporting as a new state of the art.',
+  { id: 'future', label: 'Future calls' },
 ];
 
 const provisions = [
   { term: 'Compute', html: `Subsidized inference covering ${tbd('the costs of grant runs / up to $X per grantee')}, so an ensemble can use as many models as the idea needs.` },
-  { term: 'Infrastructure', html: `Our toolkit is open source and runs locally, on your keys or ours. Any ensemble or router becomes a single ${tbd('url4')} recipe that can be rerun, shared and published.` },
-  { term: 'Engineering', html: 'Our engineers work directly with you, extending the toolkit around your method until it expresses the method faithfully.' },
+  { term: 'Infrastructure', html: `Our toolkit is open source and runs locally, on your keys or ours. Any ensemble or router becomes a single ${tbd('url4')} recipe that can be rerun, shared, and published.` },
+  { term: 'Engineering', html: 'Our engineers work directly with you to extend the toolkit around your method until it expresses the method faithfully.' },
   { term: 'Evaluation', html: 'Independent re-runs and full cost accounting, so your result stands on its own for anyone who reads it.' },
-  { term: 'Your time', html: 'A $2,000 stipend.' },
+  { term: 'Stipend', html: '$2,000 stipend for your time.' },
 ];
 
 const faqs = [
-  { q: 'Who is this for?', a: 'Researchers with published work on ensembles, routing, multi-agent systems, model composition or closely related areas — and people with a well-formed idea in the space and the rigor to test it. If you’ve built a mixture-of-agents system, a router, a cascade, a verifier or a fusion method, this is for you.' },
   { q: 'Do I need my own compute budget or API keys?', a: `No. Subsidized inference covers ${tbd('the costs of grant runs / up to $X per grantee')}. The toolkit runs on our keys or yours — whichever you prefer — so the cost of running an ensemble across many models is not your problem to solve.` },
-  { q: 'What exactly do I commit to?', a: `The grant runs for 12 weeks, from Nov 1, 2026 to Jan 23, 2027, at roughly ${tbd('X')} hours a week. You bring one method or idea, rebuild it as an open recipe, run it against current models and benchmarks, and publish each result with its full cost and a short technical note under your name.` },
-  { q: 'What’s out of scope?', a: 'Anything that needs pretraining or fine-tuning large models, or that can’t run through the toolkit within the three months. The work is zero-shot and composed from existing models — ensembles, routers, cascades, judges. If you’re set on a method the stack doesn’t support yet, tell us; the team would rather extend the toolkit than turn a good idea away.' },
-  { q: 'What if my reimplementation doesn’t reproduce, or the method doesn’t transfer?', a: 'That’s a finding, and we publish it with the same care as a new state of the art. A method that fails to transfer to current models tells the field something real. Nobody is penalized for an honest negative result — the point is a verified map, and the map needs its dead ends.' },
-  { q: 'I want to reimplement someone else’s paper. How does credit work?', a: 'The original authors are invited to review the implementation before anything is published. Reimplementations are attributed to the original authors first and to the grantee second, and every entry links back to the source paper.' },
-  { q: 'Who owns the results and the IP?', a: 'Recipes, results and code are open source. You keep authorship of your ideas and your notes, and you share authorship of the co-authored cohort paper.' },
-  { q: 'Is there a stipend?', a: 'Yes — a $2,000 stipend for your time, on top of the covered compute, engineering and evaluation.' },
-  { q: 'Can I apply as a team, or nominate a colleague?', a: `${tbd('Nominations of colleagues are welcome.')} If you’d like to apply alongside a collaborator, say so in your application and tell us how you’d split the work.` },
-  { q: 'What models and benchmarks will we work against?', a: `Current frontier models, measured along the frontier of quality against cost and latency. The launch benchmarks are ${tbd('launch benchmarks')}, and every result is published with its full recipe and its full cost in tokens, dollars and time so anyone can rerun it.` },
-  { q: 'When do applications close, and when would I hear back?', a: 'Applications close Oct 23, 2026, and final offers go out by Oct 27, with the cohort starting Nov 1. Strong candidates may hear earlier — we make offers on a rolling basis so the best people don’t have to wait. Tell us the method or idea, why it matters, and link your work — via the <a href="#apply">application</a> above.' },
+  { q: 'What if my reimplementation doesn’t reproduce, or the method doesn’t transfer?', a: 'That’s a finding, and we will publish it with the same care as a new state of the art. A method that fails to transfer to current models tells the field something important. Nobody is penalized for an honest negative result, as the field needs a verified map of what has been tried, and the map needs to show which attempts lead to dead ends.' },
+  { q: 'What models and benchmarks will we work against?', a: `Current frontier models, measured along the frontier of quality against cost and latency. The launch benchmarks are ${tbd('launch benchmarks')}, and every result is published with its full recipe and its full cost in tokens, dollars, and time so anyone can rerun it.` },
 ];
 ---
 
 <Page
   title="Research Grants"
-  description="OpenMined research grants cover the compute, engineering and evaluation for a small cohort of researchers bringing ensemble and routing methods to today’s frontier models."
-  socialDescription="The strongest AI systems will be ensembles of many models. We cover the compute, engineering and evaluation so a small cohort can prove it on current models."
+  description="OpenMined research grants give independent researchers the resources to pursue open questions at the intersection of privacy, open infrastructure, and data governance."
+  socialDescription="We believe research can change how technology gets built. OpenMined research grants give independent researchers the resources to pursue a mutually defined piece of work."
   breadcrumbs={[
     { name: 'Home', item: `${SITE_URL}/` },
     { name: 'Research', item: `${SITE_URL}/research/` },
@@ -84,9 +73,11 @@ const faqs = [
 >
   <div class="grants-progress" aria-hidden="true"><span></span></div>
 
-  <header id="top" class="container grants-hero" data-index-section>
+  <header id="top" class="container grants-hero">
     <h1 data-fade>Research Grants</h1>
-    <p class="grants-hero__lede measure" data-fade>More and more of what’s possible in AI now depends on how models are combined. There are dozens of capable models, each strong in different places, and prices for comparable quality span an order of magnitude or more.</p>
+    <p class="grants-hero__statement" data-fade>We believe research can change how technology gets built.</p>
+    <p class="grants-hero__lede measure" data-fade>OpenMined supports independent research on how data, privacy, and power are governed as technology becomes more capable. Our research grants give researchers the resources to pursue a mutually defined piece of work that advances our nonprofit mission.</p>
+    <div class="grants-hero__cta" data-fade><Button href="#current-call">See the current call</Button></div>
   </header>
 
   <div class="container grants">
@@ -98,27 +89,33 @@ const faqs = [
     </nav>
 
     <article class="grants__read">
-      <section class="grants__section grants__section--open" data-reveal>
-        <p class="grants__lead">Ensemble research saw this coming. Mixture-of-agents, generate-and-rank fusion, self-consistency, multi-agent debate, verifier-guided selection — again and again, a group of models did what no single one could. Routers and cascades proved it from the other side: send each query to the model that fits, and pay for the strongest only when you need it. If you’re reading this, some of that work is probably yours.</p>
-        <p>But nearly all of it ran under tight constraints — the models of the moment, whatever compute a lab could spare, an eval harness built for one paper. Ensembles are expensive by design: every query passes through several models, so testing one on today’s frontier means a real inference bill before you see a single result. Then you have to rebuild the evaluation and find a fair basis for comparison. So the strongest methods have mostly never run on the models where they’d matter most.</p>
-        <p>Our research grants take that wall down. We cover the compute, build the engineering, and run the evaluation — and we make every result credible to anyone who reads it. You bring the idea. We help you find out how far it goes.</p>
+      <section id="current-call" class="grants__section grants__section--open" data-index-section>
+        <div class="call-head" data-reveal>
+          <p class="call-head__label">Current call</p>
+          <h2 class="call-head__title">Ensembles &amp; Routing (Winter 2026)</h2>
+          <p class="call-head__status"><i aria-hidden="true"></i>Applications close Oct 23, 2026</p>
+        </div>
+        <h2 data-reveal>Overview</h2>
+        <p class="grants__lead" data-reveal>A 12-week grant for researchers who have worked on ensembles, routing, or model composition. We cover the compute and engineering to run your method on current frontier models, re-run every result independently, and publish the full recipe and cost so anyone can verify it.</p>
       </section>
 
-      <section id="believe" class="grants__section" data-index-section>
-        <h2 data-reveal>What we believe</h2>
-        <ol class="tenets">
-          {beliefs.map((b, i) => <li data-reveal data-reveal-delay={i * 90}>{b}</li>)}
-        </ol>
-      </section>
-
-      <section id="frontier" class="grants__section" data-index-section>
-        <h2 data-reveal>One goal: to move the frontier.</h2>
-        <blockquote class="grants__pull" data-reveal>The best quality reachable at each level of cost and latency, measured on current models — and put in the open, so it holds for everyone and not just for us.</blockquote>
+      <section id="problem" class="grants__section" data-index-section>
+        <h2 data-reveal>The problem</h2>
+        <p data-reveal>More and more of what’s possible in AI now depends on how models are combined. There are dozens of capable models, each strong in different places, and prices for comparable quality span an order of magnitude or more.</p>
+        <p data-reveal>Ensemble research saw this coming. Mixture-of-agents, generate-and-rank fusion, self-consistency, multi-agent debate, verifier-guided selection — again and again, a group of models did what no single one could. Routers and cascades proved it from the other side: send each query to the model that fits, and pay for the strongest only when you need it. If you’re reading this, some of that work is probably yours.</p>
+        <p data-reveal>But nearly all of it ran under tight constraints — the models of the moment, whatever compute a lab could spare, an eval harness built for one paper. Ensembles are expensive by design: every query passes through several models, so testing one on today’s frontier means a real inference bill before you see a single result. Then you have to rebuild the evaluation and find a fair basis for comparison. So the strongest methods have mostly never run on the models where they’d matter most.</p>
+        <p data-reveal>Our research grants take that wall down. We cover the compute, build the engineering, and run the evaluation — and we make every result credible to anyone who reads it. You bring the idea. We help you find out how far it goes.</p>
+        <p data-reveal>The best quality reachable at each level of cost and latency, measured on current models — and put in the open, so it holds for everyone and not just for us.</p>
         <p data-reveal>Every result is re-run independently and published with its full recipe and its full cost, in tokens, dollars and time. Nothing rests on trust: anyone can verify a state-of-the-art mark by rerunning it. Together, the cohort’s work becomes a co-authored, openly published map — <Fragment set:html={tbd('the first verified map of the quality–cost frontier for ensembles and routers on current models')} /> — a commons that outlasts the cohort and belongs to the field.</p>
       </section>
 
+      <section id="aim" class="grants__section" data-index-section>
+        <h2 data-reveal>What this call seeks to accomplish</h2>
+        <p data-reveal>Map the quality–cost frontier for ensembles and routers on current models, in the open. We believe the strongest AI systems will be ensembles of many models, and that the evidence for this is spread across papers that are never measured against each other. Ensembles and routers should be measured against current models, with quality, cost, and latency as key dimensions to test. We re-run every result independently and publish its full recipe and cost in tokens, dollars, and time.</p>
+      </section>
+
       <section id="provide" class="grants__section" data-index-section>
-        <h2 data-reveal>What we take care of</h2>
+        <h2 data-reveal>What we provide</h2>
         <dl class="provisions">
           {provisions.map((p, i) => (
             <div class="provisions__row" data-reveal data-reveal-delay={i * 70}>
@@ -129,25 +126,34 @@ const faqs = [
         </dl>
       </section>
 
+      <section id="who" class="grants__section" data-index-section>
+        <h2 data-reveal>Who’s this for</h2>
+        <p data-reveal>Researchers with published work on ensembles, routing, multi-agent systems, model composition, or closely related areas, and people with a well-formed idea in the space and the rigor to test it. If you’ve built a mixture-of-agents system, a router, a cascade, a verifier, or a fusion method, please apply!</p>
+      </section>
+
+      <section id="work" class="grants__section" data-index-section>
+        <h2 data-reveal>What you’d do</h2>
+        <p data-reveal>Bring one method or idea, rebuild it as an open recipe, run it against current models and benchmarks, and publish each result with its full cost and a short technical note under your name. Two tracks:</p>
+        <ul class="tracks" data-reveal>
+          <li>Bring a published method back to life on today’s models, or</li>
+          <li>Test an idea nobody has tried.</li>
+        </ul>
+        <p data-reveal><strong>Out of scope:</strong> anything that needs pretraining or fine-tuning large models, or that can’t run through the toolkit within 12 weeks. The work is zero-shot and composed from existing models — ensembles, routers, cascades, judges. If you’re set on a method the stack doesn’t support yet, tell us! We’d rather extend the toolkit than turn a good idea away.</p>
+      </section>
+
       <section id="credit" class="grants__section" data-index-section>
-        <h2 data-reveal>How your work is credited</h2>
-        <p data-reveal>When a grantee reimplements a published method, the original authors are invited to review the implementation before anything is published. Reimplementations are attributed to the original authors first and to the grantee second, and every entry links to the source paper.</p>
-        <p data-reveal>Recipes, results and code are open source. You keep authorship of your ideas and your notes, and you share authorship of the cohort paper.</p>
+        <h2 data-reveal>How credit and IP work</h2>
+        <p data-reveal>Recipes, results, and code are open source. You keep authorship of your ideas and notes and share authorship of the cohort paper. When a grantee reimplements a published method, the original authors are invited to review the implementation before anything is published. Reimplementations are attributed to the original authors first and to the grantee second, and every entry links to the source paper.</p>
       </section>
 
       <section id="apply" class="grants__section" data-index-section>
-        <h2 data-reveal>Applying</h2>
-        <p data-reveal>The grants are open to researchers with published work on ensembles, routing, multi-agent systems, model composition or closely related areas. They are also open to people with a well-formed idea in this space and the rigor to test it. <Fragment set:html={tbd('Nominations of colleagues are welcome.')} /></p>
+        <h2 data-reveal>How to apply</h2>
+        <p data-reveal>Grants are open to researchers with published work on ensembles, routing, multi-agent systems, model composition, or closely related areas. They are also open to people with a well-formed idea in this space and the rigor to test it. Nominations of others are highly encouraged and will be given additional consideration in applications.</p>
         <div class="apply-card" data-reveal>
-          <h3 class="apply-card__title">Tell us three things</h3>
-          <ol class="apply-card__list">
-            <li>the ensemble or routing method you would bring back, or the idea you would test;</li>
-            <li>why it matters;</li>
-            <li>and a link to your relevant work.</li>
-          </ol>
           <dl class="apply-card__meta">
-            <div><dt>Applications close</dt><dd>Oct 23, 2026</dd></div>
-            <div><dt>Runs</dt><dd>Nov 1, 2026 – Jan 23, 2027</dd></div>
+            <div><dt>Applications close</dt><dd>Oct 23, 2026.</dd></div>
+            <div><dt>Offers</dt><dd>Offers will be made on a rolling basis. All offers will go out by Oct 27.</dd></div>
+            <div><dt>Grant program runs</dt><dd>Nov 1, 2026 – Jan 23, 2027</dd></div>
             <div><dt>Commitment</dt><dd>12 weeks · ~<Fragment set:html={tbd('X')} /> hrs/week</dd></div>
           </dl>
           <div class="apply-card__form">
@@ -158,7 +164,7 @@ const faqs = [
       </section>
 
       <section id="faq" class="grants__section" data-index-section>
-        <h2 data-reveal>FAQ</h2>
+        <h2 data-reveal>Ensembles &amp; Routing (Winter 2026) FAQ</h2>
         <div class="faq" data-reveal>
           {faqs.map((f) => (
             <details>
@@ -169,12 +175,20 @@ const faqs = [
         </div>
       </section>
 
-      <footer class="grants__close" data-reveal>
-        <p>A good part of the frontier has already been written down, in papers like yours. We’d like to help you run it.</p>
-      </footer>
+      <section id="future" class="grants__section" data-index-section>
+        <h2 data-reveal>Hear about future calls</h2>
+        <p data-reveal>Calls are announced here and through our community. Leave your details, and we’ll be in touch when one matches your work.</p>
+        <div class="apply-card" data-reveal>
+          <div class="apply-card__form apply-card__form--solo">
+            <FormEmbed formId="57645870-171a-4f93-93a1-310665ae99ae" />
+            <p class="apply-card__fine">Submitting confirms you agree with our <a href="/privacy-policy/">privacy policy</a>.</p>
+          </div>
+        </div>
+      </section>
     </article>
   </div>
 </Page>
+
 
 <script>
   // Reading progress + "On this page" state. Progressive enhancement: without
@@ -231,7 +245,7 @@ const faqs = [
     transform-origin: 0 50%;
   }
 
-  /* ── Hero: centred title + lede ─────────────────────────────────────── */
+  /* ── Hero: centred title, statement, lede, one button ───────────────── */
   /* One column axis for the whole page: the hero, the rule under it and
      the reading column share --read-w and are centred on the page. */
   .grants-hero {
@@ -245,16 +259,22 @@ const faqs = [
   .grants-hero,
   .grants { --read-w: 38rem; }
   .grants-hero h1 { margin: 0 0 var(--spacing-2XL); }
-  /* Body size in headline ink. It bleeds 1rem past the column each side
-     (40rem) so it sets in three lines with "…combined." closing the first —
-     greedy `pretty` wrapping, since `balance` pushes that word down. */
+  /* The program's one-line belief, in headline ink, over the body-size lede. */
+  .grants-hero__statement {
+    margin: 0 0 var(--spacing-L);
+    font-family: var(--font-secondary);
+    font-size: 21px;
+    line-height: 1.5;
+    color: var(--text-headline);
+    text-wrap: balance;
+  }
   .grants-hero__lede {
-    margin: 0 -1rem;
+    margin: 0;
     font-size: 16px;
     line-height: 1.75;
-    color: var(--text-headline);
-    text-wrap: pretty;
+    text-wrap: balance;
   }
+  .grants-hero__cta { margin-top: var(--spacing-3XL); }
 
   /* ── Layout: sticky index | one reading column ──────────────────────── */
   /* Index in the left gutter, a matching empty track on the right, so the
@@ -327,36 +347,39 @@ const faqs = [
   .grants__section p + p { margin-top: var(--spacing-L); }
   .grants__lead { color: var(--text-headline); }
 
-  /* What we believe: 01 / 02 / 03 */
-  .tenets { list-style: none; margin: 0; padding: 0; counter-reset: tenet; }
-  .tenets li {
-    counter-increment: tenet;
-    display: grid;
-    grid-template-columns: 2.75em minmax(0, 1fr);
-    padding-block: var(--spacing-L);
-    border-top: 1px solid color-mix(in srgb, var(--text-headline) 12%, transparent);
-  }
-  .tenets li:last-child { border-bottom: 1px solid color-mix(in srgb, var(--text-headline) 12%, transparent); }
-  .tenets li::before {
-    content: counter(tenet, decimal-leading-zero);
-    font-family: var(--font-secondary);
-    font-variant-numeric: tabular-nums;
+  /* Current call: label, the call's name, and its status — the masthead of
+     everything below it, down to the call FAQ. */
+  .call-head { margin-bottom: var(--spacing-4XL); }
+  .call-head__label {
+    margin: 0 0 var(--spacing-M) !important;
+    font-size: 12px !important;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    line-height: 1.4 !important;
+    text-transform: uppercase;
     color: var(--text-subtle);
   }
-
-  /* One goal: the statement as a pull quote */
-  .grants__pull {
-    margin: 0 0 var(--spacing-2XL);
-    padding-left: var(--spacing-2XL);
-    border-left: 2px solid var(--text-headline);
-    font-family: var(--font-secondary);
-    font-size: 21px;
-    line-height: 1.5;
+  .grants__section .call-head__title { --h2-min: 28px; --h2-max: 36px; margin: 0 0 var(--spacing-L); text-wrap: balance; }
+  .call-head__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6em;
+    margin: 0 !important;
+    padding: 5px 14px 5px 12px;
+    border: 1px solid color-mix(in srgb, var(--text-headline) 14%, transparent);
+    border-radius: 999px;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
     color: var(--text-headline);
-    text-wrap: pretty;
   }
+  .call-head__status i { width: 7px; height: 7px; border-radius: 50%; background: var(--color-green-600, #2e9e5b); }
 
-  /* What we take care of: term | description, hairline rows */
+  /* What you'd do: the two tracks */
+  .tracks { margin: var(--spacing-L) 0; padding-left: 1.3em; }
+  .tracks li + li { margin-top: 2px; }
+  .grants__section strong { font-weight: 600; color: var(--text-headline); }
+
+  /* What we provide: term | description, hairline rows */
   .provisions { margin: 0; }
   .provisions__row {
     display: grid;
@@ -375,7 +398,7 @@ const faqs = [
   }
   .provisions dd { margin: 0; }
 
-  /* Applying: one quiet card — what to send, the dates, the form */
+  /* How to apply / future calls: one quiet card — the dates, the form */
   .apply-card {
     margin-top: var(--spacing-3XL);
     padding: var(--spacing-3XL);
@@ -386,20 +409,18 @@ const faqs = [
     background-color: color-mix(in srgb, var(--text-headline) 4%, var(--surface-background-default));
     border: 1px solid color-mix(in srgb, var(--text-headline) 8%, transparent);
   }
-  .apply-card__title { --h3-min: 19px; --h3-max: 21px; margin: 0 0 var(--spacing-L); }
-  .apply-card__list { margin: 0; padding-left: 1.3em; }
-  .apply-card__list li + li { margin-top: 2px; }
   .apply-card__meta {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr);
-    gap: var(--spacing-L);
-    margin: var(--spacing-2XL) 0 0;
-    padding-block: var(--spacing-L);
-    border-block: 1px solid color-mix(in srgb, var(--text-headline) 12%, transparent);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    gap: var(--spacing-L) var(--spacing-2XL);
+    margin: 0;
+    padding-bottom: var(--spacing-2XL);
+    border-bottom: 1px solid color-mix(in srgb, var(--text-headline) 12%, transparent);
   }
   .apply-card__meta dt { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-subtle); }
   .apply-card__meta dd { margin: 4px 0 0; font-size: 15px; line-height: 1.5; color: var(--text-headline); }
   .apply-card__form { margin-top: var(--spacing-2XL); }
+  .apply-card__form--solo { margin-top: 0; }
   .apply-card__fine { margin-top: var(--spacing-L) !important; font-size: 13px !important; color: var(--text-subtle); }
 
   /* FAQ: hairline disclosures; the answer eases open where the browser can
@@ -443,9 +464,6 @@ const faqs = [
   .faq details[open]::details-content { height: auto; }
   .faq__a p { padding: 0 var(--spacing-3XL) var(--spacing-L) 0; color: var(--text-body); }
 
-  .grants__close { margin-top: var(--spacing-5XL); padding-top: var(--spacing-3XL); border-top: 1px solid color-mix(in srgb, var(--text-headline) 12%, transparent); }
-  .grants__close p { margin: 0; font-family: var(--font-secondary); font-size: 18px; line-height: 1.6; color: var(--text-subtle); text-wrap: balance; }
-
   @media (prefers-reduced-motion: reduce) {
     .grants-progress { display: none; }
     .grants__index,
@@ -486,7 +504,7 @@ const faqs = [
     .grants-hero { padding-block: var(--spacing-4XL) var(--spacing-2XL); }
     .grants { padding-top: var(--spacing-2XL); }
     .grants__section { padding-top: var(--spacing-4XL); }
-    .grants__pull { font-size: 19px; padding-left: var(--spacing-L); }
+    .grants-hero__statement { font-size: 19px; }
     .provisions__row { grid-template-columns: 1fr; row-gap: 2px; }
     .apply-card { padding: var(--spacing-2XL) var(--spacing-L); }
     .apply-card__meta { grid-template-columns: 1fr; }
