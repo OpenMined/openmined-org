@@ -91,9 +91,8 @@ const faqs = [
     <article class="grants__read">
       <section id="current-call" class="grants__section grants__section--open" data-index-section>
         <div class="call-head" data-reveal>
-          <p class="call-head__label">Current call</p>
+          <p class="call-head__label"><i aria-hidden="true"></i><span>Current call</span><span class="call-head__sep" aria-hidden="true">·</span><span>Applications close Oct 23, 2026</span></p>
           <h2 class="call-head__title">Ensembles &amp; Routing (Winter 2026)</h2>
-          <p class="call-head__status"><i aria-hidden="true"></i>Applications close Oct 23, 2026</p>
         </div>
         <h2 data-reveal>Overview</h2>
         <p class="grants__lead" data-reveal>A 12-week grant for researchers who have worked on ensembles, routing, or model composition. We cover the compute and engineering to run your method on current frontier models, re-run every result independently, and publish the full recipe and cost so anyone can verify it.</p>
@@ -268,11 +267,15 @@ const faqs = [
     color: var(--text-headline);
     text-wrap: balance;
   }
+  /* Bleeds past the reading column so it sets in three balanced lines. */
   .grants-hero__lede {
     margin: 0;
     font-size: 16px;
     line-height: 1.75;
     text-wrap: balance;
+  }
+  @media (min-width: 768px) {
+    .grants-hero__lede { margin-inline: -3.5rem; }
   }
   .grants-hero__cta { margin-top: var(--spacing-3XL); }
 
@@ -347,32 +350,25 @@ const faqs = [
   .grants__section p + p { margin-top: var(--spacing-L); }
   .grants__lead { color: var(--text-headline); }
 
-  /* Current call: label, the call's name, and its status — the masthead of
-     everything below it, down to the call FAQ. */
+  /* Current call: one status line (label · deadline) over the call's name —
+     the masthead of everything below it, down to the call FAQ. */
   .call-head { margin-bottom: var(--spacing-4XL); }
   .call-head__label {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 0.6em;
     margin: 0 0 var(--spacing-M) !important;
     font-size: 12px !important;
     font-weight: 600;
     letter-spacing: 0.08em;
-    line-height: 1.4 !important;
+    line-height: 1.6 !important;
     text-transform: uppercase;
     color: var(--text-subtle);
   }
-  .grants__section .call-head__title { --h2-min: 28px; --h2-max: 36px; margin: 0 0 var(--spacing-L); text-wrap: balance; }
-  .call-head__status {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6em;
-    margin: 0 !important;
-    padding: 5px 14px 5px 12px;
-    border: 1px solid color-mix(in srgb, var(--text-headline) 14%, transparent);
-    border-radius: 999px;
-    font-size: 14px !important;
-    line-height: 1.5 !important;
-    color: var(--text-headline);
-  }
-  .call-head__status i { width: 7px; height: 7px; border-radius: 50%; background: var(--color-green-600, #2e9e5b); }
+  .call-head__label i { width: 7px; height: 7px; border-radius: 50%; background: var(--color-green-600); }
+  .call-head__sep { opacity: 0.6; }
+  .grants__section .call-head__title { --h2-min: 28px; --h2-max: 36px; margin: 0; text-wrap: balance; }
 
   /* What you'd do: the two tracks */
   .tracks { margin: var(--spacing-L) 0; padding-left: 1.3em; }
