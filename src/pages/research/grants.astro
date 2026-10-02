@@ -54,6 +54,13 @@ const provisions = [
   { term: 'Stipend', html: '$2,000 stipend for your time.' },
 ];
 
+const arc = [
+  { term: 'Weeks 1–2', lead: 'Get set up.', text: 'Reproduce a known ensemble as your first submission, so you’ve proven the pipeline before the real work starts.' },
+  { term: 'Weeks 3–6', lead: 'Run your method.', text: 'Rebuild it as an open recipe and measure it against current models and benchmarks.' },
+  { term: 'Weeks 7–10', lead: 'Push.', text: 'Stronger models, better aggregation, a cheaper cascade, or a combination with another grantee’s recipe. This is where most frontier results come from.' },
+  { term: 'Weeks 11–12', lead: 'Write it up.', text: 'Author review, a short technical note under your name, and the co-authored cohort paper.' },
+];
+
 const faqs = [
   { q: 'Do I need my own compute budget or API keys?', a: `No. Subsidized inference covers ${tbd('the costs of grant runs / up to $X per grantee')}. The toolkit runs on our keys or yours — whichever you prefer — so the cost of running an ensemble across many models is not your problem to solve.` },
   { q: 'What if my reimplementation doesn’t reproduce, or the method doesn’t transfer?', a: 'That’s a finding, and we will publish it with the same care as a new state of the art. A method that fails to transfer to current models tells the field something important. Nobody is penalized for an honest negative result, as the field needs a verified map of what has been tried, and the map needs to show which attempts lead to dead ends.' },
@@ -132,12 +139,17 @@ const faqs = [
 
       <section id="work" class="grants__section" data-index-section>
         <h2 data-reveal>What you’d do</h2>
-        <p data-reveal>Bring one method or idea, rebuild it as an open recipe, run it against current models and benchmarks, and publish each result with its full cost and a short technical note under your name. Two tracks:</p>
-        <ul class="tracks" data-reveal>
-          <li>Bring a published method back to life on today’s models, or</li>
-          <li>Test an idea nobody has tried.</li>
-        </ul>
-        <p data-reveal><strong>Out of scope:</strong> anything that needs pretraining or fine-tuning large models, or that can’t run through the toolkit within 12 weeks. The work is zero-shot and composed from existing models — ensembles, routers, cascades, judges. If you’re set on a method the stack doesn’t support yet, tell us! We’d rather extend the toolkit than turn a good idea away.</p>
+        <p data-reveal>You bring one method or idea, and over 12 weeks you take it from a first run to a published result. Pick a track: bring a published method back to life on today’s models, or test an idea nobody has tried. Either way, the work happens in the open, on a public leaderboard, where every entry is a recipe with its full cost.</p>
+        <p data-reveal>The 12 weeks follow the same arc for everyone:</p>
+        <dl class="provisions provisions--arc">
+          {arc.map((w, i) => (
+            <div class="provisions__row" data-reveal data-reveal-delay={i * 70}>
+              <dt>{w.term}</dt>
+              <dd><strong>{w.lead}</strong> {w.text}</dd>
+            </div>
+          ))}
+        </dl>
+        <p data-reveal><strong>Out of scope:</strong> anything that needs pretraining or fine-tuning large models, or that can’t run through the toolkit within 12 weeks. The work is zero-shot and composed from existing models: ensembles, routers, cascades, judges. If you’re set on a method the stack doesn’t support yet, tell us. We’d rather extend the toolkit than turn a good idea away.</p>
       </section>
 
       <section id="credit" class="grants__section" data-index-section>
@@ -148,10 +160,11 @@ const faqs = [
       <section id="apply" class="grants__section" data-index-section>
         <h2 data-reveal>How to apply</h2>
         <p data-reveal>Grants are open to researchers with published work on ensembles, routing, multi-agent systems, model composition, or closely related areas. They are also open to people with a well-formed idea in this space and the rigor to test it. Nominations of others are highly encouraged and will be given additional consideration in applications.</p>
+        <p data-reveal>We will put more weight on work you’ve shipped in this area (a paper, preprint, workshop paper, or competition write-up with code), and a specific proposal that names the method, the benchmark, and the models.</p>
         <div class="apply-card" data-reveal>
           <dl class="apply-card__meta">
-            <div><dt>Applications close</dt><dd>Oct 23, 2026.</dd></div>
-            <div><dt>Offers</dt><dd>Offers will be made on a rolling basis. All offers will go out by Oct 27.</dd></div>
+            <div><dt>Applications close</dt><dd>Oct 23, 2026</dd></div>
+            <div><dt>Offers</dt><dd>Rolling, all by Oct 27</dd></div>
             <div><dt>Grant program runs</dt><dd>Nov 1, 2026 – Jan 23, 2027</dd></div>
             <div><dt>Commitment</dt><dd>12 weeks · ~<Fragment set:html={tbd('X')} /> hrs/week</dd></div>
           </dl>
@@ -370,9 +383,8 @@ const faqs = [
   .call-head__sep { opacity: 0.6; }
   .grants__section .call-head__title { --h2-min: 28px; --h2-max: 36px; margin: 0; text-wrap: balance; }
 
-  /* What you'd do: the two tracks */
-  .tracks { margin: var(--spacing-L) 0; padding-left: 1.3em; }
-  .tracks li + li { margin-top: 2px; }
+  /* What you'd do: the 12-week arc, set between two paragraphs */
+  .provisions.provisions--arc { margin-block: var(--spacing-L) var(--spacing-2XL); }
   .grants__section strong { font-weight: 600; color: var(--text-headline); }
 
   /* What we provide: term | description, hairline rows */
